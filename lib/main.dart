@@ -35,3 +35,4 @@ Future<void> main() async {
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
   runApp(DevicePreview(enabled: false ,builder:(context) =>  StoreGoApp()));
 }
+//test merge
