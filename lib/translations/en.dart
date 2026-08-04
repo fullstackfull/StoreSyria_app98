@@ -108,4 +108,8 @@ const Map<String, String> en = {
     "created_at": "Created at",
     "Already Reviewed" : "Already Reviewed",
     'please_select_category': 'Please select a category',
+  'More' : "More",
+  'Products' : "Products",
+  "Orders" : "Orders",
+  "Home" : "Home",
 };

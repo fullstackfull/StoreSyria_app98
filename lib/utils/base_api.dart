@@ -6,6 +6,9 @@ class API {
 
   static String imageBaseUrl = '/base_url';
   static String storeIdUrl = '?store_id=';
+  static const String andStatusUrl = "&delivered_status=";
+  static const String andFromDateUrl = "&from_date=";
+  static const String andToDateUrl = "&to_date=";
 
   static String categoryListUrl = '/categorylist';
   static String createProductUrl = '/createproduct';

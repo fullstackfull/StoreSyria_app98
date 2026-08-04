@@ -11,6 +11,7 @@ class DefaultImages {
   static String nextIcn = "assets/svg/next.svg";
   static String successIcn = "assets/svg/success.svg";
   static String ordersIcn = "assets/svg/orders.svg";
+  static String moreIcn = "assets/svg/more.svg";
   static String productIcn = "assets/svg/product.svg";
   static String dashboardIcn = "assets/svg/dashboard.svg";
   static String categoriesIcn = "assets/svg/categories.svg";

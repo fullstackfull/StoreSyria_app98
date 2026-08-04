@@ -21,6 +21,7 @@ class CommonTextField extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final bool readOnly;
   final String? labelText;
+  final Color? color;
   final String? hintText;
   final String? prefix;
   final Widget? suffix;
@@ -45,6 +46,7 @@ class CommonTextField extends StatefulWidget {
     this.suffix,
     this.focusNode,
     this.obscuringCharacter = "*",
+    this.color,
   });
 
   @override
@@ -96,7 +98,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
     isDark ? const Color(0xff2C3748) : const Color(0xffF5F7FA);
 
     final iconColor = isFocused
-        ? AppColor.themeGreenColor
+        ? AppColor.themeNavyBlueColor
         : (isDark ? Colors.white70 : Colors.grey.shade700);
 
     return Column(
@@ -126,7 +128,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
           validator: widget.validator,
           onChanged: widget.onChanged,
           onTap: widget.onTap,
-          cursorColor: AppColor.themeGreenColor,
+          cursorColor: AppColor.themeNavyBlueColor,
           style: pMedium14.copyWith(
             color: textColor,
           ),
@@ -135,13 +137,12 @@ class _CommonTextFieldState extends State<CommonTextField> {
             hintStyle: pMedium14.copyWith(
               color: hintColor,
             ),
-
             errorStyle: pMedium12.copyWith(
               color: Colors.red,
             ),
 
             filled: true,
-            fillColor: fillColor,
+            fillColor: widget.color ?? fillColor,
 
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16.w,
@@ -158,7 +159,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
               child: CircleAvatar(
                 radius: 18.r,
                 backgroundColor: isFocused
-                    ? AppColor.themeGreenColor
+                    ? AppColor.themeNavyBlueColor
                     .withOpacity(.12)
                     : iconBackground,
                 child: assetSvdImageWidget(
@@ -186,29 +187,29 @@ class _CommonTextFieldState extends State<CommonTextField> {
             ),
 
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(40.r),
               borderSide: BorderSide(
                 color: borderColor,
               ),
             ),
 
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(40.r),
               borderSide: BorderSide(
-                color: AppColor.themeGreenColor,
+                color: AppColor.themeNavyBlueColor,
                 width: 1.5.w,
               ),
             ),
 
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(40.r),
               borderSide: BorderSide(
                 color: Colors.red,
               ),
             ),
 
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(40.r),
               borderSide: BorderSide(
                 color: Colors.red,
                 width: 1.5.w,

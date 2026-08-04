@@ -1,12 +1,29 @@
 // ignore_for_file: avoid_print
 
+import 'package:intl/intl.dart';
 import 'package:store_go_app/network_dio/network_dio.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 
 class OrderRepository {
-  getOrderData(int page) async {
+  getOrderData(
+      int page,
+      {int? status,
+        DateTime? fromDate,
+        DateTime? toDate,
+      })  async {
     String endPoint = "${API.orderListUrl}${API.storeIdUrl}${Prefs.getStoreID()}${API.andPageUrl}$page";
+    if (status != null) {
+      endPoint += "${API.andStatusUrl}$status";
+    }
+    if (fromDate != null) {
+      endPoint += "${API.andFromDateUrl}${DateFormat('yyyy-MM-dd').format(fromDate)}";
+    }
+
+    if (toDate != null) {
+      endPoint += "${API.andToDateUrl}${DateFormat('yyyy-MM-dd').format(toDate)}";
+    }
+
     var response = await NetworkHttps.getRequest(endPoint);
     print("response==========>$response");
     return response;

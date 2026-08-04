@@ -56,7 +56,7 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
   Widget build(BuildContext context) {
     return Obx(() {
       final bool isDark = themeController.isDark.value;
-      final Color bgColor = isDark ? DarkThemeColor.cBackGround : LightThemeColor.cBackGround;
+      final Color bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
       final Color navBgColor = isDark ? DarkThemeColor.cBottomNavyBlueColor : LightThemeColor.cBottomNavyBlueColor;
       final Color navInactiveColor = isDark ? Colors.white54 : AppColor.cDarkGreyFont;
       final Color navActiveColor = isDark ? AppColor.themeGreenColor : AppColor.cWhite;
@@ -72,11 +72,11 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
           child: Padding(
             padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
             child: SizedBox(
-              height: 73.h,
+              height: 70.h,
               child: StylishBottomBar(
                 currentIndex: dashboardManagerController.currantIndex.value,
                 backgroundColor: navBgColor,
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(40.r),
                 elevation: 4,
                 option: BubbleBarOptions(
                   barStyle: BubbleBarStyle.vertical,
@@ -87,8 +87,8 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
                   return BottomBarItem(
                     icon: SvgPicture.asset(
                       element['icon'],
-                      width: 20.w,
-                      height: 20.w,
+                      width: 25.w,
+                      height: 25.w,
                       colorFilter: ColorFilter.mode(
                         navInactiveColor,
                         BlendMode.srcIn,
@@ -96,8 +96,8 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
                     ),
                     selectedIcon: SvgPicture.asset(
                       element['icon'],
-                      width: 20.w,
-                      height: 20.w,
+                      width: 25.w,
+                      height: 25.w,
                       colorFilter: ColorFilter.mode(
                         navActiveColor,
                         BlendMode.srcIn,

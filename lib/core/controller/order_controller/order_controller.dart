@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_print, invalid_use_of_protected_member
 
-import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:store_go_app/config/repository/order_repository.dart';
@@ -8,13 +7,12 @@ import 'package:store_go_app/config/repository/search_repository.dart';
 import 'package:store_go_app/core/model/order_detail_model.dart';
 import 'package:store_go_app/core/model/order_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 
 class OrderController extends GetxController {
-  TextEditingController searchController = TextEditingController();
-  SearchRepository searchRepository = SearchRepository();
-  OrderRepository orderRepository = OrderRepository();
-  OrderDetailRepository orderDetailRepository = OrderDetailRepository();
+  final TextEditingController searchController = TextEditingController();
+  final SearchRepository searchRepository = SearchRepository();
+  final OrderRepository orderRepository = OrderRepository();
+  final OrderDetailRepository orderDetailRepository = OrderDetailRepository();
 
   // Models
   OrderModel? orderModel;
@@ -23,52 +21,80 @@ class OrderController extends GetxController {
 
   // Reactive Variables
   RxList<OrderData> orderList = <OrderData>[].obs;
-  RxBool isDataAvailable = false.obs; // للتحميل الأولي أو تحميل التفاصيل
-  RxBool isLoading = false.obs;       // للتحميل العام (Pagination/Search)
-  RxString errorMessage = ''.obs;     // لعرض رسائل الخطأ
+  RxBool isLoading = false.obs;
+  RxString errorMessage = ''.obs;
   RxInt currantPage = 1.obs;
   RxBool isScroll = true.obs;
-  RxString imageBaseUrl = ''.obs;
   RxDouble extTax = 0.0.obs;
+
+  // ✅ متغيرات جديدة لإدارة الحالة بشكل صحيح
+  RxInt selectedStatus = 0.obs;
+  RxBool isSearching = false.obs;
+  RxBool isDataAvailable = false.obs;
+
 
   @override
   void onInit() {
     super.onInit();
-    // تعيين القيم الافتراضية عند دخول الكونترولر
+    resetPagination();
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
+  }
+
+  void resetPagination() {
     currantPage.value = 1;
     isScroll.value = true;
     errorMessage.value = '';
   }
 
-  // دالة مساعدة لإظهار/إخفاء اللودر وتحديث الحالة
   void _setLoading(bool value) {
     isLoading.value = value;
-    if (value) {
-      errorMessage.value = ''; // مسح الخطأ عند بدء التحميل
-    }
+    if (value) errorMessage.value = '';
   }
 
-  Future<void> getOrderData(int page) async {
+  Future<void> getOrderData(
+      int page, {
+        int? status,
+        DateTime? fromDate,
+        DateTime? toDate,
+      }) async {
+    // ✅ منع جلب المزيد أثناء البحث
+    if (isSearching.value && page > 1) return;
+
     if (page == 1) {
       _setLoading(true);
       orderList.clear();
     }
 
-    final result = await orderRepository.getOrderData(page);
+    final result = await orderRepository.getOrderData(
+      page,
+      status: status ?? selectedStatus.value,
+      fromDate: fromDate,
+      toDate: toDate,
+    );
 
     result.fold(
       onSuccess: (data) {
         orderModel = OrderModel.fromJson(data);
+        final newItems = orderModel?.data?.data ?? [];
 
-        orderList.addAll(orderModel?.data?.data ?? []);
-        orderList.refresh();
+        // ✅ منع التكرار
+        final existingIds = orderList.map((e) => e.id).toSet();
+        for (var item in newItems) {
+          if (!existingIds.contains(item.id)) {
+            orderList.add(item);
+          }
+        }
 
-        isScroll.value =
-            page < (orderModel?.data?.lastPage ?? 1);
+        isScroll.value = page < (orderModel?.data?.lastPage ?? 1);
       },
       onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
-        //commonToast(message);
+        commonToast(message);
       },
     );
 
@@ -76,7 +102,16 @@ class OrderController extends GetxController {
   }
 
   Future<void> searchOrderData({required String name}) async {
+    if (name.isEmpty) {
+      isSearching.value = false;
+      resetPagination();
+      await getOrderData(1);
+      return;
+    }
+
+    isSearching.value = true;
     _setLoading(true);
+
     final result = await searchRepository.getSearchData(
       type: "order",
       name: name,
@@ -85,17 +120,17 @@ class OrderController extends GetxController {
     result.fold(
       onSuccess: (data) {
         orderList.clear();
-
         if (data['data'] != null) {
           for (var item in data['data']) {
             orderList.add(OrderData.fromJson(item));
           }
-          orderList.refresh();
         }
+        // ✅ تعطيل الباجينيشن أثناء البحث
+        isScroll.value = false;
       },
       onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
-        //commonToast(message);
+        commonToast(message);
       },
     );
 
@@ -103,54 +138,55 @@ class OrderController extends GetxController {
   }
 
   Future<void> getOrderDetailData(String orderId) async {
-
-    isDataAvailable.value = true;
+    _setLoading(true);
     orderDetail = null;
-    errorMessage.value = '';
     extTax.value = 0.0;
 
-    final result =
-    await orderDetailRepository.getOrderDetailData(orderId);
+    final result = await orderDetailRepository.getOrderDetailData(orderId);
 
     result.fold(
       onSuccess: (data) {
         orderDetailModel = OrderDetailModel.fromJson(data);
         orderDetail = orderDetailModel?.data;
 
-        extTax.value = 0;
-
         if (orderDetail?.tax != null) {
+          double totalTax = 0;
           for (var tax in orderDetail!.tax!) {
-            extTax.value +=
-                double.tryParse(tax.amountstring ?? "0") ?? 0;
+            totalTax += double.tryParse(tax.amountstring ?? "0") ?? 0;
           }
+          extTax.value = totalTax;
         }
       },
       onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
-        //commonToast(message);
+        commonToast(message);
       },
     );
 
-    isDataAvailable.value = false;
+    _setLoading(false);
   }
 
   Future<void> deleteOrderData({required String orderId}) async {
-    Loader.showLoader();
+    // ✅ استخدام isLoading بدلاً من Loader العام
+    _setLoading(true);
 
-    final result =
-    await orderRepository.deleteOrderData(orderId);
+    final result = await orderRepository.deleteOrderData(orderId);
 
     result.fold(
       onSuccess: (data) {
         commonToast(data['data']['message']);
-        getOrderData(currantPage.value);
+
+        // ✅ إزالة العنصر محلياً أولاً لتحسين الاستجابة
+        orderList.removeWhere((element) => element.id.toString() == orderId);
+
+        // ✅ إعادة جلب الصفحة الأولى بنفس الفلتر الحالي
+        resetPagination();
+        getOrderData(1, status: selectedStatus.value);
       },
       onFailure: (reason, message, validationErrors) {
-        //commonToast(message);
+        commonToast(message);
+        _setLoading(false);
       },
     );
-
-    Loader.hideLoader();
   }
 }

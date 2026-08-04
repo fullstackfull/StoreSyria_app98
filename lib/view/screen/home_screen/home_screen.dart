@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     return GetBuilder<ThemeController>(
       builder: (themeController) {
         final bool isDark = themeController.isDark.value;
-        final Color bgColor = isDark ? DarkThemeColor.cBackGround : LightThemeColor.cBackGround;
+        final Color bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
 
         return GetBuilder<HomeController>(
           builder: (controller) {

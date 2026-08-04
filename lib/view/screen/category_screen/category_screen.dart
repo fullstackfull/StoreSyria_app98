@@ -120,7 +120,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                 ),
                 verticalSpace(20),
                 searchFieldWidget(
-
+                  context: context,
                   controller: categoryController.searchController,
                   hint: 'Search for order',
                   onChanged: (value) {

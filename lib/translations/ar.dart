@@ -112,4 +112,8 @@ const Map<String, String> ar = {
     "created_at": "تاريخ الإنشاء",
     "Already Reviewed" : "تم التقييم",
     'please_select_category': 'الرجاء اختيار الفئة',
+  'More' : "المزيد",
+  'Products' : "المنتجات",
+  "Orders" : "الطلبات",
+  "Home" : "الرئيسية",
 };

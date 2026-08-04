@@ -130,8 +130,8 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                               },
                               icon: Icon(
                                 authController.isObscure.value
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined
                               ),
                             ),
                             focusNode: FocusNode(),
