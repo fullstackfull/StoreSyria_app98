@@ -19,15 +19,15 @@ class OrderController extends GetxController {
   OrderDetailModel? orderDetailModel;
   OrderDetailData? orderDetail;
 
+
   // Reactive Variables
   RxList<OrderData> orderList = <OrderData>[].obs;
+  Rxn<OrderModelData> orderData = Rxn<OrderModelData>();
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
   RxInt currantPage = 1.obs;
   RxBool isScroll = true.obs;
   RxDouble extTax = 0.0.obs;
-
-  // ✅ متغيرات جديدة لإدارة الحالة بشكل صحيح
   RxInt selectedStatus = 0.obs;
   RxBool isSearching = false.obs;
   RxBool isDataAvailable = false.obs;
@@ -58,11 +58,10 @@ class OrderController extends GetxController {
 
   Future<void> getOrderData(
       int page, {
-        int? status,
+        int? deliveredStatus,
         DateTime? fromDate,
         DateTime? toDate,
       }) async {
-    // ✅ منع جلب المزيد أثناء البحث
     if (isSearching.value && page > 1) return;
 
     if (page == 1) {
@@ -72,7 +71,7 @@ class OrderController extends GetxController {
 
     final result = await orderRepository.getOrderData(
       page,
-      status: status ?? selectedStatus.value,
+      deliveredStatus: deliveredStatus,
       fromDate: fromDate,
       toDate: toDate,
     );
@@ -80,9 +79,11 @@ class OrderController extends GetxController {
     result.fold(
       onSuccess: (data) {
         orderModel = OrderModel.fromJson(data);
-        final newItems = orderModel?.data?.data ?? [];
+        orderData.value = orderModel?.data;
 
-        // ✅ منع التكرار
+        final newItems = orderData.value?.data ?? [];
+
+
         final existingIds = orderList.map((e) => e.id).toSet();
         for (var item in newItems) {
           if (!existingIds.contains(item.id)) {
@@ -120,12 +121,18 @@ class OrderController extends GetxController {
     result.fold(
       onSuccess: (data) {
         orderList.clear();
-        if (data['data'] != null) {
-          for (var item in data['data']) {
+
+        final responseData = data['data'];
+
+        if (responseData is List) {
+          for (var item in responseData) {
             orderList.add(OrderData.fromJson(item));
           }
+          isDataAvailable.value = true;
+        } else {
+          isDataAvailable.value = false;
         }
-        // ✅ تعطيل الباجينيشن أثناء البحث
+
         isScroll.value = false;
       },
       onFailure: (reason, message, validationErrors) {
@@ -167,7 +174,6 @@ class OrderController extends GetxController {
   }
 
   Future<void> deleteOrderData({required String orderId}) async {
-    // ✅ استخدام isLoading بدلاً من Loader العام
     _setLoading(true);
 
     final result = await orderRepository.deleteOrderData(orderId);
@@ -175,18 +181,15 @@ class OrderController extends GetxController {
     result.fold(
       onSuccess: (data) {
         commonToast(data['data']['message']);
-
-        // ✅ إزالة العنصر محلياً أولاً لتحسين الاستجابة
         orderList.removeWhere((element) => element.id.toString() == orderId);
-
-        // ✅ إعادة جلب الصفحة الأولى بنفس الفلتر الحالي
         resetPagination();
-        getOrderData(1, status: selectedStatus.value);
+        getOrderData(1, deliveredStatus: selectedStatus.value);
       },
       onFailure: (reason, message, validationErrors) {
         commonToast(message);
-        _setLoading(false);
       },
     );
+
+    _setLoading(false);
   }
 }

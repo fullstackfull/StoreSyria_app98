@@ -8,13 +8,13 @@ import 'package:store_go_app/utils/prefer.dart';
 class OrderRepository {
   getOrderData(
       int page,
-      {int? status,
+      {int? deliveredStatus,
         DateTime? fromDate,
         DateTime? toDate,
       })  async {
     String endPoint = "${API.orderListUrl}${API.storeIdUrl}${Prefs.getStoreID()}${API.andPageUrl}$page";
-    if (status != null) {
-      endPoint += "${API.andStatusUrl}$status";
+    if (deliveredStatus != null) {
+      endPoint += "${API.andStatusUrl}$deliveredStatus";
     }
     if (fromDate != null) {
       endPoint += "${API.andFromDateUrl}${DateFormat('yyyy-MM-dd').format(fromDate)}";

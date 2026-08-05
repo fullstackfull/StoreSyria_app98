@@ -28,7 +28,7 @@ class DashboardManagerController extends GetxController {
     // Initialize screens once
     screens = [
       HomeScreen(key: const ValueKey('dashboard')),
-      OrderScreen(key: const ValueKey('orders'), isBack: false),
+      OrderScreen(key: const ValueKey('orders')),
       ProductsScreen(key: const ValueKey('products'), isBack: false),
       SettingScreen(key: const ValueKey('settings'), isBack: false),
     ];

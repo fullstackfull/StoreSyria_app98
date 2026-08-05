@@ -3,24 +3,23 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/helper.dart';
-import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/core/model/order_model.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/order_screen/order_detail_screen.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
 import '../../../utils/images.dart';
+import '../../new_widgets/filter_tabs.dart';
 import '../../new_widgets/header_widget.dart';
 import '../../new_widgets/search_widget.dart';
+import '../../new_widgets/top_orders.dart';
 import '../../widget/error_empty_state.dart';
 import '../../widget/icon_and_image.dart';
 import '../../widget/loading_widget.dart';
-import 'order_widgets.dart';
+import '../../new_widgets/date_filter.dart';
 
 class OrderScreen extends StatefulWidget {
-  final bool isBack;
 
-  const OrderScreen({super.key, required this.isBack});
+  const OrderScreen({super.key});
 
   @override
   State<OrderScreen> createState() => _OrderScreenState();
@@ -29,6 +28,7 @@ class OrderScreen extends StatefulWidget {
 class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClientMixin {
   final OrderController orderController = Get.find<OrderController>();
   late ScrollController scrollController;
+
   bool _isFirstLoad = true;
 
   @override
@@ -53,28 +53,27 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
   void dispose() {
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
-    // لا تقم بعمل dispose للـ searchController هنا إذا كان تابعاً للـ Controller
-    // لأنه قد يُستخدم في أماكن أخرى، الـ GetX سيتولى أمره
     super.dispose();
   }
 
   void _onScroll() {
     if (orderController.isScroll.value &&
         scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200) {
-      // إضافة عتبة 200 لتحميل مبكر ومنع الوصول الحرفي للقاع
       orderController.currantPage.value += 1;
       orderController.getOrderData(
         orderController.currantPage.value,
-        status: orderController.selectedStatus.value, // استخدام الحالة المحفوظة في الكونترولر
       );
     }
   }
-
-  Future<void> _fetchInitialData({int status = 0}) async {
+  Future<void> _fetchInitialData({int? deliveredStatus}) async {
     orderController.currantPage.value = 1;
     orderController.isScroll.value = true;
     orderController.orderList.clear();
-    await orderController.getOrderData(1, status: status);
+
+    await orderController.getOrderData(
+      1,
+      deliveredStatus: deliveredStatus,
+    );
   }
 
   @override
@@ -103,46 +102,39 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
 
                 verticalSpace(16.h),
 
-                /// تبويبات الحالات - تم تحسين الأداء باستخدام Obx منفصل
-                Obx(() {
-                  final list = orderController.orderList;
-                  // يفضل نقل هذه الحسابات للـ Controller كـ Getters
-                  final allCount = list.length;
-                  final newCount = list.where((o) => (o.paymentStatus ?? '').toLowerCase() == 'new').length;
-                  final preparingCount = list.where((o) => (o.deliveredStatus ?? '') == '0').length;
 
+                Obx(() {
                   return orderStatusTabsWidget(
                     context: context,
-                    allCount: allCount,
-                    newCount: newCount,
-                    preparingCount: preparingCount,
-                    allLabel: "all_orders".tr,
-                    newLabel: "new".tr,
-                    preparingLabel: "preparing".tr,
-                    selectedIndex: orderController.selectedStatus.value, // ربط مباشر بالكونترولر
+                    selectedIndex: orderController.selectedStatus.value,
                     onChanged: (index) {
                       orderController.selectedStatus.value = index;
-                      _fetchInitialData(status: index); // تصفير الصفحة وتطبيق الفلتر الصحيح
+                      if (index == 0) {
+                        _fetchInitialData();
+                      } else {
+                        _fetchInitialData(deliveredStatus: index - 1);
+                      }
                     },
                   );
                 }),
-
                 verticalSpace(20.h),
 
-                SearchRowWidget(
-                  context: context,
-                  controller: orderController.searchController,
-                  hint: 'search'.tr,
-                  onChanged: (value) {
-                    if (value.length > 2) {
-                      orderController.searchOrderData(name: value);
-                    } else if (value.isEmpty) {
-                      // عند مسح البحث، نعود للصفحة الأولى بالحالة الحالية
-                      _fetchInitialData(status: orderController.selectedStatus.value);
-                    }
-                  },
-                  onSortTap: () {},
-                  onFilterTap: () {},
+                SizedBox(
+                  width: double.infinity,
+                  child: SearchRowWidget(
+                    context: context,
+                    controller: orderController.searchController,
+                    hint: 'search'.tr,
+                    onChanged: (value) {
+                      if (value.length > 2) {
+                        orderController.searchOrderData(name: value);
+                      } else if (value.isEmpty) {
+                        _fetchInitialData();
+                      }
+                    },
+                    onSortTap: () {},
+                    onFilterTap: () {},
+                  ),
                 ),
 
                 verticalSpace(24.h),
@@ -155,7 +147,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
 
                     if (orderController.errorMessage.isNotEmpty && orderController.orderList.isEmpty) {
                       return RefreshIndicator(
-                        onRefresh: () => _fetchInitialData(status: orderController.selectedStatus.value),
+                        onRefresh: () => _fetchInitialData(),
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           children: [
@@ -164,7 +156,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                               child: Center(
                                 child: ErrorState(
                                   message: orderController.errorMessage.value,
-                                  onRetry: () => _fetchInitialData(status: orderController.selectedStatus.value),
+                                  onRetry: () => _fetchInitialData(),
                                 ),
                               ),
                             ),
@@ -175,7 +167,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
 
                     if (orderController.orderList.isEmpty) {
                       return RefreshIndicator(
-                        onRefresh: () => _fetchInitialData(status: orderController.selectedStatus.value),
+                        onRefresh: () => _fetchInitialData(),
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           children: [
@@ -193,13 +185,11 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                       );
                     }
 
-                    // ملاحظة: Top Orders يجب أن تأتي من API منفصل أو تكون محفوظة بشكل مستقل
-                    // حالياً نأخذ أول 5 كحل مؤقت لكن لن تتغير مع الباجينيشن بسبب take(5)
                     final topOrders = orderController.orderList.take(5).toList();
 
                     return RefreshIndicator(
                       backgroundColor: Colors.white,
-                      onRefresh: () => _fetchInitialData(status: orderController.selectedStatus.value),
+                      onRefresh: () => _fetchInitialData(),
                       child: ListView.builder(
                         controller: scrollController,
                         itemCount: orderController.orderList.length + (orderController.isScroll.value ? 1 : 0) + 2,
@@ -229,8 +219,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                                           orderId: order.productOrderId ?? '',
                                           date: dateFormatted(date: order.orderDate!, formatType: formatForDateTime(FormatType.date)),
                                           maskedName: order.userName ?? '',
-                                          price: "${order.finalPrice} ${"sar".tr}",
-                                          isHot: i == 0,
+                                          price: "${order.finalPrice}",
                                           primaryBadgeLabel: order.paymentStatus,
                                           secondaryBadgeLabel: "paid".tr,
                                           onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
@@ -274,13 +263,11 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                               orderId: order.productOrderId ?? '',
                               date: dateFormatted(date: order.orderDate!, formatType: formatForDateTime(FormatType.date)),
                               maskedName: order.userName ?? '',
-                              price: "${order.finalPrice} ${"sar".tr}",
+                              price: "${order.finalPrice}",
                               primaryBadgeLabel: order.paymentStatus,
                               secondaryBadgeLabel: "paid".tr,
                               onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
                               viewFun: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
-                              shareFun: () {},
-                              downloadFun: () {},
                               deleteFun: () {
                                 AppDialog.showCustomDialog(
                                   iconColor: AppColor.cRedText,
@@ -305,7 +292,6 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
   }
 }
 
-// تم تعديل الدالة لاستقبال BuildContext بدلاً من الاعتماد على Get.context!
 Widget searchFieldWidget({
   required BuildContext context,
   String? hint,

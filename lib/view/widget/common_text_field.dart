@@ -55,6 +55,7 @@ class CommonTextField extends StatefulWidget {
 
 class _CommonTextFieldState extends State<CommonTextField> {
   late FocusNode _focusNode;
+  ModalRoute? _modalRoute;
 
   @override
   void initState() {
@@ -66,7 +67,46 @@ class _CommonTextFieldState extends State<CommonTextField> {
   void _onFocusChange() => setState(() {});
 
   @override
+  void didUpdateWidget(covariant CommonTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      _focusNode.removeListener(_onFocusChange);
+      if (oldWidget.focusNode == null) {
+        _focusNode.dispose();
+      }
+      _focusNode = widget.focusNode ?? FocusNode();
+      _focusNode.addListener(_onFocusChange);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newRoute = ModalRoute.of(context);
+    if (_modalRoute != newRoute) {
+      _modalRoute?.secondaryAnimation?.removeListener(_onRouteAnimationChange);
+      _modalRoute = newRoute;
+      _modalRoute?.secondaryAnimation?.addListener(_onRouteAnimationChange);
+    }
+  }
+
+  void _onRouteAnimationChange() {
+    final secondaryAnimation = _modalRoute?.secondaryAnimation;
+    if (secondaryAnimation == null) return;
+
+    if (secondaryAnimation.value > 0) {
+      if (_focusNode.hasFocus) {
+        _focusNode.unfocus();
+      }
+      _focusNode.canRequestFocus = false;
+    } else {
+      _focusNode.canRequestFocus = true;
+    }
+  }
+
+  @override
   void dispose() {
+    _modalRoute?.secondaryAnimation?.removeListener(_onRouteAnimationChange);
     _focusNode.removeListener(_onFocusChange);
     if (widget.focusNode == null) {
       _focusNode.dispose();
