@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/images.dart';
+import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import '../../core/controller/auth/auth_controller.dart';
+import '../../core/controller/onboarding_controller/onboarding_controller.dart';
 
 class WelComeScreen extends StatefulWidget {
   const WelComeScreen({super.key});
@@ -15,6 +17,7 @@ class WelComeScreen extends StatefulWidget {
 class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
   final AuthController authController = Get.find<AuthController>();
+  final OnboardingController onboardingController = OnboardingController();
 
   @override
   void initState() {
@@ -25,12 +28,34 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
       duration: const Duration(milliseconds: 1200),
     );
 
-
     _animationController.forward();
 
-    authController.checkLogin();
+    // ✅ التحقق من OnBoarding والتنقل المناسب
+    _checkAndNavigate();
 
     Future.delayed(const Duration(milliseconds: 500), () {
+    });
+  }
+
+  void _checkAndNavigate() {
+    Future.delayed(Duration(milliseconds: 1500), () {
+      final isOnboardingCompleted = onboardingController.isOnboardingCompleted;
+      final isLoggedIn = Prefs.getToken().isNotEmpty;
+
+      print('🔍 التحقق في Welcome Screen:');
+      print('   OnBoarding: $isOnboardingCompleted');
+      print('   Logged In: $isLoggedIn');
+
+      if (!isOnboardingCompleted) {
+        // عرض OnBoarding
+        Get.offAllNamed('/onboarding');
+      } else if (isLoggedIn) {
+        // تسجيل الدخول موجود - اذهب للـ Dashboard
+        Get.offAllNamed('/dashboard');
+      } else {
+        // لا يوجد تسجيل دخول - اذهب لصفحة الدخول
+        Get.offAllNamed('/login');
+      }
     });
   }
 

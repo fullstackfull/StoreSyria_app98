@@ -21,8 +21,12 @@ import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
+import 'package:store_go_app/view/screen/notification_screen/notification_screen.dart';
 
 Widget buildAppTitleRow(Function() menuFun, String date) {
+  final NotificationController notificationController = Get.put(NotificationController());
+  
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
@@ -39,18 +43,61 @@ Widget buildAppTitleRow(Function() menuFun, String date) {
           ),
         ],
       ),
-      Row(
+      Obx(() => Stack(
         children: [
-          Text(
-            date,
-            style: pSemiBold14,
+          GestureDetector(
+            onTap: () {
+              Get.to(() => NotificationScreen(isBack: true));
+            },
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: AppColor.cWhite,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.notifications_outlined,
+                size: 24.sp,
+                color: AppColor.cLabel,
+              ),
+            ),
           ),
-          // Text(
-          //   dateMonth,
-          //   style: pRegular14,
-          // ),
+          if (notificationController.unreadCount.value > 0)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: BoxConstraints(
+                  minWidth: 18.w,
+                  minHeight: 18.h,
+                ),
+                child: Text(
+                  notificationController.unreadCount.value > 99 
+                      ? '99+' 
+                      : notificationController.unreadCount.value.toString(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
         ],
-      )
+      ))
     ],
   );
 }

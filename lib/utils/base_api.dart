@@ -81,4 +81,6 @@ class API {
   static String viewUsedCouponUrl = '/view-used-coupon';
   static String updateProductUrl = '/updateproduct';
   static String deleteStoreUrl = '/deletestore';
+  static String fcmTokenUrl = '/store/fcm-token';
+  static String notificationUrl = '/notification';
 }

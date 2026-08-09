@@ -26,6 +26,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/home_controller.dart';
 import 'package:store_go_app/core/controller/dashboard_manager_controller/dashboard_manager_controller.dart';
+import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../widget/common_snak_bar_widget.dart';
 import 'add_category_bottomsheet.dart';
@@ -43,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   final ProductController productController = Get.put(ProductController());
   final NewCouponController couponController = Get.put(NewCouponController());
   final OrderController orderController = Get.put(OrderController());
+  final NotificationController notificationController = Get.put(NotificationController());
   final ThemeController themeController = Get.find<ThemeController>();
   final GlobalKey<LiquidPullToRefreshState> _refreshIndicatorKey = GlobalKey<
       LiquidPullToRefreshState>();
@@ -60,6 +62,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     await homeController.getDashboardData();
     await homeController.getImageBaseUrl();
     homeController.imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
+    // جلب الإشعارات عند فتح التطبيق
+    await notificationController.getNotifications();
   }
 
   @override
