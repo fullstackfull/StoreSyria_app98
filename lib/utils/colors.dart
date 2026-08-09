@@ -6,9 +6,10 @@ class AppColor {
   static Color cBlack = Colors.black;
   static Color cWhite = Color(0xffFFFFFF);
   static Color cBorder = Color(0xffCFD9E3);
+  static Color cLight = Color(0xfff2f6fa);
 
   // خلفية فاتحة مريحة
-  static Color cBackGround = Color(0xFFF5F7FA);
+  static Color cBackGround = Color(0xffdce4f1);
 
   static Color cTransparent = Colors.transparent;
 

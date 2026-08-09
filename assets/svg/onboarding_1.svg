@@ -1,0 +1,24 @@
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Store Building -->
+  <rect x="50" y="100" width="200" height="150" rx="10" fill="white" fill-opacity="0.9"/>
+  <rect x="60" y="90" width="180" height="20" rx="5" fill="white"/>
+  
+  <!-- Store Sign -->
+  <rect x="80" y="60" width="140" height="30" rx="5" fill="white"/>
+  <text x="150" y="80" text-anchor="middle" fill="#00B4D8" font-size="12" font-weight="bold">STORE</text>
+  
+  <!-- Products -->
+  <rect x="70" y="130" width="40" height="40" rx="5" fill="#00B4D8" fill-opacity="0.6"/>
+  <rect x="120" y="130" width="40" height="40" rx="5" fill="#00B4D8" fill-opacity="0.4"/>
+  <rect x="170" y="130" width="40" height="40" rx="5" fill="#00B4D8" fill-opacity="0.6"/>
+  
+  <!-- Chart Icon -->
+  <path d="M70 200 L70 180 L90 180 L90 200" fill="white" fill-opacity="0.8"/>
+  <path d="M100 200 L100 160 L120 160 L120 200" fill="white" fill-opacity="0.8"/>
+  <path d="M130 200 L130 170 L150 170 L150 200" fill="white" fill-opacity="0.8"/>
+  <path d="M160 200 L160 150 L180 150 L180 200" fill="white" fill-opacity="0.8"/>
+  
+  <!-- Shopping Cart -->
+  <circle cx="220" cy="230" r="25" fill="white" fill-opacity="0.9"/>
+  <path d="M210 220 L230 220 L235 235 L215 235 Z" fill="#00B4D8"/>
+</svg>

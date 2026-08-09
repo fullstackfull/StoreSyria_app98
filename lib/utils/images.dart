@@ -11,6 +11,7 @@ class DefaultImages {
   static String nextIcn = "assets/svg/next.svg";
   static String successIcn = "assets/svg/success.svg";
   static String ordersIcn = "assets/svg/orders.svg";
+  static String moreIcn = "assets/svg/more.svg";
   static String productIcn = "assets/svg/product.svg";
   static String dashboardIcn = "assets/svg/dashboard.svg";
   static String categoriesIcn = "assets/svg/categories.svg";
@@ -65,6 +66,7 @@ class DefaultImages {
   static String logoutIcn = "assets/svg/logout.svg";
   static String invoiceIcn = "assets/svg/invoice.svg";
   static String splashLogoImg = "assets/svg/splash_logo.svg";
+  static String emptyNotification = "assets/svg/empty_notification.svg";
 
   static String welcomeImg = "assets/svg/welcome.svg";
   static String profileImg = "https://apps.rajodiya.com/ecommercego-saas/storage/uploads/profile/avatar.png";

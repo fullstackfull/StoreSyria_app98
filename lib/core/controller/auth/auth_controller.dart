@@ -15,6 +15,7 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/screen/dashboard_manager/dashboard_manager.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
+import 'package:store_go_app/core/services/fcm_token_service.dart';
 
 class AuthController extends GetxController {
   TextEditingController emailController = TextEditingController();
@@ -152,6 +153,9 @@ class AuthController extends GetxController {
 
           commonToast("$userName Login Successfully");
 
+          // إرسال FCM Token للسيرفر بعد تسجيل الدخول الناجح
+          _sendFcmTokenAfterLogin(storeId);
+
           Get.offAllNamed(AppRoutes.dashboard);
 
         } else {
@@ -177,6 +181,17 @@ class AuthController extends GetxController {
       commonToast("An unexpected error occurred. Please check logs.");
     }
   }
+
+  /// إرسال FCM Token للسيرفر بعد تسجيل الدخول
+  Future<void> _sendFcmTokenAfterLogin(String storeId) async {
+    try {
+      final fcmService = FcmTokenService();
+      await fcmService.sendFcmTokenToServer(storeId: storeId);
+    } catch (e) {
+      print('❌ خطأ في إرسال FCM Token بعد تسجيل الدخول: $e');
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();

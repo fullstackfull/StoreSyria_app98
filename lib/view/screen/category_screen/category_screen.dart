@@ -119,20 +119,20 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                   height: 51,
                 ),
                 verticalSpace(20),
-                searchFieldWidget(
-
-                  controller: categoryController.searchController,
-                  hint: 'Search for order',
-                  onChanged: (value) {
-                    if (value.length >= 3) {
-                      categoryController.searchCategoryData(name: value);
-                    }
-                  },
-                  onTap: () {
-                    getData();
-                    categoryController.searchController.clear();
-                  },
-                ),
+                // searchFieldWidget(
+                //   context: context,
+                //   controller: categoryController.searchController,
+                //   hint: 'Search for order',
+                //   onChanged: (value) {
+                //     if (value.length >= 3) {
+                //       categoryController.searchCategoryData(name: value);
+                //     }
+                //   },
+                //   onTap: () {
+                //     getData();
+                //     categoryController.searchController.clear();
+                //   },
+                // ),
                 verticalSpace(25),
                 Text(
                   "Category List",

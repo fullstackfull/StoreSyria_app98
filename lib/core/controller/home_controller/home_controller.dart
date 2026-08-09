@@ -6,6 +6,7 @@ import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:get/get.dart';
+import 'package:store_go_app/core/services/fcm_token_service.dart';
 
 
 class HomeController extends GetxController {
@@ -51,6 +52,13 @@ class HomeController extends GetxController {
         if (data['status'] == 1) {
           isStore.value = false;
           commonToast(data['data']['message']);
+          
+          // تحديث Store ID محلياً
+          Prefs.setStoreID(storeId);
+          
+          // إرسال FCM Token للسيرفر مع المتجر الجديد
+          _sendFcmTokenAfterStoreChange(storeId);
+          
           getDashboardData();
         } else {
           commonToast(data['data']['message']);
@@ -88,5 +96,15 @@ class HomeController extends GetxController {
     );
 
     isDataAvailable.value = false;
+  }
+
+  /// إرسال FCM Token للسيرفر بعد تغيير المتجر
+  Future<void> _sendFcmTokenAfterStoreChange(String storeId) async {
+    try {
+      final fcmService = FcmTokenService();
+      await fcmService.sendFcmTokenToServer(storeId: storeId);
+    } catch (e) {
+      print('❌ خطأ في إرسال FCM Token بعد تغيير المتجر: $e');
+    }
   }
 }

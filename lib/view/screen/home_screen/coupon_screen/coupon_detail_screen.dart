@@ -96,7 +96,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
                   ),
                   Expanded(
                     child: couponController.viewCouponsList.isEmpty
-                        ? Center(child: dataNotFoundTextWidget())
+                        ? Center(child: SizedBox())
                         : ListView.separated(
                             itemCount: couponController.viewCouponsList.length,
                             shrinkWrap: true,

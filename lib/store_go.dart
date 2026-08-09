@@ -18,6 +18,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:store_go_app/view/screen/dashboard_manager/dashboard_manager.dart';
 import 'package:store_go_app/core/controller/setting_controller/theme_controller.dart';
 import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/core/controller/onboarding_controller/onboarding_controller.dart';
 
 class StoreGoApp extends StatelessWidget {
   StoreGoApp({Key? key}) : super(key: key);
@@ -43,7 +44,16 @@ class StoreGoApp extends StatelessWidget {
     Prefs.setBool(AppConstant.isDemoMode, bool.parse(isDemoMode));
 
     String? accessToken = await Prefs.getToken();
-    return {'token': accessToken};
+    
+    // ✅ التحقق من حالة OnBoarding
+    final onboardingController = OnboardingController();
+    final isOnboardingCompleted = onboardingController.isOnboardingCompleted;
+    print('🔍 حالة OnBoarding في _initAppData: $isOnboardingCompleted');
+    
+    return {
+      'token': accessToken,
+      'onboarding_completed': isOnboardingCompleted,
+    };
   }
 
   @override

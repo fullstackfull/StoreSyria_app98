@@ -1,330 +1,4 @@
-// // To parse this JSON data, do
-// //
-// //     final orderDetailModel = orderDetailModelFromJson(jsonString);
-//
-// import 'dart:convert';
-//
-// class OrderDetailModel {
-//   int ? status;
-//   String ? message;
-//   OrderDetailData ? data;
-//
-//   OrderDetailModel({
-//     this.status,
-//     this.message,
-//     this.data,
-//   });
-//
-//   factory OrderDetailModel.fromRawJson(String str) => OrderDetailModel.fromJson(json.decode(str));
-//
-//   String toRawJson() => json.encode(toJson());
-//
-//   factory OrderDetailModel.fromJson(Map<String, dynamic> json) => OrderDetailModel(
-//     status: json["status"],
-//     message: json["message"],
-//     data: OrderDetailData.fromJson(json["data"]),
-//   );
-//
-//   Map<String, dynamic> toJson() => {
-//     "status": status,
-//     "message": message,
-//     "data": data!.toJson(),
-//   };
-// }
-//
-// class OrderDetailData {
-//   int ? id;
-//   int ? isGuest;
-//   String ? orderId;
-//   DateTime ? deliveryDate;
-//   int ? orderRewardPoint;
-//   int ? returnPrice;
-//   dynamic ? returnStatusMessage;
-//   DateTime ? returnDate;
-//   String ? orderStatusText;
-//   int ? orderStatus;
-//   String ? orderStatusMessage;
-//   List<Product> ? product;
-//   int ? isReview;
-//   Informations ? billingInformations;
-//   Informations ? deliveryInformations;
-//   String ? paymnetType;
-//   String ? paymnet;
-//   String ? delivery;
-//   String ? deliveredCharge;
-//   CouponInfo ? couponInfo;
-//   List<Tax> ? tax;
-//   String ? subTotal;
-//   String ? finalPrice;
-//
-//   OrderDetailData({
-//     this.id,
-//     this.isGuest,
-//     this.orderId,
-//     this.deliveryDate,
-//     this.orderRewardPoint,
-//     this.returnPrice,
-//     this.returnStatusMessage,
-//     this.returnDate,
-//     this.orderStatusText,
-//     this.orderStatus,
-//     this.orderStatusMessage,
-//     this.product,
-//     this.isReview,
-//     this.billingInformations,
-//     this.deliveryInformations,
-//     this.paymnetType,
-//     this.paymnet,
-//     this.delivery,
-//     this.deliveredCharge,
-//     this.couponInfo,
-//     this.tax,
-//     this.subTotal,
-//     this.finalPrice,
-//   });
-//
-//   factory OrderDetailData.fromRawJson(String str) => OrderDetailData.fromJson(json.decode(str));
-//
-//   String toRawJson() => json.encode(toJson());
-//
-//   factory OrderDetailData.fromJson(Map<String, dynamic> json) => OrderDetailData(
-//     id: json["id"],
-//     isGuest: json["is_guest"],
-//     orderId: json["order_id"],
-//     deliveryDate: DateTime.parse(json["delivery_date"]),
-//     orderRewardPoint: json["order_reward_point"],
-//     returnPrice: json["return_price"],
-//     returnStatusMessage: json["return_status_message"],
-//     returnDate: DateTime.parse(json["return_date"]),
-//     orderStatusText: json["order_status_text"],
-//     orderStatus: json["order_status"],
-//     orderStatusMessage: json["order_status_message"],
-//     product: List<Product>.from(json["product"].map((x) => Product.fromJson(x))),
-//     isReview: json["is_review"],
-//     billingInformations: Informations.fromJson(json["billing_informations"]),
-//     deliveryInformations: Informations.fromJson(json["delivery_informations"]),
-//     paymnetType: json["paymnet_type"],
-//     paymnet: json["paymnet"],
-//     delivery: json["delivery"],
-//     deliveredCharge: json["delivered_charge"],
-//     couponInfo: CouponInfo.fromJson(json["coupon_info"]),
-//     tax: List<Tax>.from(json["tax"].map((x) => Tax.fromJson(x))),
-//     subTotal: json["sub_total"],
-//     finalPrice: json["final_price"],
-//   );
-//
-//   Map<String, dynamic> toJson() => {
-//     "id": id,
-//     "is_guest": isGuest,
-//     "order_id": orderId,
-//     "delivery_date": "${deliveryDate!.year.toString().padLeft(4, '0')}-${deliveryDate!.month.toString().padLeft(2, '0')}-${deliveryDate!.day.toString().padLeft(2, '0')}",
-//     "order_reward_point": orderRewardPoint,
-//     "return_price": returnPrice,
-//     "return_status_message": returnStatusMessage,
-//     "return_date": "${returnDate!.year.toString().padLeft(4, '0')}-${returnDate!.month.toString().padLeft(2, '0')}-${returnDate!.day.toString().padLeft(2, '0')}",
-//     "order_status_text": orderStatusText,
-//     "order_status": orderStatus,
-//     "order_status_message": orderStatusMessage,
-//     "product": List<dynamic>.from(product!.map((x) => x.toJson())),
-//     "is_review": isReview,
-//     "billing_informations": billingInformations!.toJson(),
-//     "delivery_informations": deliveryInformations!.toJson(),
-//     "paymnet_type": paymnetType,
-//     "paymnet": paymnet,
-//     "delivery": delivery,
-//     "delivered_charge": deliveredCharge,
-//     "coupon_info": couponInfo!.toJson(),
-//     "tax": List<dynamic>.from(tax!.map((x) => x.toJson())),
-//     "sub_total": subTotal,
-//     "final_price": finalPrice,
-//   };
-// }
-//
-// class Informations {
-//   String? name;
-//   String? address;
-//   String? state;
-//   String? country;
-//   String? city;
-//   String? postCode;
-//   String? email;
-//   String? phone;
-//
-//   Informations({
-//     this.name,
-//     this.address,
-//     this.state,
-//     this.country,
-//     this.city,
-//     this.postCode,
-//     this.email,
-//     this.phone,
-//   });
-//
-//   factory Informations.fromRawJson(String str) => Informations.fromJson(json.decode(str));
-//
-//   String toRawJson() => json.encode(toJson());
-//
-//   factory Informations.fromJson(Map<String, dynamic> json) => Informations(
-//     name: json["name"],
-//     address: json["address"],
-//     state: json["state"],
-//     country: json["country"],
-//     city: json["city"],
-//     postCode: json["post_code"],
-//     email: json["email"],
-//     phone: json["phone"],
-//   );
-//
-//   Map<String, dynamic> toJson() => {
-//     "name": name,
-//     "address": address,
-//     "state": state,
-//     "country": country,
-//     "city": city,
-//     "post_code": postCode,
-//     "email": email,
-//     "phone": phone,
-//   };
-// }
-//
-// class CouponInfo {
-//   bool ? status;
-//   String ? message;
-//   String ? code;
-//   String ? discountString;
-//   String ? price;
-//   String ? discountString2;
-//   String ? discountAmount;
-//   String ? discount;
-//
-//   CouponInfo({
-//     this.status,
-//     this.message,
-//     this.code,
-//     this.discountString,
-//     this.price,
-//     this.discountString2,
-//     this.discountAmount,
-//     this.discount,
-//   });
-//
-//   factory CouponInfo.fromRawJson(String str) => CouponInfo.fromJson(json.decode(str));
-//
-//   String toRawJson() => json.encode(toJson());
-//
-//   factory CouponInfo.fromJson(Map<String, dynamic> json) => CouponInfo(
-//     status: json["status"],
-//     message: json["message"],
-//     code: json["code"],
-//     discountString: json["discount_string"],
-//     price: json["price"],
-//     discountString2: json["discount_string2"],
-//     discountAmount: json["discount_amount"],
-//     discount: json["discount"],
-//   );
-//
-//   Map<String, dynamic> toJson() => {
-//     "status": status,
-//     "message": message,
-//     "code": code,
-//     "discount_string": discountString,
-//     "price": price,
-//     "discount_string2": discountString2,
-//     "discount_amount": discountAmount,
-//     "discount": discount,
-//   };
-// }
-//
-// class Product {
-//   String ? productId;
-//   String ? image;
-//   String ? name;
-//   String ? orignalPrice;
-//   String ? totalOrignalPrice;
-//   String ? perProductDiscountPrice;
-//   String ? discountPrice;
-//   String ? finalPrice;
-//   String ? qty;
-//   String ? variantId;
-//   String ? variantName;
-//   int ? productReturn;
-//
-//   Product({
-//     this.productId,
-//     this.image,
-//     this.name,
-//     this.orignalPrice,
-//     this.totalOrignalPrice,
-//     this.perProductDiscountPrice,
-//     this.discountPrice,
-//     this.finalPrice,
-//     this.qty,
-//     this.variantId,
-//     this.variantName,
-//     this.productReturn,
-//   });
-//
-//   factory Product.fromRawJson(String str) => Product.fromJson(json.decode(str));
-//
-//   String toRawJson() => json.encode(toJson());
-//
-//   factory Product.fromJson(Map<String, dynamic> json) => Product(
-//     productId: json["product_id"].toString(),
-//     image: json["image"],
-//     name: json["name"],
-//     orignalPrice: json["orignal_price"],
-//     totalOrignalPrice: json["total_orignal_price"],
-//     perProductDiscountPrice: json["per_product_discount_price"],
-//     discountPrice: json["discount_price"],
-//     finalPrice: json["final_price"],
-//     qty: json["qty"].toString(),
-//     variantId: json["variant_id"].toString(),
-//     variantName: json["variant_name"],
-//     productReturn: json["return"],
-//   );
-//
-//   Map<String, dynamic> toJson() => {
-//     "product_id": productId,
-//     "image": image,
-//     "name": name,
-//     "orignal_price": orignalPrice,
-//     "total_orignal_price": totalOrignalPrice,
-//     "per_product_discount_price": perProductDiscountPrice,
-//     "discount_price": discountPrice,
-//     "final_price": finalPrice,
-//     "qty": qty,
-//     "variant_id": variantId,
-//     "variant_name": variantName,
-//     "return": productReturn,
-//   };
-// }
-//
-// class Tax {
-//   String? taxString;
-//   String? amountstring;
-//
-//   Tax({
-//     this.taxString,
-//     this.amountstring,
-//   });
-//
-//   factory Tax.fromRawJson(String str) => Tax.fromJson(json.decode(str));
-//
-//   String toRawJson() => json.encode(toJson());
-//
-//   factory Tax.fromJson(Map<String, dynamic> json) => Tax(
-//     taxString: json["tax_string"],
-//     amountstring: json["amountstring"],
-//   );
-//
-//   Map<String, dynamic> toJson() => {
-//     "tax_string": taxString,
-//     "amountstring": amountstring,
-//   };
-// }
 
-// ignore_for_file: unnecessary_this, prefer_collection_literals, avoid_print
 String myPaymnetType = '';
 
 class OrderDetailModel {
@@ -369,12 +43,14 @@ class OrderDetailData {
   BillingInformations? deliveryInformations;
   String? paymnetType;
   String? paymnet;
+  String? paymentStatus;
   String? delivery;
   String? deliveredCharge;
   CouponInfo? couponInfo;
   List<Tax>? tax;
   String? subTotal;
   String? finalPrice;
+  List<Note>? notes;
 
   OrderDetailData(
       {this.id,
@@ -394,6 +70,8 @@ class OrderDetailData {
       this.deliveryInformations,
       this.paymnetType,
       this.paymnet,
+        this.paymentStatus,
+        this.notes,
       this.delivery,
       this.deliveredCharge,
       this.couponInfo,
@@ -445,6 +123,7 @@ class OrderDetailData {
     deliveryInformations = json['delivery_informations'] != null ? BillingInformations.fromJson(json['delivery_informations']) : null;
     paymnetType = json['paymnet_type'];
     paymnet = json['paymnet'];
+    paymentStatus = json['payment_status'];
     delivery = json['delivery'];
     deliveredCharge = json['delivered_charge'];
     couponInfo = json['coupon_info'] != null ? CouponInfo.fromJson(json['coupon_info']) : null;
@@ -456,6 +135,12 @@ class OrderDetailData {
     }
     subTotal = json['sub_total'];
     finalPrice = json['final_price'];
+    if (json['notes'] != null && json['notes'] is List) {
+      notes = <Note>[];
+      json['notes'].forEach((v) {
+        notes!.add(Note.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -483,6 +168,7 @@ class OrderDetailData {
     }
     data['paymnet_type'] = this.paymnetType;
     data['paymnet'] = this.paymnet;
+    data['payment_status'] = this.paymentStatus;
     data['delivery'] = this.delivery;
     data['delivered_charge'] = this.deliveredCharge;
     if (this.couponInfo != null) {
@@ -493,6 +179,9 @@ class OrderDetailData {
     }
     data['sub_total'] = this.subTotal;
     data['final_price'] = this.finalPrice;
+    if (this.notes != null) {
+      data['notes'] = this.notes!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -636,6 +325,54 @@ class Tax {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['tax_string'] = this.taxString;
     data['amountstring'] = this.amountstring;
+    return data;
+  }
+}
+
+// ... (الكود السابق يبقى كما هو)
+
+class Note {
+  int? id;
+  int? orderId;
+  int? customerId;
+  String? note;
+  String? noteType;
+  String? status;
+  String? createdAt;
+  String? updatedAt;
+
+  Note({
+    this.id,
+    this.orderId,
+    this.customerId,
+    this.note,
+    this.noteType,
+    this.status,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  Note.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    orderId = json['order_id'];
+    customerId = json['customer_id'];
+    note = json['note'];
+    noteType = json['note_type'];
+    status = json['status'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['id'] = this.id;
+    data['order_id'] = this.orderId;
+    data['customer_id'] = this.customerId;
+    data['note'] = this.note;
+    data['note_type'] = this.noteType;
+    data['status'] = this.status;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
     return data;
   }
 }
