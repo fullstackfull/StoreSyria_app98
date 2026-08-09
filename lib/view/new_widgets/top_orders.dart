@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:store_go_app/utils/images.dart';
 import '../../utils/colors.dart';
 
 Widget topOrderCardWidget({
@@ -167,23 +170,26 @@ Widget allOrdersListItemWidget({
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                orderId,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w800,
-                  color: textColor,
-                ),
+              Row(
+                children: [
+                  SvgPicture.asset(DefaultImages.ordersIcn,width: 18.h,color: AppColor.cGreenFont),
+                  Text(
+                    " $orderId",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w800,
+                      color: textColor,
+                    ),
+                  ),
+                ],
               ),
               PopupMenuButton<String>(
                 padding: EdgeInsets.zero,
                 splashRadius: 22.r,
                 offset: Offset(0, 35.h),
-
                 tooltip: 'more'.tr,
-
                 icon: Container(
                   width: 34.w,
                   height: 34.h,
@@ -201,10 +207,17 @@ Widget allOrdersListItemWidget({
                 ),
 
                 elevation: 8,
-
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.r),
+                  side: BorderSide(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.12)
+                        : Colors.black.withOpacity(0.08),
+                    width: 1,
+                  ),
                 ),
+
+                shadowColor: Colors.black.withOpacity(0.4),
 
                 color: cardColor,
 
@@ -245,7 +258,19 @@ Widget allOrdersListItemWidget({
                         ],
                       ),
                     ),
-
+                  if (viewFun != null && deleteFun != null)
+                    PopupMenuItem<String>(
+                      enabled: false,
+                      height: 1.h,
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      child: Divider(
+                        height: 1.h,
+                        thickness: 1,
+                        color: isDark
+                            ? Colors.white.withOpacity(0.12)
+                            : Colors.black.withOpacity(0.08),
+                      ),
+                    ),
                   if (deleteFun != null)
                     PopupMenuItem(
                       value: 'delete',
@@ -299,7 +324,6 @@ Widget allOrdersListItemWidget({
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                           color: subTextColor,
-                          decoration: TextDecoration.underline,
                         ),
                       ),
                     ),

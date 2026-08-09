@@ -14,6 +14,7 @@ class OrderController extends GetxController {
   final OrderRepository orderRepository = OrderRepository();
   final OrderDetailRepository orderDetailRepository = OrderDetailRepository();
 
+
   // Models
   OrderModel? orderModel;
   OrderDetailModel? orderDetailModel;
@@ -24,6 +25,7 @@ class OrderController extends GetxController {
   RxList<OrderData> orderList = <OrderData>[].obs;
   Rxn<OrderModelData> orderData = Rxn<OrderModelData>();
   RxBool isLoading = false.obs;
+  RxBool isDetailLoading = false.obs;
   RxString errorMessage = ''.obs;
   RxInt currantPage = 1.obs;
   RxBool isScroll = true.obs;
@@ -145,7 +147,7 @@ class OrderController extends GetxController {
   }
 
   Future<void> getOrderDetailData(String orderId) async {
-    _setLoading(true);
+    isDetailLoading.value = true;
     orderDetail = null;
     extTax.value = 0.0;
 
@@ -158,9 +160,14 @@ class OrderController extends GetxController {
 
         if (orderDetail?.tax != null) {
           double totalTax = 0;
-          for (var tax in orderDetail!.tax!) {
-            totalTax += double.tryParse(tax.amountstring ?? "0") ?? 0;
+
+          for (final tax in orderDetail!.tax!) {
+            totalTax += double.tryParse(
+              tax.amountstring ?? "0",
+            ) ??
+                0;
           }
+
           extTax.value = totalTax;
         }
       },
@@ -170,7 +177,7 @@ class OrderController extends GetxController {
       },
     );
 
-    _setLoading(false);
+    isDetailLoading.value = false;
   }
 
   Future<void> deleteOrderData({required String orderId}) async {

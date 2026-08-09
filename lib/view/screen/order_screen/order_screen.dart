@@ -7,13 +7,11 @@ import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/order_screen/order_detail_screen.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
-import '../../../utils/images.dart';
 import '../../new_widgets/filter_tabs.dart';
 import '../../new_widgets/header_widget.dart';
 import '../../new_widgets/search_widget.dart';
 import '../../new_widgets/top_orders.dart';
 import '../../widget/error_empty_state.dart';
-import '../../widget/icon_and_image.dart';
 import '../../widget/loading_widget.dart';
 import '../../new_widgets/date_filter.dart';
 
@@ -30,6 +28,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
   late ScrollController scrollController;
 
   bool _isFirstLoad = true;
+  DateTimeRange? selectedDateRange;
 
   @override
   bool get wantKeepAlive => true;
@@ -62,10 +61,16 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
       orderController.currantPage.value += 1;
       orderController.getOrderData(
         orderController.currantPage.value,
+        deliveredStatus: orderController.selectedStatus.value == 0
+            ? null
+            : orderController.selectedStatus.value - 1,
+        fromDate: selectedDateRange?.start,
+        toDate: selectedDateRange?.end,
       );
     }
   }
-  Future<void> _fetchInitialData({int? deliveredStatus}) async {
+
+  Future<void> _fetchInitialData({int? deliveredStatus, bool useDateFilter = true}) async {
     orderController.currantPage.value = 1;
     orderController.isScroll.value = true;
     orderController.orderList.clear();
@@ -73,6 +78,8 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
     await orderController.getOrderData(
       1,
       deliveredStatus: deliveredStatus,
+      fromDate: useDateFilter ? selectedDateRange?.start : null,
+      toDate: useDateFilter ? selectedDateRange?.end : null,
     );
   }
 
@@ -91,17 +98,15 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // add order
                 HeaderWidget(
                   context: context,
                   title: "orders".tr,
                   label: "new_order".tr,
-                  onNewLabelTap: () {
-                    // TODO: توجيه لشاشة إنشاء طلب جديد
-                  },
+                  onNewLabelTap: () {},
                 ),
 
                 verticalSpace(16.h),
-
 
                 Obx(() {
                   return orderStatusTabsWidget(
@@ -109,10 +114,15 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                     selectedIndex: orderController.selectedStatus.value,
                     onChanged: (index) {
                       orderController.selectedStatus.value = index;
+
+                      setState(() {
+                        selectedDateRange = null;
+                      });
+
                       if (index == 0) {
-                        _fetchInitialData();
+                        _fetchInitialData(useDateFilter: false);
                       } else {
-                        _fetchInitialData(deliveredStatus: index - 1);
+                        _fetchInitialData(deliveredStatus: index - 1, useDateFilter: false);
                       }
                     },
                   );
@@ -203,8 +213,28 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                                   sectionHeaderWithFilterWidget(
                                     context: context,
                                     title: "top_orders".tr,
-                                    filterLabel: "last_30_days".tr,
-                                    onFilterTap: () {},
+                                    filterLabel: selectedDateRange != null
+                                        ? "${dateFormatted(date: selectedDateRange!.start.toString(), formatType: formatForDateTime(FormatType.date))} - "
+                                        "${dateFormatted(date: selectedDateRange!.end.toString(), formatType: formatForDateTime(FormatType.date))}"
+                                        : "filter_by_date".tr,
+                                    onFilterTap: () async {
+                                      final range = await showDateRangeBottomSheet(
+                                        context: context,
+                                        initialRange: selectedDateRange,
+                                      );
+
+                                      if (range != null) {
+                                        setState(() {
+                                          selectedDateRange = range;
+                                        });
+
+                                        _fetchInitialData(
+                                          deliveredStatus: orderController.selectedStatus.value == 0
+                                              ? null
+                                              : orderController.selectedStatus.value - 1,
+                                        );
+                                      }
+                                    },
                                   ),
                                   verticalSpace(14.h),
                                   SizedBox(
@@ -291,53 +321,52 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
     );
   }
 }
-
-Widget searchFieldWidget({
-  required BuildContext context,
-  String? hint,
-  Function(String)? onChanged,
-  TextEditingController? controller,
-  Function()? onTap,
-  TextInputType? keyboardType,
-}) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-  final textColor = isDark ? DarkThemeColor.cText : AppColor.cText;
-  final hintColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
-  final borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder;
-
-  return Container(
-    height: 55.h,
-    decoration: BoxDecoration(
-      color: cardColor,
-      borderRadius: BorderRadius.circular(16.r),
-      border: Border.all(color: borderColor.withOpacity(0.5)),
-    ),
-    child: TextField(
-      controller: controller,
-      onChanged: onChanged,
-      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: textColor),
-      cursorColor: AppColor.themeGreenColor,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        hintText: hint,
-        contentPadding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 20.w),
-        prefixIcon: Padding(
-          padding: EdgeInsets.all(12.w),
-          child: assetSvdImageWidget(image: DefaultImages.searchIcn),
-        ),
-        suffixIcon: GestureDetector(
-          onTap: onTap,
-          child: Padding(
-            padding: EdgeInsets.all(12.w),
-            child: Icon(Icons.arrow_circle_right_rounded, color: AppColor.themeGreenColor, size: 25.sp),
-          ),
-        ),
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        hintStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: hintColor),
-      ),
-    ),
-  );
-}
+// Widget searchFieldWidget({
+//   required BuildContext context,
+//   String? hint,
+//   Function(String)? onChanged,
+//   TextEditingController? controller,
+//   Function()? onTap,
+//   TextInputType? keyboardType,
+// }) {
+//   final isDark = Theme.of(context).brightness == Brightness.dark;
+//   final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
+//   final textColor = isDark ? DarkThemeColor.cText : AppColor.cText;
+//   final hintColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
+//   final borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder;
+//
+//   return Container(
+//     height: 55.h,
+//     decoration: BoxDecoration(
+//       color: cardColor,
+//       borderRadius: BorderRadius.circular(16.r),
+//       border: Border.all(color: borderColor.withOpacity(0.5)),
+//     ),
+//     child: TextField(
+//       controller: controller,
+//       onChanged: onChanged,
+//       style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: textColor),
+//       cursorColor: AppColor.themeGreenColor,
+//       keyboardType: keyboardType,
+//       decoration: InputDecoration(
+//         hintText: hint,
+//         contentPadding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 20.w),
+//         prefixIcon: Padding(
+//           padding: EdgeInsets.all(12.w),
+//           child: assetSvdImageWidget(image: DefaultImages.searchIcn),
+//         ),
+//         suffixIcon: GestureDetector(
+//           onTap: onTap,
+//           child: Padding(
+//             padding: EdgeInsets.all(12.w),
+//             child: Icon(Icons.arrow_circle_right_rounded, color: AppColor.themeGreenColor, size: 25.sp),
+//           ),
+//         ),
+//         border: InputBorder.none,
+//         enabledBorder: InputBorder.none,
+//         focusedBorder: InputBorder.none,
+//         hintStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: hintColor),
+//       ),
+//     ),
+//   );
+// }

@@ -102,7 +102,7 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                           validator: (value) =>
                               Validator.validateEmail(value!),
                           keyboardType: TextInputType.emailAddress,
-                          focusNode: FocusNode(),
+                          autofocus: true,
                         ),
 
                         SizedBox(height: 20.h),
@@ -134,7 +134,7 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                                     : Icons.visibility_outlined
                               ),
                             ),
-                            focusNode: FocusNode(),
+                            autofocus: true,
                           ),
                         ),
 
@@ -152,6 +152,7 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                               authController.isLoading.value
                                   ? null
                                   : () async {
+                                FocusScope.of(context).unfocus();
                                 if (formKey.currentState!.validate()) {
                                   await authController.loginAuth(
                                     email: authController.emailController.text.trim(),

@@ -24,7 +24,7 @@ class OrderDetailScreen extends StatefulWidget {
 }
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
-  OrderController orderController = Get.put(OrderController());
+  OrderController orderController = Get.find<OrderController>();
 
   @override
   void initState() {

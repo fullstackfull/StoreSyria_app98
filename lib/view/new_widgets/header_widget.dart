@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 Widget HeaderWidget({
   required BuildContext context,
   required String title,
-  required String label,
+  required String? label,
   required VoidCallback onNewLabelTap,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -23,31 +23,31 @@ Widget HeaderWidget({
           color: titleColor,
         ),
       ),
-      GestureDetector(
-        onTap: onNewLabelTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30.r),
-            border: Border.all(color: accent, width: 1.3),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.add, size: 18.sp, color: accent),
-              SizedBox(width: 4.w),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: accent,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      // GestureDetector(
+      //   onTap: onNewLabelTap,
+      //   child: Container(
+      //     padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+      //     decoration: BoxDecoration(
+      //       borderRadius: BorderRadius.circular(30.r),
+      //       border: Border.all(color: accent, width: 1.3),
+      //     ),
+      //     child: Row(
+      //       mainAxisSize: MainAxisSize.min,
+      //       children: [
+      //         Icon(Icons.add, size: 18.sp, color: accent),
+      //         SizedBox(width: 4.w),
+      //         Text(
+      //           label,
+      //           style: TextStyle(
+      //             fontSize: 14.sp,
+      //             fontWeight: FontWeight.w600,
+      //             color: accent,
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      // ),
     ],
   );
 }
