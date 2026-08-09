@@ -3,6 +3,7 @@ import 'package:store_go_app/view/screen/welcome_screen.dart';
 
 import '../bindings/coupon_binding.dart';
 import '../bindings/dashboard_binding.dart';
+import '../bindings/onboarding_binding.dart';
 import '../bindings/shipping_binding.dart';
 import '../bindings/statistics_binding.dart';
 import '../bindings/tax_binding.dart';
@@ -12,6 +13,8 @@ import '../view/screen/home_screen/coupon_screen/coupon_screen.dart';
 import '../view/screen/home_screen/shipping_screen.dart';
 import '../view/screen/home_screen/tax_screen.dart';
 import '../view/screen/statistics_screen/statistics_screen.dart';
+import '../view/screen/onboarding_screen/onboarding_screen.dart';
+import '../view/screen/notification_screen/notification_screen.dart';
 
 class AppRoutes {
   // =========================
@@ -37,6 +40,7 @@ class AppRoutes {
   static const shipping = '/shipping';
   static const tax = '/tax';
   static const coupon = '/coupon';
+  static const notifications = '/notifications';
 
   // =========================
   // Pages
@@ -46,13 +50,11 @@ class AppRoutes {
     //Auth & Onboarding
    GetPage(name: splash, page: () => const WelComeScreen()),
 
-  //   GetPage(
-  //     name: onboarding,
-  //     page: () => const OnboardingScreen(),
-  //     binding: BindingsBuilder(() {
-  //       Get.lazyPut(() => OnboardingController());
-  //     }),
-  //   ),
+    GetPage(
+      name: onboarding,
+      page: () => OnboardingScreen(),
+      binding: OnboardingBinding(),
+    ),
 
     GetPage(
         name: login,
@@ -88,6 +90,11 @@ class AppRoutes {
       name: AppRoutes.statistics,
       page: ()=> StatisticsScreen(),
       binding: StatisticsBinding(),
+    ),
+
+    GetPage(
+      name: AppRoutes.notifications,
+      page: () => NotificationScreen(isBack: true),
     ),
 
     // GetPage(

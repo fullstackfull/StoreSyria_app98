@@ -13,6 +13,8 @@ import 'package:store_go_app/view/screen/setting_screen/store_setting_screen.dar
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
+import 'package:store_go_app/core/services/fcm_token_service.dart';
+import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 
 import 'email_setting_screen.dart';
 import 'loyality_setting_screen.dart';
@@ -52,8 +54,16 @@ class SettingScreen extends StatelessWidget {
                   settingWidget(icon: DefaultImages.envelopeIcn, title: "Store Email Setting", function: () {Get.to(() => EmailSettingScreen());},), horizontalDivider(),
                   settingWidget(icon: DefaultImages.loyaltyIcn, title: "Store Loyalty Program", function: () {Get.to(() => LoyaltyProgramScreen());},), horizontalDivider(),
                   // settingWidget(icon: DefaultImages.callIcn, title: "Whatsapp Message Setting", function: () {},), horizontalDivider(),
-                  settingWidget(icon: DefaultImages.logoutIcn, title: "LogOut", function: () {Prefs.clear();
-                    Get.offAll(()=>NormalLoginWidget());},), horizontalDivider(),
+                  settingWidget(icon: DefaultImages.logoutIcn, title: "LogOut", function: () async {
+                    // مسح وتدمير FCM Token عند تسجيل الخروج
+                    await FcmTokenService().clearFcmToken();
+                    // مسح بيانات الإشعارات
+                    if (Get.isRegistered<NotificationController>()) {
+                      Get.find<NotificationController>().clearNotificationData();
+                    }
+                    Prefs.clear();
+                    Get.offAll(()=>NormalLoginWidget());
+                  },), horizontalDivider(),
                 ],
               ),
             ),

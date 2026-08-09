@@ -66,6 +66,7 @@ class DefaultImages {
   static String logoutIcn = "assets/svg/logout.svg";
   static String invoiceIcn = "assets/svg/invoice.svg";
   static String splashLogoImg = "assets/svg/splash_logo.svg";
+  static String emptyNotification = "assets/svg/empty_notification.svg";
 
   static String welcomeImg = "assets/svg/welcome.svg";
   static String profileImg = "https://apps.rajodiya.com/ecommercego-saas/storage/uploads/profile/avatar.png";

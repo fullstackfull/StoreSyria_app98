@@ -1,4 +1,4 @@
-package com.store.store_go_app
+package com.syriastore.app
 
 import io.flutter.embedding.android.FlutterActivity
 

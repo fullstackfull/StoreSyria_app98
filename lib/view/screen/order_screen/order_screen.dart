@@ -120,7 +120,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                       });
 
                       if (index == 0) {
-                        _fetchInitialData(useDateFilter: false);
+                        _fetchInitialData(deliveredStatus: null,useDateFilter: false);
                       } else {
                         _fetchInitialData(deliveredStatus: index - 1, useDateFilter: false);
                       }
