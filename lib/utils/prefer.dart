@@ -7,6 +7,9 @@ class Prefs {
   static const String storeId = 'storeId';
   static const String KEY_TOKEN = 'TOKEN';
   static const String BASE_URL = 'base_url';
+  static const String FCM_TOKEN = 'fcm_token';
+  static const String DEVICE_ID = 'device_id';
+  static const String ONBOARDING_COMPLETED = 'onboarding_completed';
 
   static setString(String key, String value) {
     return getStorage!.write(key, value);
@@ -22,6 +25,14 @@ class Prefs {
 
   static bool getBool(String key) {
     return getStorage!.read(key) ?? false;
+  }
+
+  static setInt(String key, int value) {
+    return getStorage!.write(key, value);
+  }
+
+  static int getInt(String key) {
+    return getStorage!.read(key) ?? 0;
   }
 
   static String getBaseUrl() {
@@ -63,5 +74,21 @@ class Prefs {
   static clear() {
     print('PREFS CLEARED');
     return getStorage!.erase();
+  }
+
+  static String getFcmToken() {
+    return getStorage!.read(FCM_TOKEN) ?? '';
+  }
+
+  static setFcmToken(String token) {
+    return getStorage!.write(FCM_TOKEN, token);
+  }
+
+  static String getDeviceId() {
+    return getStorage!.read(DEVICE_ID) ?? '';
+  }
+
+  static setDeviceId(String deviceId) {
+    return getStorage!.write(DEVICE_ID, deviceId);
   }
 }

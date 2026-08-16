@@ -92,192 +92,193 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
           padding: const EdgeInsets.all(24),
           child: Obx(() {
             return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CommonIconButton(
-                  title: 'Add Category',
-                  iconData: DefaultImages.addCircleIcn,
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      backgroundColor: AppColor.cBackGround,
-                      barrierColor: AppColor.cGreyOpacity,
-                      isScrollControlled: true,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CommonIconButton(
+                    title: 'Add Category',
+                    iconData: DefaultImages.addCircleIcn,
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: AppColor.cBackGround,
+                        barrierColor: AppColor.cGreyOpacity,
+                        isScrollControlled: true,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(30),
+                            topRight: Radius.circular(30),
+                          ),
+                        ),
+                        builder: (context) {
+                          return AddNewCategoriesWidget(
+                            isUpdate: false,
+                          );
+                        },
+                      );
+                    },
+                    height: 51,
+                  ),
+                  verticalSpace(20),
+                  // searchFieldWidget(
+                  //   context: context,
+                  //   controller: categoryController.searchController,
+                  //   hint: 'Search for order',
+                  //   onChanged: (value) {
+                  //     if (value.length >= 3) {
+                  //       categoryController.searchCategoryData(name: value);
+                  //     }
+                  //   },
+                  //   onTap: () {
+                  //     getData();
+                  //     categoryController.searchController.clear();
+                  //   },
+                  // ),
+                  verticalSpace(25),
+                  Text(
+                    "Category List",
+                    style: pRegular20,
+                  ),
+                  verticalSpace(25),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          "Product",
+                          style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10),
                         ),
                       ),
-                      builder: (context) {
-                        return AddNewCategoriesWidget(
-                          isUpdate: false,
-                        );
-                      },
-                    );
-                  },
-                  height: 51,
-                ),
-                verticalSpace(20),
-                searchFieldWidget(
-                  controller: categoryController.searchController,
-                  hint: 'Search for order',
-                  onChanged: (value) {
-                    if (value.length >= 3) {
-                      categoryController.searchCategoryData(name: value);
-                    }
-                  },
-                  onTap: () {
-                    getData();
-                    categoryController.searchController.clear();
-                  },
-                ),
-                verticalSpace(25),
-                Text(
-                  "Category List",
-                  style: pRegular20,
-                ),
-                verticalSpace(25),
-                Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              "Product",
-                              style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              "Category",
-                              style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              "Action",
-                              style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10),
-                              textAlign: TextAlign.right,
-                            ),
-                          ),
-                        ],
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "Category",
+                          style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                verticalSpace(10),
-                categoryController.categoriesList.isEmpty ? SizedBox() : horizontalDivider(),
-                Expanded(
-             child: Obx(() {
-            /// First Loading
-            if (categoryController.isLoading.value &&
-            categoryController.currantPage.value == 1) {
-            return const Center(child: LoadingWidget());
-            }
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "Action",
+                          style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                  verticalSpace(10),
+                  categoryController.categoriesList.isEmpty ? SizedBox() : horizontalDivider(),
+                  Expanded(
+                      child: Obx(() {
+                        /// First Loading
+                        if (categoryController.isLoading.value &&
+                            categoryController.currantPage.value == 1) {
+                          return const Center(child: LoadingWidget());
+                        }
 
-            /// Error
-            if (categoryController.errorMessage.isNotEmpty &&
-            categoryController.categoriesList.isEmpty) {
-            return RefreshIndicator(
-            onRefresh: () async => getData(),
-            child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: [
-            SizedBox(
-            height: MediaQuery
-                .of(context)
-                .size
-                .height * .6,
-            child: Center(
-            child: ErrorState(
-            message: categoryController.errorMessage.value,
-            onRetry: getData,
-            )),
-            ),
-            ]));
-            }
+                        /// Error
+                        if (categoryController.errorMessage.isNotEmpty &&
+                            categoryController.categoriesList.isEmpty) {
+                          return RefreshIndicator(
+                              onRefresh: () async => getData(),
+                              child: ListView(
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  children: [
+                                    SizedBox(
+                                      height: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .height * .6,
+                                      child: Center(
+                                          child: ErrorState(
+                                            message: categoryController.errorMessage.value,
+                                            onRetry: getData,
+                                          )),
+                                    ),
+                                  ]));
+                        }
 
-            /// Empty
-            if (categoryController.categoriesList.isEmpty) {
-            return RefreshIndicator(
-            onRefresh: () async => getData(),
-            child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: [
-            SizedBox(
-            height: MediaQuery
-                .of(context)
-                .size
-                .height * .6,
-            child: Center(
-            child: EmptyState(
-            message: "no_orders_found".tr,
-            icon: Icons.receipt_long_outlined,
-            ),
-            ),
-            ),
-            ],
-            ),
-            );
-            }
+                        /// Empty
+                        if (categoryController.categoriesList.isEmpty) {
+                          return RefreshIndicator(
+                            onRefresh: () async => getData(),
+                            child: ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                SizedBox(
+                                  height: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height * .6,
+                                  child: Center(
+                                    child: EmptyState(
+                                      message: "no_orders_found".tr,
+                                      icon: Icons.receipt_long_outlined,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
 
-            /// Data
-            return RefreshIndicator(
-            backgroundColor: Colors.white,
-            onRefresh: () async => getData(),
-            child: ListView.separated(
-            controller: scrollController,
-            itemCount: categoryController.categoriesList.length,
-            shrinkWrap: true,
-            physics: AlwaysScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-            CategoryData category = categoryController.categoriesList[index];
-            return buildCategoryWidget(
-            image: category.imagePathFullUrl!,
-            title: 'Shop',
-            subTitle: category.name!,
-            category: category.themeId?.capitalizeFirst ?? "No Theme",
-            deleteFun: () {
-            AppDialog.showCustomDialog(
-              iconColor: AppColor.cRedText,
-              confirmColor: AppColor.cRedText,
-              context: context,
-              onConfirm: () =>  categoryController.deleteCategoriesData(
-                  categoryId: category.id ?? 0)
-            );
-          },
-            filterFun: () {
-            showModalBottomSheet(
-            context: context,
-            backgroundColor: AppColor.cBackGround,
-            barrierColor: AppColor.cGreyOpacity,
-            isScrollControlled: true,
-            shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-            ),
-            ),
-            builder: (context) {
-            return AddNewCategoriesWidget(
-            isUpdate: true,
-            categoryId: category.id,
-            name: category.name,
-            image: category.imagePathFullUrl,
-            icon: category.iconPath,
-            trending: category.trending.toString(),
-            status: category.status.toString(),
-            );
-            },
-            );
-            },
-            );
-            },
-            separatorBuilder: (context, index) => horizontalDivider(),
-            ),
-            );
-            })),
-            ]);
+                        /// Data
+                        return RefreshIndicator(
+                          backgroundColor: Colors.white,
+                          onRefresh: () async => getData(),
+                          child: ListView.separated(
+                            controller: scrollController,
+                            itemCount: categoryController.categoriesList.length,
+                            shrinkWrap: true,
+                            physics: AlwaysScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              CategoryData category = categoryController.categoriesList[index];
+                              return buildCategoryWidget(
+                                image: category.imagePathFullUrl!,
+                                title: 'Shop',
+                                subTitle: category.name!,
+                                category: category.themeId?.capitalizeFirst ?? "No Theme",
+                                deleteFun: () {
+                                  AppDialog.showCustomDialog(
+                                      iconColor: AppColor.cRedText,
+                                      confirmColor: AppColor.cRedText,
+                                      context: context,
+                                      onConfirm: () =>  categoryController.deleteCategoriesData(
+                                          categoryId: category.id ?? 0)
+                                  );
+                                },
+                                filterFun: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    backgroundColor: AppColor.cBackGround,
+                                    barrierColor: AppColor.cGreyOpacity,
+                                    isScrollControlled: true,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(30),
+                                        topRight: Radius.circular(30),
+                                      ),
+                                    ),
+                                    builder: (context) {
+                                      return AddNewCategoriesWidget(
+                                        isUpdate: true,
+                                        categoryId: category.id,
+                                        name: category.name,
+                                        image: category.imagePathFullUrl,
+                                        icon: category.iconPath,
+                                        trending: category.trending.toString(),
+                                        status: category.status.toString(),
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                            separatorBuilder: (context, index) => horizontalDivider(),
+                          ),
+                        );
+                      })),
+                ]);
           }),
         ),
       ),

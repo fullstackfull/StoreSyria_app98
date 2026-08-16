@@ -12,10 +12,10 @@ import 'package:store_go_app/view/screen/category_screen/category_screen.dart';
 class DashboardManagerController extends GetxController {
   RxInt currantIndex = 0.obs;
   RxList naviBarItemList = [
-    {'icon': DefaultImages.ordersIcn, 'title': 'Orders'},
-    {'icon': DefaultImages.productIcn, 'title': 'Products'},
-    {'icon': DefaultImages.dashboardIcn, 'title': 'Dashboard'},
-    {'icon': DefaultImages.settingIcn, 'title': 'Settings'},
+    {'icon': DefaultImages.dashboardIcn, 'title': 'Home'.tr},
+    {'icon': DefaultImages.ordersIcn, 'title': 'Orders'.tr},
+    {'icon': DefaultImages.productIcn, 'title': 'Products'.tr},
+    {'icon': DefaultImages.moreIcn, 'title': 'More'.tr},
   ].obs;
 
   // Create screens once and keep them alive
@@ -27,9 +27,9 @@ class DashboardManagerController extends GetxController {
     currantIndex.value = 0;
     // Initialize screens once
     screens = [
-      OrderScreen(key: const ValueKey('orders'), isBack: false),
-      ProductsScreen(key: const ValueKey('products'), isBack: false),
       HomeScreen(key: const ValueKey('dashboard')),
+      OrderScreen(key: const ValueKey('orders')),
+      ProductsScreen(key: const ValueKey('products'), isBack: false),
       SettingScreen(key: const ValueKey('settings'), isBack: false),
     ];
   }

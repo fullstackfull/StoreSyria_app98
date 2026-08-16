@@ -21,6 +21,7 @@ class CommonTextField extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final bool readOnly;
   final String? labelText;
+  final Color? color;
   final String? hintText;
   final String? prefix;
   final Widget? suffix;
@@ -45,6 +46,7 @@ class CommonTextField extends StatefulWidget {
     this.suffix,
     this.focusNode,
     this.obscuringCharacter = "*",
+    this.color,
   });
 
   @override
@@ -53,6 +55,7 @@ class CommonTextField extends StatefulWidget {
 
 class _CommonTextFieldState extends State<CommonTextField> {
   late FocusNode _focusNode;
+  ModalRoute? _modalRoute;
 
   @override
   void initState() {
@@ -64,7 +67,46 @@ class _CommonTextFieldState extends State<CommonTextField> {
   void _onFocusChange() => setState(() {});
 
   @override
+  void didUpdateWidget(covariant CommonTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      _focusNode.removeListener(_onFocusChange);
+      if (oldWidget.focusNode == null) {
+        _focusNode.dispose();
+      }
+      _focusNode = widget.focusNode ?? FocusNode();
+      _focusNode.addListener(_onFocusChange);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newRoute = ModalRoute.of(context);
+    if (_modalRoute != newRoute) {
+      _modalRoute?.secondaryAnimation?.removeListener(_onRouteAnimationChange);
+      _modalRoute = newRoute;
+      _modalRoute?.secondaryAnimation?.addListener(_onRouteAnimationChange);
+    }
+  }
+
+  void _onRouteAnimationChange() {
+    final secondaryAnimation = _modalRoute?.secondaryAnimation;
+    if (secondaryAnimation == null) return;
+
+    if (secondaryAnimation.value > 0) {
+      if (_focusNode.hasFocus) {
+        _focusNode.unfocus();
+      }
+      _focusNode.canRequestFocus = false;
+    } else {
+      _focusNode.canRequestFocus = true;
+    }
+  }
+
+  @override
   void dispose() {
+    _modalRoute?.secondaryAnimation?.removeListener(_onRouteAnimationChange);
     _focusNode.removeListener(_onFocusChange);
     if (widget.focusNode == null) {
       _focusNode.dispose();
@@ -96,7 +138,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
     isDark ? const Color(0xff2C3748) : const Color(0xffF5F7FA);
 
     final iconColor = isFocused
-        ? AppColor.themeGreenColor
+        ? AppColor.themeNavyBlueColor
         : (isDark ? Colors.white70 : Colors.grey.shade700);
 
     return Column(
@@ -126,7 +168,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
           validator: widget.validator,
           onChanged: widget.onChanged,
           onTap: widget.onTap,
-          cursorColor: AppColor.themeGreenColor,
+          cursorColor: AppColor.themeNavyBlueColor,
           style: pMedium14.copyWith(
             color: textColor,
           ),
@@ -135,13 +177,12 @@ class _CommonTextFieldState extends State<CommonTextField> {
             hintStyle: pMedium14.copyWith(
               color: hintColor,
             ),
-
             errorStyle: pMedium12.copyWith(
               color: Colors.red,
             ),
 
             filled: true,
-            fillColor: fillColor,
+            fillColor: widget.color ?? fillColor,
 
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16.w,
@@ -158,7 +199,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
               child: CircleAvatar(
                 radius: 18.r,
                 backgroundColor: isFocused
-                    ? AppColor.themeGreenColor
+                    ? AppColor.themeNavyBlueColor
                     .withOpacity(.12)
                     : iconBackground,
                 child: assetSvdImageWidget(
@@ -186,29 +227,29 @@ class _CommonTextFieldState extends State<CommonTextField> {
             ),
 
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(40.r),
               borderSide: BorderSide(
                 color: borderColor,
               ),
             ),
 
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(40.r),
               borderSide: BorderSide(
-                color: AppColor.themeGreenColor,
+                color: AppColor.themeNavyBlueColor,
                 width: 1.5.w,
               ),
             ),
 
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(40.r),
               borderSide: BorderSide(
                 color: Colors.red,
               ),
             ),
 
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(40.r),
               borderSide: BorderSide(
                 color: Colors.red,
                 width: 1.5.w,
