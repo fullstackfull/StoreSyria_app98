@@ -14,7 +14,8 @@ class AppColor {
   static Color cTransparent = Colors.transparent;
 
   // اللون الأزرق الداكن (Navy Blue) - الأساسي
-  static Color themeNavyBlueColor = Color(0xFF1E293B);
+  //static Color themeNavyBlueColor = Color(0xFF1E293B);
+  static Color themeNavyBlueColor = Color(0xFF172C4E);
   static Color blueColor = Color(0xFF2C57A2);
   static Color cBottomNavyBlueColor = Color(0xFF172C4E);
 

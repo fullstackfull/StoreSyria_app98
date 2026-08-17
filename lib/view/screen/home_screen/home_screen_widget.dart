@@ -52,7 +52,7 @@ Widget buildAppTitleRow(Function() menuFun, String date) {
             child: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: AppColor.cWhite,
+                color: AppColor.cBottomNavyBlueColor,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -65,7 +65,7 @@ Widget buildAppTitleRow(Function() menuFun, String date) {
               child: Icon(
                 Icons.notifications_outlined,
                 size: 24.sp,
-                color: AppColor.cLabel,
+                color: AppColor.cWhite,
               ),
             ),
           ),

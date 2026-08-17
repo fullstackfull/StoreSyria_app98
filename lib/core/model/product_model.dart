@@ -87,14 +87,15 @@ class ProductData {
   String? slug, themeId, productOption, productOptionApi, createdAt, updatedAt;
   String? demoField, categoryName, defaultVariantPrice, defaultVariantName;
   String? originalPrice, discountPrice, finalPrice, retuenText, coverImagePathFullUrl;
-
+  double? salePrice;
   bool? inCart, inWhishlist;
+  String? stockStatus;
 
   List<OtherDescriptionArray>? otherDescriptionArray;
   List<dynamic>? productOptionArray;
 
   ProductData({
-    this.id, this.name, this.description, this.otherDescription, this.otherDescriptionApi,
+    this.stockStatus,this.salePrice, this.id, this.name, this.description, this.otherDescription, this.otherDescriptionApi,
     this.tag, this.tagApi, this.categoryId, this.subcategoryId, this.coverImagePath,
     this.coverImageUrl, this.price, this.discountType, this.discountAmount,
     this.productStock, this.variantProduct, this.variantId, this.variantAttribute,
@@ -120,7 +121,8 @@ class ProductData {
     coverImagePath = json['cover_image_path'] as String?;
     coverImageUrl = json['cover_image_url'] as String?;
 
-    // ✅ حماية حقل السعر من الكراش إذا كان null أو نصاً غير رقمي
+    stockStatus = json['stock_status'] as String?;
+
     try {
       price = json['price'] != null ? double.parse(json['price'].toString()) : null;
     } catch (_) {
@@ -155,6 +157,14 @@ class ProductData {
       for (var v in json['other_description_array']) {
         if (v is Map<String, dynamic>) otherDescriptionArray!.add(OtherDescriptionArray.fromJson(v));
       }
+    }
+
+    try {
+      salePrice = json['sale_price'] != null
+          ? double.parse(json['sale_price'].toString())
+          : null;
+    } catch (_) {
+      salePrice = null;
     }
 
     inCart = json['in_cart'] as bool?;

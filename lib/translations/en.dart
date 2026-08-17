@@ -133,4 +133,26 @@ const Map<String, String> en = {
   'common.cancel': 'Cancel',
   'orders.top_orders': 'Top Orders',
   'orders.all_orders': 'All Orders',
+    "skip": "Skip",
+    "previous": "Previous",
+    "next": "Next",
+    "get_started": "Get Started",
+
+    "onboarding_title_2": "Track Your Sales Instantly",
+    "onboarding_desc_2": "See clear reports and insights for your store, and watch your sales grow day by day.",
+
+    "onboarding_title_1": "Manage Your Store Anywhere",
+    "onboarding_desc_1": "Receive orders and track their status in real time, so your store keeps running even when you're not looking.",
+
+    "onboarding_title_3": "Ready to Get Started?",
+    "onboarding_desc_3": "Everything you need to manage your store is now in your pocket. Let's get started together!",
+
+  'change': 'Edit',
+  'has_variant': 'Multiple Options',
+  'no_variant': 'No Options',
+
+  'no_category': 'No Category',
+  'no_product_name': 'No Product Name',
+
+
 };

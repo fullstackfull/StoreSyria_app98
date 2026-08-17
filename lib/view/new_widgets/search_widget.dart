@@ -9,8 +9,6 @@ Widget SearchRowWidget({
   required TextEditingController controller,
   String? hint,
   Function(String)? onChanged,
-  VoidCallback? onSortTap,
-  VoidCallback? onFilterTap,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;

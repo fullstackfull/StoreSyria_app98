@@ -138,6 +138,10 @@ Widget orderStatusBadgeWidget({
     ),
   );
 }
+// ملاحظة: هاد ملف يحتوي فقط الـ function المعدّلة allOrdersListItemWidget.
+// انسخ محتوى هاد الـ function وحط مكان القديمة بنفس الملف الأصلي عندك،
+// لأنه ما كان معي باقي الملف (الـ imports، orderStatusBadgeWidget، OrderBadgeType...).
+
 Widget allOrdersListItemWidget({
   required BuildContext context,
   required String orderId,
@@ -149,11 +153,32 @@ Widget allOrdersListItemWidget({
   VoidCallback? onTap,
   VoidCallback? viewFun,
   VoidCallback? deleteFun,
+  // 👇 جديد: زر التعديل + بوليان للتحكم بإظهاره
+  VoidCallback? changeFun,
+  bool showChangeAction = false,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
   final textColor = isDark ? DarkThemeColor.cText : AppColor.cText;
   final subTextColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
+
+  // هل عناصر القائمة فعليًا رح تظهر (يعني الفنكشن مو null)
+  final bool canView = viewFun != null;
+  final bool canChange = showChangeAction && changeFun != null;
+  final bool canDelete = deleteFun != null;
+
+  PopupMenuEntry<String> divider() => PopupMenuItem<String>(
+    enabled: false,
+    height: 1.h,
+    padding: EdgeInsets.symmetric(horizontal: 12.w),
+    child: Divider(
+      height: 1.h,
+      thickness: 1,
+      color: isDark
+          ? Colors.white.withOpacity(0.12)
+          : Colors.black.withOpacity(0.08),
+    ),
+  );
 
   return GestureDetector(
     onTap: onTap,
@@ -172,7 +197,8 @@ Widget allOrdersListItemWidget({
             children: [
               Row(
                 children: [
-                  SvgPicture.asset(DefaultImages.ordersIcn,width: 18.h,color: AppColor.cGreenFont),
+                  SvgPicture.asset(DefaultImages.ordersIcn,
+                      width: 18.h, color: AppColor.cGreenFont),
                   Text(
                     " $orderId",
                     maxLines: 2,
@@ -205,7 +231,6 @@ Widget allOrdersListItemWidget({
                     color: subTextColor,
                   ),
                 ),
-
                 elevation: 8,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.r),
@@ -216,86 +241,110 @@ Widget allOrdersListItemWidget({
                     width: 1,
                   ),
                 ),
-
                 shadowColor: Colors.black.withOpacity(0.4),
-
                 color: cardColor,
-
                 onSelected: (value) {
                   switch (value) {
                     case 'view':
                       viewFun?.call();
                       break;
-
+                    case 'change':
+                      changeFun?.call();
+                      break;
                     case 'delete':
                       deleteFun?.call();
                       break;
                   }
                 },
+                itemBuilder: (context) {
+                  final items = <PopupMenuEntry<String>>[];
 
-                itemBuilder: (context) => [
-
-                  if (viewFun != null)
-                    PopupMenuItem(
-                      value: 'view',
-                      height: 42.h,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.visibility_outlined,
-                            size: 18.sp,
-                            color: subTextColor,
-                          ),
-                          SizedBox(width: 10.w),
-                          Text(
-                            'view'.tr,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: textColor,
-                              fontWeight: FontWeight.w500,
+                  if (canView) {
+                    items.add(
+                      PopupMenuItem(
+                        value: 'view',
+                        height: 42.h,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.visibility_outlined,
+                              size: 18.sp,
+                              color: subTextColor,
                             ),
-                          ),
-                        ],
+                            SizedBox(width: 10.w),
+                            Text(
+                              'view'.tr,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: textColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  if (viewFun != null && deleteFun != null)
-                    PopupMenuItem<String>(
-                      enabled: false,
-                      height: 1.h,
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                      child: Divider(
-                        height: 1.h,
-                        thickness: 1,
-                        color: isDark
-                            ? Colors.white.withOpacity(0.12)
-                            : Colors.black.withOpacity(0.08),
+                    );
+                  }
+
+                  if (canChange) {
+                    if (items.isNotEmpty) items.add(divider());
+                    items.add(
+                      PopupMenuItem(
+                        value: 'change',
+                        height: 42.h,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.edit_outlined,
+                              size: 18.sp,
+                              color: AppColor.themeNavyBlueColor,
+                            ),
+                            SizedBox(width: 10.w),
+                            Text(
+                              'change'.tr,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: AppColor.themeNavyBlueColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  if (deleteFun != null)
-                    PopupMenuItem(
-                      value: 'delete',
-                      height: 42.h,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.delete_outline_rounded,
-                            size: 18.sp,
-                            color: Colors.redAccent,
-                          ),
-                          SizedBox(width: 10.w),
-                          Text(
-                            'delete'.tr,
-                            style: TextStyle(
-                              fontSize: 14.sp,
+                    );
+                  }
+
+                  if (canDelete) {
+                    if (items.isNotEmpty) items.add(divider());
+                    items.add(
+                      PopupMenuItem(
+                        value: 'delete',
+                        height: 42.h,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline_rounded,
+                              size: 18.sp,
                               color: Colors.redAccent,
-                              fontWeight: FontWeight.w600,
                             ),
-                          ),
-                        ],
+                            SizedBox(width: 10.w),
+                            Text(
+                              'delete'.tr,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.redAccent,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                ],
-              )
+                    );
+                  }
+
+                  return items;
+                },
+              ),
             ],
           ),
 
@@ -312,9 +361,7 @@ Widget allOrdersListItemWidget({
                       size: 16.sp,
                       color: AppColor.themeGreenColor,
                     ),
-
                     SizedBox(width: 6.w),
-
                     Flexible(
                       child: Text(
                         maskedName,
@@ -330,9 +377,7 @@ Widget allOrdersListItemWidget({
                   ],
                 ),
               ),
-
               SizedBox(width: 8.w),
-
               Flexible(
                 child: Text(
                   price,
@@ -349,9 +394,7 @@ Widget allOrdersListItemWidget({
             ],
           ),
 
-
           SizedBox(height: 12.h),
-
 
           /// Badges
           Row(

@@ -1,59 +1,65 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:store_go_app/core/controller/onboarding_controller/onboarding_controller.dart';
 import 'package:store_go_app/core/model/onboarding_model.dart';
 import 'package:store_go_app/utils/colors.dart';
-import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/view/widget/icon_and_image.dart';
 
+/// ============================================================
+/// OnboardingScreen
+/// - يدعم Lottie animations بدل الصور الثابتة
+/// - يدعم Dark / Light mode
+/// - يدعم الترجمة (GetX .tr) و RTL/LTR تلقائياً
+/// ============================================================
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final controller = Get.find<OnboardingController>();
 
-    return Scaffold(
-      body: GetBuilder<OnboardingController>(
-        builder: (controller) {
-          return Container(
-            decoration: BoxDecoration(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: isDark ? AppColor.themeNavyBlueColor : AppColor.cWhite,
+        // ============================================================
+        // FIX: استبدلنا GetBuilder بـ Obx هون تحديداً، لأن currentPage
+        // هو RxInt (.obs) وGetBuilder ما بيسمعله إلا لو نادينا
+        // controller.update() يدوياً. Obx بيتفاعل معه تلقائياً،
+        // فهيك الخلفية بتتغير فوراً كل ما تتغير الصفحة.
+        // ============================================================
+        body: Obx(() {
+          final pageColor = _hexToColor(
+            controller.onboardingPages[controller.currentPage.value]
+                .backgroundColor,
+          );
+          return AnimatedContainer(
+            duration: Duration(milliseconds: 500),
+            // Light mode: خلفية بيضاء ثابتة بدون تدرّج ألوان.
+            // Dark mode: يضل نفس تدرّج ألوان الصفحة (أغمق) زي ما كان.
+            color: isDark ? null : AppColor.cWhite,
+            decoration: isDark
+                ? BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  _getColor(controller.currentPage.value, 0),
-                  _getColor(controller.currentPage.value, 1),
+                  _adjustForTheme(pageColor, isDark, darken: 0),
+                  _adjustForTheme(pageColor, isDark, darken: 0.30),
                 ],
               ),
-            ),
+            )
+                : null,
             child: SafeArea(
               child: Column(
                 children: [
-                  // Skip Button
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: Obx(() => controller.currentPage.value < controller.onboardingPages.length - 1
-                          ? TextButton(
-                              onPressed: controller.skipOnboarding,
-                              child: Text(
-                                'skip'.tr,
-                                style: pMedium16.copyWith(
-                                  color: Colors.white.withOpacity(0.8),
-                                ),
-                              ),
-                            )
-                          : SizedBox()),
-                    ),
-                  ),
-
-                  // PageView Content
+                  _buildTopBar(controller, isDark),
                   Expanded(
                     child: PageView.builder(
                       controller: controller.pageController,
@@ -67,164 +73,53 @@ class OnboardingScreen extends StatelessWidget {
                       },
                     ),
                   ),
-
-                  // Bottom Section - Dots & Buttons
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 30.h),
-                    child: Column(
-                      children: [
-                        // Page Indicator Dots
-                        Obx(() => Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                controller.onboardingPages.length,
-                                (index) => _buildDot(
-                                  index,
-                                  controller.currentPage.value,
-                                ),
-                              ),
-                            )),
-
-                        SizedBox(height: 40.h),
-
-                        // Navigation Buttons
-                        Obx(() => Row(
-                              children: [
-                                // Previous Button (except on first page)
-                                if (controller.currentPage.value > 0)
-                                  Expanded(
-                                    child: OutlinedButton(
-                                      onPressed: controller.previousPage,
-                                      style: OutlinedButton.styleFrom(
-                                        side: BorderSide(color: Colors.white.withOpacity(0.5)),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12.r),
-                                        ),
-                                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                                      ),
-                                      child: Text(
-                                        'previous'.tr,
-                                        style: pSemiBold16.copyWith(color: Colors.white),
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  SizedBox(width: 0),
-
-                                if (controller.currentPage.value > 0) SizedBox(width: 16.w),
-
-                                // Next/Done Button
-                                Expanded(
-                                  flex: controller.currentPage.value > 0 ? 1 : 2,
-                                  child: ElevatedButton(
-                                    onPressed: controller.nextPage,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: AppColor.themeNavyBlueColor,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12.r),
-                                      ),
-                                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                                      elevation: 0,
-                                    ),
-                                    child: Text(
-                                      controller.currentPage.value == controller.onboardingPages.length - 1
-                                          ? 'get_started'.tr
-                                          : 'next'.tr,
-                                      style: pSemiBold16.copyWith(
-                                        color: AppColor.themeNavyBlueColor,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )),
-                      ],
-                    ),
-                  ),
+                  _buildBottomSection(controller, isDark),
                 ],
               ),
             ),
           );
-        },
+        }),
       ),
     );
   }
 
-  Widget _buildOnboardingPage(OnboardingModel page, bool isDark) {
+  // ---------------------------------------------------------------
+  // Skip button
+  // ---------------------------------------------------------------
+  Widget _buildTopBar(OnboardingController controller, bool isDark) {
+    // بالـ Light mode الخلفية بيضا، فبدنا لون نص/خلفية غامق يبين فوقها.
+    // بالـ Dark mode ضلينا عالأبيض الشفاف زي ما كان.
+    final chipBg = isDark ? Colors.white.withOpacity(0.15) : AppColor.cButton;
+    final textColor =
+    isDark ? Colors.white.withOpacity(0.9) : AppColor.cText;
+
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Illustration/Image
-          Expanded(
-            flex: 3,
-            child: _buildAnimatedIllustration(page.image),
-          ),
-
-          SizedBox(height: 40.h),
-
-          // Title
-          Text(
-            page.title,
-            style: pSemiBold27.copyWith(
-              color: Colors.white,
-              fontSize: 28.sp,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          SizedBox(height: 16.h),
-
-          // Description
-          Text(
-            page.description,
-            style: pRegular16.copyWith(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 16.sp,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAnimatedIllustration(String imagePath) {
-    return Center(
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: Duration(milliseconds: 800),
-        curve: Curves.easeOutBack,
-        builder: (context, value, child) {
-          // التأكد من أن القيمة محصورة بين 0.0 و 1.0
-          final clampedValue = value.clamp(0.0, 1.0);
-          
-          return Transform.scale(
-            scale: clampedValue,
-            child: Opacity(
-              opacity: clampedValue,
-              child: child,
-            ),
-          );
-        },
-        child: Container(
-          width: 300.w,
-          height: 300.h,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: assetSvdImageWidget(
-              image: imagePath,
-              width: 200.w,
-              height: 200.h,
-              colorFilter: ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Obx(
+              () => AnimatedOpacity(
+            duration: Duration(milliseconds: 250),
+            opacity: controller.currentPage.value <
+                controller.onboardingPages.length - 1
+                ? 1
+                : 0,
+            child: IgnorePointer(
+              ignoring: controller.currentPage.value >=
+                  controller.onboardingPages.length - 1,
+              child: TextButton(
+                onPressed: controller.skipOnboarding,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  backgroundColor: chipBg,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                ),
+                child: Text(
+                  'skip'.tr,
+                  style: pMedium16.copyWith(color: textColor),
+                ),
               ),
             ),
           ),
@@ -233,25 +128,183 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDot(int index, int currentPage) {
+  // ---------------------------------------------------------------
+  // صفحة واحدة من الأونبوردينغ (Lottie + عنوان + وصف)
+  // ---------------------------------------------------------------
+  Widget _buildOnboardingPage(OnboardingModel page, bool isDark) {
+    final titleColor = isDark ? Colors.white : AppColor.cText;
+    final descColor =
+    isDark ? Colors.white.withOpacity(0.85) : AppColor.cFont;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            flex: 3,
+            child: _buildAnimatedIllustration(page.lottiePath, isDark),
+          ),
+          SizedBox(height: 40.h),
+          Text(
+            page.title.tr,
+            style: pSemiBold27.copyWith(
+              color: titleColor,
+              fontSize: 26.sp,
+              height: 1.3,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 14.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            child: Text(
+              page.description.tr,
+              style: pRegular16.copyWith(
+                color: descColor,
+                fontSize: 15.sp,
+                height: 1.6,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------
+  // Lottie illustration مع دائرة خلفية شفافة وتأثير دخول ناعم
+  // ---------------------------------------------------------------
+  Widget _buildAnimatedIllustration(String lottiePath, bool isDark) {
+    // بالـ Dark mode: دائرة بيضا شفافة خفيفة فوق الـ gradient الغامق.
+    // بالـ Light mode: دائرة رمادي فاتح جداً فوق الخلفية البيضا عشان تبين حدودها.
+    final circleColor =
+    isDark ? Colors.white.withOpacity(0.08) : AppColor.cLight;
+
+    return Center(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: Duration(milliseconds: 700),
+        curve: Curves.easeOutBack,
+        builder: (context, value, child) {
+          final clampedValue = value.clamp(0.0, 1.0);
+          return Transform.scale(
+            scale: clampedValue,
+            child: Opacity(opacity: clampedValue, child: child),
+          );
+        },
+        child: Container(
+          width: 280.w,
+          height: 280.h,
+          decoration: BoxDecoration(
+            color: circleColor,
+            shape: BoxShape.circle,
+          ),
+          padding: EdgeInsets.all(24.w),
+          child: Lottie.asset(
+            lottiePath,
+            fit: BoxFit.contain,
+            repeat: true,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(
+                Icons.image_outlined,
+                color: isDark
+                    ? Colors.white.withOpacity(0.6)
+                    : AppColor.cDarkGreyFont,
+                size: 80.sp,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------
+  // النقاط + أزرار التنقل
+  // ---------------------------------------------------------------
+  Widget _buildBottomSection(OnboardingController controller, bool isDark) {
+    final nextBg = isDark ? Colors.white : AppColor.themeNavyBlueColor;
+    final nextFg = isDark ? AppColor.themeNavyBlueColor : Colors.white;
+    final prevBorder =
+    isDark ? Colors.white.withOpacity(0.5) : AppColor.themeNavyBlueColor;
+    final prevText = isDark ? Colors.white : AppColor.themeNavyBlueColor;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 30.h),
+      child: Column(
+        children: [
+          Obx(
+                () => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                controller.onboardingPages.length,
+                    (index) =>
+                    _buildDot(index, controller.currentPage.value, isDark),
+              ),
+            ),
+          ),
+          SizedBox(height: 36.h),
+           SizedBox(
+             width: double.infinity,
+             child: ElevatedButton(
+                      onPressed: controller.nextPage,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: nextBg,
+                        foregroundColor: nextFg,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        controller.currentPage.value ==
+                            controller.onboardingPages.length - 1
+                            ? 'get_started'.tr
+                            : 'next'.tr,
+                        style: pSemiBold16.copyWith(color: nextFg),
+                      ),
+                    ),
+           ),
+                ]),
+             );
+  }
+
+  Widget _buildDot(int index, int currentPage, bool isDark) {
+    final isActive = currentPage == index;
+    final activeColor = isDark ? Colors.white : AppColor.themeNavyBlueColor;
+    final inactiveColor =
+    isDark ? Colors.white.withOpacity(0.4) : AppColor.cBorder;
+
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
+      curve: Curves.easeOut,
       margin: EdgeInsets.symmetric(horizontal: 4.w),
       height: 8.h,
-      width: currentPage == index ? 24.w : 8.w,
+      width: isActive ? 24.w : 8.w,
       decoration: BoxDecoration(
-        color: currentPage == index ? Colors.white : Colors.white.withOpacity(0.4),
+        color: isActive ? activeColor : inactiveColor,
         borderRadius: BorderRadius.circular(4.r),
       ),
     );
   }
 
-  Color _getColor(int currentPage, int index) {
-    final colors = [
-      AppColor.themeGreenColor,
-      AppColor.themeNavyBlueColor,
-      AppColor.cBottomNavyBlueColor,
-    ];
-    return colors[currentPage % colors.length];
+  // ---------------------------------------------------------------
+  // تحويل كود اللون Hex (مثال: '#00B4D8') إلى Color
+  // ---------------------------------------------------------------
+  Color _hexToColor(String hex) {
+    var value = hex.replaceAll('#', '');
+    if (value.length == 6) value = 'FF$value';
+    return Color(int.parse(value, radix: 16));
+  }
+
+  // ---------------------------------------------------------------
+  // تعتيم اللون شوي لعمل تدرّج، ويزيد التعتيم إضافي بالـ Dark mode
+  // ---------------------------------------------------------------
+  Color _adjustForTheme(Color base, bool isDark, {required double darken}) {
+    final extraDark = isDark ? 0.20 : 0.0;
+    return Color.lerp(base, Colors.black, darken + extraDark)!;
   }
 }

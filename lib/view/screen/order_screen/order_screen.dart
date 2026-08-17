@@ -148,8 +148,6 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                         _fetchInitialData();
                       }
                     },
-                    onSortTap: () {},
-                    onFilterTap: () {},
                   ),
                 ),
 
@@ -316,12 +314,11 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                           //   ),
                           // );
                           itemBuilder: (context, index) {
-
-                            // ==================== ALL ORDERS HEADER + DATE FILTER ====================
-                            if (index == 0) {
+                           if (index == 0) {
                               return Padding(
                                 padding: EdgeInsets.only(bottom: 15.h),
                                 child: sectionHeaderWithFilterWidget(
+                                  num: orderController.orderModel?.data?.total ?? 0,
                                   context: context,
                                   title: "all_orders".tr,
                                   filterLabel: selectedDateRange != null

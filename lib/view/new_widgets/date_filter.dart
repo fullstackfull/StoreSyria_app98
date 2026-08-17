@@ -207,6 +207,7 @@ class _DatePickerField extends StatelessWidget {
 Widget sectionHeaderWithFilterWidget({
   required BuildContext context,
   required String title,
+  required int num,
   required String filterLabel,
   VoidCallback? onFilterTap,
 }) {
@@ -218,11 +219,37 @@ Widget sectionHeaderWithFilterWidget({
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       Expanded(
-        child: Text(
-          title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: titleColor),
+        child: Row(
+          children: [
+            Container(
+              width: 32.w,
+              height: 32.w,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColor.themeNavyBlueColor,
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                num.toString(),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColor.themeNavyBlueColor,
+                ),
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: titleColor),
+            ),
+          ],
         ),
       ),
       SizedBox(width: 8.w),

@@ -135,4 +135,24 @@ const Map<String, String> ar = {
   'common.cancel': 'إلغاء',
   'orders.top_orders': 'أبرز الطلبات',
   'orders.all_orders': 'جميع الطلبات',
+    "skip": "تخطّي",
+    "previous": "السابق",
+    "next": "التالي",
+    "get_started": "ابدأ الآن",
+
+    "onboarding_title_2": "تابع مبيعاتك أولًا بأول",
+    "onboarding_desc_2": "اطّلع على تقارير متجرك وإحصائياته بوضوح، وراقب نمو مبيعاتك يومًا بعد يوم.",
+
+    "onboarding_title_1": "أدر متجرك من أي مكان",
+    "onboarding_desc_1": "استقبل الطلبات وتابع حالتها لحظة بلحظة، ليبقى متجرك يعمل حتى في غيابك.",
+
+    "onboarding_title_3": "هل أنت مستعد للبدء؟",
+    "onboarding_desc_3": "جميع الأدوات التي تحتاجها لإدارة متجرك باتت بين يديك الآن. فلنبدأ معاً!",
+
+  'has_variant': 'خيارات متعددة',
+  'no_variant': 'بدون خيارات',
+
+  'no_category': 'بدون تصنيف',
+  'no_product_name': 'بدون اسم',
+
 };

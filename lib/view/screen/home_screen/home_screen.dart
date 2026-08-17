@@ -140,8 +140,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             width: double.infinity,
                             height: 68.h,
                             decoration: BoxDecoration(
-                              color: AppColor.cWhite,
-                              borderRadius: BorderRadius.circular(35),
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(15),
                               border: Border.all(
                                   color: AppColor.cBorder, width: 1),
                             ),
@@ -185,6 +185,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           ? Container(
                         margin: const EdgeInsets.only(top: 10),
                         decoration: BoxDecoration(
+                          color: Colors.transparent,
                           border: Border.all(color: AppColor.cBorder),
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -216,13 +217,13 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       )
                           : const SizedBox.shrink()
                       ),
-                      verticalSpace(25),
-                      CommonIconButton(
-                        title: 'Quick Add'.tr,
-                        iconData: DefaultImages.addCircleIcn,
-                        onPressed: () => homeController.isQuickAdd.toggle(),
-                        height: 51,
-                      ),
+                      // verticalSpace(25),
+                      // CommonIconButton(
+                      //   title: 'Quick Add'.tr,
+                      //   iconData: DefaultImages.addCircleIcn,
+                      //   onPressed: () => homeController.isQuickAdd.toggle(),
+                      //   height: 51,
+                      // ),
 
                       if (homeController.isQuickAdd.value) ...[
                         verticalSpace(10),
