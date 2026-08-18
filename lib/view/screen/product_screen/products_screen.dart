@@ -418,7 +418,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                                 maxCrossAxisExtent: 220.w,
                                 crossAxisSpacing: 12.w,
                                 mainAxisSpacing: 12.h,
-                                mainAxisExtent: 260.h,
+                                mainAxisExtent: 270.h,
                               ),
                             ),
                           ),

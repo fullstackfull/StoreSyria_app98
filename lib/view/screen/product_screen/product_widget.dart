@@ -52,8 +52,8 @@ Widget allProductsListItemWidget({
 
   final isInStock = stockStatus == 'in_stock';
 
-  final originalPrice = double.tryParse(price) ?? 0;
-  final discountedPrice = double.tryParse(salePrice ?? '') ?? 0;
+  final originalPrice = double.tryParse(salePrice ?? '') ?? 0;
+  final discountedPrice = double.tryParse(price) ?? 0;
 
   final hasDiscount = !variant &&
       salePrice != null &&
@@ -89,6 +89,7 @@ Widget allProductsListItemWidget({
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
 
             // ================= IMAGE =================
@@ -158,12 +159,18 @@ Widget allProductsListItemWidget({
                                   ),
                                 ),
                                 SizedBox(width: 5.w),
-                                Text(
-                                  'out_of_stock'.tr,
-                                  style: TextStyle(
-                                    fontSize: 9.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
+                                // Flexible so a long localized label never
+                                // pushes the badge past the image width.
+                                Flexible(
+                                  child: Text(
+                                    'out_of_stock'.tr,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 9.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -173,43 +180,13 @@ Widget allProductsListItemWidget({
                       ),
                     ),
 
-                  // ================= DISCOUNT =================
-
-                  if (hasDiscount)
-                    Positioned(
-                      top: 7.h,
-                      left: 7.w,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 7.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: dangerColor,
-                          borderRadius: BorderRadius.circular(6.r),
-                        ),
-                        child: Text(
-                          '-${((originalPrice - discountedPrice) /
-                              originalPrice *
-                              100)
-                              .round()}%',
-                          style: TextStyle(
-                            fontSize: 9.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  // ================= MENU =================
 
                   if (viewFun != null ||
                       (showChangeAction && changeFun != null) ||
                       deleteFun != null)
                     Positioned(
                       top: 7.h,
-                      right: 7.w,
+                      right: .25.w,
                       child: PopupMenuButton<String>(
                         padding: EdgeInsets.zero,
                         tooltip: '',
@@ -218,13 +195,16 @@ Widget allProductsListItemWidget({
                           width: 29.w,
                           height: 29.w,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(.92),
+                            color: AppColor.cWhite,
                             shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(color: Colors.grey.shade800,blurRadius: 1),
+                            ],
                           ),
                           child: Icon(
                             Icons.more_vert_rounded,
                             size: 16.sp,
-                            color: textColor,
+                            color: Colors.black,
                           ),
                         ),
                         elevation: 4,
@@ -330,19 +310,17 @@ Widget allProductsListItemWidget({
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-
-                  // CATEGORY
-
                   if (categoryName.trim().isNotEmpty)
                     Text(
                       categoryName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 9.sp,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.w600,
-                        color: accentColor,
+                        color: Colors.grey.shade600,
                       ),
                     ),
 
@@ -354,7 +332,7 @@ Widget allProductsListItemWidget({
                     productName.trim().isNotEmpty
                         ? productName
                         : 'no_product_name'.tr,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13.sp,
@@ -390,21 +368,27 @@ Widget allProductsListItemWidget({
 
                       if (variant) ...[
                         SizedBox(width: 7.w),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6.w,
-                            vertical: 2.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accentColor.withOpacity(.10),
-                            borderRadius: BorderRadius.circular(5.r),
-                          ),
-                          child: Text(
-                            'has_variant'.tr,
-                            style: TextStyle(
-                              fontSize: 8.sp,
-                              fontWeight: FontWeight.w600,
-                              color: accentColor,
+                        // Flexible + ellipsis keeps a long "has_variant"
+                        // label from overflowing the card's fixed width.
+                        Flexible(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 2.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accentColor.withOpacity(.10),
+                              borderRadius: BorderRadius.circular(5.r),
+                            ),
+                            child: Text(
+                              'has_variant'.tr,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 8.sp,
+                                fontWeight: FontWeight.w600,
+                                color: accentColor,
+                              ),
                             ),
                           ),
                         ),
@@ -417,52 +401,60 @@ Widget allProductsListItemWidget({
                   // ================= STOCK =================
 
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-
-                      Icon(
-                        Icons.inventory_2_outlined,
-                        size: 13.sp,
-                        color: isInStock
-                            ? accentColor
-                            : dangerColor,
-                      ),
-
-                      SizedBox(width: 4.w),
-
-                      Expanded(
-                        child: Text(
-                          '${'stock'.tr}: $stock',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 9.sp,
-                            fontWeight: FontWeight.w500,
-                            color: subTextColor,
-                          ),
-                        ),
-                      ),
-
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 5.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isInStock
-                              ? accentColor.withOpacity(.10)
-                              : dangerColor.withOpacity(.10),
-                          borderRadius: BorderRadius.circular(5.r),
-                        ),
-                        child: Text(
-                          isInStock
-                              ? 'in_stock'.tr
-                              : 'out_of_stock'.tr,
-                          style: TextStyle(
-                            fontSize: 8.sp,
-                            fontWeight: FontWeight.w700,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            size: 13.sp,
                             color: isInStock
                                 ? accentColor
                                 : dangerColor,
+                          ),
+                      SizedBox(width: 3.w),
+
+                      Text(
+                        '${'stock'.tr}: $stock',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w500,
+                          color: subTextColor,
+                        ),
+                      ),
+                        ],
+                      ),
+
+
+                      // Flexible so the in/out-of-stock badge shrinks
+                      // instead of pushing the row wider than the card.
+                      Flexible(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 5.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isInStock
+                                ? accentColor.withOpacity(.10)
+                                : dangerColor.withOpacity(.10),
+                            borderRadius: BorderRadius.circular(5.r),
+                          ),
+                          child: Text(
+                            isInStock
+                                ? 'in_stock'.tr
+                                : 'out_of_stock'.tr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 8.sp,
+                              fontWeight: FontWeight.w700,
+                              color: isInStock
+                                  ? accentColor
+                                  : dangerColor,
+                            ),
                           ),
                         ),
                       ),
@@ -477,25 +469,33 @@ Widget allProductsListItemWidget({
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-
-                        Text(
-                          '\$${hasDiscount ? discountedPrice.toStringAsFixed(2) : originalPrice.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w800,
-                            color: textColor,
+                        // Flexible + ellipsis: long/large price numbers
+                        // shrink to fit instead of overflowing the card.
+                        Flexible(
+                          child: Text(
+                            '${hasDiscount ? discountedPrice.toStringAsFixed(2) : originalPrice.toStringAsFixed(2)}\$',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w800,
+                              color: textColor,
+                            ),
                           ),
                         ),
 
                         if (hasDiscount) ...[
                           SizedBox(width: 5.w),
-                          Text(
-                            '\$${originalPrice.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 9.sp,
-                              color: subTextColor,
-                              decoration:
-                              TextDecoration.lineThrough,
+                          Flexible(
+                            child: Text(
+                              '${originalPrice.toStringAsFixed(2)}\$',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 9.sp,
+                                color: subTextColor,
+                                decoration: TextDecoration.lineThrough,
+                              ),
                             ),
                           ),
                         ],
@@ -512,7 +512,6 @@ Widget allProductsListItemWidget({
   );
 }
 
-// باقي الكود (AddProductTextField و addAttachmentWidget) يبقى كما هو دون تغيير
 class AddProductTextField extends StatefulWidget {
   final TextEditingController? controller;
   final TextInputType? keyboardType;
@@ -666,9 +665,13 @@ DottedBorder addAttachmentWidget(String name) {
         children: [
           assetSvdImageWidget(image: DefaultImages.uploadIcn),
           horizontalSpace(10.w),
-          Text(
-            name,
-            style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500),
+          Flexible(
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),
