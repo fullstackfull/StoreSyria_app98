@@ -190,6 +190,7 @@ child: Obx(() {
               },
               deleteFun: () {
                 AppDialog.showCustomDialog(
+                  message: "deleteCupon",
                     iconColor: AppColor.cRedText,
                     confirmColor: AppColor.cRedText,
                     context: context,

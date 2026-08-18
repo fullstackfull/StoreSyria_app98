@@ -9,128 +9,236 @@ class AppDialog {
   static Future<bool?> showCustomDialog({
     required BuildContext context,
     String? title,
-    String? message,
+    required String message,
     bool showConfirmLoading = true,
     String? confirmText,
     String? cancelText,
     required Future<void> Function() onConfirm,
     VoidCallback? onCancel,
-    IconData icon = Icons.info_outline_rounded,
+    IconData icon = Icons.delete_outline_rounded,
     Color? iconColor,
     Color? confirmColor,
     bool barrierDismissible = true,
   }) {
     bool isLoading = false;
 
-    return showDialog<bool>(
+
+    return showGeneralDialog<bool>(
       context: context,
       barrierDismissible: barrierDismissible,
-      builder: (dialogContext) {
+      barrierLabel: 'Dialog',
+      barrierColor: Colors.black.withOpacity(.45),
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (
+          context,
+          animation,
+          secondaryAnimation,
+          ) {
+        return const SizedBox.shrink();
+      },
+      transitionBuilder: (
+          context,
+          animation,
+          secondaryAnimation,
+          child,
+          ) {
+        // Gentle fade + very slight scale — no bounce, keeps it calm.
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOut,
+        );
+
         return StatefulBuilder(
           builder: (context, setState) {
-            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final isDark =
+                Theme.of(context).brightness == Brightness.dark;
 
-            final bgColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-            final textColor = isDark ? DarkThemeColor.cText : AppColor.cText;
-            final subTextColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
-            final primaryBtnColor = confirmColor ?? AppColor.themeNavyBlueColor;
-            final cancelBtnColor = isDark ? DarkThemeColor.cBorder : AppColor.cButton;
-            final accentIconColor = iconColor ?? AppColor.themeGreenColor;
+            final bgColor = isDark
+                ? const Color(0xFF20222A)
+                : const Color(0xFFF7F7F9);
 
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              backgroundColor: bgColor,
-              insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Padding(
-                padding: EdgeInsets.all(24.w),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 40.r,
-                      height: 40.r,
-                      decoration: BoxDecoration(
-                        color: accentIconColor.withOpacity(.15),
-                        shape: BoxShape.circle,
+            final titleColor = isDark
+                ? Colors.white
+                : const Color(0xFF14161B);
+
+            final descriptionColor = isDark
+                ? const Color(0xFFA7ABB5)
+                : const Color(0xFF6B7280);
+
+            final confirmButtonColor =
+                confirmColor ?? AppColor.cRedText;
+
+            final accentColor = iconColor ?? confirmButtonColor;
+
+            final cancelBorderColor = isDark
+                ? Colors.white.withOpacity(.14)
+                : const Color(0xFFE3E5EA);
+
+            final dialogBorderColor = accentColor.withOpacity(isDark ? .55 : .45);
+
+            return FadeTransition(
+              opacity: curvedAnimation,
+              child: ScaleTransition(
+                scale: Tween(begin: .92, end: 1.0)
+                    .animate(curvedAnimation),
+                child: Dialog(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  insetPadding: EdgeInsets.symmetric(
+                    horizontal: 48.w,
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: Border.all(
+                        color: dialogBorderColor,
+                        width: 1.2,
                       ),
-                      child: Icon(
-                        icon,
-                        color: accentIconColor,
-                        size: 32.r,
-                      ),
-                    ),
-
-                    SizedBox(height: 16.h),
-
-                    Text(
-                      title ?? 'delete'.tr,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                      ),
-                    ),
-
-                    SizedBox(height: 8.h),
-
-                    Text(
-                      message ?? 'deleteConfirm'.tr,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: subTextColor,
-                        height: 1.5,
-                      ),
-                    ),
-
-                    SizedBox(height: 24.h),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppButton(
-                            text: confirmText ?? 'delete'.tr,
-                            backgroundColor: primaryBtnColor,
-                            textColor: Colors.white,
-                            isLoading: showConfirmLoading ? isLoading : false,
-                            onPressed: isLoading
-                                ? null
-                                : () async {
-                              if (!dialogContext.mounted) return;
-                              setState(() => isLoading = true);
-                              try {
-                                await onConfirm();
-                                if (dialogContext.mounted) {
-                                  Navigator.pop(dialogContext, true);
-                                }
-                              } catch (e) {
-                                if (dialogContext.mounted) {
-                                  setState(() => isLoading = false);
-                                }
-                              }
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: AppButton(
-                            text: cancelText ?? 'cancel'.tr,
-                            backgroundColor: cancelBtnColor,
-                            textColor: textColor,
-                            onPressed: isLoading
-                                ? null
-                                : () {
-                              Navigator.pop(dialogContext, false);
-                              onCancel?.call();
-                            },
-                          ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDark ? .3 : .06),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                  ],
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        20.w,
+                        22.h,
+                        20.w,
+                        18.h,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // =========================
+                          // ICON — soft glowing circle, centered
+                          // =========================
+                          Container(
+                            width: 48.w,
+                            height: 48.w,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  accentColor.withOpacity(isDark ? .28 : .16),
+                                  accentColor.withOpacity(isDark ? .14 : .07),
+                                ],
+                              ),
+                            ),
+                            child: Icon(
+                              icon,
+                              size: 21.sp,
+                              color: accentColor,
+                            ),
+                          ),
+
+                          SizedBox(height: 14.h),
+
+                          // =========================
+                          // TITLE
+                          // =========================
+                          Text(
+                            title ?? 'delete'.tr,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 15.5.sp,
+                              fontWeight: FontWeight.w700,
+                              color: titleColor,
+                              letterSpacing: -.2,
+                            ),
+                          ),
+
+                          SizedBox(height: 6.h),
+
+                          // =========================
+                          // DESCRIPTION
+                          // =========================
+                          Text(
+                            message.tr,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12.5.sp,
+                              height: 1.45,
+                              color: descriptionColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+
+                          SizedBox(height: 20.h),
+
+                          // =========================
+                          // BUTTONS — reusing AppButton for consistency
+                          // with the rest of the app.
+                          // =========================
+                          Row(
+                            children: [
+                              // CANCEL
+                              Expanded(
+                                child: AppButton(
+                                  text: cancelText ?? 'cancel'.tr,
+                                  height: 42.h,
+                                  radius: 30,
+                                  outlined: true,
+                                  textColor: titleColor,
+                                  borderSide: BorderSide(
+                                    color: cancelBorderColor,
+                                    width: 1.3,
+                                  ),
+                                  onPressed: isLoading
+                                      ? null
+                                      : () {
+                                    Navigator.pop(context, false);
+                                    onCancel?.call();
+                                  },
+                                ),
+                              ),
+
+                              SizedBox(width: 10.w),
+
+                              // CONFIRM
+                              Expanded(
+                                child: AppButton(
+                                  text: confirmText ?? 'delete'.tr,
+                                  height: 42.h,
+                                  radius: 30,
+                                  backgroundColor: confirmButtonColor,
+                                  isLoading: isLoading && showConfirmLoading,
+                                  onPressed: isLoading
+                                      ? null
+                                      : () async {
+                                    setState(() {
+                                      isLoading = true;
+                                    });
+
+                                    try {
+                                      await onConfirm();
+
+                                      if (context.mounted) {
+                                        Navigator.pop(context, true);
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        setState(() {
+                                          isLoading = false;
+                                        });
+                                      }
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             );
@@ -140,6 +248,7 @@ class AppDialog {
     );
   }
 }
+
 class AppButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;

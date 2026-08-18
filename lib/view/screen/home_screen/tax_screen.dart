@@ -207,6 +207,7 @@ class _TaxScreenState extends State<TaxScreen> {
             onEdit: () => _showTaxBottomSheet(isUpdate: true, tax: tax),
             onDelete: () {
                 AppDialog.showCustomDialog(
+                  message: "deleteTax",
                     iconColor: AppColor.cRedText,
                     confirmColor: AppColor.cRedText,
                     context: context,

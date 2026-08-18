@@ -138,9 +138,7 @@ Widget orderStatusBadgeWidget({
     ),
   );
 }
-// ملاحظة: هاد ملف يحتوي فقط الـ function المعدّلة allOrdersListItemWidget.
-// انسخ محتوى هاد الـ function وحط مكان القديمة بنفس الملف الأصلي عندك،
-// لأنه ما كان معي باقي الملف (الـ imports، orderStatusBadgeWidget، OrderBadgeType...).
+
 
 Widget allOrdersListItemWidget({
   required BuildContext context,
@@ -153,7 +151,6 @@ Widget allOrdersListItemWidget({
   VoidCallback? onTap,
   VoidCallback? viewFun,
   VoidCallback? deleteFun,
-  // 👇 جديد: زر التعديل + بوليان للتحكم بإظهاره
   VoidCallback? changeFun,
   bool showChangeAction = false,
 }) {
@@ -162,7 +159,6 @@ Widget allOrdersListItemWidget({
   final textColor = isDark ? DarkThemeColor.cText : AppColor.cText;
   final subTextColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
 
-  // هل عناصر القائمة فعليًا رح تظهر (يعني الفنكشن مو null)
   final bool canView = viewFun != null;
   final bool canChange = showChangeAction && changeFun != null;
   final bool canDelete = deleteFun != null;

@@ -368,8 +368,6 @@ Widget allProductsListItemWidget({
 
                       if (variant) ...[
                         SizedBox(width: 7.w),
-                        // Flexible + ellipsis keeps a long "has_variant"
-                        // label from overflowing the card's fixed width.
                         Flexible(
                           child: Container(
                             padding: EdgeInsets.symmetric(
@@ -469,15 +467,13 @@ Widget allProductsListItemWidget({
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        // Flexible + ellipsis: long/large price numbers
-                        // shrink to fit instead of overflowing the card.
                         Flexible(
                           child: Text(
                             '${hasDiscount ? discountedPrice.toStringAsFixed(2) : originalPrice.toStringAsFixed(2)}\$',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 15.sp,
+                              fontSize: 13.sp,
                               fontWeight: FontWeight.w800,
                               color: textColor,
                             ),
@@ -494,7 +490,6 @@ Widget allProductsListItemWidget({
                               style: TextStyle(
                                 fontSize: 9.sp,
                                 color: subTextColor,
-                                decoration: TextDecoration.lineThrough,
                               ),
                             ),
                           ),

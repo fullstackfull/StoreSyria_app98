@@ -318,6 +318,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                               return Padding(
                                 padding: EdgeInsets.only(bottom: 15.h),
                                 child: sectionHeaderWithFilterWidget(
+                                  isFilter: true,
                                   num: orderController.orderModel?.data?.total ?? 0,
                                   context: context,
                                   title: "all_orders".tr,
@@ -395,6 +396,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                                 ),
                                 deleteFun: () {
                                   AppDialog.showCustomDialog(
+                                    message: "deleteOrder",
                                     iconColor: AppColor.cRedText,
                                     confirmColor: AppColor.cRedText,
                                     context: context,

@@ -154,5 +154,12 @@ const Map<String, String> ar = {
 
   'no_category': 'بدون تصنيف',
   'no_product_name': 'بدون اسم',
+  'deleteProduct': 'هل أنت متأكد من حذف هذا المنتج؟',
+  'deleteOrder': 'هل أنت متأكد من حذف هذا الطلب؟',
+  'deleteTax': 'هل أنت متأكد من حذف هذه الضريبة؟',
+  'deleteCupon': 'هل أنت متأكد من حذف هذا الكوبون؟',
+  'deleteReview': 'هل أنت متأكد من حذف هذا التقييم؟',
+  'deleteCategory': 'هل أنت متأكد من حذف هذه الفئة؟',
+
 
 };

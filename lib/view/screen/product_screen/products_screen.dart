@@ -63,7 +63,10 @@ class _ProductsScreenState extends State<ProductsScreen>
   }
 
   void _onScroll() {
+    // The filtered/search endpoint (searchProductData) has no pagination,
+    // so we only auto-load more pages for the plain unfiltered list.
     if (!productController.isScroll.value) return;
+    if (addProductController.categoryId.value.isNotEmpty) return;
 
     if (scrollController.position.pixels >=
         scrollController.position.maxScrollExtent - 200) {
@@ -162,15 +165,24 @@ class _ProductsScreenState extends State<ProductsScreen>
     );
 
     if (selected != null) {
+      final categoryId = selected.id?.toString() ?? '';
+
       addProductController.category.value = selected.name ?? '';
-      addProductController.categoryId.value = selected.id?.toString() ?? '';
-      await _fetchInitialData();
+      addProductController.categoryId.value = categoryId;
+
+      // searchProductData has no pagination (see repository: it's a plain
+      // POST with store_id + category_id), so stop auto-loading more pages.
+      productController.isScroll.value = false;
+      productController.currantPage.value = 1;
+
+      await productController.searchProductData(categoryId);
     }
   }
 
   void _clearCategoryFilter() {
     addProductController.category.value = '';
     addProductController.categoryId.value = '';
+    productController.isScroll.value = true;
     _fetchInitialData();
   }
 
@@ -209,18 +221,14 @@ class _ProductsScreenState extends State<ProductsScreen>
                   children: [
                     Expanded(
                       child: SearchRowWidget(
-                          context: context,
-                          controller: searchController,
-                          hint: 'search'.tr,
-                          onChanged: (value) {
-                            if (value.length > 2) {
-                              productController.searchProductData(value);
-                            } else if (value.isEmpty) {
-                              _fetchInitialData();
-                            }
-                          },
-                        ),
+                        context: context,
+                        controller: searchController,
+                        hint: 'search'.tr,
+                        onChanged: (value) {
+                          //ToDO :: api search product
+                        },
                       ),
+                    ),
 
                     horizontalSpace(10.w),
                     Obx(() {
@@ -320,7 +328,10 @@ class _ProductsScreenState extends State<ProductsScreen>
                             child: Padding(
                               padding: EdgeInsets.only(bottom: 15.h),
                               child: sectionHeaderWithFilterWidget(
-                                num: productController.productModel?.data?.total ?? 0,
+                                isFilter: false,
+                                num: addProductController.categoryId.value.isNotEmpty
+                                    ? productController.productList.length
+                                    : (productController.productModel?.data?.total ?? 0),
                                 context: context,
                                 title: "all_products".tr,
                                 filterLabel:
@@ -401,6 +412,7 @@ class _ProductsScreenState extends State<ProductsScreen>
 
                                     deleteFun: () {
                                       AppDialog.showCustomDialog(
+                                        message: "deleteProduct",
                                         iconColor: AppColor.cRedText,
                                         confirmColor: AppColor.cRedText,
                                         context: context,
@@ -418,7 +430,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                                 maxCrossAxisExtent: 220.w,
                                 crossAxisSpacing: 12.w,
                                 mainAxisSpacing: 12.h,
-                                mainAxisExtent: 270.h,
+                                mainAxisExtent: 260.h,
                               ),
                             ),
                           ),

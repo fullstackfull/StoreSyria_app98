@@ -207,6 +207,7 @@ class _DatePickerField extends StatelessWidget {
 Widget sectionHeaderWithFilterWidget({
   required BuildContext context,
   required String title,
+  required bool isFilter,
   required int num,
   required String filterLabel,
   VoidCallback? onFilterTap,
@@ -253,6 +254,7 @@ Widget sectionHeaderWithFilterWidget({
         ),
       ),
       SizedBox(width: 8.w),
+      isFilter ?
       GestureDetector(
         onTap: onFilterTap,
         child: Container(
@@ -277,7 +279,7 @@ Widget sectionHeaderWithFilterWidget({
             ],
           ),
         ),
-      ),
+      ) : SizedBox(),
     ],
   );
 }

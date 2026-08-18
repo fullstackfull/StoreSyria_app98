@@ -154,5 +154,12 @@ const Map<String, String> en = {
   'no_category': 'No Category',
   'no_product_name': 'No Product Name',
 
+  'deleteProduct' : 'Are you sure you want to delete this product?',
+  'deleteOrder' : 'Are you sure you want to delete this order?',
+  'deleteTax' : 'Are you sure you want to delete this tax?',
+  'deleteCupon' : 'Are you sure you want to delete this cupon?',
+  'deleteReview' : 'Are you sure you want to delete this review?',
+  'deleteCategory' : 'Are you sure you want to delete this category?',
+
 
 };

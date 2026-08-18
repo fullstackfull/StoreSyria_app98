@@ -240,6 +240,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                                 category: category.themeId?.capitalizeFirst ?? "No Theme",
                                 deleteFun: () {
                                   AppDialog.showCustomDialog(
+                                    message: "deleteCategory",
                                       iconColor: AppColor.cRedText,
                                       confirmColor: AppColor.cRedText,
                                       context: context,
