@@ -701,7 +701,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           GestureDetector(
                             onTap: () {
                               AppDialog.showCustomDialog(
-                                message: "deleteReview",
+                                message: "deleteProduct",
                                   iconColor: AppColor.cRedText,
                                   confirmColor: AppColor.cRedText,
                                   context: context,

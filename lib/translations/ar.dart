@@ -89,7 +89,7 @@ const Map<String, String> ar = {
     "delivery": "رسوم التوصيل",
     "terms_title": "الشروط والأحكام",
     "terms_text": "يستحق سداد الفاتورة خلال 15 يومًا. يُرجى إصدار الشيكات باسم الشركة الموضح أعلاه.",
-    "generated_by": "تم إنشاء هذه الفاتورة بواسطة تطبيق StoreGo",
+    "generated_by": "تم إنشاء هذه الفاتورة بواسطة تطبيق Store Syria",
     "page_label": "الصفحة",
     "invoice": "الفاتورة",
     "download": "تحميل",
@@ -160,6 +160,5 @@ const Map<String, String> ar = {
   'deleteCupon': 'هل أنت متأكد من حذف هذا الكوبون؟',
   'deleteReview': 'هل أنت متأكد من حذف هذا التقييم؟',
   'deleteCategory': 'هل أنت متأكد من حذف هذه الفئة؟',
-
-
+  'hidden' : "مخفي"
 };

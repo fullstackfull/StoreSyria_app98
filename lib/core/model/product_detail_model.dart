@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_collection_literals, unnecessary_this
 // updated
+import 'package:store_go_app/core/model/product_model.dart';
+
 class ProductDetailModel {
   int? status;
   String? message;
@@ -28,7 +30,7 @@ class ProductDetailModel {
 }
 
 class ProductDetailData {
-  Product? product;
+  ProductData? product;
   List<SubImage>? subImage;
 
   ProductDetailData({this.product, this.subImage});
@@ -36,7 +38,7 @@ class ProductDetailData {
   ProductDetailData.fromJson(Map<String, dynamic> json) {
     // ✅ التحقق من النوع قبل التحويل
     product = json['Product'] != null && json['Product'] is Map<String, dynamic>
-        ? Product.fromJson(json['Product'] as Map<String, dynamic>)
+        ? ProductData.fromJson(json['Product'] as Map<String, dynamic>)
         : null;
 
     // ✅ التعامل الآمن مع القوائم التي قد تكون null أو أنواعها خاطئ

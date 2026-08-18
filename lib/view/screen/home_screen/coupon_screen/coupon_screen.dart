@@ -191,6 +191,7 @@ child: Obx(() {
               deleteFun: () {
                 AppDialog.showCustomDialog(
                   message: "deleteCupon",
+                    lottieAsset: 'assets/lottie/delete.json',
                     iconColor: AppColor.cRedText,
                     confirmColor: AppColor.cRedText,
                     context: context,

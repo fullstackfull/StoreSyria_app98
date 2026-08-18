@@ -241,6 +241,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                                 deleteFun: () {
                                   AppDialog.showCustomDialog(
                                     message: "deleteCategory",
+                                      lottieAsset: 'assets/lottie/delete.json',
                                       iconColor: AppColor.cRedText,
                                       confirmColor: AppColor.cRedText,
                                       context: context,

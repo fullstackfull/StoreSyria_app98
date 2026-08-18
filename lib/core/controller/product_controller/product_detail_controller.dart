@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/product_repository.dart';
 import 'package:store_go_app/core/model/product_detail_model.dart';
+import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 
@@ -14,7 +15,7 @@ class ProductDetailController extends GetxController {
   RxString productImage = ''.obs;
 
   ProductDetailModel? productDetailModel;
-  Product? product;
+  ProductData? product;
 
   final ProductRepository productRepository = ProductRepository();
 

@@ -397,6 +397,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                                 deleteFun: () {
                                   AppDialog.showCustomDialog(
                                     message: "deleteOrder",
+                                    lottieAsset: 'assets/lottie/delete.json',
                                     iconColor: AppColor.cRedText,
                                     confirmColor: AppColor.cRedText,
                                     context: context,

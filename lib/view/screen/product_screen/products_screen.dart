@@ -356,6 +356,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                                   productController.productList[index];
 
                                   return allProductsListItemWidget(
+                                    status: product.status!,
                                     context: context,
                                     imageUrl: product.coverImageUrl ?? '',
                                     categoryName: product.categoryName ?? '',
@@ -412,14 +413,16 @@ class _ProductsScreenState extends State<ProductsScreen>
 
                                     deleteFun: () {
                                       AppDialog.showCustomDialog(
-                                        message: "deleteProduct",
-                                        iconColor: AppColor.cRedText,
-                                        confirmColor: AppColor.cRedText,
                                         context: context,
-                                        onConfirm: () =>
-                                            productController.deleteProductData(
-                                              productId: product.id?.toString() ?? '',
-                                            ),
+                                        title: 'delete'.tr,
+                                        message: 'deleteProduct'.tr,
+                                        lottieAsset: 'assets/lottie/delete_icon.json',
+                                        confirmColor: Colors.red,
+                                        onConfirm: () async {
+                                          await productController.deleteProductData(
+                                            productId: product.id.toString(),
+                                          );
+                                        },
                                       );
                                     },
                                   );
@@ -430,7 +433,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                                 maxCrossAxisExtent: 220.w,
                                 crossAxisSpacing: 12.w,
                                 mainAxisSpacing: 12.h,
-                                mainAxisExtent: 260.h,
+                                mainAxisExtent: 220.h,
                               ),
                             ),
                           ),

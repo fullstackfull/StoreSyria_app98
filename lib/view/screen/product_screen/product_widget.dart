@@ -16,6 +16,7 @@ Widget allProductsListItemWidget({
   required String categoryName,
   required String productName,
   required String price,
+  required int status,
   String? salePrice,
   required String stock,
   String? stockStatus,
@@ -29,20 +30,17 @@ Widget allProductsListItemWidget({
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  final cardColor = isDark
-      ? const Color(0xFF1E1E1E)
-      : Colors.white;
+  final cardColor =
+  isDark ? const Color(0xFF1E1E1E) : Colors.white;
 
-  final textColor = isDark
-      ? Colors.white
-      : const Color(0xFF1F1F1F);
+  final textColor =
+  isDark ? Colors.white : const Color(0xFF1F1F1F);
 
-  final subTextColor = isDark
-      ? const Color(0xFF9CA3AF)
-      : const Color(0xFF6B7280);
+  final subTextColor =
+  isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
 
   final accentColor = AppColor.themeGreenColor;
-  final dangerColor = Color(0xFFEF4444);
+  final dangerColor = const Color(0xFFEF4444);
 
   final variant = hasVariant == true;
 
@@ -51,9 +49,13 @@ Widget allProductsListItemWidget({
           imageUrl.startsWith('assets'));
 
   final isInStock = stockStatus == 'in_stock';
+  final isHidden = status == 0;
 
-  final originalPrice = double.tryParse(salePrice ?? '') ?? 0;
-  final discountedPrice = double.tryParse(price) ?? 0;
+  final originalPrice =
+      double.tryParse(salePrice ?? '') ?? 0;
+
+  final discountedPrice =
+      double.tryParse(price) ?? 0;
 
   final hasDiscount = !variant &&
       salePrice != null &&
@@ -66,11 +68,11 @@ Widget allProductsListItemWidget({
     color: Colors.transparent,
     child: InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12.r),
+      borderRadius: BorderRadius.circular(10.r),
       child: Container(
         decoration: BoxDecoration(
           color: cardColor,
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(10.r),
           border: Border.all(
             color: isDark
                 ? Colors.white.withOpacity(.08)
@@ -80,8 +82,8 @@ Widget allProductsListItemWidget({
               ? null
               : [
             BoxShadow(
-              color: Colors.black.withOpacity(.03),
-              blurRadius: 6,
+              color: Colors.black.withOpacity(.025),
+              blurRadius: 5,
               offset: const Offset(0, 2),
             ),
           ],
@@ -89,13 +91,12 @@ Widget allProductsListItemWidget({
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
 
             // ================= IMAGE =================
 
             AspectRatio(
-              aspectRatio: 1.05,
+              aspectRatio: 1.18,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -109,16 +110,17 @@ Widget allProductsListItemWidget({
                           ? Colors.white.withOpacity(.05)
                           : const Color(0xFFF3F4F6),
                     ),
-                    errorWidget: (_, __, ___) => Container(
-                      color: isDark
-                          ? Colors.white.withOpacity(.05)
-                          : const Color(0xFFF3F4F6),
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                        color: subTextColor,
-                        size: 24.sp,
-                      ),
-                    ),
+                    errorWidget: (_, __, ___) =>
+                        Container(
+                          color: isDark
+                              ? Colors.white.withOpacity(.05)
+                              : const Color(0xFFF3F4F6),
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: subTextColor,
+                            size: 22.sp,
+                          ),
+                        ),
                   )
                       : Container(
                     color: isDark
@@ -127,50 +129,90 @@ Widget allProductsListItemWidget({
                     child: Icon(
                       Icons.image_outlined,
                       color: subTextColor,
-                      size: 28.sp,
+                      size: 24.sp,
                     ),
                   ),
+
+                  // ================= HIDDEN PRODUCT =================
+
+                  if (isHidden)
+                    Positioned(
+                      top: 6.h,
+                      left: 6.w,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 7.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(.72),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(.15),
+                            width: .5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.visibility_off_outlined,
+                              size: 11.sp,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              'hidden'.tr,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 7.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
                   // ================= OUT OF STOCK =================
 
                   if (!isInStock)
                     Positioned.fill(
                       child: Container(
-                        color: Colors.black.withOpacity(.30),
+                        color: Colors.black.withOpacity(.25),
                         child: Center(
                           child: Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 9.w,
-                              vertical: 5.h,
+                              horizontal: 7.w,
+                              vertical: 4.h,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(.75),
-                              borderRadius: BorderRadius.circular(20.r),
+                              color: Colors.black.withOpacity(.72),
+                              borderRadius:
+                              BorderRadius.circular(15.r),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  width: 6.w,
-                                  height: 6.w,
+                                  width: 5.w,
+                                  height: 5.w,
                                   decoration: BoxDecoration(
                                     color: dangerColor,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
-                                SizedBox(width: 5.w),
-                                // Flexible so a long localized label never
-                                // pushes the badge past the image width.
-                                Flexible(
-                                  child: Text(
-                                    'out_of_stock'.tr,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 9.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
+                                SizedBox(width: 4.w),
+                                Text(
+                                  'out_of_stock'.tr,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 8.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ],
@@ -180,37 +222,42 @@ Widget allProductsListItemWidget({
                       ),
                     ),
 
+                  // ================= MENU =================
 
                   if (viewFun != null ||
                       (showChangeAction && changeFun != null) ||
                       deleteFun != null)
                     Positioned(
-                      top: 7.h,
-                      right: .25.w,
+                      top: 5.h,
+                      right: 5.w,
                       child: PopupMenuButton<String>(
                         padding: EdgeInsets.zero,
                         tooltip: '',
-                        offset: Offset(0, 34.h),
+                        offset: Offset(0, 30.h),
                         icon: Container(
-                          width: 29.w,
-                          height: 29.w,
+                          width: 25.w,
+                          height: 25.w,
                           decoration: BoxDecoration(
-                            color: AppColor.cWhite,
+                            color: Colors.white,
                             shape: BoxShape.circle,
                             boxShadow: [
-                              BoxShadow(color: Colors.grey.shade800,blurRadius: 1),
+                              BoxShadow(
+                                color: Colors.black.withOpacity(.15),
+                                blurRadius: 3,
+                              ),
                             ],
                           ),
                           child: Icon(
                             Icons.more_vert_rounded,
-                            size: 16.sp,
+                            size: 14.sp,
                             color: Colors.black,
                           ),
                         ),
-                        elevation: 4,
+                        elevation: 3,
                         color: cardColor,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
+                          borderRadius:
+                          BorderRadius.circular(9.r),
                         ),
                         onSelected: (value) {
                           if (value == 'view') {
@@ -225,19 +272,19 @@ Widget allProductsListItemWidget({
                           if (viewFun != null)
                             PopupMenuItem(
                               value: 'view',
-                              height: 38.h,
+                              height: 34.h,
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.visibility_outlined,
-                                    size: 16.sp,
+                                    size: 15.sp,
                                     color: subTextColor,
                                   ),
-                                  SizedBox(width: 8.w),
+                                  SizedBox(width: 7.w),
                                   Text(
                                     'view'.tr,
                                     style: TextStyle(
-                                      fontSize: 12.sp,
+                                      fontSize: 11.sp,
                                       color: textColor,
                                     ),
                                   ),
@@ -245,23 +292,23 @@ Widget allProductsListItemWidget({
                               ),
                             ),
 
-                          if (showChangeAction && changeFun != null)
+                          if (showChangeAction &&
+                              changeFun != null)
                             PopupMenuItem(
                               value: 'change',
-                              height: 38.h,
+                              height: 34.h,
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.edit_outlined,
-                                    size: 16.sp,
+                                    size: 15.sp,
                                     color: accentColor,
                                   ),
-                                  SizedBox(width: 8.w),
+                                  SizedBox(width: 7.w),
                                   Text(
                                     'change'.tr,
                                     style: TextStyle(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11.sp,
                                       color: accentColor,
                                     ),
                                   ),
@@ -272,20 +319,19 @@ Widget allProductsListItemWidget({
                           if (deleteFun != null)
                             PopupMenuItem(
                               value: 'delete',
-                              height: 38.h,
+                              height: 34.h,
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.delete_outline_rounded,
-                                    size: 16.sp,
+                                    size: 15.sp,
                                     color: dangerColor,
                                   ),
-                                  SizedBox(width: 8.w),
+                                  SizedBox(width: 7.w),
                                   Text(
                                     'delete'.tr,
                                     style: TextStyle(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11.sp,
                                       color: dangerColor,
                                     ),
                                   ),
@@ -303,31 +349,31 @@ Widget allProductsListItemWidget({
 
             Padding(
               padding: EdgeInsets.fromLTRB(
-                10.w,
-                7.h,
-                10.w,
-                8.h,
+                8.w,
+                5.h,
+                8.w,
+                6.h,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
+
+                  // CATEGORY
                   if (categoryName.trim().isNotEmpty)
                     Text(
                       categoryName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 8.5.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.grey.shade600,
                       ),
                     ),
 
+                  SizedBox(height: 1.h),
+
                   // PRODUCT NAME
-
-                  SizedBox(height: 2.h),
-
                   Text(
                     productName.trim().isNotEmpty
                         ? productName
@@ -335,27 +381,25 @@ Widget allProductsListItemWidget({
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13.sp,
-                      height: 1.2,
+                      fontSize: 12.sp,
+                      height: 1.15,
                       fontWeight: FontWeight.w600,
                       color: textColor,
                     ),
                   ),
 
-                  SizedBox(height: 5.h),
+                  SizedBox(height: 3.h),
 
-                  // ================= RATING + VARIANT =================
-
+                  // RATING + VARIANT
                   Row(
                     children: [
-
                       Icon(
                         Icons.star_rounded,
                         size: 14.sp,
                         color: Colors.amber,
                       ),
 
-                      SizedBox(width: 3.w),
+                      SizedBox(width: 2.w),
 
                       Text(
                         (rating ?? 0).toStringAsFixed(1),
@@ -367,23 +411,25 @@ Widget allProductsListItemWidget({
                       ),
 
                       if (variant) ...[
-                        SizedBox(width: 7.w),
+                        SizedBox(width: 5.w),
                         Flexible(
                           child: Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 6.w,
-                              vertical: 2.h,
+                              horizontal: 5.w,
+                              vertical: 1.5.h,
                             ),
                             decoration: BoxDecoration(
-                              color: accentColor.withOpacity(.10),
-                              borderRadius: BorderRadius.circular(5.r),
+                              color:
+                              accentColor.withOpacity(.10),
+                              borderRadius:
+                              BorderRadius.circular(4.r),
                             ),
                             child: Text(
                               'has_variant'.tr,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 8.sp,
+                                fontSize: 7.sp,
                                 fontWeight: FontWeight.w600,
                                 color: accentColor,
                               ),
@@ -394,51 +440,54 @@ Widget allProductsListItemWidget({
                     ],
                   ),
 
-                  SizedBox(height: 5.h),
+                  SizedBox(height: 3.h),
 
-                  // ================= STOCK =================
-
+                  // STOCK
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.inventory_2_outlined,
-                            size: 13.sp,
-                            color: isInStock
-                                ? accentColor
-                                : dangerColor,
-                          ),
-                      SizedBox(width: 3.w),
-
-                      Text(
-                        '${'stock'.tr}: $stock',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.w500,
-                          color: subTextColor,
+                      Flexible(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.inventory_2_outlined,
+                              size: 11.sp,
+                              color: isInStock
+                                  ? accentColor
+                                  : dangerColor,
+                            ),
+                            SizedBox(width: 2.w),
+                            Flexible(
+                              child: Text(
+                                '${'stock'.tr}: $stock',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: subTextColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                        ],
-                      ),
 
+                      SizedBox(width: 4.w),
 
-                      // Flexible so the in/out-of-stock badge shrinks
-                      // instead of pushing the row wider than the card.
                       Flexible(
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 5.w,
-                            vertical: 2.h,
+                            horizontal: 4.w,
+                            vertical: 1.5.h,
                           ),
                           decoration: BoxDecoration(
                             color: isInStock
                                 ? accentColor.withOpacity(.10)
                                 : dangerColor.withOpacity(.10),
-                            borderRadius: BorderRadius.circular(5.r),
+                            borderRadius:
+                            BorderRadius.circular(4.r),
                           ),
                           child: Text(
                             isInStock
@@ -459,13 +508,11 @@ Widget allProductsListItemWidget({
                     ],
                   ),
 
-                  // ================= PRICE =================
-
+                  // PRICE
                   if (!variant && originalPrice > 0) ...[
-                    SizedBox(height: 5.h),
+                    SizedBox(height: 3.h),
 
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Flexible(
                           child: Text(
@@ -473,7 +520,7 @@ Widget allProductsListItemWidget({
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 13.sp,
+                              fontSize: 11.5.sp,
                               fontWeight: FontWeight.w800,
                               color: textColor,
                             ),
@@ -481,10 +528,10 @@ Widget allProductsListItemWidget({
                         ),
 
                         if (hasDiscount) ...[
-                          SizedBox(width: 5.w),
+                          SizedBox(width: 4.w),
                           Flexible(
                             child: Text(
-                              '${originalPrice.toStringAsFixed(2)}\$',
+                              '${originalPrice}\$',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
