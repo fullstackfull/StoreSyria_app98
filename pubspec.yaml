@@ -74,6 +74,7 @@ dependencies:
   stylish_bottom_bar: ^1.1.1
   intl: ^0.20.2
   lottie: ^3.3.3
+  flutter_html: ^3.0.0
 
 dev_dependencies:
   flutter_test:

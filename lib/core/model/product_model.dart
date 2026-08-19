@@ -101,7 +101,7 @@ class ProductData {
   String? downloadableProduct, customField;
 
   // --- صور وروابط ---
-  String? coverImagePath, coverImageUrl, coverImagePathFullUrl;
+  String? coverImagePath, coverImageUrl;
   String? createdAt, updatedAt;
 
   // --- خيارات ومتغيرات ---
@@ -129,7 +129,7 @@ class ProductData {
     this.stockOrderStatus, this.productType, this.attributeId, this.productAttribute,
     this.taxStatus, this.previewType, this.previewVideo, this.previewContent,
     this.videoUrl, this.downloadableProduct, this.customField,
-    this.coverImagePath, this.coverImageUrl, this.coverImagePathFullUrl,
+    this.coverImagePath, this.coverImageUrl,
     this.createdAt, this.updatedAt, this.variantId, this.variantAttribute,
     this.productOption, this.productOptionApi, this.productOptionArray,
     this.otherDescriptionArray, this.inCart, this.inWhishlist, this.stockStatus,
@@ -202,7 +202,6 @@ class ProductData {
     // الصور
     coverImagePath = json['cover_image_path'] as String?;
     coverImageUrl = json['cover_image_url'] as String?;
-    coverImagePathFullUrl = json['cover_image_path_full_url'] as String?;
 
     // التواريخ
     createdAt = json['created_at'] as String?;
@@ -281,7 +280,6 @@ class ProductData {
     data['specification'] = specification;
     data['other_description'] = otherDescription; data['other_description_api'] = otherDescriptionApi;
     data['cover_image_path'] = coverImagePath; data['cover_image_url'] = coverImageUrl;
-    data['cover_image_path_full_url'] = coverImagePathFullUrl;
     data['created_at'] = createdAt; data['updated_at'] = updatedAt;
 
     // الخيارات والأسعار

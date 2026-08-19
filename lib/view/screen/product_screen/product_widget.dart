@@ -9,7 +9,6 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../utils/images.dart';
 import '../../widget/icon_and_image.dart';
-
 Widget allProductsListItemWidget({
   required BuildContext context,
   required String imageUrl,
@@ -17,6 +16,7 @@ Widget allProductsListItemWidget({
   required String productName,
   required String price,
   required int status,
+  required bool trackStock,
   String? salePrice,
   required String stock,
   String? stockStatus,
@@ -30,39 +30,141 @@ Widget allProductsListItemWidget({
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  final cardColor =
-  isDark ? const Color(0xFF1E1E1E) : Colors.white;
+  // ==================================================
+  // COLORS
+  // ==================================================
 
-  final textColor =
-  isDark ? Colors.white : const Color(0xFF1F1F1F);
+  final cardColor = isDark
+      ? const Color(0xFF1E1E1E)
+      : Colors.white;
 
-  final subTextColor =
-  isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+  final textColor = isDark
+      ? Colors.white
+      : const Color(0xFF1F1F1F);
+
+  final subTextColor = isDark
+      ? const Color(0xFF9CA3AF)
+      : const Color(0xFF6B7280);
+
+  final borderColor = isDark
+      ? Colors.white.withOpacity(.08)
+      : const Color(0xFFE5E7EB);
+
+  final imageBackground = isDark
+      ? Colors.white.withOpacity(.05)
+      : const Color(0xFFF3F4F6);
 
   final accentColor = AppColor.themeGreenColor;
-  final dangerColor = const Color(0xFFEF4444);
+
+  const dangerColor = Color(0xFFEF4444);
+  const warningColor = Colors.orange;
+
+  // ==================================================
+  // PRODUCT LOGIC
+  // ==================================================
 
   final variant = hasVariant == true;
 
-  final isValidImageUrl = imageUrl.trim().isNotEmpty &&
-      (imageUrl.startsWith('http') ||
-          imageUrl.startsWith('assets'));
-
-  final isInStock = stockStatus == 'in_stock';
   final isHidden = status == 0;
 
-  final originalPrice =
-      double.tryParse(salePrice ?? '') ?? 0;
+  final stockValue = stockStatus ?? '';
 
-  final discountedPrice =
-      double.tryParse(price) ?? 0;
+  final isInStock = stockValue == 'in_stock';
 
-  final hasDiscount = !variant &&
-      salePrice != null &&
-      salePrice!.isNotEmpty &&
-      originalPrice > 0 &&
-      discountedPrice > 0 &&
-      discountedPrice != originalPrice;
+  final isBackorder = stockValue == 'on_backorder';
+
+  final isOutOfStock =
+      stockValue == 'out_of_stock' ||
+          stockValue == '0';
+
+  // ==================================================
+  // PRICE LOGIC
+  // ==================================================
+
+  final finalPrice = double.tryParse(price) ?? 0;
+
+  final sale = double.tryParse(salePrice ?? '') ?? 0;
+
+  final hasDiscount =
+      !variant &&
+          sale > 0 &&
+          finalPrice > 0 &&
+          sale != finalPrice;
+
+  final displayPrice =
+  hasDiscount ? sale : finalPrice;
+
+  // ==================================================
+  // IMAGE
+  // ==================================================
+
+  final isValidImageUrl =
+      imageUrl.trim().isNotEmpty &&
+          (
+              imageUrl.startsWith('http') ||
+                  imageUrl.startsWith('assets')
+          );
+
+  // ==================================================
+  // STOCK COLOR
+  // ==================================================
+
+  Color stockColor() {
+    if (variant || !trackStock) {
+      return subTextColor;
+    }
+
+    if (isInStock) {
+      return accentColor;
+    }
+
+    if (isBackorder) {
+      return warningColor;
+    }
+
+    return dangerColor;
+  }
+
+  Color statusColor() {
+    if (variant) {
+      return accentColor;
+    }
+
+    if (isInStock) {
+      return accentColor;
+    }
+
+    if (isBackorder) {
+      return warningColor;
+    }
+
+    return dangerColor;
+  }
+
+  Color statusBackgroundColor() {
+    if (variant) {
+      return accentColor.withOpacity(.10);
+    }
+
+    if (isInStock) {
+      return accentColor.withOpacity(.10);
+    }
+
+    if (isBackorder) {
+      return warningColor.withOpacity(.10);
+    }
+
+    return dangerColor.withOpacity(.10);
+  }
+
+  // ==================================================
+  // MENU
+  // ==================================================
+
+  final hasMenu =
+      viewFun != null ||
+          (showChangeAction && changeFun != null) ||
+          deleteFun != null;
 
   return Material(
     color: Colors.transparent,
@@ -74,9 +176,7 @@ Widget allProductsListItemWidget({
           color: cardColor,
           borderRadius: BorderRadius.circular(10.r),
           border: Border.all(
-            color: isDark
-                ? Colors.white.withOpacity(.08)
-                : const Color(0xFFE5E7EB),
+            color: borderColor,
           ),
           boxShadow: isDark
               ? null
@@ -93,7 +193,9 @@ Widget allProductsListItemWidget({
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // ================= IMAGE =================
+            // ==================================================
+            // IMAGE
+            // ==================================================
 
             AspectRatio(
               aspectRatio: 1.18,
@@ -101,31 +203,44 @@ Widget allProductsListItemWidget({
                 fit: StackFit.expand,
                 children: [
 
+                  // ==================================================
+                  // PRODUCT IMAGE
+                  // ==================================================
+
                   isValidImageUrl
                       ? CachedNetworkImage(
                     imageUrl: imageUrl,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
-                      color: isDark
-                          ? Colors.white.withOpacity(.05)
-                          : const Color(0xFFF3F4F6),
-                    ),
-                    errorWidget: (_, __, ___) =>
-                        Container(
-                          color: isDark
-                              ? Colors.white.withOpacity(.05)
-                              : const Color(0xFFF3F4F6),
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            color: subTextColor,
-                            size: 22.sp,
+
+                    placeholder: (_, __) {
+                      return Container(
+                        color: imageBackground,
+                        child: Center(
+                          child: SizedBox(
+                            width: 18.w,
+                            height: 18.w,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1.5,
+                              color: accentColor,
+                            ),
                           ),
                         ),
+                      );
+                    },
+
+                    errorWidget: (_, __, ___) {
+                      return Container(
+                        color: imageBackground,
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          color: subTextColor,
+                          size: 24.sp,
+                        ),
+                      );
+                    },
                   )
                       : Container(
-                    color: isDark
-                        ? Colors.white.withOpacity(.05)
-                        : const Color(0xFFF3F4F6),
+                    color: imageBackground,
                     child: Icon(
                       Icons.image_outlined,
                       color: subTextColor,
@@ -133,12 +248,14 @@ Widget allProductsListItemWidget({
                     ),
                   ),
 
-                  // ================= HIDDEN PRODUCT =================
+                  // ==================================================
+                  // HIDDEN BADGE
+                  // ==================================================
 
                   if (isHidden)
                     Positioned(
-                      top: 6.h,
-                      left: 6.w,
+                      top: 7.h,
+                      left: 7.w,
                       child: Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 7.w,
@@ -146,25 +263,23 @@ Widget allProductsListItemWidget({
                         ),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(.72),
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(.15),
-                            width: .5,
-                          ),
+                          borderRadius:
+                          BorderRadius.circular(12.r),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+
                             Icon(
                               Icons.visibility_off_outlined,
                               size: 11.sp,
                               color: Colors.white,
                             ),
+
                             SizedBox(width: 4.w),
+
                             Text(
                               'hidden'.tr,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 7.sp,
                                 fontWeight: FontWeight.w700,
@@ -176,17 +291,19 @@ Widget allProductsListItemWidget({
                       ),
                     ),
 
-                  // ================= OUT OF STOCK =================
+                  // ==================================================
+                  // OUT OF STOCK OVERLAY
+                  // ==================================================
 
-                  if (!isInStock)
+                  if (isOutOfStock)
                     Positioned.fill(
                       child: Container(
                         color: Colors.black.withOpacity(.25),
                         child: Center(
                           child: Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 7.w,
-                              vertical: 4.h,
+                              horizontal: 8.w,
+                              vertical: 5.h,
                             ),
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(.72),
@@ -196,19 +313,21 @@ Widget allProductsListItemWidget({
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+
                                 Container(
                                   width: 5.w,
                                   height: 5.w,
-                                  decoration: BoxDecoration(
+                                  decoration:
+                                  const BoxDecoration(
                                     color: dangerColor,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
+
                                 SizedBox(width: 4.w),
+
                                 Text(
                                   'out_of_stock'.tr,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 8.sp,
                                     fontWeight: FontWeight.w700,
@@ -222,43 +341,51 @@ Widget allProductsListItemWidget({
                       ),
                     ),
 
-                  // ================= MENU =================
+                  // ==================================================
+                  // MENU
+                  // ==================================================
 
-                  if (viewFun != null ||
-                      (showChangeAction && changeFun != null) ||
-                      deleteFun != null)
+                  if (hasMenu)
                     Positioned(
-                      top: 5.h,
-                      right: 5.w,
+                      top: 6.h,
+                      right: 6.w,
                       child: PopupMenuButton<String>(
                         padding: EdgeInsets.zero,
                         tooltip: '',
                         offset: Offset(0, 30.h),
+
                         icon: Container(
-                          width: 25.w,
-                          height: 25.w,
+                          width: 26.w,
+                          height: 26.w,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(.15),
-                                blurRadius: 3,
+                                color:
+                                Colors.black.withOpacity(.15),
+                                blurRadius: 4,
+                                offset:
+                                const Offset(0, 1),
                               ),
                             ],
                           ),
                           child: Icon(
                             Icons.more_vert_rounded,
-                            size: 14.sp,
+                            size: 15.sp,
                             color: Colors.black,
                           ),
                         ),
+
                         elevation: 3,
+
                         color: cardColor,
+
                         shape: RoundedRectangleBorder(
                           borderRadius:
                           BorderRadius.circular(9.r),
                         ),
+
                         onSelected: (value) {
                           if (value == 'view') {
                             viewFun?.call();
@@ -268,19 +395,24 @@ Widget allProductsListItemWidget({
                             deleteFun?.call();
                           }
                         },
+
                         itemBuilder: (_) => [
+
                           if (viewFun != null)
-                            PopupMenuItem(
+                            PopupMenuItem<String>(
                               value: 'view',
-                              height: 34.h,
+                              height: 36.h,
                               child: Row(
                                 children: [
+
                                   Icon(
                                     Icons.visibility_outlined,
                                     size: 15.sp,
                                     color: subTextColor,
                                   ),
+
                                   SizedBox(width: 7.w),
+
                                   Text(
                                     'view'.tr,
                                     style: TextStyle(
@@ -294,17 +426,20 @@ Widget allProductsListItemWidget({
 
                           if (showChangeAction &&
                               changeFun != null)
-                            PopupMenuItem(
+                            PopupMenuItem<String>(
                               value: 'change',
-                              height: 34.h,
+                              height: 36.h,
                               child: Row(
                                 children: [
+
                                   Icon(
                                     Icons.edit_outlined,
                                     size: 15.sp,
                                     color: accentColor,
                                   ),
+
                                   SizedBox(width: 7.w),
+
                                   Text(
                                     'change'.tr,
                                     style: TextStyle(
@@ -317,17 +452,20 @@ Widget allProductsListItemWidget({
                             ),
 
                           if (deleteFun != null)
-                            PopupMenuItem(
+                            PopupMenuItem<String>(
                               value: 'delete',
-                              height: 34.h,
+                              height: 36.h,
                               child: Row(
                                 children: [
+
                                   Icon(
                                     Icons.delete_outline_rounded,
                                     size: 15.sp,
                                     color: dangerColor,
                                   ),
+
                                   SizedBox(width: 7.w),
+
                                   Text(
                                     'delete'.tr,
                                     style: TextStyle(
@@ -345,20 +483,26 @@ Widget allProductsListItemWidget({
               ),
             ),
 
-            // ================= CONTENT =================
+            // ==================================================
+            // CONTENT
+            // ==================================================
 
             Padding(
               padding: EdgeInsets.fromLTRB(
-                8.w,
-                5.h,
-                8.w,
-                6.h,
+                9.w,
+                7.h,
+                9.w,
+                8.h,
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
                 children: [
 
+                  // ==================================================
                   // CATEGORY
+                  // ==================================================
+
                   if (categoryName.trim().isNotEmpty)
                     Text(
                       categoryName,
@@ -367,13 +511,16 @@ Widget allProductsListItemWidget({
                       style: TextStyle(
                         fontSize: 8.5.sp,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade600,
+                        color: subTextColor,
                       ),
                     ),
 
-                  SizedBox(height: 1.h),
+                  SizedBox(height: 2.h),
 
+                  // ==================================================
                   // PRODUCT NAME
+                  // ==================================================
+
                   Text(
                     productName.trim().isNotEmpty
                         ? productName
@@ -383,16 +530,20 @@ Widget allProductsListItemWidget({
                     style: TextStyle(
                       fontSize: 12.sp,
                       height: 1.15,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: textColor,
                     ),
                   ),
 
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 5.h),
 
+                  // ==================================================
                   // RATING + VARIANT
+                  // ==================================================
+
                   Row(
                     children: [
+
                       Icon(
                         Icons.star_rounded,
                         size: 14.sp,
@@ -409,63 +560,45 @@ Widget allProductsListItemWidget({
                           color: subTextColor,
                         ),
                       ),
-
-                      if (variant) ...[
-                        SizedBox(width: 5.w),
-                        Flexible(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 5.w,
-                              vertical: 1.5.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                              accentColor.withOpacity(.10),
-                              borderRadius:
-                              BorderRadius.circular(4.r),
-                            ),
-                            child: Text(
-                              'has_variant'.tr,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 7.sp,
-                                fontWeight: FontWeight.w600,
-                                color: accentColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
 
-                  SizedBox(height: 3.h),
 
+                  SizedBox(height: 6.h),
+
+                  // ==================================================
                   // STOCK
+                  // ==================================================
+
                   Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
                     children: [
-                      Flexible(
+
+                      Expanded(
                         child: Row(
                           children: [
+
                             Icon(
                               Icons.inventory_2_outlined,
-                              size: 11.sp,
-                              color: isInStock
-                                  ? accentColor
-                                  : dangerColor,
+                              size: 12.sp,
+                              color: stockColor(),
                             ),
-                            SizedBox(width: 2.w),
-                            Flexible(
+
+                            SizedBox(width: 4.w),
+
+                            Expanded(
                               child: Text(
-                                '${'stock'.tr}: $stock',
+                                variant
+                                    ? '${'stock'.tr}: -'
+                                    : !trackStock
+                                    ? '${'stock'.tr}: -'
+                                    : '${'stock'.tr}: $stock',
                                 maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                overflow:
+                                TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 9.5.sp,
+                                  fontWeight:
+                                  FontWeight.w500,
                                   color: subTextColor,
                                 ),
                               ),
@@ -474,33 +607,34 @@ Widget allProductsListItemWidget({
                         ),
                       ),
 
-                      SizedBox(width: 4.w),
+                      SizedBox(width: 5.w),
 
                       Flexible(
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 4.w,
-                            vertical: 1.5.h,
+                            horizontal: 6.w,
+                            vertical: 3.h,
                           ),
                           decoration: BoxDecoration(
-                            color: isInStock
-                                ? accentColor.withOpacity(.10)
-                                : dangerColor.withOpacity(.10),
+                            color:
+                            statusBackgroundColor(),
                             borderRadius:
-                            BorderRadius.circular(4.r),
+                            BorderRadius.circular(5.r),
                           ),
                           child: Text(
-                            isInStock
+                                isInStock
                                 ? 'in_stock'.tr
+                                : isBackorder
+                                ? 'on_backorder'.tr
                                 : 'out_of_stock'.tr,
                             maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            overflow:
+                            TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 8.sp,
-                              fontWeight: FontWeight.w700,
-                              color: isInStock
-                                  ? accentColor
-                                  : dangerColor,
+                              fontWeight:
+                              FontWeight.w700,
+                              color: statusColor(),
                             ),
                           ),
                         ),
@@ -508,40 +642,123 @@ Widget allProductsListItemWidget({
                     ],
                   ),
 
+                  // ==================================================
+                  // NOT TRACKED
+                  // ==================================================
+
+                  if (!trackStock) ...[
+                    SizedBox(height: 5.h),
+
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                        subTextColor.withOpacity(.08),
+                        borderRadius:
+                        BorderRadius.circular(5.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+
+                          Icon(
+                              trackStock
+                                  ? Icons.track_changes_rounded
+                                  : Icons.do_not_disturb_on_outlined,
+                            size: 11.sp,
+                            color: subTextColor,
+                          ),
+
+                          SizedBox(width: 4.w),
+
+                          Text(
+                            trackStock ?
+                            'tracked'.tr :
+                            'not_tracked'.tr,
+                            maxLines: 1,
+                            overflow:
+                            TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 8.sp,
+                              fontWeight:
+                              FontWeight.w600,
+                              color: subTextColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  // ==================================================
                   // PRICE
-                  if (!variant && originalPrice > 0) ...[
-                    SizedBox(height: 3.h),
+                  // ==================================================
+
+                  if (!variant && displayPrice > 0) ...[
+                    SizedBox(height: 7.h),
 
                     Row(
+                      crossAxisAlignment:
+                      CrossAxisAlignment.center,
                       children: [
-                        Flexible(
-                          child: Text(
-                            '${hasDiscount ? discountedPrice.toStringAsFixed(2) : originalPrice.toStringAsFixed(2)}\$',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11.5.sp,
-                              fontWeight: FontWeight.w800,
-                              color: textColor,
-                            ),
+
+                        Text(
+                          '${displayPrice.toStringAsFixed(2)}\$',
+                          maxLines: 1,
+                          overflow:
+                          TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight:
+                            FontWeight.w800,
+                            color: textColor,
                           ),
                         ),
 
                         if (hasDiscount) ...[
-                          SizedBox(width: 4.w),
+                          SizedBox(width: 6.w),
+
                           Flexible(
                             child: Text(
-                              '${originalPrice}\$',
+                              '${finalPrice.toStringAsFixed(2)}\$',
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              overflow:
+                              TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 9.sp,
+                                fontWeight:
+                                FontWeight.w500,
                                 color: subTextColor,
+                                decoration:
+                                TextDecoration
+                                    .lineThrough,
                               ),
                             ),
                           ),
                         ],
                       ],
+                    ),
+                  ],
+
+                  // ==================================================
+                  // VARIANT MESSAGE
+                  // ==================================================
+
+                  if (variant) ...[
+                    SizedBox(height: 5.h),
+
+                    Text(
+                      'multiple_variants'.tr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.w500,
+                        color: subTextColor,
+                      ),
                     ),
                   ],
                 ],

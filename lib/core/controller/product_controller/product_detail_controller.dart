@@ -29,6 +29,7 @@ class ProductDetailController extends GetxController {
 
   ProductData? product;
 
+
   final ProductRepository productRepository =
   ProductRepository();
 
@@ -58,12 +59,65 @@ class ProductDetailController extends GetxController {
         }
       },
       onFailure: (reason, message, validationErrors) {
-        // يمكنك إظهار الخطأ هنا إذا أردت
+
       },
     );
   }
 
-  List<SubImage> get subImages {
-    return productDetailModel?.data?.subImages ?? [];
+  List<String> getProductImages() {
+    final images = <String>[];
+
+    if (product == null) {
+      return images;
+    }
+
+    // ----------------------------------------------------------
+    // 1. COVER IMAGE
+    // ----------------------------------------------------------
+
+    try {
+      final coverUrl = product?.coverImageUrl;
+
+      if (coverUrl != null && coverUrl.toString().trim().isNotEmpty) {
+        final fullUrl = coverUrl;
+
+        if (fullUrl.isNotEmpty) {
+          images.add(fullUrl);
+        }
+      }
+    } catch (_) {}
+
+    // ----------------------------------------------------------
+    // 2. SUB IMAGES
+    // ----------------------------------------------------------
+
+    final subImages = productDetailModel?.data?.subImages;
+
+    if (subImages != null && subImages.isNotEmpty) {
+      for (final image in subImages) {
+        try {
+          String? imageUrl;
+
+          if (image.imagePathFullUrl != null &&
+              image.imagePathFullUrl!.trim().isNotEmpty) {
+            imageUrl = image.imagePathFullUrl;
+          } else if (image.imagePath != null &&
+              image.imagePath!.trim().isNotEmpty) {
+            imageUrl = image.imagePath;
+          }
+
+          if (imageUrl != null && imageUrl.trim().isNotEmpty) {
+            final fullUrl = imageUrl;
+
+            if (fullUrl.isNotEmpty && !images.contains(fullUrl)) {
+              images.add(fullUrl);
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    return images;
   }
+
 }
