@@ -324,6 +324,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             onTap: () =>
                                 Get.to(() =>
                                     ProductDetailScreen(
+                                       product: product,
                                         categoryId: product.categoryId
                                             ?.toString() ?? "",
                                         productId: product.id?.toString() ??
@@ -368,6 +369,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                               viewFun: () =>
                                   Get.to(() =>
                                       ProductDetailScreen(
+                                          product: product,
                                           id: product.id.toString(),
                                           categoryId: product.categoryId
                                               ?.toString() ?? "",

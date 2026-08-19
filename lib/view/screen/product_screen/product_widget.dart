@@ -9,10 +9,12 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../utils/images.dart';
 import '../../widget/icon_and_image.dart';
+
 Widget allProductsListItemWidget({
   required BuildContext context,
   required String imageUrl,
   required String categoryName,
+  required String productId,
   required String productName,
   required String price,
   required int status,
@@ -207,44 +209,45 @@ Widget allProductsListItemWidget({
                   // PRODUCT IMAGE
                   // ==================================================
 
-                  isValidImageUrl
-                      ? CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover,
-
-                    placeholder: (_, __) {
-                      return Container(
-                        color: imageBackground,
-                        child: Center(
-                          child: SizedBox(
-                            width: 18.w,
-                            height: 18.w,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              color: accentColor,
+                  Hero(
+                    tag: 'product_image_$productId',
+                    child: isValidImageUrl
+                        ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) {
+                        return Container(
+                          color: imageBackground,
+                          child: Center(
+                            child: SizedBox(
+                              width: 18.w,
+                              height: 18.w,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.5,
+                                color: accentColor,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-
-                    errorWidget: (_, __, ___) {
-                      return Container(
-                        color: imageBackground,
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          color: subTextColor,
-                          size: 24.sp,
-                        ),
-                      );
-                    },
-                  )
-                      : Container(
-                    color: imageBackground,
-                    child: Icon(
-                      Icons.image_outlined,
-                      color: subTextColor,
-                      size: 24.sp,
+                        );
+                      },
+                      errorWidget: (_, __, ___) {
+                        return Container(
+                          color: imageBackground,
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: subTextColor,
+                            size: 24.sp,
+                          ),
+                        );
+                      },
+                    )
+                        : Container(
+                      color: imageBackground,
+                      child: Icon(
+                        Icons.image_outlined,
+                        color: subTextColor,
+                        size: 24.sp,
+                      ),
                     ),
                   ),
 
@@ -572,7 +575,6 @@ Widget allProductsListItemWidget({
 
                   Row(
                     children: [
-
                       Expanded(
                         child: Row(
                           children: [

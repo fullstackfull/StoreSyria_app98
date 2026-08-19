@@ -75,7 +75,7 @@ class AddReviewController extends GetxController {
 
           imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
         } else {
-          commonToast(data['data']?['message'] ?? "Error");
+          // commonToast(data['data']?['message'] ?? "Error");
         }
       },
       onFailure: (reason, message, validationErrors) {

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
@@ -13,9 +12,11 @@ import 'package:store_go_app/view/screen/product_screen/add_rating_screen.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/controller/product_controller/product_detail_controller.dart';
 import 'package:store_go_app/core/controller/product_controller/add_review_controller.dart';
+import '../../../core/model/product_model.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String categoryId;
+  final ProductData product;
   final String productId;
   final String id;
 
@@ -24,6 +25,7 @@ class ProductDetailScreen extends StatefulWidget {
     required this.categoryId,
     required this.productId,
     required this.id,
+    required this.product,
   });
 
   @override
@@ -33,6 +35,7 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState
     extends State<ProductDetailScreen> {
+
   final ProductDetailController productDetailController =
   Get.put(ProductDetailController());
 
@@ -43,10 +46,11 @@ class _ProductDetailScreenState
   PageController();
 
   int _currentImageIndex = 0;
-
   @override
   void initState() {
     super.initState();
+
+    productDetailController.setProduct(widget.product);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
@@ -114,8 +118,7 @@ class _ProductDetailScreenState
           builder: (controller) {
             final product = controller.product;
 
-            if (product == null ||
-                controller.productDetailModel?.data == null) {
+            if (product == null) {
               return const Center(
                 child: LoadingWidget(),
               );
@@ -253,27 +256,30 @@ class _ProductDetailScreenState
                 });
               },
               itemBuilder: (context, index) {
-                return CachedNetworkImage(
-                  imageUrl: images[index],
-                  fit: BoxFit.contain,
-                  placeholder:
-                      (context, url) {
-                    return const Center(
-                      child: LoadingWidget(),
-                    );
-                  },
-                  errorWidget:
-                      (context, url, error) {
-                    return Center(
-                      child: Icon(
-                        Icons
-                            .broken_image_outlined,
-                        size: 50.sp,
-                        color:
-                        Colors.grey.shade400,
-                      ),
-                    );
-                  },
+                return Hero(
+                  tag: 'product_image_${widget.productId}',
+                  child: CachedNetworkImage(
+                    imageUrl: images[index],
+                    fit: BoxFit.contain,
+                    placeholder:
+                        (context, url) {
+                      return const Center(
+                        child: LoadingWidget(),
+                      );
+                    },
+                    errorWidget:
+                        (context, url, error) {
+                      return Center(
+                        child: Icon(
+                          Icons
+                              .broken_image_outlined,
+                          size: 50.sp,
+                          color:
+                          Colors.grey.shade400,
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),

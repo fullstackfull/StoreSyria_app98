@@ -356,6 +356,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                                   productController.productList[index];
 
                                   return allProductsListItemWidget(
+                                    productId: product.id.toString(),
                                     trackStock: product.trackStock == 1,
                                     status: product.status!,
                                     context: context,
@@ -380,6 +381,7 @@ class _ProductsScreenState extends State<ProductsScreen>
 
                                     onTap: () => Get.to(
                                           () => ProductDetailScreen(
+                                        product: product,
                                         categoryId: product.categoryId?.toString() ?? '',
                                         productId: product.id?.toString() ?? '',
                                         id: product.id.toString(),
@@ -388,6 +390,7 @@ class _ProductsScreenState extends State<ProductsScreen>
 
                                     viewFun: () => Get.to(
                                           () => ProductDetailScreen(
+                                        product: product,
                                         categoryId: product.categoryId?.toString() ?? '',
                                         productId: product.id?.toString() ?? '',
                                         id: product.id.toString(),

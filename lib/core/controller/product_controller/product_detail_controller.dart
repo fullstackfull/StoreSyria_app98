@@ -34,6 +34,10 @@ class ProductDetailController extends GetxController {
   ProductRepository();
 
   Future<void> getProductDetail(String productId) async {
+    productDetailModel = null;
+
+    update();
+
     final response =
     await productRepository.getProductDetailData(productId);
 
@@ -42,12 +46,6 @@ class ProductDetailController extends GetxController {
         if (data['status'] == 1) {
           productDetailModel =
               ProductDetailModel.fromJson(data);
-
-          product =
-              productDetailModel?.data?.product;
-
-          productImage.value =
-              product?.coverImageUrl ?? '';
 
           update();
         } else {
@@ -58,9 +56,7 @@ class ProductDetailController extends GetxController {
           );
         }
       },
-      onFailure: (reason, message, validationErrors) {
-
-      },
+      onFailure: (reason, message, validationErrors) {},
     );
   }
 
@@ -118,6 +114,15 @@ class ProductDetailController extends GetxController {
     }
 
     return images;
+  }
+
+  void setProduct(ProductData value) {
+    product = value;
+
+    productImage.value =
+        value.coverImageUrl ?? '';
+
+    update();
   }
 
 }
