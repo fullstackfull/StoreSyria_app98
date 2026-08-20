@@ -2,6 +2,7 @@
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
@@ -793,6 +794,10 @@ class AddProductTextField extends StatefulWidget {
   final String? obscuringCharacter;
   final int? maxLines;
 
+  // --- الإضافات الجديدة ---
+  final bool isEditMode;      // لتحديد وضع التعديل
+  final String? htmlContent;  // محتوى HTML للعرض في وضع التعديل
+
   const AddProductTextField({
     Key? key,
     this.controller,
@@ -813,6 +818,8 @@ class AddProductTextField extends StatefulWidget {
     this.suffix,
     this.focusNode,
     this.maxLines,
+    this.isEditMode = false, // الافتراضي إضافة
+    this.htmlContent,
   }) : super(key: key);
 
   @override
@@ -843,6 +850,8 @@ class _AddProductTextFieldState extends State<AddProductTextField> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Colors
     final bgColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
     final borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5);
     final hintColor = isDark ? Colors.grey.shade500 : AppColor.cFont;
@@ -855,57 +864,95 @@ class _AddProductTextFieldState extends State<AddProductTextField> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Label
           if (widget.labelText != null && widget.labelText!.isNotEmpty)
             Text(
               widget.labelText!,
-              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade300 : AppColor.cDarkGreyFont),
+              style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.grey.shade300 : AppColor.cDarkGreyFont
+              ),
             ),
-          if (widget.labelText != null && widget.labelText!.isNotEmpty) verticalSpace(15.h),
 
-          TextFormField(
-            controller: widget.controller,
-            cursorColor: accentColor,
-            autofocus: widget.autofocus ?? false,
-            focusNode: _focus,
-            maxLines: widget.maxLines ?? 1,
-            readOnly: widget.readOnly ?? false,
-            validator: widget.validator,
-            onChanged: widget.onChanged,
-            onTap: widget.onTap,
-            obscureText: widget.obscureText ?? false,
-            obscuringCharacter: widget.obscuringCharacter ?? '•',
-            keyboardType: widget.keyboardType,
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: textColor),
-            decoration: InputDecoration(
-              fillColor: bgColor,
-              filled: true,
-              hintText: widget.hintText,
-              hintStyle: TextStyle(fontSize: 14.sp, color: hintColor),
-              errorStyle: TextStyle(fontSize: 12.sp, color: AppColor.cRedText),
-              suffixIcon: widget.suffix,
-              contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-              border: OutlineInputBorder(
+          if (widget.labelText != null && widget.labelText!.isNotEmpty)
+            verticalSpace(15.h),
+
+          // Logic: Show HTML in Edit Mode OR TextField in Add Mode
+          if (widget.isEditMode && widget.htmlContent != null && widget.htmlContent!.isNotEmpty)
+
+          // --- عرض HTML في وضع التعديل ---
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                color: bgColor,
                 borderRadius: BorderRadius.circular(12.r),
-                borderSide: BorderSide(color: borderColor),
+                border: Border.all(color: borderColor),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.r),
-                borderSide: BorderSide(color: borderColor),
+              child: Html(
+                data: widget.htmlContent,
+                style: {
+                  "body": Style(
+                    fontSize: FontSize(14.sp),
+                    color: textColor,
+                    margin: Margins.zero,
+                    padding: HtmlPaddings.zero,
+                  ),
+                  "p": Style(
+                    margin: Margins.zero,
+                    padding: HtmlPaddings.zero,
+                  ),
+                },
               ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.r),
-                borderSide: BorderSide(color: AppColor.cRedText),
-              ),
-              disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.r),
-                borderSide: BorderSide(color: borderColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.r),
-                borderSide: BorderSide(color: accentColor, width: 1.5),
+            )
+          else
+
+          // --- عرض TextField عادي (وضع الإضافة أو لا يوجد محتوى HTML) ---
+            TextFormField(
+              controller: widget.controller,
+              cursorColor: accentColor,
+              autofocus: widget.autofocus ?? false,
+              focusNode: _focus,
+              maxLines: widget.maxLines ?? 1,
+              readOnly: widget.readOnly ?? false,
+              validator: widget.validator,
+              onChanged: widget.onChanged,
+              onTap: widget.onTap,
+              obscureText: widget.obscureText ?? false,
+              obscuringCharacter: widget.obscuringCharacter ?? '•',
+              keyboardType: widget.keyboardType,
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: textColor),
+              decoration: InputDecoration(
+                fillColor: bgColor,
+                filled: true,
+                hintText: widget.hintText, // يظهر الهينت هنا
+                hintStyle: TextStyle(fontSize: 14.sp, color: hintColor),
+                errorStyle: TextStyle(fontSize: 12.sp, color: AppColor.cRedText),
+                suffixIcon: widget.suffix,
+                contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColor.cRedText),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: accentColor, width: 1.5),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

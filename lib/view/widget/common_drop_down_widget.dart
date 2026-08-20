@@ -9,171 +9,223 @@ import 'package:store_go_app/view/widget/icon_and_image.dart';
 
 Widget commonDropdownButtonWidget(
     {String? value,
-    String? labelText,
-    Widget? widget,
-    String hint = '',
-    List? list,
-    ValueChanged? onChanged,
-    FormFieldValidator? validator}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      labelText == ''
-          ? verticalSpace(0)
-          : Text(
-              labelText!,
-              style: pMedium12,
-            ),
-      verticalSpace(15),
-      DropdownButtonFormField(
-        value: value,
-        items: list!.map((data) {
-          return DropdownMenuItem(
-            value: data,
-            child: Text(
-              data,
-              style: pMedium14.copyWith(),
-            ),
-          );
-        }).toList(),
-        dropdownColor: AppColor.themeGreenColor,
-        icon: assetSvdImageWidget(image: DefaultImages.dropDownIcn),
-        onChanged: onChanged!,
-        validator: validator,
-        style: pMedium14.copyWith(
-          color: AppColor.cWhiteFont,
-        ),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: pMedium12.copyWith(color: AppColor.cHintFont),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: widget,
-          ),
-          prefixIconConstraints: BoxConstraints(maxWidth: 80, maxHeight: 80),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(
-              color: AppColor.cBorder,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(
-              color: AppColor.cBorder,
-            ),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(
-              color: AppColor.cBorder,
-            ),
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(
-              color: AppColor.cBorder,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        ),
-      ),
-    ],
-  );
-}
+      String? labelText,
+      Widget? widget,
+      String hint = '',
+      List? list,
+      ValueChanged? onChanged,
+      FormFieldValidator? validator}) {
+  return Builder(builder: (context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fieldBg = isDark ? const Color(0xFF1E2530) : AppColor.cWhite;
+    final borderColor = isDark ? const Color(0xFF2E3542) : AppColor.cBorder;
+    final textColor = isDark ? Colors.white : AppColor.themeNavyBlueColor;
+    final labelColor = isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont;
+    final hintColor = isDark ? Colors.grey.shade500 : AppColor.cHintFont;
+    final accentColor = isDark ? Colors.white : AppColor.themeNavyBlueColor;
 
-Widget commonHintDropdownWidget(
-    {String? value,
-    String? labelText,
-    Widget? widget,
-    String hint = '',
-    List? list,
-    ValueChanged? onChanged,
-    FormFieldValidator? validator}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      labelText == ''
-          ? verticalSpace(0)
-          : Text(
-              labelText!,
-              style: pMedium12.copyWith(
-                color: AppColor.cDarkGreyFont,
-              ),
-            ),
-      verticalSpace(10),
-      SizedBox(
-        height: 50,
-        child: DropdownButtonFormField(
-          // value: value,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        labelText == ''
+            ? verticalSpace(0)
+            : Text(
+          labelText!,
+          style: pMedium12.copyWith(color: labelColor),
+        ),
+        verticalSpace(8),
+        DropdownButtonFormField(
+          value: value,
           items: list!.map((data) {
             return DropdownMenuItem(
               value: data,
               child: Text(
                 data,
-                style: pMedium12,
-                textAlign: TextAlign.center,
+                style: pMedium14.copyWith(color: textColor),
               ),
             );
           }).toList(),
-          dropdownColor: AppColor.themeGreenColor,
+          dropdownColor: fieldBg,
           icon: Padding(
-            padding: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.only(right: 4),
             child: assetSvdImageWidget(
-                image: DefaultImages.dropDownIcn,
-                colorFilter:
-                    ColorFilter.mode(AppColor.cLabel, BlendMode.srcIn)),
+              image: DefaultImages.dropDownIcn,
+              colorFilter: ColorFilter.mode(
+                accentColor,
+                BlendMode.srcIn,
+              ),
+            ),
           ),
           onChanged: onChanged!,
           validator: validator,
-          style: pMedium12.copyWith(
-            color: AppColor.cWhiteFont,
+          isExpanded: true,
+          borderRadius: BorderRadius.circular(16),
+          style: pMedium14.copyWith(
+            color: textColor,
           ),
-          borderRadius: BorderRadius.circular(15),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
-            prefixIcon: Padding(
+            hintStyle: pMedium12.copyWith(color: hintColor),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            prefixIcon: widget == null
+                ? null
+                : Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: widget,
             ),
-            prefixIconConstraints: BoxConstraints(maxWidth: 80, maxHeight: 80),
+            prefixIconConstraints: widget == null
+                ? null
+                : BoxConstraints(maxWidth: 60, maxHeight: 60),
+            filled: true,
+            fillColor: fieldBg,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: AppColor.cBorder,
+                color: borderColor,
               ),
             ),
-            contentPadding: EdgeInsets.zero,
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: AppColor.cBorder,
+                color: borderColor,
               ),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: AppColor.cBorder,
+                color: Color(0xFFE5484D),
               ),
             ),
             disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: AppColor.cBorder,
+                color: borderColor,
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: AppColor.cBorder,
+                color: accentColor,
+                width: 1.4,
               ),
             ),
           ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  });
+}
+
+Widget commonHintDropdownWidget(
+    {String? value,
+      String? labelText,
+      Widget? widget,
+      String hint = '',
+      List? list,
+      ValueChanged? onChanged,
+      FormFieldValidator? validator}) {
+  return Builder(builder: (context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fieldBg = isDark ? const Color(0xFF1E2530) : AppColor.cWhite;
+    final borderColor = isDark ? const Color(0xFF2E3542) : AppColor.cBorder;
+    final textColor = isDark ? Colors.white : AppColor.themeNavyBlueColor;
+    final labelColor = isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont;
+    final hintColor = isDark ? Colors.grey.shade500 : AppColor.cDarkGreyFont;
+    final accentColor = isDark ? Colors.white : AppColor.themeNavyBlueColor;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        labelText == ''
+            ? verticalSpace(0)
+            : Text(
+          labelText!,
+          style: pMedium12.copyWith(
+            color: labelColor,
+          ),
+        ),
+        verticalSpace(8),
+        SizedBox(
+          height: 48,
+          child: DropdownButtonFormField(
+            // value: value,
+            items: list!.map((data) {
+              return DropdownMenuItem(
+                value: data,
+                child: Text(
+                  data,
+                  style: pMedium12.copyWith(color: textColor),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }).toList(),
+            dropdownColor: fieldBg,
+            icon: Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: assetSvdImageWidget(
+                  image: DefaultImages.dropDownIcn,
+                  colorFilter: ColorFilter.mode(
+                      accentColor, BlendMode.srcIn)),
+            ),
+            onChanged: onChanged!,
+            validator: validator,
+            isExpanded: true,
+            style: pMedium12.copyWith(
+              color: textColor,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: pMedium12.copyWith(color: hintColor),
+              isDense: true,
+              prefixIcon: widget == null
+                  ? null
+                  : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: widget,
+              ),
+              prefixIconConstraints: widget == null
+                  ? null
+                  : BoxConstraints(maxWidth: 60, maxHeight: 60),
+              filled: true,
+              fillColor: fieldBg,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: borderColor,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: borderColor,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Color(0xFFE5484D),
+                ),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: borderColor,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: accentColor,
+                  width: 1.4,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  });
 }

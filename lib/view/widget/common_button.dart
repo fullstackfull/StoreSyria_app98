@@ -106,7 +106,7 @@ class CommonIconButton extends StatelessWidget {
         // height: height ?? Get.height * 0.07,
         height: height ?? 43,
         decoration: BoxDecoration(
-            color: btnColor ?? AppColor.themeGreenColor,
+            color: btnColor ?? AppColor.themeNavyBlueColor,
             borderRadius: BorderRadius.circular(radius ?? 35),
             border: Border.all(color: bColor ?? AppColor.cTransparent, width: 1)),
         child: Row(
@@ -162,7 +162,7 @@ class SmallCommonIconButton extends StatelessWidget {
         // width: width ?? 180,
         height: height ?? 35,
         decoration: BoxDecoration(
-            color: btnColor ?? AppColor.themeGreenColor,
+            color: btnColor ?? AppColor.themeNavyBlueColor,
             borderRadius: BorderRadius.circular(radius ?? 35),
             border: Border.all(color: bColor ?? AppColor.cTransparent, width: 1)),
         padding: EdgeInsets.only(top: 3, bottom: 3, right: 10),

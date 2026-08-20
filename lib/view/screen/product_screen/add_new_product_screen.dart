@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
@@ -15,7 +16,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/widget/common_button.dart';
-import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_drop_down_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
@@ -70,7 +70,9 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     if (widget.isUpdate) {
       addProductController.productName.value.text = widget.productName ?? '';
       addProductController.stockQtyController.value.text = widget.qty ?? '';
-      addProductController.productDescriptionController.value.text = widget.productDescription ?? '';
+      // ملاحظة: ما بنعبي حقل الوصف بالـ HTML الخام هون -
+      // الوصف الحالي بينعرض Read-only بالأسفل، وحقل الكتابة يضل فاضي
+      // لحتى يكتب المستخدم نص عادي جديد لو بدو يغيّر الوصف.
       addProductController.priceController.value.text = widget.priceController ?? '';
       addProductController.disAmountController.value.text = widget.disAmountController ?? '';
     } else {
@@ -85,10 +87,14 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround;
+    final bgColor = isDark ? Color(0xFF14181F) : Color(0xFFF6F7F9);
+    final cardColor = isDark ? Color(0xFF1E2530) : Colors.white;
     final textColor = isDark ? Colors.white : AppColor.cText;
     final hintColor = isDark ? Colors.grey.shade400 : AppColor.cFont;
-    final borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder;
+    final borderColor = AppColor.cBorder;
+    final softBg = isDark
+        ? AppColor.themeNavyBlueColor.withOpacity(0.18)
+        : AppColor.themeNavyBlueColor.withOpacity(0.06);
 
     return GestureDetector(
       onTap: () {
@@ -97,50 +103,134 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
       child: Scaffold(
         backgroundColor: bgColor,
         appBar: simpleAppBar(
-          title: widget.isUpdate ? "update_product".tr : "new_product".tr,
+          title: widget.isUpdate ? "Update Product" : "New Product",
         ),
         body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Obx(() {
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildBasicInfoSection(textColor, hintColor, borderColor),
-                      verticalSpace(20.h),
-                      _buildDescriptionSection(textColor, hintColor, borderColor),
-                      verticalSpace(20.h),
-                      _buildImagesSection(textColor, hintColor),
-                      verticalSpace(20.h),
-                      _buildPricingSection(textColor, hintColor, borderColor),
-                      verticalSpace(30.h),
-                      _buildActionButtons(),
-                    ],
-                  ),
+          child: Obx(() {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.all(16.w),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionCard(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      softBg: softBg,
+                      textColor: textColor,
+                      title: "Basic Information",
+                      icon: Icons.inventory_2_outlined,
+                      child: _buildBasicInfoSection(textColor, hintColor, borderColor, cardColor, softBg, isDark),
+                    ),
+                    verticalSpace(14.h),
+                    _sectionCard(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      softBg: softBg,
+                      textColor: textColor,
+                      title: "Description",
+                      icon: Icons.description_outlined,
+                      child: _buildDescriptionSection(textColor, hintColor, borderColor, cardColor, softBg, isDark),
+                    ),
+                    verticalSpace(14.h),
+                    _sectionCard(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      softBg: softBg,
+                      textColor: textColor,
+                      title: "Product Images",
+                      icon: Icons.image_outlined,
+                      child: _buildImagesSection(textColor, hintColor, borderColor, softBg),
+                    ),
+                    verticalSpace(14.h),
+                    _sectionCard(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      softBg: softBg,
+                      textColor: textColor,
+                      title: "Price & Stock",
+                      icon: Icons.payments_outlined,
+                      child: _buildPricingSection(textColor, hintColor, borderColor, cardColor, softBg, isDark),
+                    ),
+                    verticalSpace(24.h),
+                    _buildActionButtons(),
+                    verticalSpace(10.h),
+                  ],
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          }),
         ),
+      ),
+    );
+  }
+
+  // --- Section card ---
+  Widget _sectionCard({
+    required Color cardColor,
+    required Color borderColor,
+    required Color softBg,
+    required Color textColor,
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(6.w),
+                decoration: BoxDecoration(
+                  color: softBg,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(icon, size: 16.sp, color: AppColor.themeNavyBlueColor),
+              ),
+              horizontalSpace(8.w),
+              Text(
+                title,
+                style: pSemiBold12.copyWith(fontSize: 14.sp, color: textColor),
+              ),
+            ],
+          ),
+          verticalSpace(14.h),
+          child,
+        ],
       ),
     );
   }
 
   // --- Extracted Widgets ---
 
-  Widget _buildBasicInfoSection(Color textColor, Color hintColor, Color borderColor) {
+  Widget _buildBasicInfoSection(
+      Color textColor, Color hintColor, Color borderColor, Color cardColor, Color softBg, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AddProductTextField(
           controller: addProductController.productName.value,
-          labelText: "product_name_required".tr,
-          hintText: 'product_name_hint'.tr,
+          labelText: "Product Name *",
+          hintText: 'Enter product name',
           onChanged: (value) {
             Validator.validateRequired(value);
           },
@@ -148,237 +238,276 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             return Validator.validateRequired(value!);
           },
         ),
-        verticalSpace(10.h),
-        Text(
-          "category".tr,
-          style: pMedium12.copyWith(
-            color: AppColor.cDarkGreyFont,
-          ),
-        ),
-        verticalSpace(10.h),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(35.r),
-            border: Border.all(color: borderColor),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 4.h),
-          child: DropdownButtonFormField<String>(
-            value: addProductController.category.value.isEmpty
-                ? null
-                : addProductController.categoryTypeList.any((e) => e.name == addProductController.category.value)
-                ? addProductController.category.value
-                : null,
-            hint: Text('select_category'.tr, style: pRegular12.copyWith(color: hintColor)),
-            items: addProductController.categoryTypeList.map((data) {
-              return DropdownMenuItem<String>(
-                value: data.name,
-                child: Text(
-                  data.name!,
-                  style: pRegular12,
-                ),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                addProductController.category.value = value;
-                final selectedCat = addProductController.categoryTypeList.firstWhereOrNull((c) => c.name == value);
-                if (selectedCat != null) {
-                  addProductController.categoryId.value = selectedCat.id.toString();
-                }
+        verticalSpace(14.h),
+        commonDropdownButtonWidget(
+          labelText: 'Category',
+          hint: 'Select category',
+          value: addProductController.category.value.isEmpty
+              ? null
+              : addProductController.categoryTypeList.any((e) => e.name == addProductController.category.value)
+              ? addProductController.category.value
+              : null,
+          list: addProductController.categoryTypeList.map((e) => e.name).toList(),
+          onChanged: (value) {
+            if (value != null) {
+              addProductController.category.value = value;
+              final selectedCat = addProductController.categoryTypeList.firstWhereOrNull((c) => c.name == value);
+              if (selectedCat != null) {
+                addProductController.categoryId.value = selectedCat.id.toString();
               }
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty || addProductController.categoryId.value.isEmpty) {
-                return "please_select_category".tr;
-              }
-              return null;
-            },
-            icon: assetSvdImageWidget(
-              image: DefaultImages.dropDownIcn,
-              colorFilter: ColorFilter.mode(AppColor.cLabel, BlendMode.srcIn),
-            ),
-            isExpanded: true,
-            style: pRegular12,
-            borderRadius: BorderRadius.circular(35.r),
-            dropdownColor: AppColor.themeGreenColor,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              errorBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              focusedErrorBorder: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
-              isDense: true,
-            ),
-          ),
-        ),
-        verticalSpace(10.h),
-      ],
-    );
-  }
-
-  Widget _buildDescriptionSection(Color textColor, Color hintColor, Color borderColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AddProductTextField(
-          controller: addProductController.productDescriptionController.value,
-          labelText: 'product_description'.tr,
-          hintText: 'product_description'.tr,
-          maxLines: 4,
+            }
+          },
           validator: (value) {
-            return Validator.validateRequired(value!);
+            if (value == null || value.isEmpty || addProductController.categoryId.value.isEmpty) {
+              return "Please select a category";
+            }
+            return null;
           },
         ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 15.h),
-          child: horizontalDivider(),
+      ],
+    );
+  }
+
+  // --- Description ---
+  // وضع Update: الوصف الحالي (HTML) يظهر فوق Read-only فقط، وتحته حقل نص عادي
+  // لكتابة وصف جديد (بدون أي وسوم HTML) لو بدو المستخدم يغيّره.
+  // وضع Add: حقل نص عادي بس، بدون معاينة (لأنو ما في وصف حالي أصلاً).
+  // --- Description Section ---
+  Widget _buildDescriptionSection(
+      Color textColor, Color hintColor, Color borderColor, Color cardColor, Color softBg, bool isDark) {
+
+    final bool hasCurrentDescription = widget.isUpdate &&
+        (widget.productDescription?.trim().isNotEmpty ?? false);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        // 1. عرض الوصف الحالي (HTML) فقط في حالة التعديل
+        if (hasCurrentDescription) ...[
+          Text(
+            "Current Description (Read Only)",
+            style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
+          ),
+          verticalSpace(8.h),
+          Container(
+            width: double.infinity,
+            constraints: BoxConstraints(minHeight: 80.h, maxHeight: 200.h), // تحديد ارتفاع مناسب
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: softBg,
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(color: borderColor.withOpacity(0.5)),
+            ),
+            child: SingleChildScrollView(
+              child: Html(
+                data: widget.productDescription ?? '',
+                style: {
+                  "body": Style(
+                    fontSize: FontSize(13.sp),
+                    color: textColor,
+                    margin: Margins.zero,
+                    padding: HtmlPaddings.zero,
+                  ),
+                  "p": Style(
+                    margin: Margins.zero,
+                    padding: HtmlPaddings.zero,
+                  ),
+                },
+              ),
+            ),
+          ),
+          verticalSpace(16.h),
+          Divider(color: borderColor),
+          verticalSpace(16.h),
+
+          Text(
+            "New Description (Optional)",
+            style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
+          ),
+          verticalSpace(8.h),
+        ],
+        AddProductTextField(
+          controller: addProductController.productDescriptionController.value,
+          labelText: hasCurrentDescription ? null : 'product_description'.tr, // إخفاء الليبل إذا عرضنا العنوان بالأعلى
+          hintText: hasCurrentDescription
+              ? 'Enter new description to replace the old one...'
+              : 'product_description'.tr,
+          maxLines: 5,
+          validator: (value) {
+            return null;
+          },
         ),
       ],
     );
   }
 
-  Widget _buildImagesSection(Color textColor, Color hintColor) {
+  Widget _buildImagesSection(Color textColor, Color hintColor, Color borderColor, Color softBg) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "product_image".tr,
-          style: pRegular16,
-        ),
-        verticalSpace(8.h),
-        Text(
-          "cover_image".tr,
+          "Cover Image",
           style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
         ),
-        verticalSpace(10.h),
+        verticalSpace(8.h),
         GestureDetector(
           onTap: () async {
             final path = await addProductController.pickFile();
             if (path != null) addProductController.coverImage.value = path;
           },
-          child: DottedBorder(
-            options: RoundedRectDottedBorderOptions(
-              dashPattern: [3, 3],
-              radius: Radius.circular(25.r),
-              color: AppColor.cGreenFont,
+          child: Container(
+            decoration: BoxDecoration(
+              color: softBg,
+              borderRadius: BorderRadius.circular(16.r),
             ),
-            child: Padding(
-              padding: EdgeInsets.all(15.w),
-              child: SizedBox(
-                height: 99.h,
-                child: addProductController.coverImage.value == ''
-                    ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_circle_outlined, size: 30.sp, color: AppColor.themeNavyBlueColor),
-                    horizontalSpace(10.w),
-                    Text(
-                      "drop_files_upload".tr,
-                      style: pSemiBold12,
-                    ),
-                  ],
-                )
-                    : Image.file(File(addProductController.coverImage.value)),
+            child: DottedBorder(
+              options: RoundedRectDottedBorderOptions(
+                dashPattern: [4, 4],
+                strokeWidth: 1.2,
+                radius: Radius.circular(16.r),
+                color: AppColor.themeNavyBlueColor,
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(15.w),
+                child: SizedBox(
+                  height: 99.h,
+                  width: double.infinity,
+                  child: addProductController.coverImage.value == ''
+                      ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.cloud_upload_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
+                      verticalSpace(6.h),
+                      Text(
+                        "Drop files here to upload",
+                        style: pSemiBold12.copyWith(color: textColor),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
+                      : ClipRRect(
+                    borderRadius: BorderRadius.circular(14.r),
+                    child: Image.file(File(addProductController.coverImage.value), fit: BoxFit.cover, width: double.infinity),
+                  ),
+                ),
               ),
             ),
           ),
         ),
-        verticalSpace(20.h),
+        verticalSpace(18.h),
         Text(
-          "sub_images".tr,
+          "Sub Images",
           style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
         ),
-        verticalSpace(10.h),
+        verticalSpace(8.h),
         GestureDetector(
           onTap: () {
             addProductController.getImages();
           },
-          child: DottedBorder(
-            options: RoundedRectDottedBorderOptions(
-              dashPattern: [3, 3],
-              radius: Radius.circular(25.r),
-              color: AppColor.cGreenFont,
+          child: Container(
+            decoration: BoxDecoration(
+              color: softBg,
+              borderRadius: BorderRadius.circular(16.r),
             ),
-            child: Padding(
-              padding: EdgeInsets.all(15.w),
-              child: SizedBox(
-                height: 100.h,
-                child: addProductController.selectedSubImages.isEmpty
-                    ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_circle_outlined, size: 30.sp, color: AppColor.themeNavyBlueColor),
-                    horizontalSpace(10.w),
-                    Text(
-                      "choose_file".tr,
-                      style: pSemiBold12,
-                    ),
-                  ],
-                )
-                    : ListView.builder(
-                  itemCount: addProductController.selectedSubImages.length,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Center(
-                        child: Image.file(
-                          File(addProductController.selectedSubImages[index]),
-                        ));
-                  },
+            child: DottedBorder(
+              options: RoundedRectDottedBorderOptions(
+                dashPattern: [4, 4],
+                strokeWidth: 1.2,
+                radius: Radius.circular(16.r),
+                color: AppColor.themeNavyBlueColor,
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(15.w),
+                child: SizedBox(
+                  height: 100.h,
+                  width: double.infinity,
+                  child: addProductController.selectedSubImages.isEmpty
+                      ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_photo_alternate_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
+                      verticalSpace(6.h),
+                      Text(
+                        "Choose files",
+                        style: pSemiBold12.copyWith(color: textColor),
+                      ),
+                    ],
+                  )
+                      : ListView.builder(
+                    itemCount: addProductController.selectedSubImages.length,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: EdgeInsets.only(right: 8.w),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12.r),
+                          child: Image.file(
+                            File(addProductController.selectedSubImages[index]),
+                            fit: BoxFit.cover,
+                            width: 90.w,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
           ),
         ),
-        verticalSpace(15.h),
       ],
     );
   }
 
-  Widget _buildPricingSection(Color textColor, Color hintColor, Color borderColor) {
+  Widget _buildPricingSection(
+      Color textColor, Color hintColor, Color borderColor, Color cardColor, Color softBg, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                CupertinoSwitch(
-                  value: addProductController.isTrending.value,
-                  onChanged: (value) {
-                    addProductController.isTrending.value = value;
-                    if (value == true) {
-                      addProductController.trending.value = '1';
-                    } else {
-                      addProductController.trending.value = '0';
-                    }
-                  },
-                  activeColor: AppColor.themeGreenColor,
-                  thumbColor: AppColor.cWhite,
-                  trackColor: AppColor.cFont,
-                ),
-                horizontalSpace(8.w),
-                Text(
-                  "trending".tr,
-                  style: pRegular12,
-                ),
-              ],
-            ),
-          ],
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          decoration: BoxDecoration(
+            color: softBg,
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Trending",
+                style: pRegular12.copyWith(color: textColor),
+              ),
+              CupertinoSwitch(
+                value: addProductController.isTrending.value,
+                onChanged: (value) {
+                  addProductController.isTrending.value = value;
+                  if (value == true) {
+                    addProductController.trending.value = '1';
+                  } else {
+                    addProductController.trending.value = '0';
+                  }
+                },
+                activeColor: AppColor.themeNavyBlueColor,
+                thumbColor: AppColor.cWhite,
+                trackColor: AppColor.cFont,
+              ),
+            ],
+          ),
         ),
-        verticalSpace(15.h),
+        verticalSpace(16.h),
         AddProductTextField(
             controller: addProductController.priceController.value,
-            labelText: 'price'.tr,
-            hintText: 'enter_price'.tr,
+            labelText: 'Price',
+            hintText: 'Enter price',
             validator: (value) {
               return Validator.validateRequired(value!);
             },
             keyboardType: TextInputType.number),
-        verticalSpace(10.h),
+        verticalSpace(12.h),
         commonDropdownButtonWidget(
-          labelText: 'discount_type'.tr,
-          hint: 'select_option'.tr,
+          labelText: 'Discount Type',
+          hint: 'Select option',
           value: addProductController.discountType.value,
           list: addProductController.discountTypeList,
           validator: (value) {
@@ -388,25 +517,25 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             addProductController.discountType.value = value;
           },
         ),
-        verticalSpace(15.h),
+        verticalSpace(12.h),
         AddProductTextField(
             controller: addProductController.disAmountController.value,
-            labelText: 'discount_amount'.tr,
-            hintText: 'enter_discount'.tr,
+            labelText: 'Discount Amount',
+            hintText: 'Enter discount',
             validator: (value) {
               return Validator.validateRequired(value!);
             },
             keyboardType: TextInputType.number),
+        verticalSpace(12.h),
         AddProductTextField(
           controller: addProductController.stockQtyController.value,
-          labelText: 'stock'.tr,
-          hintText: 'enter_stock'.tr,
+          labelText: 'Stock',
+          hintText: 'Enter stock',
           keyboardType: TextInputType.number,
           validator: (value) {
             return Validator.validateRequired(value!);
           },
         ),
-        verticalSpace(15.h),
       ],
     );
   }
@@ -416,17 +545,17 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         CommonIconButton(
-            title: 'close'.tr,
+            title: 'Close',
             iconData: DefaultImages.closeIcn,
             onPressed: () {
               Get.back();
             },
-            width: 75.w,
-            height: 35.h,
+            width: 90.w,
+            height: 42.h,
             btnColor: AppColor.cButton,
             textColor: AppColor.cDarkGreyFont),
         CommonIconButton(
-          title: widget.isUpdate ? "update".tr : 'create'.tr,
+          title: widget.isUpdate ? "Update" : 'Create',
           iconData: DefaultImages.whiteDoneIcn,
           onPressed: () {
             final isFormValid = formKey.currentState!.validate();
@@ -435,12 +564,12 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             }
 
             if (addProductController.coverImage.value == '') {
-              commonToast("please_add_cover_image".tr);
+              commonToast("Please add a cover image");
               return;
             }
 
             if (addProductController.selectedSubImages.isEmpty) {
-              commonToast("please_add_sub_image".tr);
+              commonToast("Please add a sub image");
               return;
             }
 
@@ -454,12 +583,13 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
               _submitProductData();
             }
           },
-          width: 200.w,
-          height: 35.h,
+          width: 190.w,
+          height: 42.h,
         ),
       ],
     );
   }
+
   void _submitProductData() {
     addProductController.addProductData(
       isUpdate: widget.isUpdate,

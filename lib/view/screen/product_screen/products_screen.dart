@@ -30,7 +30,7 @@ class ProductsScreen extends StatefulWidget {
 
 class _ProductsScreenState extends State<ProductsScreen>
     with AutomaticKeepAliveClientMixin {
-  final ProductController productController = Get.put(ProductController());
+  final ProductController productController = Get.find<ProductController>();
   final AddProductController addProductController =
   Get.put(AddProductController());
   final ScrollController scrollController = ScrollController();
@@ -55,7 +55,7 @@ class _ProductsScreenState extends State<ProductsScreen>
         addProductController.category.value = "";
         addProductController.categoryId.value = "";
         productController.productList.clear();
-        getData();
+       // getData();
       }
     });
 
@@ -122,7 +122,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                 width: 40.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                  color: AppColor.cBorder,
+                  color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
               ),
@@ -202,7 +202,7 @@ class _ProductsScreenState extends State<ProductsScreen>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColor.cLight,
+        backgroundColor: isDark  ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8),
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
@@ -278,6 +278,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                     if (productController.errorMessage.isNotEmpty &&
                         productController.productList.isEmpty) {
                       return RefreshIndicator(
+                        backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
                         onRefresh: _fetchInitialData,
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
@@ -298,6 +299,7 @@ class _ProductsScreenState extends State<ProductsScreen>
 
                     if (productController.productList.isEmpty) {
                       return RefreshIndicator(
+                        backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
                         onRefresh: _fetchInitialData,
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
@@ -317,7 +319,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                     }
 
                     return RefreshIndicator(
-                      backgroundColor: Colors.white,
+                      backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
                       onRefresh: _fetchInitialData,
                       child: CustomScrollView(
                         controller: scrollController,

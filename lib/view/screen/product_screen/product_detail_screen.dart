@@ -633,7 +633,7 @@ class _ProductDetailScreenState
                     : 'hidden'.tr,
                 color: isVisible
                     ? const Color(0xFF2E7D32)
-                    : Colors.grey,
+                    : isDark ? Colors.grey : Colors.grey.shade800,
               ),
 
               // STOCK STATUS
@@ -653,7 +653,7 @@ class _ProductDetailScreenState
                     : 'not_tracked'.tr,
                 color: isTrackStock
                     ? AppColor.themeGreenColor
-                    : Colors.grey.shade800,
+                    : isDark ? Colors.grey : Colors.grey.shade800,
               ),
             ],
           ),

@@ -160,5 +160,10 @@ const Map<String, String> ar = {
   'deleteCupon': 'هل أنت متأكد من حذف هذا الكوبون؟',
   'deleteReview': 'هل أنت متأكد من حذف هذا التقييم؟',
   'deleteCategory': 'هل أنت متأكد من حذف هذه الفئة؟',
-  'hidden' : "مخفي"
+  'hidden' : "مخفي",
+    "no_products_found": "لم يتم العثور على منتجات",
+    "on_backorder": "طلب مسبق",
+   "tracked": "متتبع",
+    "not_tracked": "غير متتبع",
+    "multiple_variants": "متعدد الخيارات",
 };

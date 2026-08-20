@@ -161,4 +161,9 @@ const Map<String, String> en = {
   'deleteReview' : 'Are you sure you want to delete this review?',
   'deleteCategory' : 'Are you sure you want to delete this category?',
   'hidden' : "Hidden",
+    "no_products_found": "No products found",
+    "on_backorder": "On Backorder",
+   "tracked": "Tracked",
+    "not_tracked": "Not Tracked",
+    "multiple_variants": "Multiple Variants",
 };

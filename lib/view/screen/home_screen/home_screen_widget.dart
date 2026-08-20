@@ -71,7 +71,7 @@ Widget buildAppTitleRow(Function() menuFun, String date) {
           ),
           if (notificationController.unreadCount.value > 0)
             Positioned(
-              right: 0,
+              right: -3,
               top: 0,
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
