@@ -28,6 +28,7 @@ import 'package:store_go_app/core/controller/home_controller/home_controller.dar
 import 'package:store_go_app/core/controller/dashboard_manager_controller/dashboard_manager_controller.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
+import '../../../core/controller/home_controller/category_controller.dart';
 import '../../widget/common_snak_bar_widget.dart';
 import 'add_category_bottomsheet.dart';
 import 'coupon_screen/coupon_detail_screen.dart';
@@ -41,6 +42,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
   final HomeController homeController = Get.put(HomeController());
+  final CategoryController categoryController = Get.put(CategoryController());
   final ProductController productController = Get.put(ProductController(),permanent: true);
   final NewCouponController couponController = Get.put(NewCouponController());
   final OrderController orderController = Get.put(OrderController());

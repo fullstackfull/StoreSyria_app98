@@ -55,7 +55,7 @@ class _ProductsScreenState extends State<ProductsScreen>
         addProductController.category.value = "";
         addProductController.categoryId.value = "";
         productController.productList.clear();
-       // getData();
+        getData();
       }
     });
 

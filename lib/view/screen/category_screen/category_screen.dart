@@ -1,41 +1,28 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, avoid_print
 
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:store_go_app/utils/colors.dart';
-import 'package:store_go_app/utils/constant.dart';
-import 'package:store_go_app/utils/images.dart';
-import 'package:store_go_app/utils/helper.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:store_go_app/utils/prefer.dart';
-import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/core/model/categories_model.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/home_controller/category_controller.dart';
+import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/view/new_widgets/category_widget.dart';
 import 'package:store_go_app/view/screen/home_screen/add_category_bottomsheet.dart';
-import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
-import 'package:store_go_app/view/screen/order_screen/order_screen.dart';
-import 'package:store_go_app/view/widget/common_appbar_widget.dart';
-import 'package:store_go_app/view/widget/common_text_field.dart';
-import 'package:store_go_app/view/widget/icon_and_image.dart';
-import 'package:store_go_app/view/widget/common_button.dart';
-
-import '../../widget/app_dialog.dart';
-import '../../widget/error_empty_state.dart';
-import '../../widget/loading_widget.dart';
+import 'package:store_go_app/view/widget/error_empty_state.dart';
+import 'package:store_go_app/view/widget/loading_widget.dart';
+import '../../new_widgets/header_widget.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final bool isBack;
-
-  const CategoriesScreen({Key? key, required this.isBack}) : super(key: key);
+  const CategoriesScreen({super.key, required this.isBack});
 
   @override
   State<CategoriesScreen> createState() => _CategoriesScreenState();
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepAliveClientMixin {
-  CategoryController categoryController = Get.put(CategoryController());
-  ScrollController? scrollController;
+  final CategoryController categoryController = Get.find<CategoryController>();
+  final ScrollController scrollController = ScrollController();
   bool _isFirstLoad = true;
 
   @override
@@ -43,10 +30,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_isFirstLoad) {
         _isFirstLoad = false;
         categoryController.currantPage.value = 1;
@@ -55,25 +40,34 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
         getData();
       }
     });
-    scrollController = ScrollController();
-    scrollController!.addListener(() {
-      if (categoryController.isScroll.value == true && scrollController!.offset >= scrollController!.position.maxScrollExtent && !scrollController!.position.outOfRange) {
-        categoryController.currantPage.value += 1;
-        categoryController.getCategoryData(categoryController.currantPage.value);
-        print("currantPage................-> ${categoryController.currantPage.value}");
-      }
-    });
+    scrollController.addListener(_onScroll);
   }
 
-  getData() {
-    categoryController.getCategoryData(categoryController.currantPage.value);
+  void _onScroll() {
+    if (!categoryController.isScroll.value) return;
+    if (categoryController.isLoading.value) return;
+
+    if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200) {
+      categoryController.currantPage.value += 1;
+      categoryController.getCategoryData(categoryController.currantPage.value);
+    }
+  }
+
+  Future<void> getData() async {
+    await categoryController.getCategoryData(categoryController.currantPage.value);
+  }
+
+  Future<void> _fetchInitialData() async {
+    categoryController.currantPage.value = 1;
+    categoryController.isScroll.value = true;
+    categoryController.categoriesList.clear();
+    await getData();
   }
 
   @override
   void dispose() {
-    scrollController!.dispose();
-
-    // TODO: implement dispose
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -81,302 +75,160 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
   Widget build(BuildContext context) {
     super.build(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).requestFocus(FocusNode());
-      },
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColor.cBackGround,
-        appBar: simpleAppBar(isBack: widget.isBack, title: "All Categories", date: "Monday, 30 Jan"),
-        body: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Obx(() {
-            return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CommonIconButton(
-                    title: 'Add Category',
-                    iconData: DefaultImages.addCircleIcn,
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        backgroundColor: AppColor.cBackGround,
-                        barrierColor: AppColor.cGreyOpacity,
-                        isScrollControlled: true,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(30),
-                            topRight: Radius.circular(30),
-                          ),
+        backgroundColor: isDark ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8),
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+            child: Column(
+              children: [
+                HeaderWidget(
+                  context: context,
+                  title: "all_categories".tr,
+                  label: "add_category".tr,
+                  onNewLabelTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      barrierColor: Colors.black54,
+                      isScrollControlled: true,
+                      useSafeArea: false,
+                      transitionAnimationController: AnimationController(
+                        vsync: Navigator.of(context),
+                        duration: const Duration(milliseconds: 400),
+                      ),
+                      builder: (context) {
+                        return AddNewCategoriesWidget(
+                          isUpdate: false,
+                        );
+                      },
+                    );
+                  },
+                ),
+
+                verticalSpace(16.h),
+
+                Expanded(
+                  child: Obx(() {
+                    // Loading State
+                    if (categoryController.isLoading.value && categoryController.currantPage.value == 1) {
+                      return const Center(child: LoadingWidget());
+                    }
+
+                    // Error State
+                    if (categoryController.errorMessage.isNotEmpty && categoryController.categoriesList.isEmpty) {
+                      return RefreshIndicator(
+                        backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
+                        onRefresh: _fetchInitialData,
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * .6,
+                              child: Center(
+                                child: ErrorState(
+                                  message: categoryController.errorMessage.value,
+                                  onRetry: _fetchInitialData,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        builder: (context) {
-                          return AddNewCategoriesWidget(
-                            isUpdate: false,
-                          );
-                        },
                       );
-                    },
-                    height: 51,
-                  ),
-                  verticalSpace(20),
-                  // searchFieldWidget(
-                  //   context: context,
-                  //   controller: categoryController.searchController,
-                  //   hint: 'Search for order',
-                  //   onChanged: (value) {
-                  //     if (value.length >= 3) {
-                  //       categoryController.searchCategoryData(name: value);
-                  //     }
-                  //   },
-                  //   onTap: () {
-                  //     getData();
-                  //     categoryController.searchController.clear();
-                  //   },
-                  // ),
-                  verticalSpace(25),
-                  Text(
-                    "Category List",
-                    style: pRegular20,
-                  ),
-                  verticalSpace(25),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          "Product",
-                          style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          "Category",
-                          style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          "Action",
-                          style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10),
-                          textAlign: TextAlign.right,
-                        ),
-                      ),
-                    ],
-                  ),
-                  verticalSpace(10),
-                  categoryController.categoriesList.isEmpty ? SizedBox() : horizontalDivider(),
-                  Expanded(
-                      child: Obx(() {
-                        /// First Loading
-                        if (categoryController.isLoading.value &&
-                            categoryController.currantPage.value == 1) {
-                          return const Center(child: LoadingWidget());
-                        }
+                    }
 
-                        /// Error
-                        if (categoryController.errorMessage.isNotEmpty &&
-                            categoryController.categoriesList.isEmpty) {
-                          return RefreshIndicator(
-                              onRefresh: () async => getData(),
-                              child: ListView(
-                                  physics: const AlwaysScrollableScrollPhysics(),
-                                  children: [
-                                    SizedBox(
-                                      height: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .height * .6,
-                                      child: Center(
-                                          child: ErrorState(
-                                            message: categoryController.errorMessage.value,
-                                            onRetry: getData,
-                                          )),
-                                    ),
-                                  ]));
-                        }
+                    // Empty State
+                    if (categoryController.categoriesList.isEmpty) {
+                      return RefreshIndicator(
+                        backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
+                        onRefresh: _fetchInitialData,
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * .6,
+                              child: Center(
+                                child: EmptyState(
+                                  message: "no_categories_found".tr,
+                                  icon: Icons.category_outlined,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-                        /// Empty
-                        if (categoryController.categoriesList.isEmpty) {
-                          return RefreshIndicator(
-                            onRefresh: () async => getData(),
-                            child: ListView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: [
-                                SizedBox(
-                                  height: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height * .6,
-                                  child: Center(
-                                    child: EmptyState(
-                                      message: "no_orders_found".tr,
-                                      icon: Icons.receipt_long_outlined,
+                    // Data List
+                    return RefreshIndicator(
+                      backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
+                      onRefresh: _fetchInitialData,
+                      child: CustomScrollView(
+                        controller: scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 15.h),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${categoryController.categoriesModel?.data?.total ?? 0} ${'items'.tr}",
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          );
-                        }
-
-                        /// Data
-                        return RefreshIndicator(
-                          backgroundColor: Colors.white,
-                          onRefresh: () async => getData(),
-                          child: ListView.separated(
-                            controller: scrollController,
-                            itemCount: categoryController.categoriesList.length,
-                            shrinkWrap: true,
-                            physics: AlwaysScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              CategoryData category = categoryController.categoriesList[index];
-                              return buildCategoryWidget(
-                                image: category.imagePathFullUrl!,
-                                title: 'Shop',
-                                subTitle: category.name!,
-                                category: category.themeId?.capitalizeFirst ?? "No Theme",
-                                deleteFun: () {
-                                  AppDialog.showCustomDialog(
-                                    message: "deleteCategory",
-                                      lottieAsset: 'assets/lottie/delete.json',
-                                      iconColor: AppColor.cRedText,
-                                      confirmColor: AppColor.cRedText,
-                                      context: context,
-                                      onConfirm: () =>  categoryController.deleteCategoriesData(
-                                          categoryId: category.id ?? 0)
-                                  );
-                                },
-                                filterFun: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    backgroundColor: AppColor.cBackGround,
-                                    barrierColor: AppColor.cGreyOpacity,
-                                    isScrollControlled: true,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(30),
-                                        topRight: Radius.circular(30),
-                                      ),
-                                    ),
-                                    builder: (context) {
-                                      return AddNewCategoriesWidget(
-                                        isUpdate: true,
-                                        categoryId: category.id,
-                                        name: category.name,
-                                        image: category.imagePathFullUrl,
-                                        icon: category.iconPath,
-                                        trending: category.trending.toString(),
-                                        status: category.status.toString(),
-                                      );
-                                    },
-                                  );
-                                },
-                              );
-                            },
-                            separatorBuilder: (context, index) => horizontalDivider(),
                           ),
-                        );
-                      })),
-                ]);
-          }),
+
+                          SliverPadding(
+                            padding: EdgeInsets.only(bottom: 20.h),
+                            sliver: SliverGrid(
+                              delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                  final category = categoryController.categoriesList[index];
+                                  return buildCategoryWidget(context: context,category: category,categoryController: categoryController);
+                                },
+                                childCount: categoryController.categoriesList.length,
+                              ),
+                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 220.w,
+                                crossAxisSpacing: 12.w,
+                                mainAxisSpacing: 12.h,
+                                mainAxisExtent: 225.h,
+                              ),
+                            ),
+                          ),
+
+                          if (categoryController.isScroll.value)
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20.h),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppColor.themeNavyBlueColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-    );
-  }
-
-  Widget buildCategoryWidget({required String image, required String title, required String subTitle, required String category, required Function() filterFun, required Function() deleteFun}) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: Row(
-            children: [
-              Container(
-                height: 55,
-                width: 44,
-                decoration: BoxDecoration(
-                  color: AppColor.cBackGround,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: CachedNetworkImage(
-                    imageUrl: getImageUrl(image),
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) => Image.network(
-                      DefaultImages.productImg,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              horizontalSpace(10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: pRegular12.copyWith(color: AppColor.cDarkGreyFont),
-                    ),
-                    verticalSpace(3),
-                    Text(
-                      subTitle,
-                      style: pSemiBold16,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Text(
-            category,
-            style: pRegular12.copyWith(
-              color: AppColor.cDarkGreyFont,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GestureDetector(
-                  onTap: filterFun,
-                  child: Container(
-                    height: 22,
-                    width: 22,
-                    decoration: BoxDecoration(color: AppColor.themeNavyBlueColor, borderRadius: BorderRadius.circular(8)),
-                    child: Icon(
-                      Icons.edit,
-                      color: AppColor.cWhite,
-                      size: 15,
-                    ),
-                  )),
-              horizontalSpace(8),
-              GestureDetector(
-                onTap: deleteFun,
-                child: Container(
-                  height: 22,
-                  width: 22,
-                  decoration: BoxDecoration(color: AppColor.cRedText, borderRadius: BorderRadius.circular(8)),
-                  child: Align(
-                    child: assetSvdImageWidget(image: DefaultImages.deleteIcn, height: 12, width: 12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

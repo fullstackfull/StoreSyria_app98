@@ -27,7 +27,7 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 4,
+      length: 5,
       vsync: this,
       initialIndex: dashboardManagerController.currantIndex.value,
     );

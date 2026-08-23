@@ -208,7 +208,7 @@ class _TaxScreenState extends State<TaxScreen> {
             onDelete: () {
                 AppDialog.showCustomDialog(
                   message: "deleteTax",
-                    lottieAsset: 'assets/lottie/delete.json',
+                    lottieAsset: 'assets/lottie/delete_icon.json',
                     iconColor: AppColor.cRedText,
                     confirmColor: AppColor.cRedText,
                     context: context,

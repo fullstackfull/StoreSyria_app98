@@ -1,155 +1,269 @@
 // ignore_for_file: unnecessary_this, prefer_collection_literals
-// updated
-import 'coupon_model.dart'; // تأكد من صحة هذا الاستيراد إذا لم يكن مستخدماً
 
 class CategoriesModel {
+  int? maxPrice;
   int? status;
   String? message;
   CategoriesModelData? data;
 
-  CategoriesModel({this.status, this.message, this.data});
+  CategoriesModel({
+    this.maxPrice,
+    this.status,
+    this.message,
+    this.data,
+  });
 
   CategoriesModel.fromJson(Map<String, dynamic> json) {
-    status = json['status'] as int?;
-    message = json['message'] as String?;
-    data = json['data'] != null && json['data'] is Map<String, dynamic>
-        ? CategoriesModelData.fromJson(json['data'] as Map<String, dynamic>)
-        : null;
+    maxPrice = _toInt(json['max_price']);
+    status = _toInt(json['status']);
+    message = json['message']?.toString();
+
+    if (json['data'] is Map<String, dynamic>) {
+      data = CategoriesModelData.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+    }
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = this.status;
-    data['message'] = this.message;
+
+    data['max_price'] = maxPrice;
+    data['status'] = status;
+    data['message'] = message;
+
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
+
     return data;
   }
 }
 
 class CategoriesModelData {
-  int? currentPage, from, lastPage, perPage, to, total;
+  int? currentPage;
+  int? from;
+  int? lastPage;
+  int? perPage;
+  int? to;
+  int? total;
+
   List<CategoryData>? data;
   List<Links>? links;
-  String? firstPageUrl, lastPageUrl, nextPageUrl, path, prevPageUrl;
+
+  String? firstPageUrl;
+  String? lastPageUrl;
+  String? nextPageUrl;
+  String? path;
+  String? prevPageUrl;
 
   CategoriesModelData({
-    this.currentPage, this.data, this.firstPageUrl, this.from, this.lastPage,
-    this.lastPageUrl, this.links, this.nextPageUrl, this.path, this.perPage,
-    this.prevPageUrl, this.to, this.total,
+    this.currentPage,
+    this.from,
+    this.lastPage,
+    this.perPage,
+    this.to,
+    this.total,
+    this.data,
+    this.links,
+    this.firstPageUrl,
+    this.lastPageUrl,
+    this.nextPageUrl,
+    this.path,
+    this.prevPageUrl,
   });
 
   CategoriesModelData.fromJson(Map<String, dynamic> json) {
-    currentPage = json['current_page'] as int?;
-    from = json['from'] as int?;
-    lastPage = json['last_page'] as int?;
-    perPage = json['per_page'] as int?;
-    to = json['to'] as int?;
-    total = json['total'] as int?;
+    currentPage = _toInt(json['current_page']);
+    from = _toInt(json['from']);
+    lastPage = _toInt(json['last_page']);
+    perPage = _toInt(json['per_page']);
+    to = _toInt(json['to']);
+    total = _toInt(json['total']);
 
-    firstPageUrl = json['first_page_url'] as String?;
-    lastPageUrl = json['last_page_url'] as String?;
-    nextPageUrl = json['next_page_url'] as String?;
-    path = json['path'] as String?;
-    prevPageUrl = json['prev_page_url'] as String?;
+    firstPageUrl = json['first_page_url']?.toString();
+    lastPageUrl = json['last_page_url']?.toString();
+    nextPageUrl = json['next_page_url']?.toString();
+    path = json['path']?.toString();
+    prevPageUrl = json['prev_page_url']?.toString();
 
-    // ✅ التحقق الآمن من أن القيمة قائمة قبل التكرار
-    if (json['data'] != null && json['data'] is List) {
-      data = <CategoryData>[];
-      for (var v in json['data']) {
-        if (v is Map<String, dynamic>) {
-          data!.add(CategoryData.fromJson(v));
-        }
-      }
+    // Categories
+    if (json['data'] is List) {
+      data = (json['data'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map((item) => CategoryData.fromJson(item))
+          .toList();
     }
 
-    if (json['links'] != null && json['links'] is List) {
-      links = <Links>[];
-      for (var v in json['links']) {
-        if (v is Map<String, dynamic>) {
-          links!.add(Links.fromJson(v));
-        }
-      }
+    // Pagination links
+    if (json['links'] is List) {
+      links = (json['links'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map((item) => Links.fromJson(item))
+          .toList();
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['current_page'] = currentPage;
-    data['from'] = from;
-    data['last_page'] = lastPage;
-    data['per_page'] = perPage;
-    data['to'] = to;
-    data['total'] = total;
+    final Map<String, dynamic> map = <String, dynamic>{};
 
-    data['first_page_url'] = firstPageUrl;
-    data['last_page_url'] = lastPageUrl;
-    data['next_page_url'] = nextPageUrl;
-    data['path'] = path;
-    data['prev_page_url'] = prevPageUrl;
+    map['current_page'] = currentPage;
+    map['from'] = from;
+    map['last_page'] = lastPage;
+    map['per_page'] = perPage;
+    map['to'] = to;
+    map['total'] = total;
 
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
+    map['first_page_url'] = firstPageUrl;
+    map['last_page_url'] = lastPageUrl;
+    map['next_page_url'] = nextPageUrl;
+    map['path'] = path;
+    map['prev_page_url'] = prevPageUrl;
+
+    if (data != null) {
+      map['data'] = data!
+          .map((item) => item.toJson())
+          .toList();
     }
+
     if (links != null) {
-      data['links'] = links!.map((v) => v.toJson()).toList();
+      map['links'] = links!
+          .map((item) => item.toJson())
+          .toList();
     }
-    return data;
+
+    return map;
   }
 }
 
 class CategoryData {
-  int? id, trending, status, storeId, categoryItem, maincategoryId, categoryId, totalProduct;
-  String? name, imagePath, iconPath, themeId, createdAt, updatedAt, demoField;
-  String? imagePathFullUrl, iconPathFullUrl;
+  int? id;
+  int? parentId;
+  int? trending;
+  int? status;
+  int? storeId;
+  int? totalProduct;
+
+  String? name;
+  String? slug;
+  String? imagePath;
+  String? iconPath;
+  String? createdAt;
+  String? updatedAt;
+  String? demoField;
+
+  String? imagePathFullUrl;
+  String? iconPathFullUrl;
 
   CategoryData({
-    this.id, this.name, this.imagePath, this.iconPath, this.trending,
-    this.status, this.themeId, this.storeId, this.createdAt, this.updatedAt,
-    this.demoField, this.categoryItem, this.maincategoryId,
-    this.imagePathFullUrl, this.iconPathFullUrl, this.totalProduct,
+    this.id,
+    this.name,
+    this.slug,
+    this.imagePath,
+    this.iconPath,
+    this.parentId,
+    this.trending,
+    this.status,
+    this.storeId,
+    this.createdAt,
+    this.updatedAt,
+    this.demoField,
+    this.totalProduct,
+    this.imagePathFullUrl,
+    this.iconPathFullUrl,
   });
 
-  CategoryData.fromJson(dynamic json) {
-    id = json['id'] as int?;
-    categoryId = json['category_id'] as int?;
-    name = json['name'] as String?;
-    imagePath = json['image_path'] as String?;
-    iconPath = json['icon_path'] as String?;
-    trending = json['trending'] as int?;
-    status = json['status'] as int?;
-    themeId = json['theme_id'] as String?;
-    storeId = json['store_id'] as int?;
-    createdAt = json['created_at'] as String?;
-    updatedAt = json['updated_at'] as String?;
-    demoField = json['demo_field'] as String?;
-    categoryItem = json['category_item'] as int?;
-    maincategoryId = json['maincategory_id'] as int?;
-    imagePathFullUrl = json['image_path_full_url'] as String?;
-    iconPathFullUrl = json['icon_path_full_url'] as String?;
-    totalProduct = json['total_product'] as int?;
+  CategoryData.fromJson(Map<String, dynamic> json) {
+    id = _toInt(json['id']);
+    parentId = _toInt(json['parent_id']);
+    trending = _toInt(json['trending']);
+    status = _toInt(json['status']);
+    storeId = _toInt(json['store_id']);
+    totalProduct = _toInt(json['total_product']);
+
+    name = json['name']?.toString();
+    slug = json['slug']?.toString();
+
+    imagePath = json['image_path']?.toString();
+    iconPath = json['icon_path']?.toString();
+
+    createdAt = json['created_at']?.toString();
+    updatedAt = json['updated_at']?.toString();
+    demoField = json['demo_field']?.toString();
+
+    imagePathFullUrl =
+        json['image_path_full_url']?.toString();
+
+    iconPathFullUrl =
+        json['icon_path_full_url']?.toString();
   }
 
   Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
+    final Map<String, dynamic> map = <String, dynamic>{};
+
     map['id'] = id;
-    map['category_id'] = categoryId;
     map['name'] = name;
+    map['slug'] = slug;
+
     map['image_path'] = imagePath;
     map['icon_path'] = iconPath;
+
+    map['parent_id'] = parentId;
     map['trending'] = trending;
     map['status'] = status;
-    map['theme_id'] = themeId;
     map['store_id'] = storeId;
+
     map['created_at'] = createdAt;
     map['updated_at'] = updatedAt;
     map['demo_field'] = demoField;
-    map['category_item'] = categoryItem;
-    map['maincategory_id'] = maincategoryId;
+
+    map['total_product'] = totalProduct;
+
     map['image_path_full_url'] = imagePathFullUrl;
     map['icon_path_full_url'] = iconPathFullUrl;
-    map['total_product'] = totalProduct;
+
     return map;
   }
+}
+
+class Links {
+  String? url;
+  String? label;
+  bool? active;
+
+  Links({
+    this.url,
+    this.label,
+    this.active,
+  });
+
+  Links.fromJson(Map<String, dynamic> json) {
+    url = json['url']?.toString();
+    label = json['label']?.toString();
+    active = json['active'] == true;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> map = <String, dynamic>{};
+
+    map['url'] = url;
+    map['label'] = label;
+    map['active'] = active;
+
+    return map;
+  }
+}
+
+int? _toInt(dynamic value) {
+  if (value == null) return null;
+
+  if (value is int) {
+    return value;
+  }
+
+  if (value is double) {
+    return value.toInt();
+  }
+
+  return int.tryParse(value.toString());
 }
