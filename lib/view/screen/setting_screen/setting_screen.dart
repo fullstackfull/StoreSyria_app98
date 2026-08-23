@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/setting_controller/theme_controller.dart';
 import 'package:store_go_app/routes/routes.dart';
@@ -23,40 +24,60 @@ import 'store_theme_setting_screen/store_theme_setting_screen.dart';
 
 class SettingScreen extends StatelessWidget {
   final bool isBack;
-  const SettingScreen({super.key, required this.isBack});
+
+  const SettingScreen({
+    super.key,
+    required this.isBack,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder(
-        init: ThemeController(),
-        builder: (_) {
+    return GetBuilder<ThemeController>(
+      init: ThemeController(),
+      builder: (_) {
+        final bool isDark =
+            Theme.of(context).brightness == Brightness.dark;
+
         return Scaffold(
           backgroundColor: AppColor.cBackGround,
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 30),
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                24,
+                20,
+                24,
+                30,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // =====================================================
+                  // STORE SETTINGS
+                  // =====================================================
+
                   Text(
-                    "Store Settings",
-                    style: pRegular20,
+                    'store_settings'.tr,
+                    style: pRegular20.copyWith(
+                      color: AppColor.cFont,
+                    ),
                   ),
 
                   verticalSpace(20),
 
-                  /// Main Settings
                   GridView.count(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: 2,
                     crossAxisSpacing: 14,
                     mainAxisSpacing: 14,
-                    childAspectRatio: 1.35,
+                    childAspectRatio: 1.2,
                     children: [
                       settingCard(
                         icon: DefaultImages.statisticIcn,
-                        title: "Statistics",
+                        title: 'analytics'.tr,
+                        subtitle: 'view_store_performance'.tr,
+                        isDark: isDark,
                         function: () {
                           Get.toNamed(AppRoutes.statistics);
                         },
@@ -64,7 +85,9 @@ class SettingScreen extends StatelessWidget {
 
                       settingCard(
                         icon: DefaultImages.shippingIcn,
-                        title: "Shipping",
+                        title: 'shipping'.tr,
+                        subtitle: 'manage_shipping'.tr,
+                        isDark: isDark,
                         function: () {
                           Get.toNamed(AppRoutes.shipping);
                         },
@@ -72,7 +95,9 @@ class SettingScreen extends StatelessWidget {
 
                       settingCard(
                         icon: DefaultImages.taxIcn,
-                        title: "Tax",
+                        title: 'tax'.tr,
+                        subtitle: 'manage_tax'.tr,
+                        isDark: isDark,
                         function: () {
                           Get.toNamed(AppRoutes.tax);
                         },
@@ -80,7 +105,9 @@ class SettingScreen extends StatelessWidget {
 
                       settingCard(
                         icon: DefaultImages.couponIcn,
-                        title: "Coupon",
+                        title: 'coupon'.tr,
+                        subtitle: 'manage_coupons'.tr,
+                        isDark: isDark,
                         function: () {
                           Get.toNamed(AppRoutes.coupon);
                         },
@@ -90,16 +117,23 @@ class SettingScreen extends StatelessWidget {
 
                   verticalSpace(28),
 
+                  // =====================================================
+                  // GENERAL SETTINGS
+                  // =====================================================
+
                   Text(
-                    "General Settings",
-                    style: pRegular16,
+                    'general_settings'.tr,
+                    style: pRegular16.copyWith(
+                      color: AppColor.cFont,
+                    ),
                   ),
 
                   verticalSpace(12),
 
                   settingWidget(
                     icon: DefaultImages.storeIcn,
-                    title: "Store Settings",
+                    title: 'store_settings'.tr,
+                    isDark: isDark,
                     function: () {
                       Get.to(() => StoreSettingScreen());
                     },
@@ -107,7 +141,8 @@ class SettingScreen extends StatelessWidget {
 
                   settingWidget(
                     icon: DefaultImages.themeIcn,
-                    title: "Store Theme Settings",
+                    title: 'store_theme_settings'.tr,
+                    isDark: isDark,
                     function: () {
                       Get.to(() => StoreThemeSettingScreen());
                     },
@@ -115,7 +150,8 @@ class SettingScreen extends StatelessWidget {
 
                   settingWidget(
                     icon: DefaultImages.categoriesIcn,
-                    title: "Store Payment",
+                    title: 'store_payment'.tr,
+                    isDark: isDark,
                     function: () {
                       Get.to(() => PaymentSettingScreen());
                     },
@@ -123,7 +159,8 @@ class SettingScreen extends StatelessWidget {
 
                   settingWidget(
                     icon: DefaultImages.envelopeIcn,
-                    title: "Store Email Setting",
+                    title: 'store_email_setting'.tr,
+                    isDark: isDark,
                     function: () {
                       Get.to(() => EmailSettingScreen());
                     },
@@ -131,7 +168,8 @@ class SettingScreen extends StatelessWidget {
 
                   settingWidget(
                     icon: DefaultImages.loyaltyIcn,
-                    title: "Store Loyalty Program",
+                    title: 'store_loyalty_program'.tr,
+                    isDark: isDark,
                     function: () {
                       Get.to(() => LoyaltyProgramScreen());
                     },
@@ -139,9 +177,14 @@ class SettingScreen extends StatelessWidget {
 
                   verticalSpace(8),
 
+                  // =====================================================
+                  // LOG OUT
+                  // =====================================================
+
                   settingWidget(
                     icon: DefaultImages.logoutIcn,
-                    title: "Log Out",
+                    title: 'log_out'.tr,
+                    isDark: isDark,
                     function: () async {
                       await FcmTokenService().clearFcmToken();
 
@@ -152,7 +195,9 @@ class SettingScreen extends StatelessWidget {
 
                       Prefs.clear();
 
-                      Get.offAll(() => NormalLoginWidget());
+                      Get.offAll(
+                            () => NormalLoginWidget(),
+                      );
                     },
                   ),
                 ],
@@ -160,13 +205,18 @@ class SettingScreen extends StatelessWidget {
             ),
           ),
         );
-      }
+      },
     );
   }
+
+  // ============================================================
+  // SETTING WIDGET
+  // ============================================================
 
   Widget settingWidget({
     required String icon,
     required String title,
+    required bool isDark,
     required Function() function,
   }) {
     return Padding(
@@ -179,13 +229,22 @@ class SettingScreen extends StatelessWidget {
           child: Container(
             width: double.infinity,
             height: 52,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+            ),
             decoration: BoxDecoration(
               color: AppColor.cBackGround,
               borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isDark
+                    ? AppColor.cFont.withOpacity(0.06)
+                    : Colors.transparent,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColor.cShadow.withOpacity(0.3),
+                  color: AppColor.cShadow.withOpacity(
+                    isDark ? 0.12 : 0.30,
+                  ),
                   offset: const Offset(0, 4),
                   blurRadius: 12,
                   spreadRadius: 0,
@@ -194,6 +253,10 @@ class SettingScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
+                // =====================================================
+                // ICON
+                // =====================================================
+
                 Container(
                   width: 32,
                   height: 32,
@@ -216,14 +279,24 @@ class SettingScreen extends StatelessWidget {
 
                 horizontalSpace(14),
 
+                // =====================================================
+                // TITLE
+                // =====================================================
+
                 Expanded(
                   child: Text(
                     title,
-                    style: pRegular14,
+                    style: pRegular14.copyWith(
+                      color: AppColor.cFont,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+
+                // =====================================================
+                // ARROW
+                // =====================================================
 
                 Icon(
                   Icons.arrow_forward_ios_rounded,
@@ -239,9 +312,15 @@ class SettingScreen extends StatelessWidget {
   }
 }
 
+// ============================================================
+// SETTING CARD
+// ============================================================
+
 Widget settingCard({
   required String icon,
   required String title,
+  required String subtitle,
+  required bool isDark,
   required Function() function,
 }) {
   return Material(
@@ -253,9 +332,16 @@ Widget settingCard({
         decoration: BoxDecoration(
           color: AppColor.cBackGround,
           borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isDark
+                ? AppColor.cFont.withOpacity(0.06)
+                : Colors.transparent,
+          ),
           boxShadow: [
             BoxShadow(
-              color: AppColor.cShadow.withOpacity(0.35),
+              color: AppColor.cShadow.withOpacity(
+                isDark ? 0.12 : 0.35,
+              ),
               offset: const Offset(0, 5),
               blurRadius: 14,
               spreadRadius: 0,
@@ -266,6 +352,10 @@ Widget settingCard({
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // =========================================================
+            // TOP ROW
+            // =========================================================
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -299,10 +389,32 @@ Widget settingCard({
 
             const Spacer(),
 
+            // =========================================================
+            // TITLE
+            // =========================================================
+
             Text(
               title,
-              style: pRegular14,
+              style: pRegular14.copyWith(
+                color: AppColor.cFont,
+              ),
               maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+
+            const SizedBox(height: 4),
+
+            // =========================================================
+            // SUBTITLE
+            // =========================================================
+
+            Text(
+              subtitle,
+              style: pMedium10.copyWith(
+                color: AppColor.cDarkGreyFont,
+                fontSize: 9.sp,
+              ),
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ],

@@ -33,6 +33,7 @@ class DefaultImages {
   static String downloadIcn = "assets/svg/download.svg";
   static String eyeIcn = "assets/svg/eye.svg";
   static String changeIcn = "assets/svg/change.svg";
+  static String languageIcn = "assets/svg/lang.svg";
   static String deleteIcn = "assets/svg/delete.svg";
   static String backIcn = "assets/svg/back.svg";
   static String newProductIcn = "assets/svg/new_product.svg";

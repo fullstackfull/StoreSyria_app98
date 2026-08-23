@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
+import 'package:store_go_app/view/screen/setting_screen/language_screen.dart';
 import 'package:store_go_app/view/screen/welcome_screen.dart';
-
 import '../bindings/coupon_binding.dart';
 import '../bindings/dashboard_binding.dart';
 import '../bindings/onboarding_binding.dart';
@@ -41,6 +41,7 @@ class AppRoutes {
   static const tax = '/tax';
   static const coupon = '/coupon';
   static const notifications = '/notifications';
+  static const lang = '/lang';
 
   // =========================
   // Pages
@@ -78,6 +79,11 @@ class AppRoutes {
       name: AppRoutes.coupon,
       page: ()=> const CouponScreen(),
       binding: CouponBinding(),
+    ),
+
+    GetPage(
+      name: AppRoutes.lang,
+      page: ()=> const LanguageCurrenciesScreen(),
     ),
 
     GetPage(

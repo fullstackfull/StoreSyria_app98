@@ -13,7 +13,7 @@ import 'package:store_go_app/view/screen/statistics_screen/statistics_screen_wid
 import 'package:store_go_app/view/widget/loading_widget.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  StatisticsScreen({Key? key}) : super(key: key);
+  StatisticsScreen({super.key});
 
   @override
   State<StatisticsScreen> createState() => _StatisticsScreenState();
@@ -39,7 +39,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
-      appBar: simpleAppBar(title: "Statistics", date: "Monday, 30 Jan"),
+      appBar: simpleAppBar(title: "Analytics"),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
