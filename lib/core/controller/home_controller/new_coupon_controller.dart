@@ -437,9 +437,6 @@ class NewCouponController extends GetxController {
     );
   }
 
-  // ============================================================
-  // REFRESH AFTER ADD / UPDATE
-  // ============================================================
 
   Future<void> awaitRefresh() async {
     currentPage.value = 1;
@@ -451,9 +448,6 @@ class NewCouponController extends GetxController {
     await getCouponData(1);
   }
 
-  // ============================================================
-  // DELETE COUPON
-  // ============================================================
 
   Future<void> deleteCouponData({
     required String couponId,
@@ -475,7 +469,6 @@ class NewCouponController extends GetxController {
                 "Deleted successfully",
           );
 
-          // بعد الحذف نرجع نجيب القائمة
           awaitRefresh();
 
           if (Get.isBottomSheetOpen ?? false) {
@@ -503,10 +496,6 @@ class NewCouponController extends GetxController {
       },
     );
   }
-
-  // ============================================================
-  // CLEAR FORM
-  // ============================================================
 
   void clearCouponFields() {
     couponNameController.clear();

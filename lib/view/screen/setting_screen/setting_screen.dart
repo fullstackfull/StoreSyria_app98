@@ -158,17 +158,15 @@ class SettingScreen extends StatelessWidget {
                                 lottieAsset: "assets/lottie/logout.json",
                                 confirmText: "yes".tr,
                                 onConfirm: () async {
-                            await FcmTokenService().clearFcmToken();
+                                  await FcmTokenService().clearFcmToken();
 
-                            if (Get.isRegistered<NotificationController>()) {
-                            Get.find<NotificationController>()
-                                .clearNotificationData();
-                            }
+                                  if (Get.isRegistered<NotificationController>()) {
+                                    Get.find<NotificationController>().clearNotificationData();
+                                  }
 
-                            Prefs.clear();
+                                  Prefs.clear();
 
-                            Get.offAll(
-                            () => NormalLoginWidget());
+                                  Get.offAll(() => NormalLoginWidget());
                               }
                             );
                           },

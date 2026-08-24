@@ -176,11 +176,6 @@ class _CouponScreenState extends State<CouponScreen>
             ),
             child: Column(
               children: [
-
-                // ==================================================
-                // HEADER
-                // ==================================================
-
                 HeaderWidget(
                   showBackButton: true,
                   onBackTap: () => Get.back(),
