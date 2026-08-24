@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:store_go_app/view/screen/setting_screen/app_settings.dart';
 import 'package:store_go_app/view/screen/setting_screen/language_screen.dart';
 import 'package:store_go_app/view/screen/welcome_screen.dart';
 import '../bindings/coupon_binding.dart';
@@ -37,6 +38,7 @@ class AppRoutes {
   static const categories = '/categories';
   static const statistics = '/statistics';
   static const settings = '/settings';
+  static const appSettings = '/appSettings';
   static const shipping = '/shipping';
   static const tax = '/tax';
   static const coupon = '/coupon';
@@ -103,47 +105,9 @@ class AppRoutes {
       page: () => NotificationScreen(isBack: true),
     ),
 
-    // GetPage(
-    //   name: paymentHistory,
-    //   page: () => const PaymentHistoryView(),
-    //   binding: PaymentHistoryBinding(),
-    // ),
-    //
-    // // Profile
-    // GetPage(name: profile, page: () => const ProfileScreen()),
-    //
-    // GetPage(
-    //   name: plan,
-    //   page: () => const PlanView(),
-    //   binding: BindingsBuilder(() {
-    //     Get.lazyPut<PlanController>(() => PlanController());
-    //   }),
-    // ),
-    //
-    // GetPage(name: editProfile, page: () => const EditProfileScreen()),
-
-    // GetPage(
-    //   name: terms,
-    //   page: () => TermsScreen(),
-    //   binding: LegalBinding(),
-    // ),
-    //
-    // GetPage(
-    //   name: privacy,
-    //   page: () => PrivacyScreen(),
-    //   binding: LegalBinding(),
-    // ),
-    //
-    // GetPage(
-    //   name: aboutUs,
-    //   page: () => AboutScreen(),
-    //   binding: LegalBinding(),
-    // ),
-    //
-    // GetPage(
-    //   name: subplans,
-    //   page: () => SubPlansScreen(),
-    //   binding: SubPlansBinding(),
-    // ),
+    GetPage(
+      name: AppRoutes.appSettings,
+      page: () => AppSettingsScreen(),
+    ),
   ];
 }

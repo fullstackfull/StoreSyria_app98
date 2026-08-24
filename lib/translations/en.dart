@@ -217,6 +217,7 @@ const Map<String, String> en = {
     "arabic": "Arabic",
     "us_dollar": "US Dollar",
     "syrian_pound": "Syrian Pound",
-  "manage_your_customers_details" : "Manage your customers details"
+  "manage_your_customers_details" : "Manage your customers details",
+  "settings" : "Settings",
 
 };

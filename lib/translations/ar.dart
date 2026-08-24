@@ -217,6 +217,7 @@ const Map<String, String> ar = {
     "arabic": "العربية",
     "us_dollar": "الدولار الأمريكي",
     "syrian_pound": "الليرة السورية",
-  "manage_your_customers_details" : "أدر تفاصيل عملاءك"
+  "manage_your_customers_details" : "أدر تفاصيل عملاءك",
+  "settings" : "الإعدادات",
 
 };

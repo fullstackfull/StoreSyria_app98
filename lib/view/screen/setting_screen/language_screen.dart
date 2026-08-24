@@ -49,7 +49,7 @@ class _LanguageCurrenciesScreenState
             child: Column(
               children: [
 
-                _mainCard(
+                mainCard(
                   icon: Icons.language_rounded,
                   title: 'languages'.tr,
                   value: isArabic
@@ -92,7 +92,7 @@ class _LanguageCurrenciesScreenState
 
                 const SizedBox(height: 18),
 
-                _mainCard(
+                mainCard(
                   icon: Icons.payments_outlined,
                   title: 'currencies'.tr,
                   value: selectedCurrency == 'USD'
@@ -134,139 +134,6 @@ class _LanguageCurrenciesScreenState
     );
   }
 
-  Widget _mainCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required bool isExpanded,
-    required bool isDark,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: AnimatedContainer(
-          duration:
-          const Duration(milliseconds: 250),
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColor.cBackGround,
-            borderRadius: BorderRadius.circular(18),
-
-            border: Border.all(
-              color: isExpanded
-                  ? AppColor.cLabel.withOpacity(0.35)
-                  : isDark
-                  ? AppColor.cFont.withOpacity(0.06)
-                  : Colors.transparent,
-            ),
-
-            boxShadow: [
-              BoxShadow(
-                color: AppColor.cShadow.withOpacity(
-                  isDark ? 0.12 : 0.35,
-                ),
-                offset: const Offset(0, 5),
-                blurRadius: 14,
-                spreadRadius: 0,
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color:
-                  AppColor.cLabel.withOpacity(0.08),
-                  borderRadius:
-                  BorderRadius.circular(13),
-                ),
-                child: Center(
-                  child: Icon(
-                    icon,
-                    size: 24,
-                    color: AppColor.cLabel,
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 14),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: pRegular14.copyWith(
-                        color: AppColor.cFont,
-                      ),
-                      maxLines: 1,
-                      overflow:
-                      TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Container(
-                      padding:
-                      const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColor.cLabel
-                            .withOpacity(0.08),
-                        borderRadius:
-                        BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        value,
-                        style: pMedium10.copyWith(
-                          color: AppColor.cLabel,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 10),
-
-              AnimatedSwitcher(
-                duration:
-                const Duration(milliseconds: 200),
-                transitionBuilder:
-                    (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  );
-                },
-                child: Icon(
-                  isExpanded
-                      ? Icons
-                      .keyboard_arrow_up_rounded
-                      : Icons
-                      .keyboard_arrow_down_rounded,
-                  key: ValueKey(isExpanded),
-                  size: 26,
-                  color:
-                  AppColor.cFont.withOpacity(0.5),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _currencySelector({
     required bool isDark,
@@ -284,11 +151,11 @@ class _LanguageCurrenciesScreenState
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColor.cShadow.withOpacity(
-              isDark ? 0.10 : 0.25,
+            color: Colors.teal.withOpacity(
+              isDark ? 0.10 : 0.2,
             ),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
+            offset: const Offset(0, 2),
+            blurRadius: 8,
           ),
         ],
       ),

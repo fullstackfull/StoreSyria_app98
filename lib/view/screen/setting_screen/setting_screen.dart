@@ -18,6 +18,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 
+import '../../new_widgets/settings_card.dart';
 import 'email_setting_screen.dart';
 import 'loyality_setting_screen.dart';
 import 'store_theme_setting_screen/store_theme_setting_screen.dart';
@@ -36,7 +37,9 @@ class SettingScreen extends StatelessWidget {
       init: ThemeController(),
       builder: (_) {
         final bool isDark =
-            Theme.of(context).brightness == Brightness.dark;
+            Theme
+                .of(context)
+                .brightness == Brightness.dark;
 
         return Scaffold(
           backgroundColor: AppColor.cBackGround,
@@ -52,18 +55,14 @@ class SettingScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // =====================================================
-                  // STORE SETTINGS
-                  // =====================================================
-
                   Text(
-                    'store_settings'.tr,
-                    style: pRegular20.copyWith(
-                      color: AppColor.cFont,
+                    'more'.tr,
+                    style: pBold24.copyWith(
+                      color: AppColor.themeNavyBlueColor,
                     ),
                   ),
 
-                  verticalSpace(20),
+                  verticalSpace(12),
 
                   GridView.count(
                     shrinkWrap: true,
@@ -74,40 +73,40 @@ class SettingScreen extends StatelessWidget {
                     childAspectRatio: 1.2,
                     children: [
                       settingCard(
+                        isDark: isDark,
                         icon: DefaultImages.statisticIcn,
                         title: 'analytics'.tr,
                         subtitle: 'view_store_performance'.tr,
-                        isDark: isDark,
                         function: () {
                           Get.toNamed(AppRoutes.statistics);
                         },
                       ),
 
                       settingCard(
+                        isDark: isDark,
                         icon: DefaultImages.shippingIcn,
                         title: 'shipping'.tr,
                         subtitle: 'manage_shipping'.tr,
-                        isDark: isDark,
                         function: () {
                           Get.toNamed(AppRoutes.shipping);
                         },
                       ),
 
                       settingCard(
+                        isDark: isDark,
                         icon: DefaultImages.taxIcn,
                         title: 'tax'.tr,
                         subtitle: 'manage_tax'.tr,
-                        isDark: isDark,
                         function: () {
                           Get.toNamed(AppRoutes.tax);
                         },
                       ),
 
                       settingCard(
+                        isDark: isDark,
                         icon: DefaultImages.couponIcn,
                         title: 'coupon'.tr,
                         subtitle: 'manage_coupons'.tr,
-                        isDark: isDark,
                         function: () {
                           Get.toNamed(AppRoutes.coupon);
                         },
@@ -117,88 +116,63 @@ class SettingScreen extends StatelessWidget {
 
                   verticalSpace(28),
 
-                  // =====================================================
-                  // GENERAL SETTINGS
-                  // =====================================================
-
-                  Text(
-                    'general_settings'.tr,
-                    style: pRegular16.copyWith(
-                      color: AppColor.cFont,
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
                     ),
-                  ),
+                    decoration: BoxDecoration(
+                      color: AppColor.cBackGround,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.teal.withOpacity(0.2),
+                          offset: const Offset(0, 2),
+                          blurRadius: 8,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        settingWidget(
+                          icon: DefaultImages.storeIcn,
+                          title: 'store_settings'.tr,
+                          isDark: isDark,
+                          function: () {
+                            Get.to(() => StoreSettingScreen());
+                          },
+                        ),
 
-                  verticalSpace(12),
+                        settingWidget(
+                          icon: DefaultImages.themeIcn,
+                          title: 'settings'.tr,
+                          isDark: isDark,
+                          function: () {
+                            Get.toNamed(AppRoutes.appSettings);
+                          },
+                        ),
+                        settingWidget(
+                          icon: DefaultImages.logoutIcn,
+                          title: 'log_out'.tr,
+                          isDark: isDark,
+                          function: () async {
+                            await FcmTokenService().clearFcmToken();
 
-                  settingWidget(
-                    icon: DefaultImages.storeIcn,
-                    title: 'store_settings'.tr,
-                    isDark: isDark,
-                    function: () {
-                      Get.to(() => StoreSettingScreen());
-                    },
-                  ),
+                            if (Get.isRegistered<NotificationController>()) {
+                              Get.find<NotificationController>()
+                                  .clearNotificationData();
+                            }
 
-                  settingWidget(
-                    icon: DefaultImages.themeIcn,
-                    title: 'store_theme_settings'.tr,
-                    isDark: isDark,
-                    function: () {
-                      Get.to(() => StoreThemeSettingScreen());
-                    },
-                  ),
+                            Prefs.clear();
 
-                  settingWidget(
-                    icon: DefaultImages.categoriesIcn,
-                    title: 'store_payment'.tr,
-                    isDark: isDark,
-                    function: () {
-                      Get.to(() => PaymentSettingScreen());
-                    },
-                  ),
-
-                  settingWidget(
-                    icon: DefaultImages.envelopeIcn,
-                    title: 'store_email_setting'.tr,
-                    isDark: isDark,
-                    function: () {
-                      Get.to(() => EmailSettingScreen());
-                    },
-                  ),
-
-                  settingWidget(
-                    icon: DefaultImages.loyaltyIcn,
-                    title: 'store_loyalty_program'.tr,
-                    isDark: isDark,
-                    function: () {
-                      Get.to(() => LoyaltyProgramScreen());
-                    },
-                  ),
-
-                  verticalSpace(8),
-
-                  // =====================================================
-                  // LOG OUT
-                  // =====================================================
-
-                  settingWidget(
-                    icon: DefaultImages.logoutIcn,
-                    title: 'log_out'.tr,
-                    isDark: isDark,
-                    function: () async {
-                      await FcmTokenService().clearFcmToken();
-
-                      if (Get.isRegistered<NotificationController>()) {
-                        Get.find<NotificationController>()
-                            .clearNotificationData();
-                      }
-
-                      Prefs.clear();
-
-                      Get.offAll(
-                            () => NormalLoginWidget(),
-                      );
-                    },
+                            Get.offAll(
+                                  () => NormalLoginWidget(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -208,218 +182,4 @@ class SettingScreen extends StatelessWidget {
       },
     );
   }
-
-  // ============================================================
-  // SETTING WIDGET
-  // ============================================================
-
-  Widget settingWidget({
-    required String icon,
-    required String title,
-    required bool isDark,
-    required Function() function,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: function,
-          borderRadius: BorderRadius.circular(14),
-          child: Container(
-            width: double.infinity,
-            height: 52,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-            ),
-            decoration: BoxDecoration(
-              color: AppColor.cBackGround,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isDark
-                    ? AppColor.cFont.withOpacity(0.06)
-                    : Colors.transparent,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColor.cShadow.withOpacity(
-                    isDark ? 0.12 : 0.30,
-                  ),
-                  offset: const Offset(0, 4),
-                  blurRadius: 12,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // =====================================================
-                // ICON
-                // =====================================================
-
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppColor.cLabel.withOpacity(0.07),
-                    borderRadius: BorderRadius.circular(9),
-                  ),
-                  child: Center(
-                    child: assetSvdImageWidget(
-                      image: icon,
-                      width: 16,
-                      height: 16,
-                      colorFilter: ColorFilter.mode(
-                        AppColor.cLabel,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                ),
-
-                horizontalSpace(14),
-
-                // =====================================================
-                // TITLE
-                // =====================================================
-
-                Expanded(
-                  child: Text(
-                    title,
-                    style: pRegular14.copyWith(
-                      color: AppColor.cFont,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-
-                // =====================================================
-                // ARROW
-                // =====================================================
-
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14,
-                  color: AppColor.cFont.withOpacity(0.45),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// SETTING CARD
-// ============================================================
-
-Widget settingCard({
-  required String icon,
-  required String title,
-  required String subtitle,
-  required bool isDark,
-  required Function() function,
-}) {
-  return Material(
-    color: Colors.transparent,
-    child: InkWell(
-      onTap: function,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColor.cBackGround,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isDark
-                ? AppColor.cFont.withOpacity(0.06)
-                : Colors.transparent,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColor.cShadow.withOpacity(
-                isDark ? 0.12 : 0.35,
-              ),
-              offset: const Offset(0, 5),
-              blurRadius: 14,
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // =========================================================
-            // TOP ROW
-            // =========================================================
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColor.cLabel.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  child: Center(
-                    child: assetSvdImageWidget(
-                      image: icon,
-                      width: 24,
-                      height: 24,
-                      colorFilter: ColorFilter.mode(
-                        AppColor.cLabel,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                ),
-
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14,
-                  color: AppColor.cFont.withOpacity(0.5),
-                ),
-              ],
-            ),
-
-            const Spacer(),
-
-            // =========================================================
-            // TITLE
-            // =========================================================
-
-            Text(
-              title,
-              style: pRegular14.copyWith(
-                color: AppColor.cFont,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-
-            const SizedBox(height: 4),
-
-            // =========================================================
-            // SUBTITLE
-            // =========================================================
-
-            Text(
-              subtitle,
-              style: pMedium10.copyWith(
-                color: AppColor.cDarkGreyFont,
-                fontSize: 9.sp,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
 }

@@ -7,11 +7,14 @@ import 'package:store_go_app/routes/routes.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/text_style.dart';
+import 'package:store_go_app/view/screen/setting_screen/payment_setting_screen/payment_setting_screen.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import '../../new_widgets/settings_card.dart';
 import '../../widget/app_dialog.dart';
+import 'email_setting_screen.dart';
+import 'loyality_setting_screen.dart';
 
 class StoreSettingScreen extends StatelessWidget {
   StoreSettingScreen({super.key});
@@ -49,6 +52,7 @@ class StoreSettingScreen extends StatelessWidget {
                 childAspectRatio: 1,
                 children: [
                   settingCard(
+                    isDark: isDark,
                     icon: DefaultImages.languageIcn,
                     title: 'language_and_currencies'.tr,
                     subtitle: "manage_your_customers_details".tr,
@@ -56,6 +60,7 @@ class StoreSettingScreen extends StatelessWidget {
                   ),
 
                   settingCard(
+                    isDark: isDark,
                     icon: DefaultImages.storeIcn,
                     title: 'store_information'.tr,
                     function: () {
@@ -64,6 +69,7 @@ class StoreSettingScreen extends StatelessWidget {
                   ),
 
                   settingCard(
+                    isDark: isDark,
                     icon: DefaultImages.themeIcn,
                     title: 'store_design'.tr,
                     function: () {
@@ -72,6 +78,7 @@ class StoreSettingScreen extends StatelessWidget {
                   ),
 
                   settingCard(
+                    isDark: isDark,
                     icon: DefaultImages.taxIcn,
                     title: 'tax'.tr,
                     function: () {
@@ -80,6 +87,35 @@ class StoreSettingScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              verticalSpace(20),
+
+              settingWidget(
+                icon: DefaultImages.categoriesIcn,
+                title: 'store_payment'.tr,
+                isDark: isDark,
+                function: () {
+                  Get.to(() => PaymentSettingScreen());
+                },
+              ),
+
+              settingWidget(
+                icon: DefaultImages.envelopeIcn,
+                title: 'store_email_setting'.tr,
+                isDark: isDark,
+                function: () {
+                  Get.to(() => EmailSettingScreen());
+                },
+              ),
+
+              settingWidget(
+                icon: DefaultImages.loyaltyIcn,
+                title: 'store_loyalty_program'.tr,
+                isDark: isDark,
+                function: () {
+                  Get.to(() => LoyaltyProgramScreen());
+                },
+              ),
+
 
               verticalSpace(30),
 
@@ -105,11 +141,11 @@ class StoreSettingScreen extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColor.cShadow.withOpacity(
-                        isDark ? 0.15 : 0.25,
+                      color: AppColor.cRedText.withOpacity(
+                        isDark ? 0.15 : 0.2,
                       ),
                       offset: const Offset(0, 4),
-                      blurRadius: 12,
+                      blurRadius: 8,
                     ),
                   ],
                 ),

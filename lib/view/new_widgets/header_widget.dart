@@ -1,3 +1,5 @@
+import 'package:store_go_app/utils/text_style.dart';
+
 import '../../utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -17,11 +19,7 @@ Widget HeaderWidget({
     children: [
       Text(
         title,
-        style: TextStyle(
-          fontSize: 26.sp,
-          fontWeight: FontWeight.w800,
-          color: titleColor,
-        ),
+        style: pBold24.copyWith(color: titleColor)
       ),
       GestureDetector(
         onTap: onNewLabelTap,
