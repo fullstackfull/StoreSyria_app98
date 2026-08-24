@@ -12,16 +12,14 @@ import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/auth/login_widget.dart';
 import 'package:store_go_app/view/screen/setting_screen/payment_setting_screen/payment_setting_screen.dart';
 import 'package:store_go_app/view/screen/setting_screen/store_setting_screen.dart';
+import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
-
 import '../../new_widgets/settings_card.dart';
-import 'email_setting_screen.dart';
-import 'loyality_setting_screen.dart';
-import 'store_theme_setting_screen/store_theme_setting_screen.dart';
+
 
 class SettingScreen extends StatelessWidget {
   final bool isBack;
@@ -126,7 +124,7 @@ class SettingScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.teal.withOpacity(0.2),
+                          color: AppColor.themeGreenColor.withOpacity(0.2),
                           offset: const Offset(0, 2),
                           blurRadius: 8,
                           spreadRadius: 0,
@@ -145,7 +143,7 @@ class SettingScreen extends StatelessWidget {
                         ),
 
                         settingWidget(
-                          icon: DefaultImages.themeIcn,
+                          icon: DefaultImages.settingIcn,
                           title: 'settings'.tr,
                           isDark: isDark,
                           function: () {
@@ -156,18 +154,27 @@ class SettingScreen extends StatelessWidget {
                           icon: DefaultImages.logoutIcn,
                           title: 'log_out'.tr,
                           isDark: isDark,
-                          function: () async {
+                          function: () {
+                            AppDialog.showCustomDialog(
+                                context: context,
+                                message: "logoutConfirm".tr,
+                                title: "logout".tr,
+                                lottieAsset: "assets/lottie/logout.json",
+                                confirmText: "yes".tr,
+                                onConfirm: () async {
                             await FcmTokenService().clearFcmToken();
 
                             if (Get.isRegistered<NotificationController>()) {
-                              Get.find<NotificationController>()
-                                  .clearNotificationData();
+                            Get.find<NotificationController>()
+                                .clearNotificationData();
                             }
 
                             Prefs.clear();
 
                             Get.offAll(
-                                  () => NormalLoginWidget(),
+                            () => NormalLoginWidget(),
+                            );
+                            }
                             );
                           },
                         ),

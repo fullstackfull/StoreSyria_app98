@@ -25,7 +25,7 @@ Widget settingCard({
             BoxShadow(
               color: isDark
                   ? Colors.black.withOpacity(0.18)
-                  : Colors.teal.withOpacity(0.2),
+                  : AppColor.themeGreenColor.withOpacity(0.2),
               offset: const Offset(0, 2),
               blurRadius: 8,
               spreadRadius: 0,
@@ -52,8 +52,8 @@ Widget settingCard({
                   height: 44,
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.teal.withOpacity(0.12)
-                        : Colors.teal.withOpacity(0.08),
+                        ? AppColor.themeGreenColor.withOpacity(0.12)
+                        : AppColor.themeGreenColor.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(13),
                   ),
                   child: Center(
@@ -63,8 +63,8 @@ Widget settingCard({
                       height: 24,
                       colorFilter: ColorFilter.mode(
                         isDark
-                            ? Colors.tealAccent.shade100
-                            : Colors.teal,
+                            ? AppColor.themeGreenColor.withOpacity(0.3)
+                            : AppColor.themeGreenColor,
                         BlendMode.srcIn,
                       ),
                     ),
@@ -134,7 +134,7 @@ Widget settingWidget({
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: Colors.teal.withOpacity(0.06),
+                color: AppColor.themeGreenColor.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
@@ -142,8 +142,8 @@ Widget settingWidget({
                   image: icon,
                   width: 18,
                   height: 18,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.teal,
+                  colorFilter: ColorFilter.mode(
+                    AppColor.themeGreenColor,
                     BlendMode.srcIn,
                   ),
                 ),

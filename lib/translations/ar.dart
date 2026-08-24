@@ -209,7 +209,7 @@ const Map<String, String> ar = {
     "store_email_setting": "إعدادات بريد المتجر",
     "store_loyalty_program": "برنامج ولاء المتجر",
     "log_out": "تسجيل الخروج",
-  "deleteStore" : "هل أنت متأكد من حذف متجرك؟",
+    "deleteStore" : "هل أنت متأكد من حذف متجرك؟",
     "language_and_currency": "اللغة والعملة",
     "languages": "اللغات",
     "currencies": "العملات",
@@ -219,5 +219,10 @@ const Map<String, String> ar = {
     "syrian_pound": "الليرة السورية",
   "manage_your_customers_details" : "أدر تفاصيل عملاءك",
   "settings" : "الإعدادات",
+  'light_mode' : "المظهر الفاتح",
+  'dark_mode' : "المظهر الداكن",
+  "theme"  : "المظهر",
+  "logout" : "تسجيل الخروج",
+  "logoutConfirm" : "هل أنت متأكد من تسجيل الخروج؟",
 
 };

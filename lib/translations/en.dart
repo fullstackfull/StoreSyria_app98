@@ -219,5 +219,9 @@ const Map<String, String> en = {
     "syrian_pound": "Syrian Pound",
   "manage_your_customers_details" : "Manage your customers details",
   "settings" : "Settings",
-
+  'light_mode' : "Light Theme",
+  'dark_mode' : "Dark Theme",
+  "theme"  : "Theme",
+  "logout" : "Logout",
+  "logoutConfirm" : "Are you sure you want to logout ? ",
 };

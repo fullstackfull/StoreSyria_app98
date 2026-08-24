@@ -151,7 +151,7 @@ class _LanguageCurrenciesScreenState
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.teal.withOpacity(
+            color: AppColor.themeGreenColor.withOpacity(
               isDark ? 0.10 : 0.2,
             ),
             offset: const Offset(0, 2),

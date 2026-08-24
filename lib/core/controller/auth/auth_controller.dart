@@ -153,7 +153,6 @@ class AuthController extends GetxController {
 
           commonToast("$userName Login Successfully");
 
-          // إرسال FCM Token للسيرفر بعد تسجيل الدخول الناجح
           _sendFcmTokenAfterLogin(storeId);
 
           Get.offAllNamed(AppRoutes.dashboard);

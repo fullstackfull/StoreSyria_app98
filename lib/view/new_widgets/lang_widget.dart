@@ -13,26 +13,28 @@ Widget languageSelector({
     width: double.infinity,
     padding: const EdgeInsets.all(8),
     decoration: BoxDecoration(
-      color: AppColor.cBackGround,
+      color: isDark
+          ? DarkThemeColor.cCardBackground
+          : AppColor.cBackGround,
       borderRadius: BorderRadius.circular(18),
       border: Border.all(
         color: isDark
-            ? AppColor.cFont.withOpacity(0.06)
+            ? DarkThemeColor.cBorder.withOpacity(0.7)
             : Colors.transparent,
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.teal.withOpacity(
-            isDark ? 0.10 : 0.2,
+          color: AppColor.themeGreenColor.withOpacity(
+            isDark ? 0.07 : 0.12,
           ),
           offset: const Offset(0, 2),
           blurRadius: 8,
+          spreadRadius: 0,
         ),
       ],
     ),
     child: Column(
       children: [
-        // English
         languageOption(
           title: 'english'.tr,
           flag: '🇬🇧',
@@ -48,7 +50,6 @@ Widget languageSelector({
 
         const SizedBox(height: 6),
 
-        // Arabic
         languageOption(
           title: 'arabic'.tr,
           flag: '🇸🇾',
@@ -88,25 +89,21 @@ Widget languageOption({
         ),
         decoration: BoxDecoration(
           color: selected
-              ? AppColor.cLabel.withOpacity(0.08)
-              : isDark
-              ? AppColor.cFont.withOpacity(0.025)
+              ? AppColor.themeGreenColor.withOpacity(
+            isDark ? 0.12 : 0.08,
+          )
               : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected
-                ? AppColor.cLabel.withOpacity(0.30)
-                : isDark
-                ? AppColor.cFont.withOpacity(0.05)
+                ? AppColor.themeGreenColor.withOpacity(
+              isDark ? 0.35 : 0.30,
+            )
                 : Colors.transparent,
           ),
         ),
         child: Row(
           children: [
-            // =================================================
-            // FLAG
-            // =================================================
-
             Text(
               flag,
               style: const TextStyle(
@@ -116,24 +113,18 @@ Widget languageOption({
 
             const SizedBox(width: 12),
 
-            // =================================================
-            // LANGUAGE
-            // =================================================
-
             Expanded(
               child: Text(
                 title,
                 style: pRegular14.copyWith(
                   color: selected
-                      ? AppColor.cLabel
-                      : AppColor.cFont,
+                      ? AppColor.themeGreenColor
+                      : isDark
+                      ? DarkThemeColor.cText
+                      : AppColor.cText,
                 ),
               ),
             ),
-
-            // =================================================
-            // CHECK
-            // =================================================
 
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
@@ -142,11 +133,13 @@ Widget languageOption({
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: selected
-                    ? AppColor.cLabel
+                    ? AppColor.themeGreenColor
                     : Colors.transparent,
                 border: Border.all(
                   color: selected
-                      ? AppColor.cLabel
+                      ? AppColor.themeGreenColor
+                      : isDark
+                      ? Colors.white.withOpacity(0.25)
                       : AppColor.cFont.withOpacity(0.25),
                   width: 1.5,
                 ),
@@ -166,6 +159,7 @@ Widget languageOption({
   );
 }
 
+
 Widget mainCard({
   required IconData icon,
   required String title,
@@ -174,32 +168,45 @@ Widget mainCard({
   required bool isDark,
   required VoidCallback onTap,
 }) {
+  final Color cardColor = isDark
+      ? DarkThemeColor.cCardBackground
+      : AppColor.cBackGround;
+
+  final Color primaryText = isDark
+      ? DarkThemeColor.cText
+      : AppColor.cText;
+
+  final Color secondaryText = isDark
+      ? DarkThemeColor.cSecondaryText
+      : AppColor.cFont;
+
   return Material(
     color: Colors.transparent,
     child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       child: AnimatedContainer(
-        duration:
-        const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 250),
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColor.cBackGround,
+          color: cardColor,
           borderRadius: BorderRadius.circular(18),
 
           border: Border.all(
             color: isExpanded
-                ? AppColor.cLabel.withOpacity(0.35)
+                ? AppColor.themeGreenColor.withOpacity(
+              isDark ? 0.40 : 0.30,
+            )
                 : isDark
-                ? AppColor.cFont.withOpacity(0.06)
+                ? DarkThemeColor.cBorder.withOpacity(0.7)
                 : Colors.transparent,
           ),
 
           boxShadow: [
             BoxShadow(
-              color: Colors.teal.withOpacity(
-                isDark ? 0.12 : 0.2,
+              color: AppColor.themeGreenColor.withOpacity(
+                isDark ? 0.07 : 0.12,
               ),
               offset: const Offset(0, 2),
               blurRadius: 8,
@@ -213,16 +220,16 @@ Widget mainCard({
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color:
-                AppColor.cLabel.withOpacity(0.08),
-                borderRadius:
-                BorderRadius.circular(13),
+                color: AppColor.themeGreenColor.withOpacity(
+                  isDark ? 0.12 : 0.08,
+                ),
+                borderRadius: BorderRadius.circular(13),
               ),
               child: Center(
                 child: Icon(
                   icon,
                   size: 24,
-                  color: AppColor.cLabel,
+                  color: AppColor.themeGreenColor,
                 ),
               ),
             ),
@@ -231,37 +238,36 @@ Widget mainCard({
 
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
                     style: pRegular14.copyWith(
-                      color: AppColor.cFont,
+                      color: primaryText,
                     ),
                     maxLines: 1,
-                    overflow:
-                    TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
                   ),
 
                   const SizedBox(height: 5),
 
                   Container(
-                    padding:
-                    const EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColor.cLabel
-                          .withOpacity(0.08),
-                      borderRadius:
-                      BorderRadius.circular(20),
+                      color: AppColor.themeGreenColor.withOpacity(
+                        isDark ? 0.12 : 0.08,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       value,
                       style: pMedium10.copyWith(
-                        color: AppColor.cLabel,
+                        color: isDark
+                            ? AppColor.themeGreenColor
+                            : AppColor.cLabel,
                       ),
                     ),
                   ),
@@ -272,10 +278,8 @@ Widget mainCard({
             const SizedBox(width: 10),
 
             AnimatedSwitcher(
-              duration:
-              const Duration(milliseconds: 200),
-              transitionBuilder:
-                  (child, animation) {
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) {
                 return FadeTransition(
                   opacity: animation,
                   child: child,
@@ -283,14 +287,13 @@ Widget mainCard({
               },
               child: Icon(
                 isExpanded
-                    ? Icons
-                    .keyboard_arrow_up_rounded
-                    : Icons
-                    .keyboard_arrow_down_rounded,
+                    ? Icons.keyboard_arrow_up_rounded
+                    : Icons.keyboard_arrow_down_rounded,
                 key: ValueKey(isExpanded),
                 size: 26,
-                color:
-                AppColor.cFont.withOpacity(0.5),
+                color: isDark
+                    ? Colors.white.withOpacity(0.45)
+                    : AppColor.cFont.withOpacity(0.5),
               ),
             ),
           ],
