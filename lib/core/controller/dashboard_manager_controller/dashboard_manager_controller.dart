@@ -13,9 +13,9 @@ class DashboardManagerController extends GetxController {
   RxInt currantIndex = 0.obs;
   RxList naviBarItemList = [
     {'icon': DefaultImages.dashboardIcn, 'title': 'Home'.tr},
-    {'icon': DefaultImages.categoriesIcn, 'title': 'Categories'.tr},
     {'icon': DefaultImages.ordersIcn, 'title': 'Orders'.tr},
     {'icon': DefaultImages.productIcn, 'title': 'Products'.tr},
+    {'icon': DefaultImages.categoriesIcn, 'title': 'Categories'.tr},
     {'icon': DefaultImages.moreIcn, 'title': 'More'.tr},
   ].obs;
 
@@ -29,9 +29,9 @@ class DashboardManagerController extends GetxController {
     // Initialize screens once
     screens = [
       HomeScreen(key: const ValueKey('dashboard')),
-      CategoriesScreen(key: const ValueKey('category'), isBack: false,),
       OrderScreen(key: const ValueKey('orders')),
       ProductsScreen(key: const ValueKey('products'), isBack: false),
+      CategoriesScreen(key: const ValueKey('category'), isBack: false,),
       SettingScreen(key: const ValueKey('settings'), isBack: false),
     ];
   }

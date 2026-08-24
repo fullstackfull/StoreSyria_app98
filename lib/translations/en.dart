@@ -137,23 +137,17 @@ const Map<String, String> en = {
     "previous": "Previous",
     "next": "Next",
     "get_started": "Get Started",
-
     "onboarding_title_2": "Track Your Sales Instantly",
     "onboarding_desc_2": "See clear reports and insights for your store, and watch your sales grow day by day.",
-
     "onboarding_title_1": "Manage Your Store Anywhere",
     "onboarding_desc_1": "Receive orders and track their status in real time, so your store keeps running even when you're not looking.",
-
     "onboarding_title_3": "Ready to Get Started?",
     "onboarding_desc_3": "Everything you need to manage your store is now in your pocket. Let's get started together!",
-
   'change': 'Edit',
   'has_variant': 'Multiple Options',
   'no_variant': 'No Options',
-
   'no_category': 'No Category',
   'no_product_name': 'No Product Name',
-
   'deleteProduct' : 'Are you sure you want to delete this product?',
   'deleteOrder' : 'Are you sure you want to delete this order?',
   'deleteTax' : 'Are you sure you want to delete this tax?',
@@ -224,4 +218,25 @@ const Map<String, String> en = {
   "theme"  : "Theme",
   "logout" : "Logout",
   "logoutConfirm" : "Are you sure you want to logout ? ",
+"add_coupon": "Add Coupon",
+"edit_coupon": "Edit Coupon",
+"create_coupon_description": "Create a new coupon for your store",
+"update_coupon_description": "Update your coupon information",
+"coupon_name": "Coupon Name",
+"enter_coupon_name": "Enter coupon name",
+"coupon_name_required": "Coupon name is required",
+"coupon_code": "Coupon Code",
+"enter_coupon_code": "Enter coupon code",
+"coupon_code_required": "Coupon code is required",
+  "enter_discount_amount": "Enter discount amount",
+"discount_required": "Discount amount is required",
+"coupon_limit": "Coupon Limit",
+"enter_coupon_limit": "Enter coupon limit",
+"coupon_limit_required": "Coupon limit is required",
+"expiry_date": "Expiry Date",
+"select_expiry_date": "Select expiry date",
+"expiry_date_required": "Expiry date is required",
+"flat": "Flat",
+"percentage": "Percentage",
+  "no_coupons_found": "No coupons found"
 };

@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:store_go_app/utils/colors.dart';
@@ -31,11 +32,11 @@ simpleAppBar({bool isBack = true, required String title, String? date}) {
                         Get.back();
                       },
                       child: Container(
-                        height: 43,
-                        width: 43,
+                        height: 30.h,
+                        width: 40.w,
                         decoration: BoxDecoration(
                           border: Border.all(color: borderColor),
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(15.r),
                         ),
                         child: Align(
                           child: assetSvdImageWidget(

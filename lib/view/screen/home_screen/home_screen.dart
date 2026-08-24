@@ -29,12 +29,13 @@ import 'package:store_go_app/core/controller/dashboard_manager_controller/dashbo
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/controller/home_controller/category_controller.dart';
+import '../../new_widgets/coupon_widget.dart';
 import '../../widget/common_snak_bar_widget.dart';
 import 'add_category_bottomsheet.dart';
 import 'coupon_screen/coupon_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -452,6 +453,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 CouponDetailScreen(couponId: coupon.id!))
                                 : null,
                             child: productCouponWidget(
+                              context: context,
                               index: index,
                               discount: "${coupon.discountAmount}${coupon
                                   .couponType == "percentage" ? "%" : ""}",

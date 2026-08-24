@@ -168,7 +168,7 @@ class AppDialog {
                               width: 70.w,
                               height: 70.w,
                               child: Lottie.asset(
-                                lottieAsset!,
+                                lottieAsset,
                                 fit: BoxFit.contain,
                               ),
                             )

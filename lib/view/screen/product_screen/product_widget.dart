@@ -176,11 +176,9 @@ Widget allProductsListItemWidget({
       borderRadius: BorderRadius.circular(10.r),
       child: Container(
         decoration: BoxDecoration(
+          border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
           color: cardColor,
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(
-            color: borderColor,
-          ),
           boxShadow: isDark
               ? null
               : [

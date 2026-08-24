@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/setting_controller/theme_controller.dart';
 import 'package:store_go_app/routes/routes.dart';
@@ -10,11 +9,8 @@ import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/auth/login_widget.dart';
-import 'package:store_go_app/view/screen/setting_screen/payment_setting_screen/payment_setting_screen.dart';
 import 'package:store_go_app/view/screen/setting_screen/store_setting_screen.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
-import 'package:store_go_app/view/widget/common_appbar_widget.dart';
-import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
@@ -172,9 +168,8 @@ class SettingScreen extends StatelessWidget {
                             Prefs.clear();
 
                             Get.offAll(
-                            () => NormalLoginWidget(),
-                            );
-                            }
+                            () => NormalLoginWidget());
+                              }
                             );
                           },
                         ),

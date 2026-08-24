@@ -79,11 +79,8 @@ Widget buildCategoryWidget({
   return Container(
     decoration: BoxDecoration(
       color: cardColor,
+      border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
       borderRadius: BorderRadius.circular(22.r),
-      border: Border.all(
-        color: borderColor,
-        width: 1,
-      ),
       boxShadow: isDark
           ? null
           : [
@@ -511,59 +508,6 @@ Widget _menuItem({
   );
 }
 
-// =============================================================
-// IMAGE BADGE
-// =============================================================
-
-Widget _imageBadge({
-  required IconData icon,
-  required String text,
-  required Color color,
-}) {
-  return Container(
-    padding: EdgeInsets.symmetric(
-      horizontal: 8.w,
-      vertical: 5.h,
-    ),
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(.95),
-      borderRadius:
-      BorderRadius.circular(30.r),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(.12),
-          blurRadius: 8,
-          offset: Offset(0, 3),
-        ),
-      ],
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-
-        Container(
-          width: 6.w,
-          height: 6.w,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-
-        SizedBox(width: 5.w),
-
-        Text(
-          text,
-          style: TextStyle(
-            color: color,
-            fontSize: 8.sp,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    ),
-  );
-}
 // =============================================================
 // DASHBOARD STAT
 // =============================================================

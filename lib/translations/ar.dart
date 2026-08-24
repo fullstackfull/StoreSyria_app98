@@ -139,19 +139,14 @@ const Map<String, String> ar = {
     "previous": "السابق",
     "next": "التالي",
     "get_started": "ابدأ الآن",
-
     "onboarding_title_2": "تابع مبيعاتك أولًا بأول",
     "onboarding_desc_2": "اطّلع على تقارير متجرك وإحصائياته بوضوح، وراقب نمو مبيعاتك يومًا بعد يوم.",
-
     "onboarding_title_1": "أدر متجرك من أي مكان",
     "onboarding_desc_1": "استقبل الطلبات وتابع حالتها لحظة بلحظة، ليبقى متجرك يعمل حتى في غيابك.",
-
     "onboarding_title_3": "هل أنت مستعد للبدء؟",
     "onboarding_desc_3": "جميع الأدوات التي تحتاجها لإدارة متجرك باتت بين يديك الآن. فلنبدأ معاً!",
-
   'has_variant': 'خيارات متعددة',
   'no_variant': 'بدون خيارات',
-
   'no_category': 'بدون تصنيف',
   'no_product_name': 'بدون اسم',
   'deleteProduct': 'هل أنت متأكد من حذف هذا المنتج؟',
@@ -224,5 +219,25 @@ const Map<String, String> ar = {
   "theme"  : "المظهر",
   "logout" : "تسجيل الخروج",
   "logoutConfirm" : "هل أنت متأكد من تسجيل الخروج؟",
-
+    "add_coupon": "إضافة كوبون",
+    "edit_coupon": "تعديل الكوبون",
+    "create_coupon_description": "أنشئ كوبونًا جديدًا لمتجرك",
+    "update_coupon_description": "تحديث معلومات الكوبون",
+    "coupon_name": "اسم الكوبون",
+    "enter_coupon_name": "أدخل اسم الكوبون",
+    "coupon_name_required": "اسم الكوبون مطلوب",
+    "coupon_code": "رمز الكوبون",
+    "enter_coupon_code": "أدخل رمز الكوبون",
+    "coupon_code_required": "رمز الكوبون مطلوب",
+   "enter_discount_amount": "أدخل قيمة الخصم",
+    "discount_required": "قيمة الخصم مطلوبة",
+    "coupon_limit": "حد استخدام الكوبون",
+    "enter_coupon_limit": "أدخل حد استخدام الكوبون",
+    "coupon_limit_required": "حد استخدام الكوبون مطلوب",
+    "expiry_date": "تاريخ الانتهاء",
+    "select_expiry_date": "اختر تاريخ الانتهاء",
+    "expiry_date_required": "تاريخ الانتهاء مطلوب",
+   "flat": "قيمة ثابتة",
+    "percentage": "نسبة مئوية",
+  "no_coupons_found": "لا توجد كوبونات"
 };

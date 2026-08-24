@@ -230,7 +230,7 @@ Widget sectionHeaderWithFilterWidget({
                 color: Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColor.themeNavyBlueColor,
+                  color: Colors.grey,
                   width: 1,
                 ),
               ),
