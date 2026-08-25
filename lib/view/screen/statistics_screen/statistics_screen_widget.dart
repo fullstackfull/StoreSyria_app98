@@ -12,6 +12,94 @@ import 'package:store_go_app/core/model/static_model.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
 
+import '../../../core/model/dashboard_model.dart';
+
+/// ------------------------------------------------------------
+/// COMMON CARD
+/// ------------------------------------------------------------
+
+class StatisticsCard extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  const StatisticsCard({
+    super.key,
+    required this.title,
+    this.subtitle,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.cBackGround,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppColor.cBorder.withOpacity(.7),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.035),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: AppColor.themeNavyBlueColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              horizontalSpace(10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: pBold14.copyWith(
+                        color: AppColor.cDarkGreyFont,
+                      ),
+                    ),
+                    if (subtitle != null) ...[
+                      verticalSpace(3),
+                      Text(
+                        subtitle!,
+                        style: pRegular10.copyWith(
+                          color: AppColor.cDarkGreyFont.withOpacity(.65),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          verticalSpace(16),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// ------------------------------------------------------------
+/// TOP URL CARD
+/// ------------------------------------------------------------
+
 Widget topUrlWidget({
   required String title,
   required String subTitle,
@@ -19,75 +107,123 @@ Widget topUrlWidget({
   required String digit,
   required Function() shareFun,
 }) {
-  return Padding(
-    padding: const EdgeInsets.only(left: 8.0, bottom: 13),
-    child: Stack(
-      alignment: Alignment.centerLeft,
-      fit: StackFit.loose,
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          decoration: BoxDecoration(color: AppColor.cBackGround, borderRadius: BorderRadius.circular(9), border: Border.all(color: AppColor.cBorder)),
-          padding: const EdgeInsets.only(left: 20, right: 8, top: 10, bottom: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: pRegular12.copyWith(color: AppColor.cDarkGreyFont),
-                  ),
-                  verticalSpace(3),
-                  SizedBox(
-                    width: 200,
-                    child: Text(
-                      subTitle,
-                      style: pSemiBold10,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                  verticalSpace(3),
-                  Row(
-                    children: [
-                      richText("Unique Clicks: ", total),
-                    ],
-                  )
-                ],
-              ),
-              GestureDetector(
-                onTap: shareFun,
-                child: circleImageWidget(DefaultImages.shareIcn),
-              ),
-            ],
-          ),
-        ),
-        Align(
-          alignment: Alignment.centerLeft - Alignment(.05, 0),
-          child: twoXWidget(digit),
+  return Container(
+    margin: const EdgeInsets.only(
+      left: 8,
+      right: 8,
+      bottom: 14,
+    ),
+    decoration: BoxDecoration(
+      color: AppColor.cBackGround,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: AppColor.cBorder.withOpacity(.7),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(.035),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
         ),
       ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 14,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColor.themeNavyBlueColor.withOpacity(.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.link_rounded,
+              color: AppColor.themeNavyBlueColor,
+              size: 21,
+            ),
+          ),
+          horizontalSpace(12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: pRegular12.copyWith(
+                    color: AppColor.cDarkGreyFont.withOpacity(.65),
+                  ),
+                ),
+                verticalSpace(4),
+                Text(
+                  subTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: pSemiBold12.copyWith(
+                    color: AppColor.cDarkGreyFont,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          horizontalSpace(10),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              color: AppColor.themeGreenColor.withOpacity(.10),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              total,
+              style: pBold12.copyWith(
+                color: AppColor.themeGreenColor,
+              ),
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
 
+/// ------------------------------------------------------------
+/// VISITOR GRAPH
+/// ------------------------------------------------------------
 class StatisticsVisitorGraph extends StatefulWidget {
   final List<VisitorChartData> visitorChart;
 
-  const StatisticsVisitorGraph({Key? key, required this.visitorChart}) : super(key: key);
+  const StatisticsVisitorGraph({
+    Key? key,
+    required this.visitorChart,
+  }) : super(key: key);
 
   @override
-  State<StatisticsVisitorGraph> createState() => _StatisticsVisitorGraphState();
+  State<StatisticsVisitorGraph> createState() =>
+      _StatisticsVisitorGraphState();
 }
 
-class _StatisticsVisitorGraphState extends State<StatisticsVisitorGraph> {
-  List<ChartData>? chartData;
+class _StatisticsVisitorGraphState
+    extends State<StatisticsVisitorGraph> {
+
+  List<ChartData> chartData = [];
 
   @override
   void initState() {
-    chartData = <ChartData>[];
+    super.initState();
+
+    _loadChartData();
+  }
+
+  void _loadChartData() {
+    chartData = [];
+
     if (Prefs.getBool(AppConstant.isDemoMode) == true) {
       chartData = [
         ChartData('19-jul', 5, 8),
@@ -99,18 +235,28 @@ class _StatisticsVisitorGraphState extends State<StatisticsVisitorGraph> {
         ChartData('25-jul', 8, 5),
       ];
     } else {
-      widget.visitorChart.forEach((data) {
-        chartData!.add(ChartData(data.date!, data.uniquePageview!, data.pageview!));
-      });
+      for (final data in widget.visitorChart) {
+        chartData.add(
+          ChartData(
+            data.date ?? '',
+            data.uniquePageview ?? 0,
+            data.pageview ?? 0,
+          ),
+        );
+      }
     }
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 250,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), border: Border.all(color: AppColor.cBorder)),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: AppColor.cBorder,
+        ),
+      ),
       child: Column(
         children: [
           Padding(
@@ -118,7 +264,8 @@ class _StatisticsVisitorGraphState extends State<StatisticsVisitorGraph> {
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: AppColor.themeNavyBlueColor,
+                  backgroundColor:
+                  AppColor.themeNavyBlueColor,
                   radius: 6,
                 ),
                 horizontalSpace(10),
@@ -126,9 +273,12 @@ class _StatisticsVisitorGraphState extends State<StatisticsVisitorGraph> {
                   "Total page view",
                   style: pMedium8,
                 ),
+
                 horizontalSpace(15),
+
                 CircleAvatar(
-                  backgroundColor: AppColor.themeGreenColor,
+                  backgroundColor:
+                  AppColor.themeGreenColor,
                   radius: 6,
                 ),
                 horizontalSpace(10),
@@ -139,7 +289,10 @@ class _StatisticsVisitorGraphState extends State<StatisticsVisitorGraph> {
               ],
             ),
           ),
-          Expanded(child: _buildStackedBarChart()),
+
+          Expanded(
+            child: _buildStackedBarChart(),
+          ),
         ],
       ),
     );
@@ -148,116 +301,240 @@ class _StatisticsVisitorGraphState extends State<StatisticsVisitorGraph> {
   SfCartesianChart _buildStackedBarChart() {
     return SfCartesianChart(
       enableAxisAnimation: true,
+
       plotAreaBorderWidth: 0,
-      legend: Legend(isVisible: false),
+
+      legend: Legend(
+        isVisible: false,
+      ),
+
       zoomPanBehavior: ZoomPanBehavior(
         enablePanning: true,
       ),
+
       primaryXAxis: CategoryAxis(
         borderWidth: 0,
-        autoScrollingMode: AutoScrollingMode.start,
+        autoScrollingMode:
+        AutoScrollingMode.start,
         autoScrollingDelta: 7,
         maximumLabels: 100,
-        majorGridLines: MajorGridLines(color: AppColor.cBorder),
-        axisLine: AxisLine(width: 0, color: AppColor.cTransparent),
+
+        majorGridLines: MajorGridLines(
+          color: AppColor.cBorder,
+        ),
+
+        axisLine: AxisLine(
+          width: 0,
+          color: AppColor.cTransparent,
+        ),
+
         interval: 1,
-        majorTickLines: MajorTickLines(width: 0),
-        axisBorderType: AxisBorderType.withoutTopAndBottom,
+
+        majorTickLines: MajorTickLines(
+          width: 0,
+        ),
+
+        axisBorderType:
+        AxisBorderType.withoutTopAndBottom,
       ),
-      primaryYAxis: NumericAxis(borderWidth: 0, majorGridLines: MajorGridLines(color: AppColor.cTransparent), axisLine: AxisLine(width: 0, color: AppColor.cTransparent), majorTickLines: MajorTickLines(width: 0)),
+
+      primaryYAxis: NumericAxis(
+        borderWidth: 0,
+
+        majorGridLines: MajorGridLines(
+          color: AppColor.cTransparent,
+        ),
+
+        axisLine: AxisLine(
+          width: 0,
+          color: AppColor.cTransparent,
+        ),
+
+        majorTickLines: MajorTickLines(
+          width: 0,
+        ),
+      ),
+
       tooltipBehavior: TooltipBehavior(
         enable: true,
         color: AppColor.cBackGround,
-        activationMode: ActivationMode.singleTap,
+        activationMode:
+        ActivationMode.singleTap,
         canShowMarker: true,
         shouldAlwaysShow: false,
+
         borderColor: AppColor.cBorder,
-        borderWidth: 5,
-        builder: (data, point, series, pointIndex, seriesIndex) {
-          var title = seriesIndex == 1 ? "Total Page View" : "Unique Page View";
-          var platform = seriesIndex == 1 ? chartData![pointIndex].mobile : chartData![pointIndex].desktop;
+        borderWidth: 1,
+
+        builder: (
+            data,
+            point,
+            series,
+            pointIndex,
+            seriesIndex,
+            ) {
+          final bool isUnique =
+              seriesIndex == 0;
+
+          final String title = isUnique
+              ? "Unique Page View"
+              : "Total Page View";
+
+          final num value = isUnique
+              ? chartData[pointIndex].desktop
+              : chartData[pointIndex].mobile;
+
           return Container(
             decoration: BoxDecoration(
-              border: Border.all(color: AppColor.cBorder),
-              borderRadius: BorderRadius.circular(8),
+              color: AppColor.cBackGround,
+              border: Border.all(
+                color: AppColor.cBorder,
+              ),
+              borderRadius:
+              BorderRadius.circular(8),
             ),
-            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+
+            padding:
+            const EdgeInsets.symmetric(
+              horizontal: 15,
+              vertical: 10,
+            ),
+
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize:
+              MainAxisSize.min,
+
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+
               children: [
                 Text(
                   title,
-                  style: pBold12.copyWith(color: AppColor.cDarkGreyFont),
+                  style: pBold12.copyWith(
+                    color:
+                    AppColor.cDarkGreyFont,
+                  ),
                 ),
+
                 verticalSpace(8),
+
                 Text(
-                  platform.toString(),
-                  style: pBold16.copyWith(color: seriesIndex == 0 ? AppColor.cGreenFont : AppColor.cLabel),
+                  value.toString(),
+                  style: pBold16.copyWith(
+                    color: isUnique
+                        ? AppColor
+                        .themeGreenColor
+                        : AppColor
+                        .themeNavyBlueColor,
+                  ),
                 ),
               ],
             ),
           );
         },
       ),
+
       series: _getStackedBarSeries(),
     );
   }
 
-  List<CartesianSeries<ChartData, String>> _getStackedBarSeries() {
-    return <CartesianSeries<ChartData, String>>[
+  List<CartesianSeries<ChartData, String>>
+  _getStackedBarSeries() {
+    return [
       StackedColumnSeries<ChartData, String>(
-        dataSource: chartData!,
-        xValueMapper: (ChartData sales, _) => sales.x,
-        yValueMapper: (ChartData sales, _) => sales.desktop,
-        color: AppColor.themeGreenColor,
-        name: 'Page View',
-        dataLabelSettings: DataLabelSettings(
+        dataSource: chartData,
+
+        xValueMapper:
+            (ChartData data, _) => data.x,
+
+        yValueMapper:
+            (ChartData data, _) => data.desktop,
+
+        color:
+        AppColor.themeGreenColor,
+
+        name: 'Unique Page View',
+
+        animationDuration: 900,
+
+        dataLabelSettings:
+        DataLabelSettings(
           isVisible: true,
-          textStyle: pMedium10.copyWith(
+
+          textStyle:
+          pMedium10.copyWith(
             color: AppColor.cWhite,
           ),
         ),
       ),
+
       StackedColumnSeries<ChartData, String>(
-        dataSource: chartData!,
-        xValueMapper: (ChartData sales, _) => sales.x,
-        yValueMapper: (ChartData sales, _) => sales.mobile,
-        color: AppColor.themeNavyBlueColor,
-        name: 'Unique page View',
-        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-        dataLabelSettings: DataLabelSettings(
+        dataSource: chartData,
+
+        xValueMapper:
+            (ChartData data, _) => data.x,
+
+        yValueMapper:
+            (ChartData data, _) => data.mobile,
+
+        color:
+        AppColor.themeNavyBlueColor,
+
+        name: 'Total Page View',
+
+        animationDuration: 1100,
+
+        borderRadius:
+        const BorderRadius.vertical(
+          top: Radius.circular(8),
+        ),
+
+        dataLabelSettings:
+        DataLabelSettings(
           isVisible: true,
-          textStyle: pMedium10.copyWith(color: AppColor.cWhite),
+
+          textStyle:
+          pMedium10.copyWith(
+            color: AppColor.cWhite,
+          ),
+
           borderRadius: 12,
         ),
       ),
     ];
   }
-
-  @override
-  void dispose() {
-    chartData!.clear();
-    super.dispose();
-  }
 }
+
+/// ------------------------------------------------------------
+/// PLATFORM BAR CHART
+/// ------------------------------------------------------------
 
 class PlatformBarChart extends StatefulWidget {
   final List<PlatformData> list;
 
-  const PlatformBarChart({super.key, required this.list});
+  const PlatformBarChart({
+    super.key,
+    required this.list,
+  });
 
   @override
-  State<PlatformBarChart> createState() => _PlatformBarChartState();
+  State<PlatformBarChart> createState() =>
+      _PlatformBarChartState();
 }
 
-class _PlatformBarChartState extends State<PlatformBarChart> {
-  List<BarChartData>? chartData;
+class _PlatformBarChartState
+    extends State<PlatformBarChart> {
+  List<BarChartData> chartData = [];
 
   @override
   void initState() {
-    chartData = <BarChartData>[];
+    super.initState();
+    _loadData();
+  }
+
+  void _loadData() {
+    chartData = [];
+
     if (Prefs.getBool(AppConstant.isDemoMode) == true) {
       chartData = [
         BarChartData('Windows', 5, Colors.pink),
@@ -267,157 +544,208 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
         BarChartData('AndroidOS', 12, Colors.indigo),
         BarChartData('Other', 15, Colors.lime),
       ];
-    } else  {
-      widget.list.forEach((data) {
-        chartData!.add(BarChartData(data.platform!, data.data!, HexColor(data.colour!)));
-      });
+    } else {
+      for (final data in widget.list) {
+        chartData.add(
+          BarChartData(
+            data.platform ?? '',
+            data.data ?? 0,
+            HexColor(data.colour ?? '#000000'),
+          ),
+        );
+      }
     }
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 250,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), border: Border.all(color: AppColor.cBorder)),
+    return StatisticsCard(
+      title: 'Platforms',
+      subtitle: 'Visitors by operating system',
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(15),
-            child: Wrap(direction: Axis.horizontal, alignment: WrapAlignment.start, spacing: 15, runSpacing: 8, children: platFormData()),
-          ),
-          Expanded(
-            child: SfCartesianChart(
-              enableAxisAnimation: true,
-              plotAreaBorderWidth: 0,
-              legend: Legend(isVisible: false),
-              zoomPanBehavior: ZoomPanBehavior(
-                enablePanning: true,
-              ),
-              primaryXAxis: CategoryAxis(
-                borderWidth: 0,
-                autoScrollingMode: AutoScrollingMode.start,
-                autoScrollingDelta: 7,
-                maximumLabels: 100,
-                majorGridLines: MajorGridLines(color: AppColor.cBorder),
-                axisLine: AxisLine(width: 0, color: AppColor.cTransparent),
-                interval: 1,
-                majorTickLines: MajorTickLines(width: 0),
-                axisBorderType: AxisBorderType.withoutTopAndBottom,
-              ),
-              primaryYAxis: NumericAxis(borderWidth: 0, majorGridLines: MajorGridLines(color: AppColor.cTransparent), axisLine: AxisLine(width: 0, color: AppColor.cTransparent), majorTickLines: MajorTickLines(width: 0)),
-              tooltipBehavior: TooltipBehavior(
-                enable: true,
-                color: AppColor.cBackGround,
-                activationMode: ActivationMode.singleTap,
-                canShowMarker: true,
-                shouldAlwaysShow: false,
-                borderColor: AppColor.cBorder,
-                borderWidth: 5,
-                builder: (data, point, series, pointIndex, seriesIndex) {
-                  var title = chartData![pointIndex].x;
-                  var platform = chartData![pointIndex].desktop;
-                  Color color = chartData![pointIndex].color;
-                  return Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColor.cBorder),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          style: pBold12.copyWith(color: AppColor.cDarkGreyFont),
-                        ),
-                        verticalSpace(8),
-                        Text(
-                          platform.toString(),
-                          style: pBold16.copyWith(color: color),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              series: <CartesianSeries<BarChartData, String>>[
-                StackedColumnSeries<BarChartData, String>(
-                  dataSource: chartData!,
-                  width: 0.5,
-                  xValueMapper: (BarChartData sales, _) => sales.x,
-                  yValueMapper: (BarChartData sales, _) => sales.desktop,
-                  pointColorMapper: (BarChartData sales, _) => sales.color,
-                  color: AppColor.themeGreenColor,
-                  name: 'Page View',
-                  dataLabelSettings: DataLabelSettings(
-                    isVisible: true,
-                    textStyle: pMedium10.copyWith(
-                      color: AppColor.cWhite,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          _buildPlatformLegend(),
+          verticalSpace(10),
+          SizedBox(
+            height: 205,
+            child: _buildChart(),
           ),
         ],
       ),
     );
   }
 
-  List<Widget> platFormData() {
-    List<Widget> data = [];
-    for (int i = 0; i < chartData!.length; i++) {
-      data.add(Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            backgroundColor: chartData![i].color,
-            radius: 6,
+  Widget _buildPlatformLegend() {
+    return Wrap(
+      spacing: 14,
+      runSpacing: 9,
+      children: chartData.map((data) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: data.color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            horizontalSpace(6),
+            Text(
+              data.x,
+              style: pMedium8.copyWith(
+                color: AppColor.cDarkGreyFont,
+              ),
+            ),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildChart() {
+    return SfCartesianChart(
+      enableAxisAnimation: true,
+      plotAreaBorderWidth: 0,
+      margin: const EdgeInsets.only(
+        left: 0,
+        right: 5,
+        top: 10,
+      ),
+      primaryXAxis: CategoryAxis(
+        interval: 1,
+        borderWidth: 0,
+        majorTickLines: const MajorTickLines(width: 0),
+        majorGridLines: MajorGridLines(
+          color: AppColor.cBorder.withOpacity(.4),
+        ),
+        axisLine: AxisLine(
+          width: 0,
+          color: AppColor.cTransparent,
+        ),
+        labelStyle: pMedium8.copyWith(
+          color: AppColor.cDarkGreyFont.withOpacity(.65),
+        ),
+      ),
+      primaryYAxis: NumericAxis(
+        borderWidth: 0,
+        majorTickLines: const MajorTickLines(width: 0),
+        majorGridLines: MajorGridLines(
+          color: AppColor.cBorder.withOpacity(.35),
+        ),
+        axisLine: AxisLine(
+          width: 0,
+          color: AppColor.cTransparent,
+        ),
+        labelStyle: pMedium8.copyWith(
+          color: AppColor.cDarkGreyFont.withOpacity(.55),
+        ),
+      ),
+      tooltipBehavior: TooltipBehavior(
+        enable: true,
+        activationMode: ActivationMode.singleTap,
+        color: AppColor.cBackGround,
+        borderColor: AppColor.cBorder,
+        borderWidth: 1,
+        builder: (
+            data,
+            point,
+            series,
+            pointIndex,
+            seriesIndex,
+            ) {
+          final item = chartData[pointIndex];
+
+          return Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 10,
+            ),
+            decoration: BoxDecoration(
+              color: AppColor.cBackGround,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColor.cBorder,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  item.x,
+                  style: pMedium10.copyWith(
+                    color: AppColor.cDarkGreyFont,
+                  ),
+                ),
+                verticalSpace(5),
+                Text(
+                  item.desktop.toString(),
+                  style: pBold16.copyWith(
+                    color: item.color,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      series: [
+        ColumnSeries<BarChartData, String>(
+          dataSource: chartData,
+          width: .55,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(8),
           ),
-          horizontalSpace(10),
-          Text(
-            chartData![i].x,
-            style: pMedium8,
+          xValueMapper: (data, _) => data.x,
+          yValueMapper: (data, _) => data.desktop,
+          pointColorMapper: (data, _) => data.color,
+          name: 'Page View',
+          dataLabelSettings: DataLabelSettings(
+            isVisible: true,
+            textStyle: pMedium10.copyWith(
+              color: AppColor.cWhite,
+            ),
           ),
-        ],
-      ));
-    }
-    return data;
+        ),
+      ],
+    );
   }
 }
 
-class BarChartData {
-  BarChartData(this.x, this.desktop, this.color);
-
-  final String x;
-  final num desktop;
-  final Color color;
-}
+/// ------------------------------------------------------------
+/// BROWSER / DEVICE GRAPH
+/// ------------------------------------------------------------
 
 class BrowsersGraph extends StatefulWidget {
   final List<BrowserData>? browser;
   final List<DeviceData>? device;
   final bool isDevice;
 
-  BrowsersGraph({Key? key, this.browser, this.device, required this.isDevice}) : super(key: key);
+  const BrowsersGraph({
+    Key? key,
+    this.browser,
+    this.device,
+    required this.isDevice,
+  }) : super(key: key);
 
   @override
-  State<BrowsersGraph> createState() => _BrowsersGraphState();
+  State<BrowsersGraph> createState() =>
+      _BrowsersGraphState();
 }
 
 class _BrowsersGraphState extends State<BrowsersGraph> {
-   List<_ChartData> chartData = <_ChartData>[];
+  List<_ChartData> chartData = [];
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    if (widget.isDevice == true) {
+    _loadData();
+  }
+
+  void _loadData() {
+    if (widget.isDevice) {
       if (Prefs.getBool(AppConstant.isDemoMode) == true) {
         chartData = [
           _ChartData('WebKit', 350, Colors.pink),
@@ -426,10 +754,14 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
           _ChartData('iPhone', 140, Colors.brown),
           _ChartData('Other', 120, Colors.indigo),
         ];
-      } else  {
-        widget.device!.forEach((element) {
-          chartData.add(_ChartData(element.device!, element.data!, HexColor(element.colour!)));
-        });
+      } else {
+        chartData = (widget.device ?? []).map((element) {
+          return _ChartData(
+            element.device ?? '',
+            element.data ?? 0,
+            HexColor(element.colour ?? '#000000'),
+          );
+        }).toList();
       }
     } else {
       if (Prefs.getBool(AppConstant.isDemoMode) == true) {
@@ -441,108 +773,169 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
           _ChartData('Chrome', 700, Colors.indigo),
         ];
       } else {
-        widget.browser!.forEach((element) {
-          chartData.add(_ChartData(element.browser!, element.data!, HexColor(element.colour!)));
-        });
+        chartData = (widget.browser ?? []).map((element) {
+          return _ChartData(
+            element.browser ?? '',
+            element.data ?? 0,
+            HexColor(element.colour ?? '#000000'),
+          );
+        }).toList();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), border: Border.all(color: AppColor.cBorder)),
-      padding: EdgeInsets.only(left: 15, right: 15, bottom: 15, top: 25),
+    return StatisticsCard(
+      title: widget.isDevice
+          ? 'Devices'
+          : 'Browsers',
+      subtitle: widget.isDevice
+          ? 'Visitors by device'
+          : 'Visitors by browser',
       child: Column(
         children: [
           SizedBox(
-            height: 200,
-            child: widget.isDevice == true
-                ? SfCircularChart(
-                    series: <CircularSeries>[
-                      PieSeries<_ChartData, String>(
-                          dataSource: chartData,
-                          xValueMapper: (_ChartData data, _) => data.x,
-                          yValueMapper: (_ChartData data, _) => data.y,
-                          pointColorMapper: (_ChartData data, _) => data.color,
-                          explode: true,
-                          explodeIndex: 1,
-                          // dataLabelMapper: (_ChartData data, _) => data.x,
-                          pointRenderMode: PointRenderMode.segment,
-                          dataLabelSettings: DataLabelSettings(
-                              builder: (data, point, series, pointIndex, seriesIndex) {
-                                return Text(
-                                  chartData[pointIndex].y.toString(),
-                                  style: pMedium10,
-                                );
-                              },
-                              isVisible: true,
-                              labelPosition: ChartDataLabelPosition.outside,
-                              labelAlignment: ChartDataLabelAlignment.outer))
-                    ],
-                  )
-                : SfCircularChart(
-                    series: <CircularSeries<_ChartData, String>>[
-                      RadialBarSeries<_ChartData, String>(
-                        maximumValue: 1000,
-                        radius: '100%',
-                        gap: '2%',
-                        strokeWidth: 0.8,
-                        dataSource: chartData,
-                        trackColor: AppColor.cBorder,
-                        cornerStyle: CornerStyle.bothCurve,
-                        xValueMapper: (_ChartData data, _) => data.x,
-                        yValueMapper: (_ChartData data, _) => data.y,
-                        pointColorMapper: (_ChartData data, _) => data.color,
-                      ),
-                    ],
-                  ),
+            height: 210,
+            child: widget.isDevice
+                ? _buildPieChart()
+                : _buildRadialChart(),
           ),
-          Column(
-            children: platFormData(),
-          ),
+          verticalSpace(10),
+          _buildDetails(),
         ],
       ),
     );
   }
 
-  List<Widget> platFormData() {
-    List<Widget> data = [];
-    for (int i = 0; i < chartData.length; i++) {
-      data.add(browserGraphDetail(title: chartData[i].x, total: chartData[i].y.toString(), color: chartData[i].color));
-    }
-    return data;
-  }
-
-  Widget browserGraphDetail({required String title, required String total, required Color color}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
-      child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), border: Border.all(color: AppColor.cBorder)),
-        padding: EdgeInsets.all(15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(radius: 3, backgroundColor: color),
-                horizontalSpace(9),
-                Text(
-                  title,
-                  style: pMedium10.copyWith(color: color),
+  Widget _buildPieChart() {
+    return SfCircularChart(
+      margin: EdgeInsets.zero,
+      series: [
+        PieSeries<_ChartData, String>(
+          dataSource: chartData,
+          xValueMapper: (data, _) => data.x,
+          yValueMapper: (data, _) => data.y,
+          pointColorMapper: (data, _) => data.color,
+          explode: true,
+          explodeIndex: 0,
+          explodeOffset: '8%',
+          radius: '90%',
+          dataLabelSettings: DataLabelSettings(
+            isVisible: true,
+            labelPosition: ChartDataLabelPosition.outside,
+            textStyle: pMedium10.copyWith(
+              color: AppColor.cDarkGreyFont,
+            ),
+            connectorLineSettings:
+            const ConnectorLineSettings(
+              length: '12%',
+              type: ConnectorType.curve,
+            ),
+            builder: (
+                data,
+                point,
+                series,
+                pointIndex,
+                seriesIndex,
+                ) {
+              return Text(
+                chartData[pointIndex].y.toString(),
+                style: pSemiBold8.copyWith(
+                  color: chartData[pointIndex].color,
                 ),
-              ],
-            ),
-            Text(
-              total,
-              style: pMedium12.copyWith(color: color),
-            ),
-          ],
+              );
+            },
+          ),
         ),
-      ),
+      ],
     );
   }
+
+  Widget _buildRadialChart() {
+    return SfCircularChart(
+      margin: EdgeInsets.zero,
+      series: [
+        RadialBarSeries<_ChartData, String>(
+          dataSource: chartData,
+          maximumValue: 1000,
+          radius: '90%',
+          innerRadius: '30%',
+          gap: '5%',
+          strokeWidth: 0,
+          trackColor: AppColor.cBorder.withOpacity(.35),
+          cornerStyle: CornerStyle.bothCurve,
+          xValueMapper: (data, _) => data.x,
+          yValueMapper: (data, _) => data.y,
+          pointColorMapper: (data, _) => data.color,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetails() {
+    return Column(
+      children: chartData.map((data) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 13,
+            vertical: 11,
+          ),
+          decoration: BoxDecoration(
+            color: data.color.withOpacity(.055),
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(
+              color: data.color.withOpacity(.12),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: data.color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              horizontalSpace(9),
+              Expanded(
+                child: Text(
+                  data.x,
+                  style: pMedium10.copyWith(
+                    color: data.color,
+                  ),
+                ),
+              ),
+              Text(
+                data.y.toString(),
+                style: pBold12.copyWith(
+                  color: data.color,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+/// ------------------------------------------------------------
+/// MODELS
+/// ------------------------------------------------------------
+
+class BarChartData {
+  BarChartData(
+      this.x,
+      this.desktop,
+      this.color,
+      );
+
+  final String x;
+  final num desktop;
+  final Color color;
 }
 
 class _ChartData {
@@ -550,5 +943,9 @@ class _ChartData {
   final int y;
   final Color color;
 
-  _ChartData(this.x, this.y, this.color);
+  _ChartData(
+      this.x,
+      this.y,
+      this.color,
+      );
 }

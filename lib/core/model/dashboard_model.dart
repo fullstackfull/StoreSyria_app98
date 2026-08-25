@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_this
 
 import 'package:store_go_app/core/model/product_model.dart';
+import 'package:store_go_app/core/model/static_model.dart';
 
 class DashboardModel {
   int? status;
@@ -16,16 +17,21 @@ class DashboardModel {
   DashboardModel.fromJson(dynamic json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? DashboardData.fromJson(json['data']) : null;
+    data = json['data'] != null
+        ? DashboardData.fromJson(json['data'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
+
     map['status'] = status;
     map['message'] = message;
+
     if (data != null) {
       map['data'] = data?.toJson();
     }
+
     return map;
   }
 }
@@ -41,93 +47,157 @@ class DashboardData {
     this.product,
     this.recentOrder,
     this.coupons,
+    this.orderchart,
+    this.visitorchart,
   });
 
   DashboardData.fromJson(dynamic json) {
-    user = json['user'] != null ? User.fromJson(json['user']) : null;
+    user = json['user'] != null
+        ? User.fromJson(json['user'])
+        : null;
+
+    // Stores
     if (json['store'] != null && json['store'] is List) {
-      store = [];
+      store = <Store>[];
+
       json['store'].forEach((v) {
-        store?.add(Store.fromJson(v));
+        store!.add(Store.fromJson(v));
       });
     }
-    qrcode = json['qr-code'] != null ? QrCode.fromJson(json['qr-code']) : null;
+
+    // QR Code
+    qrcode = json['qr-code'] != null
+        ? QrCode.fromJson(json['qr-code'])
+        : null;
+
     products = json['products'];
     sales = json['sales'];
     order = json['order'];
+
+    // Products
     if (json['product'] != null && json['product'] is List) {
-      product = [];
+      product = <ProductData>[];
+
       json['product'].forEach((v) {
-        product?.add(ProductData.fromJson(v));
+        product!.add(ProductData.fromJson(v));
       });
     }
-    if (json['recent_order'] != null && json['recent_order'] is List) {
-      recentOrder = [];
+
+    // Recent Orders
+    if (json['recent_order'] != null &&
+        json['recent_order'] is List) {
+      recentOrder = <RecentOrder>[];
+
       json['recent_order'].forEach((v) {
-        recentOrder?.add(RecentOrder.fromJson(v));
+        recentOrder!.add(
+          RecentOrder.fromJson(v),
+        );
       });
     }
-    if (json['coupons'] != null && json['coupons'] is List) {
-      coupons = [];
+
+    // Coupons
+    if (json['coupons'] != null &&
+        json['coupons'] is List) {
+      coupons = <Coupons>[];
+
       json['coupons'].forEach((v) {
-        coupons?.add(Coupons.fromJson(v));
+        coupons!.add(
+          Coupons.fromJson(v),
+        );
       });
     }
-    if (json['orderchart'] != null && json['orderchart'] is List) {
+
+    // Order Chart
+    if (json['orderchart'] != null &&
+        json['orderchart'] is List) {
       orderchart = <Orderchart>[];
+
       json['orderchart'].forEach((v) {
-        orderchart!.add(Orderchart.fromJson(v));
+        orderchart!.add(
+          Orderchart.fromJson(v),
+        );
       });
     }
-    if (json['visitorchart'] != null && json['visitorchart'] is List) {
-      visitorchart = <Visitorchart>[];
+
+    // Visitor Chart
+    if (json['visitorchart'] != null &&
+        json['visitorchart'] is List) {
+      visitorchart = <VisitorChartData>[];
+
       json['visitorchart'].forEach((v) {
-        visitorchart!.add(Visitorchart.fromJson(v));
+        visitorchart!.add(
+          VisitorChartData.fromJson(v),
+        );
       });
     }
   }
 
   User? user;
+
   List<Store>? store;
+
   QrCode? qrcode;
+
   int? products;
   int? sales;
   int? order;
+
   List<ProductData>? product;
+
   List<RecentOrder>? recentOrder;
+
   List<Coupons>? coupons;
+
   List<Orderchart>? orderchart;
-  List<Visitorchart>? visitorchart;
+
+  // نفس Model الموجود في static_model.dart
+  List<VisitorChartData>? visitorchart;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
+
     if (user != null) {
       map['user'] = user?.toJson();
     }
+
     if (store != null) {
-      map['store'] = store?.map((v) => v.toJson()).toList();
+      map['store'] =
+          store!.map((v) => v.toJson()).toList();
     }
+
     if (qrcode != null) {
       map['qr-code'] = qrcode?.toJson();
     }
+
     map['products'] = products;
     map['sales'] = sales;
     map['order'] = order;
+
     if (product != null) {
-      map['product'] = product?.map((v) => v.toJson()).toList();
+      map['product'] =
+          product!.map((v) => v.toJson()).toList();
     }
+
     if (recentOrder != null) {
-      map['recent_order'] = recentOrder?.map((v) => v.toJson()).toList();
+      map['recent_order'] =
+          recentOrder!.map((v) => v.toJson()).toList();
     }
+
     if (coupons != null) {
-      map['coupons'] = coupons?.map((v) => v.toJson()).toList();
+      map['coupons'] =
+          coupons!.map((v) => v.toJson()).toList();
     }
-    if (this.orderchart != null) {
-      map['orderchart'] = this.orderchart!.map((v) => v.toJson()).toList();
+
+    if (orderchart != null) {
+      map['orderchart'] =
+          orderchart!.map((v) => v.toJson()).toList();
     }
-    if (this.visitorchart != null) {
-      map['visitorchart'] = this.visitorchart!.map((v) => v.toJson()).toList();
+
+    if (visitorchart != null) {
+      map['visitorchart'] =
+          visitorchart!.map((v) => v.toJson()).toList();
     }
+
     return map;
   }
 }
@@ -145,9 +215,13 @@ class Coupons {
     couponName = json['coupon_name'];
     couponCode = json['coupon_code'];
     couponType = json['coupon_type'];
+
     discountAmount = json['discount_amount'] != null
-        ? double.tryParse(json['discount_amount'].toString())
+        ? double.tryParse(
+      json['discount_amount'].toString(),
+    )
         : null;
+
     id = json['id'];
   }
 
@@ -159,11 +233,13 @@ class Coupons {
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
+
     map['coupon_name'] = couponName;
     map['coupon_code'] = couponCode;
     map['coupon_type'] = couponType;
     map['discount_amount'] = discountAmount;
     map['id'] = id;
+
     return map;
   }
 }
@@ -177,38 +253,47 @@ class RecentOrder {
   String? deliveryStatus;
   String? currency;
 
-  RecentOrder(
-      {this.id,
-        this.productOrderId,
-        this.userName,
-        this.orderDate,
-        this.finalPrice,
-        this.deliveryStatus,
-        this.currency});
+  RecentOrder({
+    this.id,
+    this.productOrderId,
+    this.userName,
+    this.orderDate,
+    this.finalPrice,
+    this.deliveryStatus,
+    this.currency,
+  });
 
   RecentOrder.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     productOrderId = json['product_order_id'];
     userName = json['user_name'];
     orderDate = json['order_date'];
-    finalPrice = json['final_price'] != null ? double.tryParse(json['final_price'].toString()) : null;
+
+    finalPrice = json['final_price'] != null
+        ? double.tryParse(
+      json['final_price'].toString(),
+    )
+        : null;
+
     deliveryStatus = json['delivery_status'];
     currency = json['currency'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = this.id;
-    data['product_order_id'] = this.productOrderId;
-    data['user_name'] = this.userName;
-    data['order_date'] = this.orderDate;
-    data['final_price'] = this.finalPrice;
-    data['delivery_status'] = this.deliveryStatus;
-    data['currency'] = this.currency;
+    final Map<String, dynamic> data =
+    <String, dynamic>{};
+
+    data['id'] = id;
+    data['product_order_id'] = productOrderId;
+    data['user_name'] = userName;
+    data['order_date'] = orderDate;
+    data['final_price'] = finalPrice;
+    data['delivery_status'] = deliveryStatus;
+    data['currency'] = currency;
+
     return data;
   }
 }
-
 
 class QrCode {
   QrCode({
@@ -226,8 +311,10 @@ class QrCode {
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
+
     map['url'] = url;
     map['name'] = name;
+
     return map;
   }
 }
@@ -248,8 +335,10 @@ class Store {
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
+
     map['id'] = id;
     map['name'] = name;
+
     return map;
   }
 }
@@ -263,7 +352,8 @@ class User {
   User.fromJson(dynamic json) {
     name = json['name'];
 
-    final imageValue = json['image']?.toString().trim();
+    final imageValue =
+    json['image']?.toString().trim();
 
     if (imageValue == null ||
         imageValue.isEmpty ||
@@ -279,8 +369,10 @@ class User {
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
+
     map['name'] = name;
     map['image'] = image;
+
     return map;
   }
 }
@@ -289,7 +381,10 @@ class Orderchart {
   String? date;
   int? order;
 
-  Orderchart({this.date, this.order});
+  Orderchart({
+    this.date,
+    this.order,
+  });
 
   Orderchart.fromJson(Map<String, dynamic> json) {
     date = json['date'];
@@ -297,31 +392,12 @@ class Orderchart {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['date'] = this.date;
-    data['order'] = this.order;
-    return data;
-  }
-}
+    final Map<String, dynamic> data =
+    <String, dynamic>{};
 
-class Visitorchart {
-  String? date;
-  int? pageview;
-  int? uniquePageview;
+    data['date'] = date;
+    data['order'] = order;
 
-  Visitorchart({this.date, this.pageview, this.uniquePageview});
-
-  Visitorchart.fromJson(Map<String, dynamic> json) {
-    date = json['date'];
-    pageview = json['pageview'];
-    uniquePageview = json['unique_pageview'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['date'] = this.date;
-    data['pageview'] = this.pageview;
-    data['unique_pageview'] = this.uniquePageview;
     return data;
   }
 }

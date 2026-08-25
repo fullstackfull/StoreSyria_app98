@@ -24,48 +24,41 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/screen/notification_screen/notification_screen.dart';
 
-Widget buildAppTitleRow(Function() menuFun, String date) {
+Widget buildAppTitleRow(String date) {
   final NotificationController notificationController = Get.put(NotificationController());
-  
+  final isDark = Get.isDarkMode;
+
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Row(
-        children: [
-          GestureDetector(
-            onTap: menuFun,
-            child: assetSvdImageWidget(image: DefaultImages.menuIcn, height: 18, colorFilter: ColorFilter.mode(AppColor.cLabel, BlendMode.srcIn)),
-          ),
-          horizontalSpace(16),
-          Text(
-            "Dashboard",
-            style: pMedium16,
-          ),
-        ],
+      Text(
+        "Dashboard".tr,
+        style: pMedium16.copyWith(fontSize: 20, fontWeight: FontWeight.w700),
       ),
       Obx(() => Stack(
+        clipBehavior: Clip.none,
         children: [
           GestureDetector(
             onTap: () {
               Get.to(() => NotificationScreen(isBack: true));
             },
             child: Container(
-              padding: EdgeInsets.all(8.w),
+              padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                color: AppColor.cBottomNavyBlueColor,
+                color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
+                    color: AppColor.cShadow,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: Icon(
                 Icons.notifications_outlined,
-                size: 24.sp,
-                color: AppColor.cWhite,
+                size: 22.sp,
+                color: AppColor.themeNavyBlueColor,
               ),
             ),
           ),
@@ -84,8 +77,8 @@ Widget buildAppTitleRow(Function() menuFun, String date) {
                   minHeight: 18.h,
                 ),
                 child: Text(
-                  notificationController.unreadCount.value > 99 
-                      ? '99+' 
+                  notificationController.unreadCount.value > 99
+                      ? '99+'
                       : notificationController.unreadCount.value.toString(),
                   style: TextStyle(
                     color: Colors.white,
@@ -103,103 +96,124 @@ Widget buildAppTitleRow(Function() menuFun, String date) {
 }
 
 Widget buildProfileTitle({String? profileImage, String? name, String? task, Function(dynamic)? onValue}) {
-  return Row(
-    children: [
-      GestureDetector(
-        onTap: () {
-          Get.to(() => ProfileScreen(
-                    name: name!,
-                    profileImg: profileImage!,
-                  ))!
-              .then(onValue!);
-        },
-        child: CircleAvatar(
-          radius: 34,
-          backgroundColor: AppColor.themeGreenColor,
-          child: ClipOval(
-            child: CachedNetworkImage(
-              imageUrl: getImageUrl(profileImage),
-              width: 68,
-              height: 68,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
-              errorWidget: (context, url, error) {
-                return Image.network(
-                  DefaultImages.profileImg,
-                  width: 68,
-                  height: 68,
+  final isDark = Get.isDarkMode;
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.all(16.w),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColor.themeNavyBlueColor,
+          AppColor.themeNavyBlueColor.withOpacity(0.85),
+        ],
+      ),
+      borderRadius: BorderRadius.circular(22.r),
+      boxShadow: [
+        BoxShadow(
+          color: AppColor.themeNavyBlueColor.withOpacity(0.25),
+          blurRadius: 16,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        GestureDetector(
+          onTap: () {
+            Get.to(() => ProfileScreen(
+              name: name!,
+              profileImg: profileImage!,
+            ))!
+                .then(onValue!);
+          },
+          child: Container(
+            padding: EdgeInsets.all(3.w),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withOpacity(0.35), width: 2),
+            ),
+            child: CircleAvatar(
+              radius: 32,
+              backgroundColor: AppColor.themeGreenColor,
+              child: ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: getImageUrl(profileImage),
+                  width: 64,
+                  height: 64,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) {
-                    return Icon(
-                      Icons.person,
-                      size: 35,
-                      color: Colors.white,
+                  placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                  errorWidget: (context, url, error) {
+                    return Image.network(
+                      DefaultImages.profileImg,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) {
+                        return Icon(
+                          Icons.person,
+                          size: 32,
+                          color: Colors.white,
+                        );
+                      },
                     );
                   },
-                );
-              },
+                ),
+              ),
             ),
           ),
         ),
-      ),
-      horizontalSpace(8),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Hello, $name!",
-              style: pBold16.copyWith(fontSize: 20),
-            ),
-            // Text.rich(
-            //   TextSpan(
-            //     text: 'You have ',
-            //     style: pRegular18.copyWith(
-            //       color: AppColor.cGreenFont,
-            //     ),
-            //     children: <TextSpan>[
-            //       TextSpan(
-            //         text: '$task Tasks For Today',
-            //         style: pRegular18.copyWith(
-            //           color: AppColor.cGreenFont,
-            //           decoration: TextDecoration.underline,
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-          ],
+        horizontalSpace(14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Welcome back".tr,
+                style: pRegular12.copyWith(color: Colors.white.withOpacity(0.7)),
+              ),
+              verticalSpace(3),
+              Text(
+                "$name!",
+                style: pBold16.copyWith(fontSize: 19, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
-      ),
-    ],
-  );
-}
-
-Widget titleShowMoreWidget({String? title, String? btnName, Function()? onPresses}) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Text(
-        title!,
-        style: pRegular10.copyWith(fontSize: 20),
-      ),
-      SmallCommonIconButton(
-        onPressed: onPresses,
-        iconData: DefaultImages.graphIcn,
-        title: btnName,
-        textColor: AppColor.cWhiteFont,
-      )
-    ],
+        Container(
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: Colors.white),
+        ),
+      ],
+    ),
   );
 }
 
 Widget qrCodeWidget({String? qrString, String? title}) {
+  final isDark = Get.isDarkMode;
   return Container(
-    height: 70,
-    width: Get.width,
-    decoration: BoxDecoration(border: Border.all(color: AppColor.cBorder), borderRadius: BorderRadius.circular(10)),
-    padding: EdgeInsets.all(10),
+    height: 76,
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
+      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.6)),
+      borderRadius: BorderRadius.circular(18),
+      boxShadow: [
+        BoxShadow(
+          color: AppColor.cShadow,
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -229,19 +243,20 @@ Widget qrCodeWidget({String? qrString, String? title}) {
             print('copied');
           },
           child: Container(
-            width: 101,
-            height: 22,
+            width: 108,
+            height: 26,
             decoration: BoxDecoration(
               color: AppColor.themeNavyBlueColor,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(30),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 assetSvdImageWidget(
                   image: DefaultImages.copyIcn,
+                  colorFilter: ColorFilter.mode(AppColor.cWhite, BlendMode.srcIn),
                 ),
-                horizontalSpace(10),
+                horizontalSpace(8),
                 Text(
                   'Copy Me Quickly',
                   style: pRegular8.copyWith(color: AppColor.cWhite),
@@ -278,42 +293,50 @@ Widget totalProductWidget({
   String? subTitle,
   String? total,
 }) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 12),
-    child: Container(
-      height: 70,
-      width: Get.width,
-      decoration: BoxDecoration(border: Border.all(color: AppColor.cBorder), borderRadius: BorderRadius.circular(10)),
-      padding: EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              assetSvdImageWidget(image: image),
-              horizontalSpace(9),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title!,
-                    style: pRegular12,
-                  ),
-                  Text(
-                    subTitle!,
-                    style: pSemiBold16,
-                  ),
-                ],
-              ),
-            ],
+  final isDark = Get.isDarkMode;
+  return Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+      boxShadow: [
+        BoxShadow(
+          color: AppColor.cShadow,
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: AppColor.themeGreenColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(12),
           ),
-          Text(
-            total!,
-            style: pSemiBold18,
+          child: assetSvdImageWidget(
+            image: image,
+            height: 18,
+            colorFilter: ColorFilter.mode(AppColor.themeGreenColor, BlendMode.srcIn),
           ),
-        ],
-      ),
+        ),
+        verticalSpace(10),
+        Text(
+          total!,
+          style: pSemiBold18.copyWith(fontSize: 22),
+        ),
+        verticalSpace(2),
+        Text(
+          "${title!} ${subTitle!}",
+          style: pRegular12.copyWith(color: AppColor.cDarkGreyFont),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     ),
   );
 }
@@ -356,7 +379,18 @@ class _OrderGraphState extends State<OrderGraph> {
   Widget build(BuildContext context) {
     return Container(
       height: 250,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), border: Border.all(color: AppColor.cBorder)),
+      decoration: BoxDecoration(
+        color: Get.isDarkMode ? DarkThemeColor.cCardBackground : AppColor.cWhite,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Get.isDarkMode ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.cShadow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         children: [
           Padding(
@@ -477,449 +511,193 @@ class SalesData {
   final String year;
   final double sales;
 }
-
-Widget topProductWidget({
-  required String image,
-  required String title,
-  required String subTitle,
-  required String amount,
-  required String digit,
-  required String qty,
-  int? index,
-  Function()? deleteFun,
-  Function()? viewFun,
-  Function()? changeFun,
-}) {
-  return Padding(
-    padding: const EdgeInsets.only(left: 8.0, bottom: 13),
-    child: Slidable(
-      key: ValueKey(index),
-      endActionPane: ActionPane(
-        motion: ScrollMotion(),
-        children: [
-          slidableActionWidget(onTap: viewFun, image: DefaultImages.eyeIcn, title: "View"),
-          slidableActionWidget(onTap: changeFun, image: DefaultImages.changeIcn, title: "Change", color: AppColor.themeNavyBlueColor),
-          slidableActionWidget(onTap: deleteFun, image: DefaultImages.deleteIcn, title: "Delete", color: AppColor.cRedText),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.centerLeft,
-        fit: StackFit.loose,
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            decoration: BoxDecoration(color: AppColor.cBackGround, borderRadius: BorderRadius.circular(9), border: Border.all(color: AppColor.cBorder)),
-            padding: const EdgeInsets.only(left: 20, right: 8, top: 10, bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      height: 55,
-                      width: 44,
-                      decoration: BoxDecoration(
-                        color: AppColor.cBackGround,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: CachedNetworkImage(
-                          imageUrl: getImageUrl(image),
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                          errorWidget: (context, url, error) => Image.network(
-                            DefaultImages.productImg,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                    horizontalSpace(10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: pRegular12.copyWith(color: AppColor.cDarkGreyFont),
-                        ),
-                        verticalSpace(3),
-                        SizedBox(
-                          width: Get.width / 1.8,
-                          child: Text(
-                            subTitle,
-                            style: pSemiBold16,
-                            softWrap: true,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        verticalSpace(3),
-                        Row(
-                          children: [
-                            richText("Quantity:", qty),
-                            horizontalSpace(10),
-                            richText("Price: ", amount),
-                          ],
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft - Alignment(.05, 0),
-            child: twoXWidget(digit),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-Widget circleImageWidget(String image) {
-  return CircleAvatar(
-    radius: 15,
-    backgroundColor: AppColor.themeGreenColor,
-    child: assetSvdImageWidget(image: image),
-  );
-}
-
-richText(String title, String total) => Text.rich(
-      TextSpan(
-        text: '$title ',
-        style: pRegular12.copyWith(color: AppColor.cDarkGreyFont),
-        children: <TextSpan>[
-          TextSpan(
-            text: total,
-            style: pMedium12,
-          ),
-        ],
-      ),
-    );
-
-twoXWidget(String string) {
-  return Container(
-    height: 24,
-    width: 24,
-    decoration: BoxDecoration(color: AppColor.themeGreenColor, shape: BoxShape.circle),
-    child: Center(
-      child: Text(
-        string,
-        style: pSemiBold14,
-      ),
-    ),
-  );
-}
-
-Widget recentOrdersWidget({
-  String? status,
-  String? orderId,
-  String? name,
-  String? date,
-  String? usd,
-  int? index,
-  Function()? viewFun,
-  Function()? deleteFun,
-  Function()? downloadFun,
-  Function()? shareFun
-}) {
-  final isDark = Get.isDarkMode;
-
-  // ألوان مخصصة للبطاقة
-  final cardBg = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-  final borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5);
-  final titleColor = isDark ? Colors.white : AppColor.themeNavyBlueColor;
-  final subTextColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
-
-  return Padding(
-    padding: EdgeInsets.only(bottom: 12.h),
-    child: Slidable(
-      key: ValueKey(index ?? 0),
-      endActionPane: ActionPane(
-        motion: const ScrollMotion(),
-        children: [
-          slidableActionWidget(onTap: viewFun, image: DefaultImages.eyeIcn, title: "view".tr),
-          slidableActionWidget(onTap: deleteFun, image: DefaultImages.deleteIcn, title: "delete".tr, color: AppColor.cRedText),
-        ],
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: borderColor),
-        ),
-        padding: EdgeInsets.all(12.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // الصف العلوي: رقم الطلب والحالة
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "#${orderId ?? ''}",
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: titleColor,
-                  ),
-                ),
-                statusButton(status),
-              ],
-            ),
-
-            verticalSpace(7.h),
-
-            // الصف الأوسط: الاسم والتاريخ
-            Row(
-              children: [
-                Icon(Icons.person_outline, size: 14.sp, color: subTextColor),
-                horizontalSpace(6.w),
-                Expanded(
-                  child: Text(
-                    name ?? '',
-                    style: TextStyle(fontSize: 12.sp, color: subTextColor),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                horizontalSpace(10.w),
-                Icon(Icons.calendar_today_outlined, size: 12.sp, color: subTextColor),
-                horizontalSpace(4.w),
-                Text(
-                  date ?? '',
-                  style: TextStyle(fontSize: 11.sp, color: subTextColor),
-                ),
-              ],
-            ),
-
-            verticalSpace(5.h),
-
-            // خط فاصل خفيف
-            Divider(height: 1.h, color: borderColor, thickness: 1),
-
-            verticalSpace(5.h),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Total Amount",
-                  style: TextStyle(fontSize: 12.sp, color: subTextColor),
-                ),
-                Text(
-                  "\$${usd ?? '0.00'}",
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColor.themeGreenColor,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-Container statusButton(String? status) {
-  return Container(
-    padding: EdgeInsets.only(left: 10.h, right: 10.h, top: 7.h, bottom: 7.h),
-    decoration: BoxDecoration(
-      color: AppColor.cLightGreen,
-      borderRadius: BorderRadius.circular(13),
-    ),
-    child: Row(
-      children: [
-        assetSvdImageWidget(image: DefaultImages.doneIcn),
-        horizontalSpace(10),
-        Text(
-          status!,
-          style: pBold12.copyWith(color: AppColor.cGreenFont, fontSize: 10),
-        ),
-      ],
-    ),
-  );
-}
-
-class VisitorChart extends StatefulWidget {
-  final List<Visitorchart> visitorChart;
-
-  const VisitorChart({Key? key, required this.visitorChart}) : super(key: key);
-
-  @override
-  State<VisitorChart> createState() => _VisitorChartState();
-}
-
-class _VisitorChartState extends State<VisitorChart> {
-  List<ChartData>? chartData;
-
-  @override
-  void initState() {
-    chartData = <ChartData>[];
-    if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-      chartData = [
-        ChartData('19-jul', 5, 8),
-        ChartData('20-jul', 10, 15),
-        ChartData('21-jul', 12, 17),
-        ChartData('22-jul', 14, 19),
-        ChartData('23-jul', 12, 17),
-        ChartData('24-jul', 15, 10),
-        ChartData('25-jul', 8, 5),
-      ];
-    } else {
-      widget.visitorChart.forEach((data) {
-        chartData!.add(ChartData(data.date!, data.uniquePageview!, data.pageview!));
-      });
-    }
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 250,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), border: Border.all(color: AppColor.cBorder)),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(15),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: AppColor.themeGreenColor,
-                  radius: 6,
-                ),
-                horizontalSpace(10),
-                Text(
-                  "Total page view",
-                  style: pMedium8,
-                ),
-                horizontalSpace(15),
-                CircleAvatar(
-                  backgroundColor: AppColor.themeNavyBlueColor,
-                  radius: 6,
-                ),
-                horizontalSpace(10),
-                Text(
-                  "Unique page view",
-                  style: pMedium8,
-                ),
-              ],
-            ),
-          ),
-          Expanded(child: _buildStackedBarChart()),
-        ],
-      ),
-    );
-  }
-
-  SfCartesianChart _buildStackedBarChart() {
-    return SfCartesianChart(
-      enableAxisAnimation: true,
-      plotAreaBorderWidth: 0,
-      legend: Legend(isVisible: false),
-      zoomPanBehavior: ZoomPanBehavior(
-        enablePanning: true,
-      ),
-      primaryXAxis: CategoryAxis(
-        borderWidth: 0,
-        autoScrollingMode: AutoScrollingMode.start,
-        autoScrollingDelta: 7,
-        maximumLabels: 100,
-        majorGridLines: MajorGridLines(color: AppColor.cBorder),
-        axisLine: AxisLine(width: 0, color: AppColor.cTransparent),
-        interval: 1,
-        majorTickLines: MajorTickLines(width: 0),
-        axisBorderType: AxisBorderType.withoutTopAndBottom,
-      ),
-      primaryYAxis: NumericAxis(borderWidth: 0, majorGridLines: MajorGridLines(color: AppColor.cTransparent), axisLine: AxisLine(width: 0, color: AppColor.cTransparent), majorTickLines: MajorTickLines(width: 0)),
-      tooltipBehavior: TooltipBehavior(
-        enable: true,
-        color: AppColor.cBackGround,
-        activationMode: ActivationMode.singleTap,
-        canShowMarker: true,
-        shouldAlwaysShow: false,
-        borderColor: AppColor.cBorder,
-        borderWidth: 5,
-        builder: (data, point, series, pointIndex, seriesIndex) {
-          print(data);
-          print(point);
-          print(series);
-          print(pointIndex);
-          print(seriesIndex);
-          var title = seriesIndex == 0 ? "Total Page View" : "Unique Page View";
-          var platform = seriesIndex == 0 ? chartData![pointIndex].desktop : chartData![pointIndex].mobile;
-          return Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColor.cBorder),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: pBold12.copyWith(color: AppColor.cDarkGreyFont),
-                ),
-                verticalSpace(8),
-                Text(
-                  platform.toString(),
-                  style: pBold16.copyWith(color: seriesIndex == 0 ? AppColor.cGreenFont : AppColor.cLabel),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-      series: _getStackedBarSeries(),
-    );
-  }
-
-  List<CartesianSeries<ChartData, String>> _getStackedBarSeries() {
-    return <CartesianSeries<ChartData, String>>[
-      StackedColumnSeries<ChartData, String>(
-        dataSource: chartData!,
-        xValueMapper: (ChartData sales, _) => sales.x,
-        yValueMapper: (ChartData sales, _) => sales.desktop,
-        color: AppColor.themeGreenColor,
-        name: 'Desktop platform',
-        width: 0.5,
-        dataLabelSettings: DataLabelSettings(
-          isVisible: true,
-          textStyle: pMedium10.copyWith(
-            color: AppColor.cWhite,
-          ),
-        ),
-      ),
-      StackedColumnSeries<ChartData, String>(
-        dataSource: chartData!,
-        xValueMapper: (ChartData sales, _) => sales.x,
-        yValueMapper: (ChartData sales, _) => sales.mobile,
-        color: AppColor.themeNavyBlueColor,
-        name: 'Mobile platform',
-        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-        width: 0.5,
-        dataLabelSettings: DataLabelSettings(
-          isVisible: true,
-          textStyle: pMedium10.copyWith(color: AppColor.cWhite),
-          borderRadius: 12,
-        ),
-      ),
-    ];
-  }
-
-  @override
-  void dispose() {
-    chartData!.clear();
-    super.dispose();
-  }
-}
+// class VisitorChart extends StatefulWidget {
+//   final List<Visitorchart> visitorChart;
+//
+//   const VisitorChart({Key? key, required this.visitorChart}) : super(key: key);
+//
+//   @override
+//   State<VisitorChart> createState() => _VisitorChartState();
+// }
+//
+// class _VisitorChartState extends State<VisitorChart> {
+//   List<ChartData>? chartData;
+//
+//   @override
+//   void initState() {
+//     chartData = <ChartData>[];
+//     if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+//       chartData = [
+//         ChartData('19-jul', 5, 8),
+//         ChartData('20-jul', 10, 15),
+//         ChartData('21-jul', 12, 17),
+//         ChartData('22-jul', 14, 19),
+//         ChartData('23-jul', 12, 17),
+//         ChartData('24-jul', 15, 10),
+//         ChartData('25-jul', 8, 5),
+//       ];
+//     } else {
+//       widget.visitorChart.forEach((data) {
+//         chartData!.add(ChartData(data.date!, data.uniquePageview!, data.pageview!));
+//       });
+//     }
+//     super.initState();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 250,
+//       decoration: BoxDecoration(
+//         color: Get.isDarkMode ? DarkThemeColor.cCardBackground : AppColor.cWhite,
+//         borderRadius: BorderRadius.circular(18),
+//         border: Border.all(color: Get.isDarkMode ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+//         boxShadow: [
+//           BoxShadow(
+//             color: AppColor.cShadow,
+//             blurRadius: 12,
+//             offset: const Offset(0, 4),
+//           ),
+//         ],
+//       ),
+//       child: Column(
+//         children: [
+//           Padding(
+//             padding: const EdgeInsets.all(15),
+//             child: Row(
+//               children: [
+//                 CircleAvatar(
+//                   backgroundColor: AppColor.themeGreenColor,
+//                   radius: 6,
+//                 ),
+//                 horizontalSpace(10),
+//                 Text(
+//                   "Total page view",
+//                   style: pMedium8,
+//                 ),
+//                 horizontalSpace(15),
+//                 CircleAvatar(
+//                   backgroundColor: AppColor.themeNavyBlueColor,
+//                   radius: 6,
+//                 ),
+//                 horizontalSpace(10),
+//                 Text(
+//                   "Unique page view",
+//                   style: pMedium8,
+//                 ),
+//               ],
+//             ),
+//           ),
+//           Expanded(child: _buildStackedBarChart()),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   SfCartesianChart _buildStackedBarChart() {
+//     return SfCartesianChart(
+//       enableAxisAnimation: true,
+//       plotAreaBorderWidth: 0,
+//       legend: Legend(isVisible: false),
+//       zoomPanBehavior: ZoomPanBehavior(
+//         enablePanning: true,
+//       ),
+//       primaryXAxis: CategoryAxis(
+//         borderWidth: 0,
+//         autoScrollingMode: AutoScrollingMode.start,
+//         autoScrollingDelta: 7,
+//         maximumLabels: 100,
+//         majorGridLines: MajorGridLines(color: AppColor.cBorder),
+//         axisLine: AxisLine(width: 0, color: AppColor.cTransparent),
+//         interval: 1,
+//         majorTickLines: MajorTickLines(width: 0),
+//         axisBorderType: AxisBorderType.withoutTopAndBottom,
+//       ),
+//       primaryYAxis: NumericAxis(borderWidth: 0, majorGridLines: MajorGridLines(color: AppColor.cTransparent), axisLine: AxisLine(width: 0, color: AppColor.cTransparent), majorTickLines: MajorTickLines(width: 0)),
+//       tooltipBehavior: TooltipBehavior(
+//         enable: true,
+//         color: AppColor.cBackGround,
+//         activationMode: ActivationMode.singleTap,
+//         canShowMarker: true,
+//         shouldAlwaysShow: false,
+//         borderColor: AppColor.cBorder,
+//         borderWidth: 5,
+//         builder: (data, point, series, pointIndex, seriesIndex) {
+//           print(data);
+//           print(point);
+//           print(series);
+//           print(pointIndex);
+//           print(seriesIndex);
+//           var title = seriesIndex == 0 ? "Total Page View" : "Unique Page View";
+//           var platform = seriesIndex == 0 ? chartData![pointIndex].desktop : chartData![pointIndex].mobile;
+//           return Container(
+//             decoration: BoxDecoration(
+//               border: Border.all(color: AppColor.cBorder),
+//               borderRadius: BorderRadius.circular(8),
+//             ),
+//             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 Text(
+//                   title,
+//                   style: pBold12.copyWith(color: AppColor.cDarkGreyFont),
+//                 ),
+//                 verticalSpace(8),
+//                 Text(
+//                   platform.toString(),
+//                   style: pBold16.copyWith(color: seriesIndex == 0 ? AppColor.cGreenFont : AppColor.cLabel),
+//                 ),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//       series: _getStackedBarSeries(),
+//     );
+//   }
+//
+//   List<CartesianSeries<ChartData, String>> _getStackedBarSeries() {
+//     return <CartesianSeries<ChartData, String>>[
+//       StackedColumnSeries<ChartData, String>(
+//         dataSource: chartData!,
+//         xValueMapper: (ChartData sales, _) => sales.x,
+//         yValueMapper: (ChartData sales, _) => sales.desktop,
+//         color: AppColor.themeGreenColor,
+//         name: 'Desktop platform',
+//         width: 0.5,
+//         dataLabelSettings: DataLabelSettings(
+//           isVisible: true,
+//           textStyle: pMedium10.copyWith(
+//             color: AppColor.cWhite,
+//           ),
+//         ),
+//       ),
+//       StackedColumnSeries<ChartData, String>(
+//         dataSource: chartData!,
+//         xValueMapper: (ChartData sales, _) => sales.x,
+//         yValueMapper: (ChartData sales, _) => sales.mobile,
+//         color: AppColor.themeNavyBlueColor,
+//         name: 'Mobile platform',
+//         borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+//         width: 0.5,
+//         dataLabelSettings: DataLabelSettings(
+//           isVisible: true,
+//           textStyle: pMedium10.copyWith(color: AppColor.cWhite),
+//           borderRadius: 12,
+//         ),
+//       ),
+//     ];
+//   }
+//
+//   @override
+//   void dispose() {
+//     chartData!.clear();
+//     super.dispose();
+//   }
+// }
 
 class ChartData {
   ChartData(this.x, this.desktop, this.mobile);
@@ -935,7 +713,7 @@ Widget slidableActionWidget({Function()? onTap, String? image, String? title, Co
     child: GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(color: color ?? AppColor.themeGreenColor, borderRadius: BorderRadius.horizontal(right: Radius.circular(8))),
+        decoration: BoxDecoration(color: color ?? AppColor.themeGreenColor, borderRadius: BorderRadius.horizontal(right: Radius.circular(16))),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
