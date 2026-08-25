@@ -24,8 +24,7 @@ class CouponScreen extends StatefulWidget {
 
 class _CouponScreenState extends State<CouponScreen>
     with AutomaticKeepAliveClientMixin {
-  final NewCouponController couponController =
-  Get.put(NewCouponController());
+  final NewCouponController couponController = Get.find<NewCouponController>();
 
   late final ScrollController scrollController;
 
@@ -37,11 +36,13 @@ class _CouponScreenState extends State<CouponScreen>
     super.initState();
 
     scrollController = ScrollController();
-
     scrollController.addListener(_onScroll);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
+      if (!mounted) return;
+
+      if (couponController.couponsList.isEmpty &&
+          !couponController.isLoading.value) {
         couponController.refreshCoupons();
       }
     });
@@ -187,16 +188,8 @@ class _CouponScreenState extends State<CouponScreen>
 
                 verticalSpace(16.h),
 
-                // ==================================================
-                // CONTENT
-                // ==================================================
-
                 Expanded(
                   child: Obx(() {
-
-                    // ==================================================
-                    // FIRST PAGE LOADING
-                    // ==================================================
 
                     if (couponController.isLoading.value &&
                         couponController.couponsList.isEmpty) {
@@ -204,10 +197,6 @@ class _CouponScreenState extends State<CouponScreen>
                         child: LoadingWidget(),
                       );
                     }
-
-                    // ==================================================
-                    // ERROR
-                    // ==================================================
 
                     if (couponController.errorMessage.isNotEmpty &&
                         couponController.couponsList.isEmpty) {
@@ -237,10 +226,6 @@ class _CouponScreenState extends State<CouponScreen>
                       );
                     }
 
-                    // ==================================================
-                    // EMPTY
-                    // ==================================================
-
                     if (couponController.couponsList.isEmpty) {
                       return RefreshIndicator(
                         backgroundColor: isDark
@@ -269,10 +254,6 @@ class _CouponScreenState extends State<CouponScreen>
                       );
                     }
 
-                    // ==================================================
-                    // COUPON LIST
-                    // ==================================================
-
                     return RefreshIndicator(
                       backgroundColor: isDark
                           ? DarkThemeColor.cCardBackground
@@ -283,10 +264,6 @@ class _CouponScreenState extends State<CouponScreen>
                         physics:
                         const AlwaysScrollableScrollPhysics(),
                         slivers: [
-
-                          // ==================================================
-                          // TOTAL COUPONS
-                          // ==================================================
 
                           SliverToBoxAdapter(
                             child: Padding(
@@ -313,10 +290,6 @@ class _CouponScreenState extends State<CouponScreen>
                             ),
                           ),
 
-                          // ==================================================
-                          // COUPONS
-                          // ==================================================
-
                           SliverPadding(
                             padding: EdgeInsets.only(
                               bottom: 20.h,
@@ -334,82 +307,26 @@ class _CouponScreenState extends State<CouponScreen>
                                     padding: EdgeInsets.only(
                                       bottom: 12.h,
                                     ),
-                                    child:
-                                    productCouponWidget(
+                                    child: productCouponWidget(
                                       context: context,
                                       index: index,
-
-                                      // ==================================================
-                                      // DISCOUNT
-                                      // ==================================================
-
-                                      discount: coupon
-                                          .discountAmount
-                                          .toString(),
-
-                                      // ==================================================
-                                      // NAME
-                                      // ==================================================
-
+                                      discount: coupon.discountAmount.toString(),
                                       name: coupon.couponName,
-
-                                      // ==================================================
-                                      // CODE
-                                      // ==================================================
-
                                       code: coupon.couponCode,
-
-                                      // ==================================================
-                                      // DATE
-                                      // ==================================================
-
-                                      date: coupon
-                                          .couponExpiryDate,
-
-                                      // ==================================================
-                                      // TYPE
-                                      // ==================================================
-
-                                      couponType:
-                                      coupon.couponType,
-
-                                      // ==================================================
-                                      // STATUS
-                                      // ==================================================
-
-                                      status:
-                                      coupon.status ?? 0,
-
-                                      // ==================================================
-                                      // VIEW
-                                      // ==================================================
-
+                                      date: coupon.couponExpiryDate,
+                                      couponType: coupon.couponType,
+                                      status: coupon.status ?? 0,
                                       viewFun: () {
                                         _viewCoupon(coupon);
                                       },
 
-                                      // ==================================================
-                                      // EDIT
-                                      // ==================================================
-
                                       showChangeAction: true,
-
                                       changeFun: () {
                                         _editCoupon(coupon);
                                       },
-
-                                      // ==================================================
-                                      // DELETE
-                                      // ==================================================
-
                                       deleteFun: () {
                                         _deleteCoupon(coupon);
                                       },
-
-                                      // ==================================================
-                                      // CARD TAP
-                                      // ==================================================
-
                                       onTap: () {
                                         _viewCoupon(coupon);
                                       },

@@ -145,14 +145,16 @@ class Coupons {
     couponName = json['coupon_name'];
     couponCode = json['coupon_code'];
     couponType = json['coupon_type'];
-    discountAmount = json['discount_amount'];
+    discountAmount = json['discount_amount'] != null
+        ? double.tryParse(json['discount_amount'].toString())
+        : null;
     id = json['id'];
   }
 
   String? couponName;
   String? couponCode;
   String? couponType;
-  int? discountAmount;
+  double? discountAmount;
   int? id;
 
   Map<String, dynamic> toJson() {
@@ -177,12 +179,12 @@ class RecentOrder {
 
   RecentOrder(
       {this.id,
-      this.productOrderId,
-      this.userName,
-      this.orderDate,
-      this.finalPrice,
-      this.deliveryStatus,
-      this.currency});
+        this.productOrderId,
+        this.userName,
+        this.orderDate,
+        this.finalPrice,
+        this.deliveryStatus,
+        this.currency});
 
   RecentOrder.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -260,7 +262,16 @@ class User {
 
   User.fromJson(dynamic json) {
     name = json['name'];
-    image = json['image']==''?"https://storesyria.com/uploads/profile/avatar.png":json['image'];
+
+    final imageValue = json['image']?.toString().trim();
+
+    if (imageValue == null ||
+        imageValue.isEmpty ||
+        imageValue.contains('default.jpg')) {
+      image = null;
+    } else {
+      image = imageValue;
+    }
   }
 
   String? name;

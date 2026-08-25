@@ -884,7 +884,27 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
                           decimal: true,
                         ),
                         validator: (value) {
-                          return Validator.validateRequired(value ?? '');
+                          final discount = value?.trim() ?? '';
+
+                          if (discount.isEmpty) {
+                            return 'discount_required'.tr;
+                          }
+
+                          final discountValue = double.tryParse(discount);
+
+                          if (discountValue == null) {
+                            return 'discount_must_be_number'.tr;
+                          }
+
+                          if (discountValue < 0) {
+                            return 'discount_must_be_positive'.tr;
+                          }
+
+                          if (discountValue > 100) {
+                            return 'discount_must_be_less_than_or_equal_100'.tr;
+                          }
+
+                          return null;
                         },
                       ),
 

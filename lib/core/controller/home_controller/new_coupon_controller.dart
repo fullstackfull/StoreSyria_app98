@@ -313,10 +313,10 @@ class NewCouponController extends GetxController {
 
           viewCouponsList.refresh();
         } else {
-          commonToast(
-            data['data']?['message'] ??
-                "No data found",
-          );
+          // commonToast(
+          //   data['data']?['message'] ??
+          //       "No data found",
+          // );
         }
       },
 

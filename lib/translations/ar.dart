@@ -239,5 +239,9 @@ const Map<String, String> ar = {
     "expiry_date_required": "تاريخ الانتهاء مطلوب",
    "flat": "قيمة ثابتة",
     "percentage": "نسبة مئوية",
-  "no_coupons_found": "لا توجد كوبونات"
+  "no_coupons_found": "لا توجد كوبونات",
+    "discount_must_be_number": "يجب أن تكون قيمة الخصم رقماً صحيحاً",
+    "discount_must_be_positive": "يجب أن تكون قيمة الخصم أكبر من أو تساوي 0",
+    "discount_must_be_less_than_or_equal_100": "يجب أن تكون القيمة أقل من أو تساوي 100"
+
 };

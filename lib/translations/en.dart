@@ -238,5 +238,9 @@ const Map<String, String> en = {
 "expiry_date_required": "Expiry date is required",
 "flat": "Flat",
 "percentage": "Percentage",
-  "no_coupons_found": "No coupons found"
+  "no_coupons_found": "No coupons found",
+    "discount_must_be_number": "Discount must be a valid number",
+    "discount_must_be_positive": "Discount must be greater than or equal to 0",
+    "discount_must_be_less_than_or_equal_100": "Value must be less than or equal to 100"
+
 };

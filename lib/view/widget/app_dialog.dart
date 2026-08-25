@@ -11,31 +11,16 @@ class AppDialog {
     required BuildContext context,
     String? title,
     required String message,
-
     bool showConfirmLoading = true,
-
     String? confirmText,
     String? cancelText,
-
+    bool popOnConfirm = true,
     required Future<void> Function() onConfirm,
     VoidCallback? onCancel,
-
-    // =========================
-    // ICON
-    // =========================
     IconData? icon,
     Color? iconColor,
-
-    // =========================
-    // LOTTIE
-    // =========================
     String? lottieAsset,
-
-    // =========================
-    // COLORS
-    // =========================
     Color? confirmColor,
-
     bool barrierDismissible = true,
   }) {
     bool isLoading = false;
@@ -329,8 +314,7 @@ class AppDialog {
                                     try {
                                       await onConfirm();
 
-                                      if (context
-                                          .mounted) {
+                                      if (popOnConfirm && context.mounted) {
                                         Navigator.pop(
                                           context,
                                           true,

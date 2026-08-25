@@ -123,10 +123,21 @@ Widget buildProfileTitle({String? profileImage, String? name, String? task, Func
               height: 68,
               fit: BoxFit.cover,
               placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
-              errorWidget: (context, url, error) => Image.network(
-                DefaultImages.profileImg,
-                fit: BoxFit.cover,
-              ),
+              errorWidget: (context, url, error) {
+                return Image.network(
+                  DefaultImages.profileImg,
+                  width: 68,
+                  height: 68,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) {
+                    return Icon(
+                      Icons.person,
+                      size: 35,
+                      color: Colors.white,
+                    );
+                  },
+                );
+              },
             ),
           ),
         ),

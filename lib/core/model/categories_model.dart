@@ -191,11 +191,8 @@ class CategoryData {
     updatedAt = json['updated_at']?.toString();
     demoField = json['demo_field']?.toString();
 
-    imagePathFullUrl =
-        json['image_path_full_url']?.toString();
-
-    iconPathFullUrl =
-        json['icon_path_full_url']?.toString();
+    imagePathFullUrl = _cleanImageUrl(json['image_path_full_url']);
+    iconPathFullUrl = _cleanImageUrl(json['icon_path_full_url']);
   }
 
   Map<String, dynamic> toJson() {
@@ -252,6 +249,14 @@ class Links {
 
     return map;
   }
+}
+
+String? _cleanImageUrl(dynamic value) {
+  final url = value?.toString().trim();
+  if (url == null || url.isEmpty || url.contains('default.jpg')) {
+    return null;
+  }
+  return url;
 }
 
 int? _toInt(dynamic value) {

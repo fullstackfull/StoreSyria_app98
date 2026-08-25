@@ -9,7 +9,6 @@ import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 
-import '../../utils/helper.dart';
 
 simpleAppBar({bool isBack = true, required String title, String? date}) {
   final isDark = Theme.of(Get.context!).brightness == Brightness.dark;

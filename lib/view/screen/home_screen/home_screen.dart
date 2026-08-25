@@ -45,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   final HomeController homeController = Get.put(HomeController());
   final CategoryController categoryController = Get.put(CategoryController());
   final ProductController productController = Get.put(ProductController(),permanent: true);
-  final NewCouponController couponController = Get.put(NewCouponController());
   final OrderController orderController = Get.put(OrderController());
   final NotificationController notificationController = Get.put(NotificationController());
   final ThemeController themeController = Get.find<ThemeController>();
@@ -434,75 +433,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       verticalSpace(10),
                       VisitorChart(visitorChart: homeController.dashboardData
                           ?.visitorchart ?? []),
-                      verticalSpace(25),
-
-                      titleShowMoreWidget(title: "Product coupons".tr,
-                          btnName: "Go to Coupons".tr,
-                          onPresses: () => Get.to(() => const CouponScreen())),
-                      verticalSpace(15),
-                      ListView.builder(
-                        itemCount: homeController.couponsList.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final coupon = homeController.couponsList[index];
-                          return GestureDetector(
-                            onTap: () =>
-                            coupon.id != null
-                                ? Get.to(() =>
-                                CouponDetailScreen(couponId: coupon.id!))
-                                : null,
-                            child: productCouponWidget(
-                              context: context,
-                              index: index,
-                              discount: "${coupon.discountAmount}${coupon
-                                  .couponType == "percentage" ? "%" : ""}",
-                              name: coupon.couponName,
-                              code: coupon.couponCode,
-                              date: '',
-                              viewFun: () =>
-                              coupon.id != null
-                                  ? Get.to(() =>
-                                  CouponDetailScreen(couponId: coupon.id!))
-                                  : null,
-                              deleteFun: () {
-                                if (Prefs.getBool(AppConstant.isDemoMode) ==
-                                    true) {
-                                  commonToast(AppConstant.demoString);
-                                } else {
-                                  couponController.deleteCouponData(
-                                      couponId: coupon.id?.toString() ?? "");
-                                  getData();
-                                }
-                              },
-                              changeFun: () =>
-                                  showModalBottomSheet(
-                                    context: context,
-                                    backgroundColor: AppColor.cBackGround,
-                                    barrierColor: AppColor.cGreyOpacity,
-                                    isScrollControlled: true,
-                                    shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(30))),
-                                    constraints: BoxConstraints(
-                                        maxHeight: Get.height,
-                                        minHeight: Get.height / 1.5),
-                                    builder: (_) =>
-                                        AddNewCouponWidget(
-                                          isUpdate: true,
-                                          couponId: coupon.id?.toString(),
-                                          name: coupon.couponName,
-                                          flat: coupon.couponType,
-                                          code: coupon.couponCode,
-                                          discount: coupon.discountAmount
-                                              ?.toString(),
-                                        ),
-                                  ).then((_) => getData()),
-                            ),
-                          );
-                        },
-                      ),
-                      verticalSpace(20),
                     ],
                   ),
                 ),
