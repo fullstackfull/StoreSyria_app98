@@ -4,15 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/helper.dart';
-import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:store_go_app/core/model/static_model.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
-
-import '../../../core/model/dashboard_model.dart';
 
 /// ------------------------------------------------------------
 /// COMMON CARD
@@ -235,15 +232,17 @@ class _StatisticsVisitorGraphState
         ChartData('25-jul', 8, 5),
       ];
     } else {
-      for (final data in widget.visitorChart) {
-        chartData.add(
-          ChartData(
-            data.date ?? '',
-            data.uniquePageview ?? 0,
-            data.pageview ?? 0,
-          ),
+      final data = widget.visitorChart;
+
+      final start = data.length > 7 ? data.length - 7 : 0;
+
+      chartData = data.sublist(start).map((data) {
+        return ChartData(
+          data.date ?? '',
+          data.uniquePageview ?? 0,
+          data.pageview ?? 0,
         );
-      }
+      }).toList();
     }
   }
 
