@@ -241,6 +241,11 @@ const Map<String, String> en = {
   "no_coupons_found": "No coupons found",
     "discount_must_be_number": "Discount must be a valid number",
     "discount_must_be_positive": "Discount must be greater than or equal to 0",
-    "discount_must_be_less_than_or_equal_100": "Value must be less than or equal to 100"
-
+    "discount_must_be_less_than_or_equal_100": "Value must be less than or equal to 100",
+    "manage_store_information": "Manage your store information",
+   "customize_your_store": "Customize your store",
+    "manage_store_tax": "Manage your store tax",
+    "manage_payment_settings": "Manage payment settings",
+    "manage_email_settings": "Manage email settings",
+    "manage_loyalty_program": "Manage your loyalty program",
 };

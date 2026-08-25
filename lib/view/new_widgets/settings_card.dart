@@ -64,7 +64,7 @@ Widget settingCard({
                       colorFilter: ColorFilter.mode(
                         isDark
                             ? AppColor.themeGreenColor.withOpacity(0.3)
-                            : AppColor.themeGreenColor,
+                            : AppColor.themeNavyBlueColor,
                         BlendMode.srcIn,
                       ),
                     ),
@@ -143,7 +143,7 @@ Widget settingWidget({
                   width: 18,
                   height: 18,
                   colorFilter: ColorFilter.mode(
-                    AppColor.themeGreenColor,
+                    AppColor.themeNavyBlueColor,
                     BlendMode.srcIn,
                   ),
                 ),

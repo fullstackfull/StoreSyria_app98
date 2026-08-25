@@ -63,6 +63,7 @@ class StoreSettingScreen extends StatelessWidget {
                     isDark: isDark,
                     icon: DefaultImages.storeIcn,
                     title: 'store_information'.tr,
+                    subtitle: 'manage_store_information'.tr,
                     function: () {
                       // Store Information
                     },
@@ -72,6 +73,7 @@ class StoreSettingScreen extends StatelessWidget {
                     isDark: isDark,
                     icon: DefaultImages.themeIcn,
                     title: 'store_design'.tr,
+                    subtitle: 'customize_your_store'.tr,
                     function: () {
                       // Store Design
                     },
@@ -81,41 +83,43 @@ class StoreSettingScreen extends StatelessWidget {
                     isDark: isDark,
                     icon: DefaultImages.taxIcn,
                     title: 'tax'.tr,
+                    subtitle: 'manage_store_tax'.tr,
                     function: () {
                       // Tax
                     },
                   ),
+
+                  settingCard(
+                    isDark: isDark,
+                    icon: DefaultImages.categoriesIcn,
+                    title: 'store_payment'.tr,
+                    subtitle: 'manage_payment_settings'.tr,
+                    function: () {
+                      Get.to(() => PaymentSettingScreen());
+                    },
+                  ),
+
+                  settingCard(
+                    isDark: isDark,
+                    icon: DefaultImages.envelopeIcn,
+                    title: 'store_email_setting'.tr,
+                    subtitle: 'manage_email_settings'.tr,
+                    function: () {
+                      Get.to(() => EmailSettingScreen());
+                    },
+                  ),
+
+                  settingCard(
+                    isDark: isDark,
+                    icon: DefaultImages.loyaltyIcn,
+                    title: 'store_loyalty_program'.tr,
+                    subtitle: 'manage_loyalty_program'.tr,
+                    function: () {
+                      Get.to(() => LoyaltyProgramScreen());
+                    },
+                  ),
                 ],
               ),
-              verticalSpace(20),
-
-              settingWidget(
-                icon: DefaultImages.categoriesIcn,
-                title: 'store_payment'.tr,
-                isDark: isDark,
-                function: () {
-                  Get.to(() => PaymentSettingScreen());
-                },
-              ),
-
-              settingWidget(
-                icon: DefaultImages.envelopeIcn,
-                title: 'store_email_setting'.tr,
-                isDark: isDark,
-                function: () {
-                  Get.to(() => EmailSettingScreen());
-                },
-              ),
-
-              settingWidget(
-                icon: DefaultImages.loyaltyIcn,
-                title: 'store_loyalty_program'.tr,
-                isDark: isDark,
-                function: () {
-                  Get.to(() => LoyaltyProgramScreen());
-                },
-              ),
-
 
               verticalSpace(30),
 
@@ -152,7 +156,6 @@ class StoreSettingScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     Text(
                       'delete_store'.tr,
                       style: pRegular16.copyWith(
@@ -174,22 +177,22 @@ class StoreSettingScreen extends StatelessWidget {
                     CommonIconButton(
                       iconData: DefaultImages.whiteCloseIcn,
                       title: 'delete_store'.tr,
-                      onPressed: () =>
-                        AppDialog.showCustomDialog(
-                            message: "deleteStore",
-                            lottieAsset: 'assets/lottie/delete_icon.json',
-                            iconColor: AppColor.cRedText,
-                            confirmColor: AppColor.cRedText,
-                            context: context,
-                            onConfirm: () => storeSettingController.deleteStoreData()),
+                      onPressed: () => AppDialog.showCustomDialog(
+                        message: "deleteStore",
+                        lottieAsset: 'assets/lottie/delete_icon.json',
+                        iconColor: AppColor.cRedText,
+                        confirmColor: AppColor.cRedText,
+                        context: context,
+                        onConfirm: () =>
+                            storeSettingController.deleteStoreData(),
+                      ),
                       btnColor: AppColor.cRedText,
                     ),
                   ],
                 ),
               ),
             ],
-          ),
-        ),
+          ),        ),
       ),
     );
   }

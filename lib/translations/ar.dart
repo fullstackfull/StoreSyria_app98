@@ -242,6 +242,11 @@ const Map<String, String> ar = {
   "no_coupons_found": "لا توجد كوبونات",
     "discount_must_be_number": "يجب أن تكون قيمة الخصم رقماً صحيحاً",
     "discount_must_be_positive": "يجب أن تكون قيمة الخصم أكبر من أو تساوي 0",
-    "discount_must_be_less_than_or_equal_100": "يجب أن تكون القيمة أقل من أو تساوي 100"
-
+    "discount_must_be_less_than_or_equal_100": "يجب أن تكون القيمة أقل من أو تساوي 100",
+  'manage_store_information': 'إدارة معلومات متجرك',
+  'customize_your_store': 'تخصيص متجرك',
+  'manage_store_tax': 'إدارة ضريبة المتجر',
+  'manage_payment_settings': 'إدارة إعدادات الدفع',
+  'manage_email_settings': 'إدارة إعدادات البريد الإلكتروني',
+  'manage_loyalty_program': 'إدارة برنامج الولاء',
 };

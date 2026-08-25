@@ -439,7 +439,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             }),
                             verticalSpace(25),
 
-
                             HeaderWidget(
                               context: context,
                               title: "Recent orders".tr,

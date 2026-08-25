@@ -97,101 +97,101 @@ Widget buildAppTitleRow(String date) {
 
 Widget buildProfileTitle({String? profileImage, String? name, String? task, Function(dynamic)? onValue}) {
   final isDark = Get.isDarkMode;
-  return Container(
-    width: double.infinity,
-    padding: EdgeInsets.all(16.w),
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          AppColor.themeNavyBlueColor,
-          AppColor.themeNavyBlueColor.withOpacity(0.85),
+  return GestureDetector(
+    onTap: () {
+      Get.to(() => ProfileScreen(
+        name: name!,
+        profileImg: profileImage!,
+      ))!
+          .then(onValue!);
+    },
+    child: Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColor.themeNavyBlueColor,
+            AppColor.themeNavyBlueColor.withOpacity(0.85),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(22.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.themeNavyBlueColor.withOpacity(0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
-      borderRadius: BorderRadius.circular(22.r),
-      boxShadow: [
-        BoxShadow(
-          color: AppColor.themeNavyBlueColor.withOpacity(0.25),
-          blurRadius: 16,
-          offset: const Offset(0, 8),
-        ),
-      ],
-    ),
-    child: Row(
-      children: [
-        GestureDetector(
-          onTap: () {
-            Get.to(() => ProfileScreen(
-              name: name!,
-              profileImg: profileImage!,
-            ))!
-                .then(onValue!);
-          },
-          child: Container(
-            padding: EdgeInsets.all(3.w),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.35), width: 2),
-            ),
-            child: CircleAvatar(
-              radius: 32,
-              backgroundColor: AppColor.themeGreenColor,
-              child: ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: getImageUrl(profileImage),
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
-                  errorWidget: (context, url, error) {
-                    return Image.network(
-                      DefaultImages.profileImg,
-                      width: 64,
-                      height: 64,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return Icon(
-                          Icons.person,
-                          size: 32,
-                          color: Colors.white,
-                        );
-                      },
-                    );
-                  },
+      child: Row(
+        children: [
+           Container(
+              padding: EdgeInsets.all(3.w),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withOpacity(0.35), width: 2),
+              ),
+              child: CircleAvatar(
+                radius: 32,
+                backgroundColor: AppColor.themeGreenColor,
+                child: ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: getImageUrl(profileImage),
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                    errorWidget: (context, url, error) {
+                      return Image.network(
+                        DefaultImages.profileImg,
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) {
+                          return Icon(
+                            Icons.person,
+                            size: 32,
+                            color: Colors.white,
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
+          horizontalSpace(14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Welcome back".tr,
+                  style: pRegular12.copyWith(color: Colors.white.withOpacity(0.7)),
+                ),
+                verticalSpace(3),
+                Text(
+                  "$name!",
+                  style: pBold16.copyWith(fontSize: 19, color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-        ),
-        horizontalSpace(14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Welcome back".tr,
-                style: pRegular12.copyWith(color: Colors.white.withOpacity(0.7)),
-              ),
-              verticalSpace(3),
-              Text(
-                "$name!",
-                style: pBold16.copyWith(fontSize: 19, color: Colors.white),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: Colors.white),
           ),
-        ),
-        Container(
-          padding: EdgeInsets.all(8.w),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: Colors.white),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
@@ -355,7 +355,6 @@ class _OrderGraphState extends State<OrderGraph> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (Prefs.getBool(AppConstant.isDemoMode) == true) {
       orders = [
