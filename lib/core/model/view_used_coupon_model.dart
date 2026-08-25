@@ -68,27 +68,19 @@ class ViewUsedCouponData {
   });
 
   ViewUsedCouponData.fromJson(Map<String, dynamic> json) {
-    id = (json['id'] as num?)?.toInt();
-
-    userId = (json['user_id'] as num?)?.toInt();
-
-    couponId = (json['coupon_id'] as num?)?.toInt();
+    id = json['id'];
+    userId = json['user_id'];
+    couponId = json['coupon_id'];
 
     amount = (json['amount'] as num?)?.toDouble();
 
-    orderId = (json['order_id'] as num?)?.toInt();
-
-    dateUsed = json['date_used']?.toString();
-
-    themeId = json['theme_id']?.toString();
-
-    createdAt = json['created_at']?.toString();
-
-    updatedAt = json['updated_at']?.toString();
-
-    couponName = json['coupon_name']?.toString();
-
-    productOrderId = json['product_order_id']?.toString();
+    orderId = json['order_id'];
+    dateUsed = json['date_used'];
+    themeId = json['theme_id'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    couponName = json['coupon_name'];
+    productOrderId = json['product_order_id'];
   }
 
   Map<String, dynamic> toJson() {

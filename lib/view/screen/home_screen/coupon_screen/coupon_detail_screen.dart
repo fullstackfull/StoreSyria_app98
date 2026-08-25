@@ -63,67 +63,32 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
               horizontal: 20.w,
               vertical: 16.h,
             ),
-            child: Obx(() {
+            child:Obx(() {
               final list = couponController.viewCouponsList;
 
-              // ================= LOADING =================
-
-              if (couponController.isLoading.value &&
+              // 1. Loading
+              if (couponController.isUsedCouponLoading.value &&
                   list.isEmpty) {
                 return const Center(
                   child: LoadingWidget(),
                 );
               }
 
-              // ================= ERROR =================
-
-              if (couponController.errorMessage.isNotEmpty &&
+              // 2. Data Not Found
+              if (couponController.usedCouponEmptyMessage.isNotEmpty &&
                   list.isEmpty) {
                 return RefreshIndicator(
-                  backgroundColor: isDark
-                      ? DarkThemeColor.cCardBackground
-                      : Colors.white,
                   onRefresh: _fetchData,
                   child: ListView(
-                    physics:
-                    const AlwaysScrollableScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     children: [
                       SizedBox(
-                        height:
-                        MediaQuery.of(context).size.height *
-                            .6,
-                        child: Center(
-                          child: ErrorState(
-                            message: couponController
-                                .errorMessage.value,
-                            onRetry: _fetchData,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              // ================= EMPTY =================
-
-              if (list.isEmpty) {
-                return RefreshIndicator(
-                  backgroundColor: isDark
-                      ? DarkThemeColor.cCardBackground
-                      : Colors.white,
-                  onRefresh: _fetchData,
-                  child: ListView(
-                    physics:
-                    const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      SizedBox(
-                        height:
-                        MediaQuery.of(context).size.height *
-                            .6,
+                        height: MediaQuery.of(context).size.height * .6,
                         child: Center(
                           child: EmptyState(
-                            message: "No usage found".tr,
+                            message: couponController
+                                .usedCouponEmptyMessage
+                                .value,
                             icon: Icons.receipt_long_outlined,
                           ),
                         ),
@@ -133,24 +98,38 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
                 );
               }
 
-              // ================= DATA =================
+              // 3. Real Error
+              if (couponController.usedCouponErrorMessage.isNotEmpty &&
+                  list.isEmpty) {
+                return RefreshIndicator(
+                  onRefresh: _fetchData,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * .6,
+                        child: Center(
+                          child: ErrorState(
+                            message: couponController
+                                .usedCouponErrorMessage
+                                .value,
+                            onRetry: _fetchData,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
+              // 4. Data
               return RefreshIndicator(
-                backgroundColor: isDark
-                    ? DarkThemeColor.cCardBackground
-                    : Colors.white,
                 onRefresh: _fetchData,
                 child: ListView.builder(
-                  physics:
-                  const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.only(
-                    top: 4.h,
-                    bottom: 20.h,
-                  ),
+                  physics: const AlwaysScrollableScrollPhysics(),
                   itemCount: list.length,
                   itemBuilder: (context, index) {
-                    final ViewUsedCouponData data =
-                    list[index];
+                    final data = list[index];
 
                     return _buildUsageCard(
                       data: data,
@@ -159,7 +138,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
                   },
                 ),
               );
-            }),
+            })
           ),
         ),
       ),

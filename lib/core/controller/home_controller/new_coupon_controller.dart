@@ -52,40 +52,54 @@ class NewCouponController extends GetxController {
   // FORM STATE
   // ============================================================
 
-  RxBool isFlat = true.obs;
-  RxBool isStatus = true.obs;
+  final RxBool isFlat = true.obs;
 
-  RxString couponType = "flat".obs;
-  RxString status = "1".obs;
+  final RxBool isStatus = true.obs;
 
-  // ============================================================
-  // LOADING
-  // ============================================================
+  final RxString couponType = "flat".obs;
 
-  RxBool isLoading = false.obs;
-  RxBool isLoadingMore = false.obs;
-  RxBool isDeleteLoading = false.obs;
-
-  RxBool isDataAvailable = false.obs;
+  final RxString status = "1".obs;
 
   // ============================================================
-  // ERROR
+  // COUPON LIST LOADING
   // ============================================================
 
-  RxString errorMessage = ''.obs;
+  final RxBool isLoading = false.obs;
+
+  final RxBool isLoadingMore = false.obs;
+
+  final RxBool isDeleteLoading = false.obs;
+
+  final RxBool isDataAvailable = false.obs;
+
+  // ============================================================
+  // COUPON LIST ERROR
+  // ============================================================
+
+  final RxString errorMessage = ''.obs;
 
   // ============================================================
   // PAGINATION
   // ============================================================
 
-  /// الصفحة الحالية
-  RxInt currentPage = 1.obs;
+  final RxInt currentPage = 1.obs;
 
-  /// آخر صفحة
-  RxInt lastPage = 1.obs;
+  final RxInt lastPage = 1.obs;
 
-  /// هل يوجد صفحات إضافية؟
-  RxBool hasMore = true.obs;
+  final RxBool hasMore = true.obs;
+
+  // ============================================================
+  // USED COUPON DETAILS
+  // ============================================================
+
+  /// Loading خاص بتفاصيل الكوبون
+  final RxBool isUsedCouponLoading = false.obs;
+
+  /// خطأ حقيقي مثل مشكلة اتصال أو Server Error
+  final RxString usedCouponErrorMessage = ''.obs;
+
+  /// رسالة عندما لا يوجد بيانات للكوبون
+  final RxString usedCouponEmptyMessage = ''.obs;
 
   // ============================================================
   // DATE
@@ -124,26 +138,20 @@ class NewCouponController extends GetxController {
   // ============================================================
 
   Future<void> getCouponData(int page) async {
-    // ----------------------------------------------------------
     // منع تكرار الطلب
-    // ----------------------------------------------------------
-
     if (isLoading.value || isLoadingMore.value) {
       return;
     }
 
-    // ----------------------------------------------------------
     // التأكد من وجود صفحة
-    // ----------------------------------------------------------
-
     if (page > lastPage.value && couponsList.isNotEmpty) {
       hasMore.value = false;
       return;
     }
 
-    // ----------------------------------------------------------
-    // الصفحة الأولى
-    // ----------------------------------------------------------
+    // ==========================================================
+    // FIRST PAGE
+    // ==========================================================
 
     if (page == 1) {
       isLoading.value = true;
@@ -158,9 +166,9 @@ class NewCouponController extends GetxController {
       couponsList.clear();
     }
 
-    // ----------------------------------------------------------
-    // Pagination
-    // ----------------------------------------------------------
+    // ==========================================================
+    // PAGINATION
+    // ==========================================================
 
     else {
       if (!hasMore.value) {
@@ -186,9 +194,9 @@ class NewCouponController extends GetxController {
             final newItems =
                 pagination?.data ?? [];
 
-            // ----------------------------------------------------
+            // ==================================================
             // ADD DATA
-            // ----------------------------------------------------
+            // ==================================================
 
             if (page == 1) {
               couponsList.assignAll(newItems);
@@ -196,9 +204,9 @@ class NewCouponController extends GetxController {
               couponsList.addAll(newItems);
             }
 
-            // ----------------------------------------------------
+            // ==================================================
             // PAGINATION DATA
-            // ----------------------------------------------------
+            // ==================================================
 
             currentPage.value =
                 pagination?.currentPage ?? page;
@@ -260,20 +268,26 @@ class NewCouponController extends GetxController {
   // ============================================================
 
   Future<void> loadNextPage() async {
-    if (!hasMore.value) return;
+    if (!hasMore.value) {
+      return;
+    }
 
-    if (isLoadingMore.value) return;
+    if (isLoadingMore.value) {
+      return;
+    }
 
-    if (isLoading.value) return;
+    if (isLoading.value) {
+      return;
+    }
 
-    final nextPage =
+    final int nextPage =
         currentPage.value + 1;
 
     await getCouponData(nextPage);
   }
 
   // ============================================================
-  // REFRESH
+  // REFRESH COUPONS
   // ============================================================
 
   Future<void> refreshCoupons() async {
@@ -287,49 +301,171 @@ class NewCouponController extends GetxController {
   }
 
   // ============================================================
-  // USED COUPONS
+  // GET USED COUPON DATA
   // ============================================================
 
-  Future<void> getUsedCouponData(
-      int couponId,
-      ) async {
-    isLoading.value = true;
+  Future<void> getUsedCouponData(int couponId) async {
+    // ==========================================================
+    // START LOADING
+    // ==========================================================
 
-    final response =
-    await couponRepository.getUsedCouponData(
-      couponId,
+    isUsedCouponLoading.value = true;
+
+    // مهم جداً
+    // نمسح بيانات الكوبون السابق
+    viewCouponsList.clear();
+
+    viewUsedCouponModel = null;
+
+    // نمسح الحالات السابقة
+    usedCouponErrorMessage.value = '';
+    usedCouponEmptyMessage.value = '';
+
+    log(
+      'Loading used coupon => couponId: $couponId',
     );
 
-    isLoading.value = false;
+    try {
+      final response =
+      await couponRepository.getUsedCouponData(
+        couponId,
+      );
 
-    response.fold(
-      onSuccess: (data) {
-        if (data['status'] == 1) {
-          viewUsedCouponModel =
-              ViewUsedCouponModel.fromJson(data);
+      response.fold(
+        // ======================================================
+        // SUCCESS RESPONSE
+        // ======================================================
 
-          viewCouponsList.value =
-              viewUsedCouponModel?.data ?? [];
+        onSuccess: (data) {
+          log(
+            'Used coupon response => $data',
+          );
 
-          viewCouponsList.refresh();
-        } else {
-          // commonToast(
-          //   data['data']?['message'] ??
-          //       "No data found",
-          // );
-        }
-      },
+          // ====================================================
+          // STATUS 1
+          // ====================================================
 
-      onFailure: (
-          reason,
-          message,
-          errors,
-          ) {
-        commonToast(
-          message ?? "Error loading data",
-        );
-      },
-    );
+          if (data['status'] == 1) {
+            viewUsedCouponModel =
+                ViewUsedCouponModel.fromJson(data);
+
+            final List<ViewUsedCouponData> result =
+                viewUsedCouponModel?.data ?? [];
+
+            // API success لكن data فاضية
+            if (result.isEmpty) {
+              usedCouponEmptyMessage.value =
+              'Data not found!';
+            } else {
+              viewCouponsList.assignAll(result);
+            }
+
+            return;
+          }
+
+          // ====================================================
+          // STATUS 0
+          //
+          // مثال:
+          //
+          // {
+          //   status: 0,
+          //   message: fail,
+          //   data: {
+          //      message: Data not found!
+          //   }
+          // }
+          // ====================================================
+
+          String message = 'Data not found!';
+
+          final dynamic responseData =
+          data['data'];
+
+          if (responseData is Map) {
+            final dynamic apiMessage =
+            responseData['message'];
+
+            if (apiMessage != null &&
+                apiMessage
+                    .toString()
+                    .trim()
+                    .isNotEmpty) {
+              message =
+                  apiMessage.toString();
+            }
+          }
+
+          log(
+            'Used coupon has no data => $message',
+          );
+
+          // مهم:
+          // لا نضعها داخل usedCouponErrorMessage
+          //
+          // لأنها ليست Error
+          // وإنما Empty State
+          usedCouponEmptyMessage.value =
+              message;
+        },
+
+        // ======================================================
+        // REAL FAILURE
+        // ======================================================
+
+        onFailure: (
+            reason,
+            message,
+            errors,
+            ) {
+          log(
+            'Used coupon API failure => $message',
+          );
+
+          usedCouponErrorMessage.value =
+              message ??
+                  'Something went wrong';
+
+          commonToast(
+            message ??
+                'Something went wrong',
+          );
+        },
+      );
+    } catch (e) {
+      // ========================================================
+      // EXCEPTION
+      // ========================================================
+
+      log(
+        'getUsedCouponData exception => $e',
+      );
+
+      usedCouponErrorMessage.value =
+      'Something went wrong';
+
+      commonToast(
+        'Something went wrong',
+      );
+    } finally {
+      isUsedCouponLoading.value = false;
+    }
+  }
+
+  // ============================================================
+  // CLEAR USED COUPON DATA
+  // ============================================================
+
+  void clearUsedCouponData() {
+    viewCouponsList.clear();
+
+    viewUsedCouponModel = null;
+
+    usedCouponErrorMessage.value = '';
+
+    usedCouponEmptyMessage.value = '';
+
+    isUsedCouponLoading.value = false;
   }
 
   // ============================================================
@@ -362,7 +498,8 @@ class NewCouponController extends GetxController {
           errors,
           ) {
         commonToast(
-          message ?? "Error generating code",
+          message ??
+              "Error generating code",
         );
       },
     );
@@ -410,7 +547,6 @@ class NewCouponController extends GetxController {
 
           clearCouponFields();
 
-          // رجع القائمة من أول صفحة
           awaitRefresh();
 
           Get.back();
@@ -428,15 +564,20 @@ class NewCouponController extends GetxController {
           errors,
           ) {
         errorMessage.value =
-            message ?? "Error adding coupon";
+            message ??
+                "Error adding coupon";
 
         commonToast(
-          message ?? "Error adding coupon",
+          message ??
+              "Error adding coupon",
         );
       },
     );
   }
 
+  // ============================================================
+  // REFRESH AFTER ADD / UPDATE / DELETE
+  // ============================================================
 
   Future<void> awaitRefresh() async {
     currentPage.value = 1;
@@ -448,6 +589,9 @@ class NewCouponController extends GetxController {
     await getCouponData(1);
   }
 
+  // ============================================================
+  // DELETE COUPON
+  // ============================================================
 
   Future<void> deleteCouponData({
     required String couponId,
@@ -488,26 +632,38 @@ class NewCouponController extends GetxController {
           errors,
           ) {
         errorMessage.value =
-            message ?? "Delete error";
+            message ??
+                "Delete error";
 
         commonToast(
-          message ?? "Delete error",
+          message ??
+              "Delete error",
         );
       },
     );
   }
 
+  // ============================================================
+  // CLEAR FORM
+  // ============================================================
+
   void clearCouponFields() {
     couponNameController.clear();
+
     discountController.clear();
+
     limitController.clear();
+
     expDateController.clear();
+
     couponController.clear();
 
     isFlat.value = true;
+
     isStatus.value = true;
 
     couponType.value = "flat";
+
     status.value = "1";
   }
 
@@ -518,10 +674,15 @@ class NewCouponController extends GetxController {
   @override
   void onClose() {
     couponNameController.dispose();
+
     discountController.dispose();
+
     limitController.dispose();
+
     expDateController.dispose();
+
     couponController.dispose();
+
     searchController.dispose();
 
     super.onClose();
