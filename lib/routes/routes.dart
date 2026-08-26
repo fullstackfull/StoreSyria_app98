@@ -22,6 +22,7 @@ class AppRoutes {
   // Route Constants
   // =========================
   static const splash = '/splash';
+  static const splah = '/';
   static const onboarding = '/onboarding';
   static const login = '/login';
   static const dashboard = '/dashboard';
@@ -58,6 +59,11 @@ class AppRoutes {
       page: () => OnboardingScreen(),
       binding: OnboardingBinding(),
     ),
+
+  // GetPage(
+  //     name: splah,
+  //     page: () => AddVariantScreen(),
+  //   ),
 
     GetPage(
         name: login,

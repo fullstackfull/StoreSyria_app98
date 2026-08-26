@@ -2,16 +2,6 @@
 
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/images.dart';
-import 'package:store_go_app/view/screen/home_screen/coupon_screen/coupon_screen.dart';
-import 'package:store_go_app/view/screen/home_screen/tax_screen.dart';
-import 'package:store_go_app/view/screen/order_screen/order_screen.dart';
-import 'package:store_go_app/view/screen/setting_screen/plan_screen.dart';
-import 'package:store_go_app/view/screen/home_screen/shipping_screen.dart';
-import 'package:store_go_app/view/screen/setting_screen/setting_screen.dart';
-import 'package:store_go_app/view/screen/product_screen/products_screen.dart';
-import 'package:store_go_app/view/screen/category_screen/category_screen.dart';
-import 'package:store_go_app/view/screen/statistics_screen/statistics_screen.dart';
-
 import '../../../routes/routes.dart';
 
 class MyDrawerController extends GetxController {

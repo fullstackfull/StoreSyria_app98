@@ -15,7 +15,6 @@ import 'package:store_go_app/utils/helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/view/screen/home_screen/drawer_screen.dart';
 import 'package:store_go_app/view/screen/profile_screen/profile_screen.dart';
 import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
@@ -732,48 +731,6 @@ Widget slidableActionWidget({Function()? onTap, String? image, String? title, Co
     ),
   );
 }
-
-void showPopup(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return DrawerScreen();
-    },
-  );
-}
-
-Widget drawerWidget({bool? isSelected, String? title, String? icon}) {
-  return Card(
-    shadowColor: AppColor.cFont,
-    elevation: 12.41,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-    child: Container(
-      width: 75,
-      height: 75,
-      decoration: BoxDecoration(color: isSelected == true ? AppColor.themeGreenColor : AppColor.cBackGround, borderRadius: BorderRadius.circular(15)),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          assetSvdImageWidget(
-            image: icon,
-            colorFilter: ColorFilter.mode(
-              isSelected == true ? AppColor.cWhite : AppColor.cLabel,
-              BlendMode.srcIn,
-            ),
-          ),
-          verticalSpace(10),
-          Text(
-            title!,
-            style: pSemiBold10.copyWith(
-              color: isSelected == true ? AppColor.cWhite : AppColor.cLabel,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
 onShare({required String link}) {
   Share.share(link, subject: 'Store Syria', sharePositionOrigin: Rect.largest);
 }

@@ -5,14 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/view/screen/setting_screen/payment_setting_screen/bank_transfer_screen.dart';
 import 'package:store_go_app/view/screen/setting_screen/payment_setting_screen/stripe_screen.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
-import 'package:store_go_app/view/screen/setting_screen/payment_setting_screen/cod_screen.dart';
 import 'package:store_go_app/core/controller/setting_controller/payment_setting_controller/payment_setting_controller.dart';
+
+import 'bank_transfer_screen.dart';
+import 'cod_screen.dart';
 
 class PaymentSettingScreen extends StatefulWidget {
   PaymentSettingScreen({super.key});
@@ -31,7 +32,6 @@ class _PaymentSettingScreenState extends State<PaymentSettingScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       getData();
@@ -79,43 +79,40 @@ class _PaymentSettingScreenState extends State<PaymentSettingScreen> {
                 ],
               ),
               verticalSpace(10),
-              // buildPayment(
-              //   title: 'COD',
-              //   onTap: () {
-              //     Get.to(() => CODScreen(
-              //               currency: paymentSettingController
-              //                   .currencyController.text,
-              //               currencySymbol: paymentSettingController
-              //                   .currencySymbolController.text,
-              //               description:
-              //                   paymentSettingController.codDescription.value,
-              //               isCodEnable:
-              //                   paymentSettingController.isCodEnabled.value,
-              //               image:
-              //                   paymentSettingController.codImage.value,
-              //             ))!
-              //         .then((value) => getData());
-              //   },
-              // ),
-              // buildPayment(
-              //   title: 'Bank Transfer',
-              //   onTap: () {
-              //     Get.to(() => BankTransferScreen(
-              //           currency:
-              //               paymentSettingController.currencyController.text,
-              //           currencySymbol: paymentSettingController
-              //               .currencySymbolController.text,
-              //         ));
-              //   },
-              // ),
+              buildPayment(
+                title: 'COD',
+                onTap: () {
+                  Get.to(() => CODScreen(
+                            currency: paymentSettingController
+                                .currencyController.text,
+                            currencySymbol: paymentSettingController
+                                .currencySymbolController.text,
+                            description:
+                                paymentSettingController.codDescription.value,
+                            isCodEnable:
+                                paymentSettingController.isCodEnabled.value,
+                            image:
+                                paymentSettingController.codImage.value,
+                          ))!
+                      .then((value) => getData());
+                },
+              ),
+              buildPayment(
+                title: 'Bank Transfer',
+                onTap: () {
+                  Get.to(() => BankTransferScreen(
+                        currency: paymentSettingController.currencyController.text,
+                        currencySymbol: paymentSettingController.currencySymbolController.text,
+                      ));
+                },
+              ),
               buildPayment(
                 title: 'Stripe',
                 onTap: () {
                   Get.to(() => StripeScreen(
                         currency:
                             paymentSettingController.currencyController.text,
-                        currencySymbol: paymentSettingController
-                            .currencySymbolController.text,
+                        currencySymbol: paymentSettingController.currencySymbolController.text,
                       ));
                 },
               ),
