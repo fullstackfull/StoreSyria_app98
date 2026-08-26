@@ -79,10 +79,15 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
 
             const SizedBox(height: 50),
 
-            CircularProgressIndicator(
-                strokeWidth: 3,
+            SizedBox(
+              width: 200,
+              child: LinearProgressIndicator(
+                minHeight: 5,
                 color: AppColor.themeNavyBlueColor,
+                backgroundColor: AppColor.cBorder,
+                borderRadius: BorderRadius.circular(10),
               ),
+            ),
           ],
         ),
       ),

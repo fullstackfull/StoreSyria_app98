@@ -9,7 +9,7 @@ class Prefs {
   static const String BASE_URL = 'base_url';
   static const String FCM_TOKEN = 'fcm_token';
   static const String DEVICE_ID = 'device_id';
-  static const String ONBOARDING_COMPLETED = 'onboarding_completed';
+  static const String onboardingKey = 'onboarding_completed';
   static const String LANGUAGE = 'language';
 
 
@@ -94,11 +94,19 @@ class Prefs {
     return getStorage!.write(DEVICE_ID, deviceId);
   }
 
-static String getLanguage() {
-return getStorage!.read(LANGUAGE) ?? 'ar';
-}
+  static String getLanguage() {
+  return getStorage!.read(LANGUAGE) ?? 'ar';
+  }
 
-static setLanguage(String language) {
+  static setLanguage(String language) {
   return getStorage!.write(LANGUAGE, language);
-}
+  }
+
+  bool get isOnboardingCompleted {
+    return Prefs.getBool(onboardingKey);
+  }
+
+  void completeOnboarding() {
+    Prefs.setBool(onboardingKey, true);
+  }
 }

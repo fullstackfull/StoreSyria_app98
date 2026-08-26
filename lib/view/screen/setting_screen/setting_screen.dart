@@ -162,7 +162,9 @@ class SettingScreen extends StatelessWidget {
                                   Get.find<NotificationController>().clearNotificationData();
                                 }
 
-                                Prefs.clear();
+                                await Prefs.remove(Prefs.KEY_TOKEN);
+                                await Prefs.remove(Prefs.USER_ID);
+                                await Prefs.remove(Prefs.storeId);
 
                                 Get.offAllNamed(AppRoutes.login);
                             }

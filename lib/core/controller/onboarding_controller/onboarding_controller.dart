@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/model/onboarding_model.dart';
+import 'package:store_go_app/routes/routes.dart';
 import 'package:store_go_app/utils/prefer.dart';
 
 class
@@ -69,13 +70,12 @@ OnboardingController extends GetxController {
   void nextPage() {
     if (currentPage.value < onboardingPages.length - 1) {
       pageController.nextPage(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
-      // الوصول للصفحة الأخيرة - إنهاء OnBoarding
       completeOnboarding();
-      Get.offAllNamed('/login');
+      Get.offAllNamed(AppRoutes.login);
     }
   }
 
@@ -83,7 +83,7 @@ OnboardingController extends GetxController {
   void previousPage() {
     if (currentPage.value > 0) {
       pageController.previousPage(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -93,7 +93,7 @@ OnboardingController extends GetxController {
   void goToPage(int page) {
     pageController.animateToPage(
       page,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }
@@ -101,7 +101,7 @@ OnboardingController extends GetxController {
   /// تخطي OnBoarding
   void skipOnboarding() {
     completeOnboarding();
-    Get.offAllNamed('/login');
+    Get.offAllNamed(AppRoutes.login);
   }
 
   /// تحديث الصفحة الحالية
