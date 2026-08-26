@@ -42,7 +42,6 @@ class BankTransferController extends GetxController {
       if (response['status'] == 1) {
         descriptionController.text = response['data']['bank_transfer'];
         if (response['data']['bank_transfer_image'] != '') {
-          networkImage.value = Prefs.getString(AppConstant.imageUrl) + response['data']['bank_transfer_image'];
         }
         if (response['data']['is_bank_transfer_enabled'] == 'on') {
           isStatus.value = true;

@@ -34,13 +34,12 @@ class CODScreen extends StatefulWidget {
 }
 
 class _CODScreenState extends State<CODScreen> {
-  PaymentSettingController paymentSettingController = Get.put(PaymentSettingController());
+  PaymentSettingController paymentSettingController = Get.find();
 
   CodController codController = Get.put(CodController());
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.isCodEnable == "on") {
       codController.isStatus.value = true;
@@ -122,10 +121,7 @@ class _CODScreenState extends State<CODScreen> {
                           ? CachedNetworkImage(
                               imageUrl: getImageUrl(codController.networkImage.value),
                               placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                              errorWidget: (context, url, error) => Image.network(
-                                DefaultImages.codImg,
-                                fit: BoxFit.cover,
-                              ),
+                              errorWidget: (context, url, error) => SizedBox(),
                               fit: BoxFit.cover,
                             )
                           : Image.file(File(codController.imagePath.value)),

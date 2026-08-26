@@ -51,7 +51,6 @@ class StripeController extends GetxController {
         secretController.text = response['data']['stripe_secret'];
         descriptionController.text = response['data']['stripe_unfo'];
         if (response['data']['stripe_image'] != '') {
-          networkImage.value = Prefs.getString(AppConstant.imageUrl) +
               response['data']['stripe_image'];
         }
         if (response['data']['is_stripe_enabled'] == 'on') {

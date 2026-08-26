@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable, prefer_const_constructors, avoid_print, prefer_const_constructors_in_immutables
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:store_go_app/utils/colors.dart';
@@ -34,7 +35,6 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.isUpdate == true) {
       taxController.nameController.text = widget.name!;
@@ -50,6 +50,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       child: Container(
         height: Get.height / 1.5,
@@ -58,7 +59,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
             topLeft: Radius.circular(30),
             topRight: Radius.circular(30),
           ),
-          color: AppColor.cBackGround,
+          color: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
         ),
         padding: EdgeInsets.all(24),
         child: Padding(
@@ -80,7 +81,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                         ),
                         horizontalSpace(8),
                         Text(
-                          "Close",
+                          "Close".tr,
                           style: pSemiBold12.copyWith(
                             color: AppColor.cGreenFont,
                           ),
@@ -90,12 +91,12 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                   ),
                   verticalSpace(8),
                   Text(
-                    "Create",
+                    "Create".tr,
                     style: pRegular12,
                   ),
                   verticalSpace(10),
                   Text(
-                    "Add Tax",
+                    "Add Tax".tr,
                     style: pRegular18.copyWith(
                       color: AppColor.cGreenFont,
                     ),
@@ -105,13 +106,13 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                   verticalSpace(10),
                   AddProductTextField(
                     controller: taxController.nameController,
-                    labelText: 'Name',
-                    hintText: "Enter name",
+                    labelText: 'name'.tr,
+                    hintText: "enter_category_name".tr,
                   ),
                   verticalSpace(10),
                   commonDropdownButtonWidget(
-                    labelText: 'Charges Type',
-                    hint: 'Select option',
+                    labelText: 'Charges Type'.tr,
+                    hint: 'select_option'.tr,
                     value: taxController.chargesTypeList.contains(taxController.chargesType.value)
                         ? taxController.chargesType.value
                         : null,
@@ -123,15 +124,15 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                   verticalSpace(10),
                   AddProductTextField(
                     controller: taxController.amountController,
-                    labelText: 'Amount',
-                    hintText: "Enter Amount",
+                    labelText: 'Amount'.tr,
+                    hintText: "enter_discount_amount".tr,
                     keyboardType: TextInputType.number,
                   ),
                   verticalSpace(10),
                   Row(
                     children: [
                       Text(
-                        "Status:",
+                        "Status:".tr,
                         style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
                       ),
                       horizontalSpace(10),
@@ -156,7 +157,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                       Expanded(
                         flex: 1,
                         child: CommonIconButton(
-                            title: 'Close',
+                            title: 'Close'.tr,
                             iconData: DefaultImages.closeIcn,
                             onPressed: () {
                               Get.back();
@@ -170,13 +171,13 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                       Expanded(
                         flex: 2,
                         child: CommonIconButton(
-                          title: widget.isUpdate == true ? "Update" : 'Create',
+                          title: widget.isUpdate == true ? "update".tr : 'Create'.tr,
                           iconData: DefaultImages.whiteDoneIcn,
                           onPressed: () {
                             if (taxController.nameController.text.isNotEmpty || taxController.amountController.text.isNotEmpty || taxController.chargesType.isNotEmpty) {
                               if (widget.isUpdate == true) {
                                 if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                  commonToast(AppConstant.demoString);
+                                  commonToast(AppConstant.demoString.tr);
                                 } else {
                                   taxController.addTaxData(
                                     isUpdate: widget.isUpdate,
@@ -198,7 +199,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                                 );
                               }
                             } else {
-                              commonToast("Please fill all field");
+                              commonToast("Please fill all field".tr);
                             }
                           },
                           width: 240,

@@ -283,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                     text: "Add new category".tr,
                                     onPressed: () => showModalBottomSheet(
                                       context: context,
-                                      backgroundColor: AppColor.cBackGround,
+                                      backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
                                       barrierColor: AppColor.cGreyOpacity,
                                       isScrollControlled: true,
                                       shape: const RoundedRectangleBorder(
@@ -297,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                     text: "Add new coupon".tr,
                                     onPressed: () => showModalBottomSheet(
                                       context: context,
-                                      backgroundColor: AppColor.cBackGround,
+                                      backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
                                       barrierColor: AppColor.cGreyOpacity,
                                       isScrollControlled: true,
                                       shape: const RoundedRectangleBorder(
@@ -364,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
                           StatisticsCard(
                             title: "Orders".tr,
-                            subtitle: "Orders overview",
+                            subtitle: "Orders overview".tr,
                             child: OrderGraph(
                               list: homeController.dashboardData?.orderchart ?? [],
                             ),
@@ -460,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                   viewFun: () => Get.to(() => OrderDetailScreen(orderId: order.id?.toString() ?? "")),
                                   deleteFun: () {
                                     if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                      commonToast(AppConstant.demoString);
+                                      commonToast(AppConstant.demoString.tr);
                                     } else {
                                       orderController.deleteOrderData(orderId: order.id?.toString() ?? "");
                                       getData();

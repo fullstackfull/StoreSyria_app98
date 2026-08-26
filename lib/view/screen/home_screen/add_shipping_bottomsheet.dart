@@ -32,7 +32,6 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.isUpdate == true) {
       shippingController.nameController.text = widget.name!;
@@ -42,6 +41,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       child: Container(
         height: Get.height / 1.5,
@@ -50,7 +50,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
             topLeft: Radius.circular(30),
             topRight: Radius.circular(30),
           ),
-          color: AppColor.cBackGround,
+          color: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
         ),
         padding: EdgeInsets.all(24),
         child: SingleChildScrollView(
@@ -70,7 +70,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                       ),
                       horizontalSpace(8),
                       Text(
-                        "Close",
+                        "Close".tr,
                         style: pSemiBold12.copyWith(
                           color: AppColor.cGreenFont,
                         ),
@@ -80,12 +80,12 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                 ),
                 verticalSpace(8),
                 Text(
-                  "Create",
+                  "Create".tr,
                   style: pRegular12,
                 ),
                 verticalSpace(10),
                 Text(
-                  "Add Shipping",
+                  "Add Shipping".tr,
                   style: pRegular18.copyWith(
                     color: AppColor.cGreenFont,
                   ),
@@ -95,13 +95,13 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                 verticalSpace(10),
                 AddProductTextField(
                   controller: shippingController.nameController,
-                  labelText: 'Name',
-                  hintText: "Enter name",
+                  labelText: 'name'.tr,
+                  hintText: "enter_category_name".tr,
                 ),
                 verticalSpace(10),
                 commonDropdownButtonWidget(
-                  labelText: 'Charges Type',
-                  hint: 'Select option',
+                  labelText: 'Charges Type'.tr,
+                  hint: 'select_option'.tr,
                   value: shippingController.chargesType.value,
                   list: shippingController.chargesTypeList,
                   onChanged: (value) {
@@ -111,20 +111,20 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                 verticalSpace(10),
                 AddProductTextField(
                   controller: shippingController.amountController,
-                  labelText: 'Amount',
-                  hintText: "Enter Amount",
+                  labelText: 'Amount'.tr,
+                  hintText: "enter_discount_amount".tr,
                   keyboardType: TextInputType.number,
                 ),
                 verticalSpace(10),
                 AddProductTextField(
                   controller: shippingController.durationController,
-                  labelText: 'Return Order Duration',
-                  hintText: "Enter Return Order Duration",
+                  labelText: 'Return Order Duration'.tr,
+                  hintText: "Enter Return Order Duration".tr,
                   keyboardType: TextInputType.number,
                 ),
                 verticalSpace(10),
                 Text(
-                  "Image:",
+                  "Image:".tr,
                   style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
                 ),
                 verticalSpace(15),
@@ -133,11 +133,11 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                     shippingController.imagePath.value = await shippingController.pickFile();
                   },
                   child: addAttachmentWidget(
-                    shippingController.imagePath.value == '' ? "Add attachment..." : shippingController.imagePath.value.split('/').last,
+                    shippingController.imagePath.value == '' ? "Add attachment...".tr : shippingController.imagePath.value.split('/').last,
                   ),
                 ),
                 verticalSpace(10),
-                AddProductTextField(controller: shippingController.descriptionController, labelText: 'Description', hintText: "Enter Description", maxLines: 3),
+                AddProductTextField(controller: shippingController.descriptionController, labelText: 'description'.tr, hintText: "Enter Description".tr, maxLines: 3),
                 verticalSpace(25),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -145,7 +145,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                     Expanded(
                       flex: 1,
                       child: CommonIconButton(
-                          title: 'Close',
+                          title: 'Close'.tr,
                           iconData: DefaultImages.closeIcn,
                           onPressed: () {
                             Get.back();
@@ -159,7 +159,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                     Expanded(
                       flex: 2,
                       child: CommonIconButton(
-                        title: widget.isUpdate == true ? "Update" : 'Create',
+                        title: widget.isUpdate == true ? "update".tr : 'Create'.tr,
                         iconData: DefaultImages.whiteDoneIcn,
                         onPressed: () {
                           if (shippingController.nameController.text.isNotEmpty &&
@@ -170,7 +170,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                             print("----->(${shippingController.imagePath.value})");
                             if (widget.isUpdate == true) {
                               if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                commonToast(AppConstant.demoString);
+                                commonToast(AppConstant.demoString.tr);
                               } else {
                                 shippingController.addShippingData(
                                     isUpdate: widget.isUpdate,
@@ -186,7 +186,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                                   description: shippingController.descriptionController.text.trim());
                             }
                           } else {
-                            commonToast("Please fill all field");
+                            commonToast("Please fill all field".tr);
                           }
                         },
                         width: 240,

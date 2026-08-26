@@ -61,21 +61,25 @@ class _ShippingScreenState extends State<ShippingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppColor.cLabel;
+    final descriptionColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
+
     return Scaffold(
-      backgroundColor: AppColor.cBackGround,
-      appBar: simpleAppBar(title: "Shipping"),
+      backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
+      appBar: simpleAppBar(title: "Shipping".tr),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CommonIconButton(
-              title: 'Add Shipping',
+              title: 'Add Shipping'.tr,
               iconData: DefaultImages.addCircleIcn,
               onPressed: () {
                 showModalBottomSheet(
                   context: context,
-                  backgroundColor: AppColor.cBackGround,
+                  backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
                   barrierColor: AppColor.cGreyOpacity,
                   isScrollControlled: true,
                   shape: RoundedRectangleBorder(
@@ -95,8 +99,8 @@ class _ShippingScreenState extends State<ShippingScreen> {
             ),
             verticalSpace(20),
             Text(
-              "Shipping",
-              style: pRegular20,
+              "Shipping".tr,
+              style: pRegular20.copyWith(color: textColor),
             ),
             verticalSpace(15),
             Obx(() {
@@ -119,7 +123,7 @@ class _ShippingScreenState extends State<ShippingScreen> {
                                 onTap: () {
                                   showModalBottomSheet(
                                     context: context,
-                                    backgroundColor: AppColor.cBackGround,
+                                    backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
                                     barrierColor: AppColor.cGreyOpacity,
                                     isScrollControlled: true,
                                     shape: RoundedRectangleBorder(
@@ -139,23 +143,23 @@ class _ShippingScreenState extends State<ShippingScreen> {
                                   );
                                 },
                                 image: DefaultImages.changeIcn,
-                                title: "Edit"),
+                                title: "edit".tr),
                             slidableActionWidget(
                                 onTap: () {
                                   if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                    commonToast(AppConstant.demoString);
+                                    commonToast(AppConstant.demoString.tr);
                                   } else {
                                     shippingController.deleteShippingData(shippingId: shipping.id.toString());
                                   }
                                 },
                                 image: DefaultImages.deleteIcn,
-                                title: "Delete",
+                                title: "delete".tr,
                                 color: AppColor.cRedText),
                           ],
                         ),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: AppColor.cWhite,
+                            color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
                             borderRadius: BorderRadius.circular(15),
                             border: Border.all(color: AppColor.themeGreenColor),
                             boxShadow: [
@@ -170,7 +174,7 @@ class _ShippingScreenState extends State<ShippingScreen> {
                                  imageUrl: getImageUrl(shippingController.imageBaseUrl.value + (shipping.imagePath ?? '')),
                                  width: 45,
                                  height: 45,
-                                 errorWidget: (context, url, error) => Icon(Icons.local_shipping, size: 45),
+                                 errorWidget: (context, url, error) => Icon(Icons.local_shipping, size: 45, color: isDark ? Colors.white70 : Colors.grey),
                                  fit: BoxFit.cover,
                                ),
                               horizontalSpace(15),
@@ -182,14 +186,14 @@ class _ShippingScreenState extends State<ShippingScreen> {
                                       children: [
                                         Text(
                                           shipping.name!,
-                                          style: pMedium14,
+                                          style: pMedium14.copyWith(color: textColor),
                                         ),
                                       ],
                                     ),
                                     verticalSpace(8),
                                     Text(
                                       shipping.description!,
-                                      style: pRegular12,
+                                      style: pRegular12.copyWith(color: descriptionColor),
                                     ),
                                   ],
                                 ),

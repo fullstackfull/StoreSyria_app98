@@ -24,7 +24,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       getData();
@@ -39,7 +38,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
-      appBar: simpleAppBar(title: "Analytics"),
+      appBar: simpleAppBar(title: "analytics".tr),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Obx(() {
@@ -51,7 +50,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Visitors",
+                        "Visitors".tr,
                         style: pRegular20,
                       ),
                       verticalSpace(20),
@@ -68,7 +67,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       statisticsController.topUrlList.isEmpty
                           ? SizedBox()
                           : Text(
-                              "Top URL",
+                              "Top URL".tr,
                               style: pRegular20,
                             ),
                       verticalSpace(
@@ -84,7 +83,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 TopUrl topUrl =
                                     statisticsController.topUrlList[index];
                                 return topUrlWidget(
-                                  title: "My Store",
+                                  title: "My Store".tr,
                                   subTitle: topUrl.url!,
                                   total: topUrl.totalClick.toString(),
                                   digit: (index + 1).toString(),
@@ -99,7 +98,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               .staticsDataModel!.data!.platform!.isEmpty
                           ? SizedBox()
                           : Text(
-                              "Platforms",
+                              "Platforms".tr,
                               style: pRegular20,
                             ),
                       statisticsController
@@ -118,38 +117,32 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       //   btnName: "Show more statistics",
                       //   onPresses: () {},
                       // ),
-                      statisticsController
-                              .staticsDataModel!.data!.browser!.isEmpty
+                      statisticsController.staticsDataModel!.data!.browser!.isEmpty
                           ? SizedBox()
                           : Text(
-                              "Browsers",
+                              "Browsers".tr,
                               style: pRegular20,
                             ),
                       verticalSpace(10),
-                      statisticsController
-                              .staticsDataModel!.data!.browser!.isEmpty
+                      statisticsController.staticsDataModel!.data!.browser!.isEmpty
                           ? SizedBox()
                           : BrowsersGraph(
                               isDevice: false,
-                              browser: statisticsController
-                                  .staticsDataModel!.data!.browser!,
+                              browser: statisticsController.staticsDataModel!.data!.browser!,
                             ),
                       verticalSpace(20),
-                      statisticsController
-                              .staticsDataModel!.data!.device!.isEmpty
+                      statisticsController.staticsDataModel!.data!.device!.isEmpty
                           ? SizedBox()
                           : Text(
-                              "Device",
+                              "Device".tr,
                               style: pRegular20,
                             ),
                       verticalSpace(20),
-                      statisticsController
-                              .staticsDataModel!.data!.device!.isEmpty
+                      statisticsController.staticsDataModel!.data!.device!.isEmpty
                           ? SizedBox()
                           : BrowsersGraph(
                               isDevice: true,
-                              device: statisticsController
-                                  .staticsDataModel!.data!.device!,
+                              device: statisticsController.staticsDataModel!.data!.device!,
                             ),
                     ],
                   ),

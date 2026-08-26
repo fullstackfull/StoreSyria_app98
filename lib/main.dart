@@ -19,19 +19,19 @@ GetStorage? getStorage;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
 
   await Firebase.initializeApp();
 
-
   await GetStorage.init();
   getStorage = GetStorage();
 
-  await FirebaseMessagingService().initialize();
+  final language = Prefs.getLanguage();
+  print('🌐 Current Language: $language');
 
+  await FirebaseMessagingService().initialize();
   await FcmTokenService().initialize();
 
   await dotenv.load(fileName: "assets/.env");

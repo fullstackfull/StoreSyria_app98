@@ -33,7 +33,7 @@ Widget buildAppTitleRow(String date) {
       Text(
         "Dashboard".tr,
         style: pBold24.copyWith(
-          color: AppColor.themeNavyBlueColor,
+          color: isDark ? Colors.white : AppColor.themeNavyBlueColor,
         ),
       ),
       Obx(() => Stack(
@@ -59,7 +59,7 @@ Widget buildAppTitleRow(String date) {
               child: Icon(
                 Icons.notifications_outlined,
                 size: 22.sp,
-                color: AppColor.themeNavyBlueColor,
+                color: isDark ? Colors.white : AppColor.themeNavyBlueColor,
               ),
             ),
           ),
@@ -227,12 +227,12 @@ Widget qrCodeWidget({String? qrString, String? title}) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "QR Code",
-                  style: pRegular12,
+                  "QR Code".tr,
+                  style: pRegular12.copyWith(color: isDark ? Colors.white70 : AppColor.cDarkGreyFont),
                 ),
                 Text(
-                  title ?? "My Store",
-                  style: pSemiBold16,
+                  title ?? "My Store".tr,
+                  style: pSemiBold16.copyWith(color: isDark ? Colors.white : AppColor.cLabel),
                 ),
               ],
             ),
@@ -259,7 +259,7 @@ Widget qrCodeWidget({String? qrString, String? title}) {
                 ),
                 horizontalSpace(8),
                 Text(
-                  'Copy Me Quickly',
+                  'Copy Me Quickly'.tr,
                   style: pRegular8.copyWith(color: AppColor.cWhite),
                   textAlign: TextAlign.center,
                 ),
@@ -274,11 +274,11 @@ Widget qrCodeWidget({String? qrString, String? title}) {
             version: QrVersions.auto,
             eyeStyle: QrEyeStyle(
               eyeShape: QrEyeShape.square,
-              color: AppColor.cBlackFont,
+              color: isDark ? Colors.white : AppColor.cBlackFont,
             ),
             dataModuleStyle: QrDataModuleStyle(
               dataModuleShape: QrDataModuleShape.square,
-              color: AppColor.cBlackFont,
+              color: isDark ? Colors.white : AppColor.cBlackFont,
             ),
             gapless: true,
           ),
@@ -328,12 +328,12 @@ Widget totalProductWidget({
         verticalSpace(10),
         Text(
           total!,
-          style: pSemiBold18.copyWith(fontSize: 22),
+          style: pSemiBold18.copyWith(fontSize: 22, color: isDark ? Colors.white : AppColor.cLabel),
         ),
         verticalSpace(2),
         Text(
           "${title!} ${subTitle!}",
-          style: pRegular12.copyWith(color: AppColor.cDarkGreyFont),
+          style: pRegular12.copyWith(color: isDark ? Colors.white70 : AppColor.cDarkGreyFont),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -403,8 +403,8 @@ class _OrderGraphState extends State<OrderGraph> {
                 ),
                 horizontalSpace(10),
                 Text(
-                  "Orders",
-                  style: pMedium8,
+                  "Orders".tr,
+                  style: pMedium8.copyWith(color: Get.isDarkMode ? Colors.white70 : AppColor.cLabel),
                 ),
                 horizontalSpace(20),
                 // CircleAvatar(
@@ -455,10 +455,10 @@ class _OrderGraphState extends State<OrderGraph> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
-                      children: [
+                       children: [
                         Text(
                           /* seriesIndex == 1 ? "Canceled Orders" :*/
-                          "Orders",
+                          "Orders".tr,
                           style: pSemiBold12.copyWith(color: AppColor.cDarkGreyFont),
                         ),
                         verticalSpace(8),
@@ -481,7 +481,7 @@ class _OrderGraphState extends State<OrderGraph> {
                   dataSource: orders,
                   xValueMapper: (SalesData sales, _) => sales.year,
                   yValueMapper: (SalesData sales, _) => sales.sales,
-                  name: 'Orders',
+                  name: 'Orders'.tr,
                   color: AppColor.themeGreenColor,
                   width: 5,
                   dataLabelSettings: DataLabelSettings(isVisible: false),

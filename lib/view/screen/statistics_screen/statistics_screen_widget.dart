@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable, prefer_const_constructors, prefer_const_constructors_in_immutables, avoid_function_literals_in_foreach_calls
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/helper.dart';
@@ -269,7 +270,7 @@ class _StatisticsVisitorGraphState
                 ),
                 horizontalSpace(10),
                 Text(
-                  "Total page view",
+                  "Total page view".tr,
                   style: pMedium8,
                 ),
 
@@ -282,7 +283,7 @@ class _StatisticsVisitorGraphState
                 ),
                 horizontalSpace(10),
                 Text(
-                  "Unique page view",
+                  "Unique page view".tr,
                   style: pMedium8,
                 ),
               ],
@@ -376,8 +377,8 @@ class _StatisticsVisitorGraphState
               seriesIndex == 0;
 
           final String title = isUnique
-              ? "Unique Page View"
-              : "Total Page View";
+              ? "Unique Page View".tr
+              : "Total Page View".tr;
 
           final num value = isUnique
               ? chartData[pointIndex].desktop
@@ -452,7 +453,7 @@ class _StatisticsVisitorGraphState
         color:
         AppColor.themeGreenColor,
 
-        name: 'Unique Page View',
+        name: 'Unique Page View'.tr,
 
         animationDuration: 900,
 
@@ -479,7 +480,7 @@ class _StatisticsVisitorGraphState
         color:
         AppColor.themeNavyBlueColor,
 
-        name: 'Total Page View',
+        name: 'Total Page View'.tr,
 
         animationDuration: 1100,
 
@@ -559,8 +560,8 @@ class _PlatformBarChartState
   @override
   Widget build(BuildContext context) {
     return StatisticsCard(
-      title: 'Platforms',
-      subtitle: 'Visitors by operating system',
+      title: 'Platforms'.tr,
+      subtitle: 'Visitors by operating system'.tr,
       child: Column(
         children: [
           _buildPlatformLegend(),
@@ -700,7 +701,7 @@ class _PlatformBarChartState
           xValueMapper: (data, _) => data.x,
           yValueMapper: (data, _) => data.desktop,
           pointColorMapper: (data, _) => data.color,
-          name: 'Page View',
+          name: 'Page View'.tr,
           dataLabelSettings: DataLabelSettings(
             isVisible: true,
             textStyle: pMedium10.copyWith(
@@ -787,11 +788,11 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
   Widget build(BuildContext context) {
     return StatisticsCard(
       title: widget.isDevice
-          ? 'Devices'
-          : 'Browsers',
+          ? 'Devices'.tr
+          : 'Browsers'.tr,
       subtitle: widget.isDevice
-          ? 'Visitors by device'
-          : 'Visitors by browser',
+          ? 'Visitors by device'.tr
+          : 'Visitors by browser'.tr,
       child: Column(
         children: [
           SizedBox(

@@ -234,7 +234,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          "Used Successfully",
+                          "Used Successfully".tr,
                           style: TextStyle(
                             fontSize: 10.5.sp,
                             fontWeight: FontWeight.w500,
@@ -257,12 +257,12 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    "AMOUNT",
+                    "AMOUNT".tr,
                     style: TextStyle(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.w500,
                       color: isDark
-                          ? Colors.grey.shade500
+                          ? Colors.grey.shade400
                           : Colors.grey.shade500,
                     ),
                   ),
@@ -276,7 +276,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w800,
-                      color: Colors.black,
+                      color: isDark ? Colors.white : Colors.black,
                     ),
                   ),
                 ],
@@ -309,7 +309,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
               Expanded(
                 child: _buildInfoItem(
                   icon: Icons.receipt_long_outlined,
-                  title: "Order ID",
+                  title: "order_id_label".tr,
                   value:
                   "#${data.productOrderId ?? data.orderId ?? '-'}",
                   green: green,
@@ -330,7 +330,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
               Expanded(
                 child: _buildInfoItem(
                   icon: Icons.calendar_today_outlined,
-                  title: "Date",
+                  title: "date_label".tr,
                   value: formattedDate,
                   green: green,
                   isDark: isDark,
@@ -386,7 +386,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w500,
                   color: isDark
-                      ? Colors.grey.shade900
+                      ? Colors.grey.shade400
                       : Colors.grey.shade500,
                 ),
               ),

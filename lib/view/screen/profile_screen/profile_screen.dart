@@ -41,7 +41,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     profileController.nameController.text = widget.name;
     profileController.emailController.text = Prefs.getString(AppConstant.emailId);
