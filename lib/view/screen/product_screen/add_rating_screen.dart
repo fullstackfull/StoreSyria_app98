@@ -78,114 +78,99 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
       appBar: simpleAppBar(title: widget.isUpdate == true ? "Update Review" : "Add Review"),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Obx(
-            () {
-              return SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Select your Rate:", style: pBold14),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: RatingBar.builder(
-                          initialRating: addReviewController.rate.value,
-                          minRating: 1,
-                          direction: Axis.horizontal,
-                          allowHalfRating: false,
-                          itemCount: 5,
-                          itemSize: 36,
-                          unratedColor: AppColor.cFont,
-                          glow: false,
-                          itemBuilder: (context, _) => Icon(
-                            Icons.star_rate_rounded,
-                            color: AppColor.cGreenFont,
-                          ),
-                          onRatingUpdate: (rating) {
-                            print(rating);
-                            addReviewController.rate.value = rating;
-                            print(addReviewController.rate.value);
-                          },
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Obx(
+          () {
+            return SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Select your Rate:", style: pBold14),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: RatingBar.builder(
+                        initialRating: addReviewController.rate.value,
+                        minRating: 1,
+                        direction: Axis.horizontal,
+                        allowHalfRating: false,
+                        itemCount: 5,
+                        itemSize: 36,
+                        unratedColor: AppColor.cFont,
+                        glow: false,
+                        itemBuilder: (context, _) => Icon(
+                          Icons.star_rate_rounded,
+                          color: AppColor.cGreenFont,
                         ),
+                        onRatingUpdate: (rating) {
+                          print(rating);
+                          addReviewController.rate.value = rating;
+                          print(addReviewController.rate.value);
+                        },
                       ),
-                      verticalSpace(10),
-                      AddProductTextField(
-                        controller: addReviewController.titleController,
-                        labelText: 'Review Title',
-                        hintText: 'Enter Review Title',
+                    ),
+                    verticalSpace(10),
+                    AddProductTextField(
+                      controller: addReviewController.titleController,
+                      labelText: 'Review Title',
+                      hintText: 'Enter Review Title',
+                      validator: (value) {
+                        return Validator.validateRequired(value!);
+                      },
+                    ),
+                    AddProductTextField(
+                        controller: addReviewController.descriptionController,
+                        labelText: 'Description',
+                        hintText: 'Description',
                         validator: (value) {
                           return Validator.validateRequired(value!);
                         },
-                      ),
-                      AddProductTextField(
-                          controller: addReviewController.descriptionController,
-                          labelText: 'Description',
-                          hintText: 'Description',
-                          validator: (value) {
-                            return Validator.validateRequired(value!);
-                          },
-                          maxLines: 5),
-                      verticalSpace(10),
-                      Obx(
-                            () => SwitchListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 14.w,
-                            vertical: 2.h,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            side: BorderSide(
-                              color: AppColor.cBorder,
-                            ),
-                          ),
-                          tileColor: Colors.white,
-                          title: Text(
-                            'Status',
-                            style: pMedium12.copyWith(
-                              fontSize: 14.sp,
-                              color: AppColor.cDarkGreyFont,
-                            ),
-                          ),
-                          value: addReviewController.isStatus.value,
-                          onChanged: (value) {
-                            addReviewController.isStatus.value = value;
-                            addReviewController.status.value = value ? '1' : '0';
-                          },
-                          activeColor: AppColor.themeGreenColor,
-                          activeTrackColor: AppColor.themeGreenColor.withOpacity(0.3),
-                          inactiveThumbColor: Colors.grey.shade500,
-                          inactiveTrackColor: Colors.grey.shade300,
+                        maxLines: 5),
+                    verticalSpace(10),
+                    Obx(
+                          () => SwitchListTile(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                          vertical: 2.h,
                         ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          side: BorderSide(
+                            color: AppColor.cBorder,
+                          ),
+                        ),
+                        tileColor: Colors.white,
+                        title: Text(
+                          'Status',
+                          style: pMedium12.copyWith(
+                            fontSize: 14.sp,
+                            color: AppColor.cDarkGreyFont,
+                          ),
+                        ),
+                        value: addReviewController.isStatus.value,
+                        onChanged: (value) {
+                          addReviewController.isStatus.value = value;
+                          addReviewController.status.value = value ? '1' : '0';
+                        },
+                        activeColor: AppColor.themeGreenColor,
+                        activeTrackColor: AppColor.themeGreenColor.withOpacity(0.3),
+                        inactiveThumbColor: Colors.grey.shade500,
+                        inactiveTrackColor: Colors.grey.shade300,
                       ),
-                      verticalSpace(20),
-                      CommonButton(
-                        title: widget.isUpdate == true ? "Update Review" : 'Send Review',
-                        onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            if (widget.isUpdate == true) {
-                              if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                commonToast(AppConstant.demoString);
-                              } else {
-                                addReviewController.addReview(
-                                  id : widget.id,
-                                  isUpdate: widget.isUpdate,
-                                  reviewId: widget.reviewId ?? '',
-                                  userId: addReviewController.userId.value,
-                                  title: addReviewController.titleController.text.trim(),
-                                  description: addReviewController.descriptionController.text.trim(),
-                                  categoryId: widget.categoryId,
-                                  productId: widget.productId,
-                                  rating: addReviewController.rate.value.toString(),
-                                  status: addReviewController.status.value,
-                                );
-                              }
+                    ),
+                    verticalSpace(20),
+                    CommonButton(
+                      title: widget.isUpdate == true ? "Update Review" : 'Send Review',
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          if (widget.isUpdate == true) {
+                            if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+                              commonToast(AppConstant.demoString);
                             } else {
                               addReviewController.addReview(
-                                id: widget.id,
+                                id : widget.id,
                                 isUpdate: widget.isUpdate,
                                 reviewId: widget.reviewId ?? '',
                                 userId: addReviewController.userId.value,
@@ -197,15 +182,28 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
                                 status: addReviewController.status.value,
                               );
                             }
+                          } else {
+                            addReviewController.addReview(
+                              id: widget.id,
+                              isUpdate: widget.isUpdate,
+                              reviewId: widget.reviewId ?? '',
+                              userId: addReviewController.userId.value,
+                              title: addReviewController.titleController.text.trim(),
+                              description: addReviewController.descriptionController.text.trim(),
+                              categoryId: widget.categoryId,
+                              productId: widget.productId,
+                              rating: addReviewController.rate.value.toString(),
+                              status: addReviewController.status.value,
+                            );
                           }
-                        },
-                      ),
-                    ],
-                  ),
+                        }
+                      },
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

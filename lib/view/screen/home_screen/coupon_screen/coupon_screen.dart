@@ -169,206 +169,204 @@ class _CouponScreenState extends State<CouponScreen>
         backgroundColor: isDark
             ? DarkThemeColor.cBackGround
             : const Color(0xFFF5F6F8),
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.w,
-              vertical: 16.h,
-            ),
-            child: Column(
-              children: [
-                HeaderWidget(
-                  showBackButton: true,
-                  onBackTap: () => Get.back(),
-                  context: context,
-                  title: "Coupon",
-                  label: "Add Coupon",
-                  onNewLabelTap: _addCoupon,
-                ),
+        body: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 20.w,
+            vertical: 16.h,
+          ),
+          child: Column(
+            children: [
+              HeaderWidget(
+                showBackButton: true,
+                onBackTap: () => Get.back(),
+                context: context,
+                title: "Coupon",
+                label: "Add Coupon",
+                onNewLabelTap: _addCoupon,
+              ),
 
-                verticalSpace(16.h),
+              verticalSpace(16.h),
 
-                Expanded(
-                  child: Obx(() {
+              Expanded(
+                child: Obx(() {
 
-                    if (couponController.isLoading.value &&
-                        couponController.couponsList.isEmpty) {
-                      return const Center(
-                        child: LoadingWidget(),
-                      );
-                    }
+                  if (couponController.isLoading.value &&
+                      couponController.couponsList.isEmpty) {
+                    return const Center(
+                      child: LoadingWidget(),
+                    );
+                  }
 
-                    if (couponController.errorMessage.isNotEmpty &&
-                        couponController.couponsList.isEmpty) {
-                      return RefreshIndicator(
-                        backgroundColor: isDark
-                            ? DarkThemeColor.cCardBackground
-                            : Colors.white,
-                        onRefresh: _fetchInitialData,
-                        child: ListView(
-                          physics:
-                          const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height:
-                              MediaQuery.of(context).size.height *
-                                  .6,
-                              child: Center(
-                                child: ErrorState(
-                                  message: couponController
-                                      .errorMessage.value,
-                                  onRetry: _fetchInitialData,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    if (couponController.couponsList.isEmpty) {
-                      return RefreshIndicator(
-                        backgroundColor: isDark
-                            ? DarkThemeColor.cCardBackground
-                            : Colors.white,
-                        onRefresh: _fetchInitialData,
-                        child: ListView(
-                          physics:
-                          const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height:
-                              MediaQuery.of(context).size.height *
-                                  .6,
-                              child: Center(
-                                child: EmptyState(
-                                  message:
-                                  "no_coupons_found".tr,
-                                  icon:
-                                  Icons.local_offer_outlined,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
+                  if (couponController.errorMessage.isNotEmpty &&
+                      couponController.couponsList.isEmpty) {
                     return RefreshIndicator(
                       backgroundColor: isDark
                           ? DarkThemeColor.cCardBackground
                           : Colors.white,
                       onRefresh: _fetchInitialData,
-                      child: CustomScrollView(
-                        controller: scrollController,
+                      child: ListView(
                         physics:
                         const AlwaysScrollableScrollPhysics(),
-                        slivers: [
-
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                bottom: 15.h,
-                              ),
-                              child: Row(
-                                children: [
-
-                                  Text(
-                                    "${couponController.couponModel?.data?.total ?? 0} ${'items'.tr}",
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: isDark
-                                          ? Colors.grey.shade400
-                                          : AppColor.cDarkGreyFont,
-                                      fontWeight:
-                                      FontWeight.w500,
-                                    ),
-                                  ),
-
-                                ],
+                        children: [
+                          SizedBox(
+                            height:
+                            MediaQuery.of(context).size.height *
+                                .6,
+                            child: Center(
+                              child: ErrorState(
+                                message: couponController
+                                    .errorMessage.value,
+                                onRetry: _fetchInitialData,
                               ),
                             ),
                           ),
-
-                          SliverPadding(
-                            padding: EdgeInsets.only(
-                              bottom: 20.h,
-                            ),
-                            sliver: SliverList(
-                              delegate:
-                              SliverChildBuilderDelegate(
-                                    (context, index) {
-
-                                  final CouponData coupon =
-                                  couponController
-                                      .couponsList[index];
-
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: 12.h,
-                                    ),
-                                    child: productCouponWidget(
-                                      context: context,
-                                      index: index,
-                                      discount: coupon.discountAmount.toString(),
-                                      name: coupon.couponName,
-                                      code: coupon.couponCode,
-                                      date: coupon.couponExpiryDate,
-                                      couponType: coupon.couponType,
-                                      status: coupon.status ?? 0,
-                                      viewFun: () {
-                                        _viewCoupon(coupon);
-                                      },
-
-                                      showChangeAction: true,
-                                      changeFun: () {
-                                        _editCoupon(coupon);
-                                      },
-                                      deleteFun: () {
-                                        _deleteCoupon(coupon);
-                                      },
-                                      onTap: () {
-                                        _viewCoupon(coupon);
-                                      },
-                                    ),
-                                  );
-                                },
-                                childCount:
-                                couponController
-                                    .couponsList.length,
-                              ),
-                            ),
-                          ),
-
-                          // ==================================================
-                          // PAGINATION LOADER
-                          // ==================================================
-
-                          if (couponController.hasMore.value)
-                            SliverToBoxAdapter(
-                              child: Padding(
-                                padding:
-                                EdgeInsets.symmetric(
-                                  vertical: 20.h,
-                                ),
-                                child: Center(
-                                  child: couponController
-                                      .isLoadingMore.value
-                                      ? CircularProgressIndicator(
-                                    color: AppColor
-                                        .themeNavyBlueColor,
-                                  )
-                                      : const SizedBox.shrink(),
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     );
-                  }),
-                ),
-              ],
-            ),
+                  }
+
+                  if (couponController.couponsList.isEmpty) {
+                    return RefreshIndicator(
+                      backgroundColor: isDark
+                          ? DarkThemeColor.cCardBackground
+                          : Colors.white,
+                      onRefresh: _fetchInitialData,
+                      child: ListView(
+                        physics:
+                        const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height:
+                            MediaQuery.of(context).size.height *
+                                .6,
+                            child: Center(
+                              child: EmptyState(
+                                message:
+                                "no_coupons_found".tr,
+                                icon:
+                                Icons.local_offer_outlined,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    backgroundColor: isDark
+                        ? DarkThemeColor.cCardBackground
+                        : Colors.white,
+                    onRefresh: _fetchInitialData,
+                    child: CustomScrollView(
+                      controller: scrollController,
+                      physics:
+                      const AlwaysScrollableScrollPhysics(),
+                      slivers: [
+
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              bottom: 15.h,
+                            ),
+                            child: Row(
+                              children: [
+
+                                Text(
+                                  "${couponController.couponModel?.data?.total ?? 0} ${'items'.tr}",
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: isDark
+                                        ? Colors.grey.shade400
+                                        : AppColor.cDarkGreyFont,
+                                    fontWeight:
+                                    FontWeight.w500,
+                                  ),
+                                ),
+
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        SliverPadding(
+                          padding: EdgeInsets.only(
+                            bottom: 20.h,
+                          ),
+                          sliver: SliverList(
+                            delegate:
+                            SliverChildBuilderDelegate(
+                                  (context, index) {
+
+                                final CouponData coupon =
+                                couponController
+                                    .couponsList[index];
+
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: 12.h,
+                                  ),
+                                  child: productCouponWidget(
+                                    context: context,
+                                    index: index,
+                                    discount: coupon.discountAmount.toString(),
+                                    name: coupon.couponName,
+                                    code: coupon.couponCode,
+                                    date: coupon.couponExpiryDate,
+                                    couponType: coupon.couponType,
+                                    status: coupon.status ?? 0,
+                                    viewFun: () {
+                                      _viewCoupon(coupon);
+                                    },
+
+                                    showChangeAction: true,
+                                    changeFun: () {
+                                      _editCoupon(coupon);
+                                    },
+                                    deleteFun: () {
+                                      _deleteCoupon(coupon);
+                                    },
+                                    onTap: () {
+                                      _viewCoupon(coupon);
+                                    },
+                                  ),
+                                );
+                              },
+                              childCount:
+                              couponController
+                                  .couponsList.length,
+                            ),
+                          ),
+                        ),
+
+                        // ==================================================
+                        // PAGINATION LOADER
+                        // ==================================================
+
+                        if (couponController.hasMore.value)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding:
+                              EdgeInsets.symmetric(
+                                vertical: 20.h,
+                              ),
+                              child: Center(
+                                child: couponController
+                                    .isLoadingMore.value
+                                    ? CircularProgressIndicator(
+                                  color: AppColor
+                                      .themeNavyBlueColor,
+                                )
+                                    : const SizedBox.shrink(),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
         ),
       ),

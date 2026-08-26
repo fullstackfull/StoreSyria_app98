@@ -98,324 +98,322 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: AppColor.cLight,
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // add order
-                HeaderWidget(
+        body: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // add order
+              HeaderWidget(
+                context: context,
+                title: "orders".tr,
+                label: "new_order".tr,
+                onNewLabelTap: () {},
+              ),
+
+              verticalSpace(16.h),
+
+              Obx(() {
+                return orderStatusTabsWidget(
                   context: context,
-                  title: "orders".tr,
-                  label: "new_order".tr,
-                  onNewLabelTap: () {},
+                  selectedIndex: orderController.selectedStatus.value,
+                  onChanged: (index) {
+                    orderController.selectedStatus.value = index;
+
+                    setState(() {
+                      selectedDateRange = null;
+                    });
+
+                    if (index == 0) {
+                      _fetchInitialData(deliveredStatus: null,useDateFilter: false);
+                    } else {
+                      _fetchInitialData(deliveredStatus: index - 1, useDateFilter: false);
+                    }
+                  },
+                );
+              }),
+              verticalSpace(20.h),
+
+              SizedBox(
+                width: double.infinity,
+                child: SearchRowWidget(
+                  context: context,
+                  controller: orderController.searchController,
+                  hint: 'search'.tr,
+                  onChanged: (value) {
+                    if (value.length > 2) {
+                      orderController.searchOrderData(name: value);
+                    } else if (value.isEmpty) {
+                      _fetchInitialData();
+                    }
+                  },
                 ),
+              ),
 
-                verticalSpace(16.h),
+              verticalSpace(24.h),
 
-                Obx(() {
-                  return orderStatusTabsWidget(
-                    context: context,
-                    selectedIndex: orderController.selectedStatus.value,
-                    onChanged: (index) {
-                      orderController.selectedStatus.value = index;
+              Expanded(
+                child: Obx(() {
+                  if (orderController.isLoading.value && orderController.currantPage.value == 1) {
+                    return const Center(child: LoadingWidget());
+                  }
 
-                      setState(() {
-                        selectedDateRange = null;
-                      });
-
-                      if (index == 0) {
-                        _fetchInitialData(deliveredStatus: null,useDateFilter: false);
-                      } else {
-                        _fetchInitialData(deliveredStatus: index - 1, useDateFilter: false);
-                      }
-                    },
-                  );
-                }),
-                verticalSpace(20.h),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: SearchRowWidget(
-                    context: context,
-                    controller: orderController.searchController,
-                    hint: 'search'.tr,
-                    onChanged: (value) {
-                      if (value.length > 2) {
-                        orderController.searchOrderData(name: value);
-                      } else if (value.isEmpty) {
-                        _fetchInitialData();
-                      }
-                    },
-                  ),
-                ),
-
-                verticalSpace(24.h),
-
-                Expanded(
-                  child: Obx(() {
-                    if (orderController.isLoading.value && orderController.currantPage.value == 1) {
-                      return const Center(child: LoadingWidget());
-                    }
-
-                    if (orderController.errorMessage.isNotEmpty && orderController.orderList.isEmpty) {
-                      return RefreshIndicator(
-                        onRefresh: () => _fetchInitialData(),
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * .6,
-                              child: Center(
-                                child: ErrorState(
-                                  message: orderController.errorMessage.value,
-                                  onRetry: () => _fetchInitialData(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    if (orderController.orderList.isEmpty) {
-                      return RefreshIndicator(
-                        onRefresh: () => _fetchInitialData(),
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * .6,
-                              child: Center(
-                                child: EmptyState(
-                                  message: "no_orders_found".tr,
-                                  icon: Icons.receipt_long_outlined,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    // TODO :: top order api
-                    final topOrders = orderController.orderList.take(5).toList();
-
+                  if (orderController.errorMessage.isNotEmpty && orderController.orderList.isEmpty) {
                     return RefreshIndicator(
-                      backgroundColor: Colors.white,
                       onRefresh: () => _fetchInitialData(),
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: orderController.orderList.length + (orderController.isScroll.value ? 1 : 0) + 1,
-                        // itemCount: orderController.orderList.length + (orderController.isScroll.value ? 1 : 0) + 2,
-                       // itemBuilder: (context, index) {
-                          // if (index == 0) {
-                          //   return Padding(
-                          //     padding: EdgeInsets.only(bottom: 20.h),
-                          //     child: Column(
-                          //       crossAxisAlignment: CrossAxisAlignment.start,
-                          //       children: [
-                          //         sectionHeaderWithFilterWidget(
-                          //           context: context,
-                          //           title: "top_orders".tr,
-                          //           filterLabel: selectedDateRange != null
-                          //               ? "${dateFormatted(date: selectedDateRange!.start.toString(), formatType: formatForDateTime(FormatType.date))} - "
-                          //               "${dateFormatted(date: selectedDateRange!.end.toString(), formatType: formatForDateTime(FormatType.date))}"
-                          //               : "filter_by_date".tr,
-                          //           onFilterTap: () async {
-                          //             final range = await showDateRangeBottomSheet(
-                          //               context: context,
-                          //               initialRange: selectedDateRange,
-                          //             );
-                          //
-                          //             if (range != null) {
-                          //               setState(() {
-                          //                 selectedDateRange = range;
-                          //               });
-                          //
-                          //               _fetchInitialData(
-                          //                 deliveredStatus: orderController.selectedStatus.value == 0
-                          //                     ? null
-                          //                     : orderController.selectedStatus.value - 1,
-                          //               );
-                          //             }
-                          //           },
-                          //         ),
-                          //         verticalSpace(14.h),
-                          //         SizedBox(
-                          //           height: 150.h,
-                          //           child: ListView.builder(
-                          //             scrollDirection: Axis.horizontal,
-                          //             itemCount: topOrders.length,
-                          //             itemBuilder: (context, i) {
-                          //               final order = topOrders[i];
-                          //               return topOrderCardWidget(
-                          //                 context: context,
-                          //                 orderId: order.productOrderId ?? '',
-                          //                 date: dateFormatted(date: order.orderDate!, formatType: formatForDateTime(FormatType.date)),
-                          //                 maskedName: order.userName ?? '',
-                          //                 price: "${order.finalPrice}",
-                          //                 primaryBadgeLabel: order.paymentStatus,
-                          //                 secondaryBadgeLabel: "paid".tr,
-                          //                 onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
-                          //               );
-                          //             },
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   );
-                          // }
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * .6,
+                            child: Center(
+                              child: ErrorState(
+                                message: orderController.errorMessage.value,
+                                onRetry: () => _fetchInitialData(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-                          // if (index == 1) {
-                          //   return Padding(
-                          //     padding: EdgeInsets.only(bottom: 15.h),
-                          //     child: Text(
-                          //       "all_orders".tr,
-                          //       style: TextStyle(
-                          //         fontSize: 20.sp,
-                          //         fontWeight: FontWeight.w800,
-                          //         color: isDark ? Colors.white : Colors.black,
-                          //       ),
-                          //     ),
-                          //   );
-                          // }
-                          //
-                          // final listIndex = index - 2;
-                          //
-                          // if (listIndex == orderController.orderList.length) {
-                          //   return Padding(
-                          //     padding: EdgeInsets.symmetric(vertical: 20.h),
-                          //     child: Center(child: CircularProgressIndicator(color: AppColor.themeNavyBlueColor)),
-                          //   );
-                          // }
-                          //
-                          // final order = orderController.orderList[listIndex];
-                          // return Padding(
-                          //   padding: EdgeInsets.only(bottom: 12.h),
-                          //   child: allOrdersListItemWidget(
-                          //     context: context,
-                          //     orderId: order.productOrderId ?? '',
-                          //     date: dateFormatted(date: order.orderDate!, formatType: formatForDateTime(FormatType.date)),
-                          //     maskedName: order.userName ?? '',
-                          //     price: "${order.finalPrice}",
-                          //     primaryBadgeLabel: order.paymentStatus,
-                          //     secondaryBadgeLabel: "paid".tr,
-                          //     onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
-                          //     viewFun: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
-                          //     deleteFun: () {
-                          //       AppDialog.showCustomDialog(
-                          //         iconColor: AppColor.cRedText,
-                          //         confirmColor: AppColor.cRedText,
-                          //         context: context,
-                          //         onConfirm: () => orderController.deleteOrderData(orderId: order.id.toString()),
-                          //       );
-                          //     },
-                          //   ),
-                          // );
-                          itemBuilder: (context, index) {
-                           if (index == 0) {
-                              return Padding(
-                                padding: EdgeInsets.only(bottom: 15.h),
-                                child: sectionHeaderWithFilterWidget(
-                                  isFilter: true,
-                                  num: orderController.orderModel?.data?.total ?? 0,
-                                  context: context,
-                                  title: "all_orders".tr,
-                                  filterLabel: selectedDateRange != null
-                                      ? "${dateFormatted(
-                                    date: selectedDateRange!.start.toString(),
-                                    formatType: formatForDateTime(FormatType.date),
-                                  )} - ${dateFormatted(
-                                    date: selectedDateRange!.end.toString(),
-                                    formatType: formatForDateTime(FormatType.date),
-                                  )}"
-                                      : "filter_by_date".tr,
-                                  onFilterTap: () async {
-                                    final range = await showDateRangeBottomSheet(
-                                      context: context,
-                                      initialRange: selectedDateRange,
-                                    );
+                  if (orderController.orderList.isEmpty) {
+                    return RefreshIndicator(
+                      onRefresh: () => _fetchInitialData(),
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * .6,
+                            child: Center(
+                              child: EmptyState(
+                                message: "no_orders_found".tr,
+                                icon: Icons.receipt_long_outlined,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-                                    if (range != null) {
-                                      setState(() {
-                                        selectedDateRange = range;
-                                      });
+                  // TODO :: top order api
+                  final topOrders = orderController.orderList.take(5).toList();
 
-                                      await _fetchInitialData(
-                                        deliveredStatus:
-                                        orderController.selectedStatus.value == 0
-                                            ? null
-                                            : orderController.selectedStatus.value - 1,
-                                      );
-                                    }
-                                  },
-                                ),
-                              );
-                            }
+                  return RefreshIndicator(
+                    backgroundColor: Colors.white,
+                    onRefresh: () => _fetchInitialData(),
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: orderController.orderList.length + (orderController.isScroll.value ? 1 : 0) + 1,
+                      // itemCount: orderController.orderList.length + (orderController.isScroll.value ? 1 : 0) + 2,
+                     // itemBuilder: (context, index) {
+                        // if (index == 0) {
+                        //   return Padding(
+                        //     padding: EdgeInsets.only(bottom: 20.h),
+                        //     child: Column(
+                        //       crossAxisAlignment: CrossAxisAlignment.start,
+                        //       children: [
+                        //         sectionHeaderWithFilterWidget(
+                        //           context: context,
+                        //           title: "top_orders".tr,
+                        //           filterLabel: selectedDateRange != null
+                        //               ? "${dateFormatted(date: selectedDateRange!.start.toString(), formatType: formatForDateTime(FormatType.date))} - "
+                        //               "${dateFormatted(date: selectedDateRange!.end.toString(), formatType: formatForDateTime(FormatType.date))}"
+                        //               : "filter_by_date".tr,
+                        //           onFilterTap: () async {
+                        //             final range = await showDateRangeBottomSheet(
+                        //               context: context,
+                        //               initialRange: selectedDateRange,
+                        //             );
+                        //
+                        //             if (range != null) {
+                        //               setState(() {
+                        //                 selectedDateRange = range;
+                        //               });
+                        //
+                        //               _fetchInitialData(
+                        //                 deliveredStatus: orderController.selectedStatus.value == 0
+                        //                     ? null
+                        //                     : orderController.selectedStatus.value - 1,
+                        //               );
+                        //             }
+                        //           },
+                        //         ),
+                        //         verticalSpace(14.h),
+                        //         SizedBox(
+                        //           height: 150.h,
+                        //           child: ListView.builder(
+                        //             scrollDirection: Axis.horizontal,
+                        //             itemCount: topOrders.length,
+                        //             itemBuilder: (context, i) {
+                        //               final order = topOrders[i];
+                        //               return topOrderCardWidget(
+                        //                 context: context,
+                        //                 orderId: order.productOrderId ?? '',
+                        //                 date: dateFormatted(date: order.orderDate!, formatType: formatForDateTime(FormatType.date)),
+                        //                 maskedName: order.userName ?? '',
+                        //                 price: "${order.finalPrice}",
+                        //                 primaryBadgeLabel: order.paymentStatus,
+                        //                 secondaryBadgeLabel: "paid".tr,
+                        //                 onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
+                        //               );
+                        //             },
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   );
+                        // }
 
-                            // ==================== ORDERS LOADING ====================
-                            final listIndex = index - 1;
-
-                            if (listIndex == orderController.orderList.length) {
-                              return Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20.h),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColor.themeNavyBlueColor,
-                                  ),
-                                ),
-                              );
-                            }
-
-                            // ==================== ORDER ITEM ====================
-                            final order = orderController.orderList[listIndex];
-
+                        // if (index == 1) {
+                        //   return Padding(
+                        //     padding: EdgeInsets.only(bottom: 15.h),
+                        //     child: Text(
+                        //       "all_orders".tr,
+                        //       style: TextStyle(
+                        //         fontSize: 20.sp,
+                        //         fontWeight: FontWeight.w800,
+                        //         color: isDark ? Colors.white : Colors.black,
+                        //       ),
+                        //     ),
+                        //   );
+                        // }
+                        //
+                        // final listIndex = index - 2;
+                        //
+                        // if (listIndex == orderController.orderList.length) {
+                        //   return Padding(
+                        //     padding: EdgeInsets.symmetric(vertical: 20.h),
+                        //     child: Center(child: CircularProgressIndicator(color: AppColor.themeNavyBlueColor)),
+                        //   );
+                        // }
+                        //
+                        // final order = orderController.orderList[listIndex];
+                        // return Padding(
+                        //   padding: EdgeInsets.only(bottom: 12.h),
+                        //   child: allOrdersListItemWidget(
+                        //     context: context,
+                        //     orderId: order.productOrderId ?? '',
+                        //     date: dateFormatted(date: order.orderDate!, formatType: formatForDateTime(FormatType.date)),
+                        //     maskedName: order.userName ?? '',
+                        //     price: "${order.finalPrice}",
+                        //     primaryBadgeLabel: order.paymentStatus,
+                        //     secondaryBadgeLabel: "paid".tr,
+                        //     onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
+                        //     viewFun: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
+                        //     deleteFun: () {
+                        //       AppDialog.showCustomDialog(
+                        //         iconColor: AppColor.cRedText,
+                        //         confirmColor: AppColor.cRedText,
+                        //         context: context,
+                        //         onConfirm: () => orderController.deleteOrderData(orderId: order.id.toString()),
+                        //       );
+                        //     },
+                        //   ),
+                        // );
+                        itemBuilder: (context, index) {
+                         if (index == 0) {
                             return Padding(
-                              padding: EdgeInsets.only(bottom: 12.h),
-                              child: allOrdersListItemWidget(
+                              padding: EdgeInsets.only(bottom: 15.h),
+                              child: sectionHeaderWithFilterWidget(
+                                isFilter: true,
+                                num: orderController.orderModel?.data?.total ?? 0,
                                 context: context,
-                                orderId: order.productOrderId ?? '',
-                                date: dateFormatted(
-                                  date: order.orderDate!,
+                                title: "all_orders".tr,
+                                filterLabel: selectedDateRange != null
+                                    ? "${dateFormatted(
+                                  date: selectedDateRange!.start.toString(),
                                   formatType: formatForDateTime(FormatType.date),
-                                ),
-                                maskedName: order.userName ?? '',
-                                price: "${order.finalPrice}",
-                                primaryBadgeLabel: order.paymentStatus,
-                                secondaryBadgeLabel: "paid".tr,
-                                onTap: () => Get.to(
-                                      () => OrderDetailScreen(
-                                    orderId: order.id.toString(),
-                                  ),
-                                ),
-                                viewFun: () => Get.to(
-                                      () => OrderDetailScreen(
-                                    orderId: order.id.toString(),
-                                  ),
-                                ),
-                                deleteFun: () {
-                                  AppDialog.showCustomDialog(
-                                    message: "deleteOrder",
-                                    lottieAsset: 'assets/lottie/delete_icon.json',
-                                    iconColor: AppColor.cRedText,
-                                    confirmColor: AppColor.cRedText,
+                                )} - ${dateFormatted(
+                                  date: selectedDateRange!.end.toString(),
+                                  formatType: formatForDateTime(FormatType.date),
+                                )}"
+                                    : "filter_by_date".tr,
+                                onFilterTap: () async {
+                                  final range = await showDateRangeBottomSheet(
                                     context: context,
-                                    onConfirm: () => orderController.deleteOrderData(
-                                      orderId: order.id.toString(),
-                                    ),
+                                    initialRange: selectedDateRange,
                                   );
+
+                                  if (range != null) {
+                                    setState(() {
+                                      selectedDateRange = range;
+                                    });
+
+                                    await _fetchInitialData(
+                                      deliveredStatus:
+                                      orderController.selectedStatus.value == 0
+                                          ? null
+                                          : orderController.selectedStatus.value - 1,
+                                    );
+                                  }
                                 },
                               ),
                             );
-                          },
-                      ),
-                    );
-                  }),
-                ),
-              ],
-            ),
+                          }
+
+                          // ==================== ORDERS LOADING ====================
+                          final listIndex = index - 1;
+
+                          if (listIndex == orderController.orderList.length) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20.h),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColor.themeNavyBlueColor,
+                                ),
+                              ),
+                            );
+                          }
+
+                          // ==================== ORDER ITEM ====================
+                          final order = orderController.orderList[listIndex];
+
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 12.h),
+                            child: allOrdersListItemWidget(
+                              context: context,
+                              orderId: order.productOrderId ?? '',
+                              date: dateFormatted(
+                                date: order.orderDate!,
+                                formatType: formatForDateTime(FormatType.date),
+                              ),
+                              maskedName: order.userName ?? '',
+                              price: "${order.finalPrice}",
+                              primaryBadgeLabel: order.paymentStatus,
+                              secondaryBadgeLabel: "paid".tr,
+                              onTap: () => Get.to(
+                                    () => OrderDetailScreen(
+                                  orderId: order.id.toString(),
+                                ),
+                              ),
+                              viewFun: () => Get.to(
+                                    () => OrderDetailScreen(
+                                  orderId: order.id.toString(),
+                                ),
+                              ),
+                              deleteFun: () {
+                                AppDialog.showCustomDialog(
+                                  message: "deleteOrder",
+                                  lottieAsset: 'assets/lottie/delete_icon.json',
+                                  iconColor: AppColor.cRedText,
+                                  confirmColor: AppColor.cRedText,
+                                  context: context,
+                                  onConfirm: () => orderController.deleteOrderData(
+                                    orderId: order.id.toString(),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
         ),
       ),

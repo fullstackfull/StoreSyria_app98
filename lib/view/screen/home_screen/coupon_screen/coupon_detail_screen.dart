@@ -56,89 +56,87 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
         appBar: simpleAppBar(
           title: "Coupon Details".tr,
         ),
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.w,
-              vertical: 16.h,
-            ),
-            child:Obx(() {
-              final list = couponController.viewCouponsList;
+        body: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 20.w,
+            vertical: 16.h,
+          ),
+          child:Obx(() {
+            final list = couponController.viewCouponsList;
 
-              // 1. Loading
-              if (couponController.isUsedCouponLoading.value &&
-                  list.isEmpty) {
-                return const Center(
-                  child: LoadingWidget(),
-                );
-              }
+            // 1. Loading
+            if (couponController.isUsedCouponLoading.value &&
+                list.isEmpty) {
+              return const Center(
+                child: LoadingWidget(),
+              );
+            }
 
-              // 2. Data Not Found
-              if (couponController.usedCouponEmptyMessage.isNotEmpty &&
-                  list.isEmpty) {
-                return RefreshIndicator(
-                  onRefresh: _fetchData,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * .6,
-                        child: Center(
-                          child: EmptyState(
-                            message: couponController
-                                .usedCouponEmptyMessage
-                                .value,
-                            icon: Icons.receipt_long_outlined,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              // 3. Real Error
-              if (couponController.usedCouponErrorMessage.isNotEmpty &&
-                  list.isEmpty) {
-                return RefreshIndicator(
-                  onRefresh: _fetchData,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * .6,
-                        child: Center(
-                          child: ErrorState(
-                            message: couponController
-                                .usedCouponErrorMessage
-                                .value,
-                            onRetry: _fetchData,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              // 4. Data
+            // 2. Data Not Found
+            if (couponController.usedCouponEmptyMessage.isNotEmpty &&
+                list.isEmpty) {
               return RefreshIndicator(
                 onRefresh: _fetchData,
-                child: ListView.builder(
+                child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: list.length,
-                  itemBuilder: (context, index) {
-                    final data = list[index];
-
-                    return _buildUsageCard(
-                      data: data,
-                      isDark: isDark,
-                    );
-                  },
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * .6,
+                      child: Center(
+                        child: EmptyState(
+                          message: couponController
+                              .usedCouponEmptyMessage
+                              .value,
+                          icon: Icons.receipt_long_outlined,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
-            })
-          ),
+            }
+
+            // 3. Real Error
+            if (couponController.usedCouponErrorMessage.isNotEmpty &&
+                list.isEmpty) {
+              return RefreshIndicator(
+                onRefresh: _fetchData,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * .6,
+                      child: Center(
+                        child: ErrorState(
+                          message: couponController
+                              .usedCouponErrorMessage
+                              .value,
+                          onRetry: _fetchData,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            // 4. Data
+            return RefreshIndicator(
+              onRefresh: _fetchData,
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  final data = list[index];
+
+                  return _buildUsageCard(
+                    data: data,
+                    isDark: isDark,
+                  );
+                },
+              ),
+            );
+          })
         ),
       ),
     );

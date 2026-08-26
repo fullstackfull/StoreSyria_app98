@@ -10,7 +10,6 @@ import 'package:store_go_app/store_go.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
-// ✅ جديد
 import 'package:store_go_app/core/services/firebase_messaging_service.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 import 'package:store_go_app/core/controller/onboarding_controller/onboarding_controller.dart';
@@ -19,6 +18,7 @@ GetStorage? getStorage;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -30,17 +30,14 @@ Future<void> main() async {
   await GetStorage.init();
   getStorage = GetStorage();
 
-  // ✅ تهيئة الإشعارات
   await FirebaseMessagingService().initialize();
 
-  // ✅ تهيئة خدمة FCM Token (بعد GetStorage)
   await FcmTokenService().initialize();
 
   await dotenv.load(fileName: "assets/.env");
   String isDemoMode = dotenv.get(AppConstant.isDemoMode);
   Prefs.setBool(AppConstant.isDemoMode, bool.parse(isDemoMode));
   
-  // ✅ التحقق من حالة OnBoarding
   final onboardingController = OnboardingController();
   final isOnboardingCompleted = onboardingController.isOnboardingCompleted;
   print('🔍 حالة OnBoarding: $isOnboardingCompleted');
@@ -55,5 +52,5 @@ Future<void> main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
-  runApp(DevicePreview(enabled: true, builder: (context) => StoreGoApp()));
+  runApp(DevicePreview(enabled: false, builder: (context) => StoreGoApp()));
 }

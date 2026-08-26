@@ -80,152 +80,150 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: isDark ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8),
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-            child: Column(
-              children: [
-                HeaderWidget(
-                  context: context,
-                  title: "all_categories".tr,
-                  label: "add_category".tr,
-                  onNewLabelTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      backgroundColor: Colors.transparent,
-                      barrierColor: Colors.black54,
-                      isScrollControlled: true,
-                      useSafeArea: false,
-                      transitionAnimationController: AnimationController(
-                        vsync: Navigator.of(context),
-                        duration: const Duration(milliseconds: 400),
-                      ),
-                      builder: (context) {
-                        return AddNewCategoriesWidget(
-                          isUpdate: false,
-                        );
-                      },
-                    );
-                  },
-                ),
-
-                verticalSpace(16.h),
-
-                Expanded(
-                  child: Obx(() {
-                    // Loading State
-                    if (categoryController.isLoading.value && categoryController.currantPage.value == 1) {
-                      return const Center(child: LoadingWidget());
-                    }
-
-                    // Error State
-                    if (categoryController.errorMessage.isNotEmpty && categoryController.categoriesList.isEmpty) {
-                      return RefreshIndicator(
-                        backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
-                        onRefresh: _fetchInitialData,
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * .6,
-                              child: Center(
-                                child: ErrorState(
-                                  message: categoryController.errorMessage.value,
-                                  onRetry: _fetchInitialData,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+        body: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+          child: Column(
+            children: [
+              HeaderWidget(
+                context: context,
+                title: "all_categories".tr,
+                label: "add_category".tr,
+                onNewLabelTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    barrierColor: Colors.black54,
+                    isScrollControlled: true,
+                    useSafeArea: false,
+                    transitionAnimationController: AnimationController(
+                      vsync: Navigator.of(context),
+                      duration: const Duration(milliseconds: 400),
+                    ),
+                    builder: (context) {
+                      return AddNewCategoriesWidget(
+                        isUpdate: false,
                       );
-                    }
+                    },
+                  );
+                },
+              ),
 
-                    // Empty State
-                    if (categoryController.categoriesList.isEmpty) {
-                      return RefreshIndicator(
-                        backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
-                        onRefresh: _fetchInitialData,
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * .6,
-                              child: Center(
-                                child: EmptyState(
-                                  message: "no_categories_found".tr,
-                                  icon: Icons.category_outlined,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+              verticalSpace(16.h),
 
-                    // Data List
+              Expanded(
+                child: Obx(() {
+                  // Loading State
+                  if (categoryController.isLoading.value && categoryController.currantPage.value == 1) {
+                    return const Center(child: LoadingWidget());
+                  }
+
+                  // Error State
+                  if (categoryController.errorMessage.isNotEmpty && categoryController.categoriesList.isEmpty) {
                     return RefreshIndicator(
                       backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
                       onRefresh: _fetchInitialData,
-                      child: CustomScrollView(
-                        controller: scrollController,
+                      child: ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        slivers: [
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.only(bottom: 15.h),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "${categoryController.categoriesModel?.data?.total ?? 0} ${'items'.tr}",
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * .6,
+                            child: Center(
+                              child: ErrorState(
+                                message: categoryController.errorMessage.value,
+                                onRetry: _fetchInitialData,
                               ),
                             ),
                           ),
-
-                          SliverPadding(
-                            padding: EdgeInsets.only(bottom: 20.h),
-                            sliver: SliverGrid(
-                              delegate: SliverChildBuilderDelegate(
-                                    (context, index) {
-                                  final category = categoryController.categoriesList[index];
-                                  return buildCategoryWidget(context: context,category: category,categoryController: categoryController);
-                                },
-                                childCount: categoryController.categoriesList.length,
-                              ),
-                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 220.w,
-                                crossAxisSpacing: 12.w,
-                                mainAxisSpacing: 12.h,
-                                mainAxisExtent: 225.h,
-                              ),
-                            ),
-                          ),
-
-                          if (categoryController.isScroll.value)
-                            SliverToBoxAdapter(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20.h),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColor.themeNavyBlueColor,
-                                  ),
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     );
-                  }),
-                ),
-              ],
-            ),
+                  }
+
+                  // Empty State
+                  if (categoryController.categoriesList.isEmpty) {
+                    return RefreshIndicator(
+                      backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
+                      onRefresh: _fetchInitialData,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * .6,
+                            child: Center(
+                              child: EmptyState(
+                                message: "no_categories_found".tr,
+                                icon: Icons.category_outlined,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // Data List
+                  return RefreshIndicator(
+                    backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
+                    onRefresh: _fetchInitialData,
+                    child: CustomScrollView(
+                      controller: scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 15.h),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "${categoryController.categoriesModel?.data?.total ?? 0} ${'items'.tr}",
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        SliverPadding(
+                          padding: EdgeInsets.only(bottom: 20.h),
+                          sliver: SliverGrid(
+                            delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                final category = categoryController.categoriesList[index];
+                                return buildCategoryWidget(context: context,category: category,categoryController: categoryController);
+                              },
+                              childCount: categoryController.categoriesList.length,
+                            ),
+                            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 220.w,
+                              crossAxisSpacing: 12.w,
+                              mainAxisSpacing: 12.h,
+                              mainAxisExtent: 225.h,
+                            ),
+                          ),
+                        ),
+
+                        if (categoryController.isScroll.value)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20.h),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColor.themeNavyBlueColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
         ),
       ),

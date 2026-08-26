@@ -19,140 +19,138 @@ class PlanScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
       appBar: simpleAppBar(title: "Plans", date: ""),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Manage Plans",
-                  style: pRegular20,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Manage Plans",
+                style: pRegular20,
+              ),
+              verticalSpace(15),
+              Container(
+                width: Get.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(color: AppColor.themeGreenColor),
                 ),
-                verticalSpace(15),
-                Container(
-                  width: Get.width,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(13),
-                    border: Border.all(color: AppColor.themeGreenColor),
-                  ),
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Free Plan",
-                            style: pSemiBold19,
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Free Plan",
+                          style: pSemiBold19,
+                        ),
+                        Container(
+                            decoration:
+                                BoxDecoration(color: AppColor.cLightGreen, borderRadius: BorderRadius.circular(20)),
+                            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                            child: Text(
+                              "Active",
+                              style: pMedium12.copyWith(color: AppColor.cGreenFont),
+                            ))
+                      ],
+                    ),
+                    verticalSpace(14),
+                    Text(
+                      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy ",
+                      style: pRegular12.copyWith(color: AppColor.cDarkGreyFont),
+                    ),
+                    verticalSpace(10),
+                    Text.rich(
+                      TextSpan(
+                        text: '630.00',
+                        style: pBold30.copyWith(
+                          fontSize: 31,
+                        ), // default text style
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: ' USD ',
+                            style: pMedium10.copyWith(
+                              color: AppColor.cDarkGreyFont,
+                            ),
                           ),
-                          Container(
-                              decoration:
-                                  BoxDecoration(color: AppColor.cLightGreen, borderRadius: BorderRadius.circular(20)),
-                              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                              child: Text(
-                                "Active",
-                                style: pMedium12.copyWith(color: AppColor.cGreenFont),
-                              ))
                         ],
                       ),
-                      verticalSpace(14),
-                      Text(
-                        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy ",
-                        style: pRegular12.copyWith(color: AppColor.cDarkGreyFont),
-                      ),
-                      verticalSpace(10),
-                      Text.rich(
-                        TextSpan(
-                          text: '630.00',
-                          style: pBold30.copyWith(
-                            fontSize: 31,
-                          ), // default text style
-                          children: <TextSpan>[
-                            TextSpan(
-                              text: ' USD ',
-                              style: pMedium10.copyWith(
-                                color: AppColor.cDarkGreyFont,
-                              ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: horizontalDivider(),
+                    ),
+                    moreEmailWidget(backGroundColor: AppColor.cBackGround, totalEmail: "10,000", totalTask: "10,000"),
+                  ],
+                ),
+              ),
+              verticalSpace(15),
+              Text(
+                "Other Plans",
+                style: pRegular20,
+              ),
+              verticalSpace(15),
+              Container(
+                width: Get.width,
+                decoration: BoxDecoration(
+                  color: AppColor.themeNavyBlueColor,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Standard Plan",
+                      style: pSemiBold19.copyWith(color: AppColor.cWhiteFont),
+                    ),
+                    verticalSpace(14),
+                    Text(
+                      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy ",
+                      style: pRegular12.copyWith(color: AppColor.cFont),
+                    ),
+                    verticalSpace(10),
+                    Text.rich(
+                      TextSpan(
+                        text: '630.00',
+                        style: pBold30.copyWith(
+                          fontSize: 31,
+                          color: AppColor.cWhiteFont,
+                        ), // default text style
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: ' USD ',
+                            style: pMedium10.copyWith(
+                              color: AppColor.cDarkGreyFont,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: horizontalDivider(),
-                      ),
-                      moreEmailWidget(backGroundColor: AppColor.cBackGround, totalEmail: "10,000", totalTask: "10,000"),
-                    ],
-                  ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: horizontalDivider(),
+                    ),
+                    moreEmailWidget(
+                        backGroundColor: AppColor.themeNavyBlueColor,
+                        totalEmail: "10,000",
+                        totalTask: "10,000",
+                        textColor: AppColor.cWhiteFont),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: horizontalDivider(),
+                    ),
+                    CommonIconButton(
+                      iconData: DefaultImages.upgradeIcn,
+                      title: 'Upgrade',
+                    )
+                  ],
                 ),
-                verticalSpace(15),
-                Text(
-                  "Other Plans",
-                  style: pRegular20,
-                ),
-                verticalSpace(15),
-                Container(
-                  width: Get.width,
-                  decoration: BoxDecoration(
-                    color: AppColor.themeNavyBlueColor,
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Standard Plan",
-                        style: pSemiBold19.copyWith(color: AppColor.cWhiteFont),
-                      ),
-                      verticalSpace(14),
-                      Text(
-                        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy ",
-                        style: pRegular12.copyWith(color: AppColor.cFont),
-                      ),
-                      verticalSpace(10),
-                      Text.rich(
-                        TextSpan(
-                          text: '630.00',
-                          style: pBold30.copyWith(
-                            fontSize: 31,
-                            color: AppColor.cWhiteFont,
-                          ), // default text style
-                          children: <TextSpan>[
-                            TextSpan(
-                              text: ' USD ',
-                              style: pMedium10.copyWith(
-                                color: AppColor.cDarkGreyFont,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: horizontalDivider(),
-                      ),
-                      moreEmailWidget(
-                          backGroundColor: AppColor.themeNavyBlueColor,
-                          totalEmail: "10,000",
-                          totalTask: "10,000",
-                          textColor: AppColor.cWhiteFont),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: horizontalDivider(),
-                      ),
-                      CommonIconButton(
-                        iconData: DefaultImages.upgradeIcn,
-                        title: 'Upgrade',
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

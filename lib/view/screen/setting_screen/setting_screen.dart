@@ -31,152 +31,148 @@ class SettingScreen extends StatelessWidget {
       init: ThemeController(),
       builder: (_) {
         final bool isDark =
-            Theme
-                .of(context)
-                .brightness == Brightness.dark;
+            Theme.of(context).brightness == Brightness.dark;
 
         return Scaffold(
           backgroundColor: AppColor.cBackGround,
-          body: SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
-                24,
-                20,
-                24,
-                30,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'more'.tr,
-                    style: pBold24.copyWith(
-                      color: AppColor.themeNavyBlueColor,
-                    ),
+          body: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              24,
+              35,
+              24,
+              30,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'more'.tr,
+                  style: pBold24.copyWith(
+                    color: AppColor.themeNavyBlueColor,
                   ),
+                ),
 
-                  verticalSpace(12),
+                verticalSpace(12),
 
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                    childAspectRatio: 1.2,
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 1.2,
+                  children: [
+                    settingCard(
+                      isDark: isDark,
+                      icon: DefaultImages.statisticIcn,
+                      title: 'analytics'.tr,
+                      subtitle: 'view_store_performance'.tr,
+                      function: () {
+                        Get.toNamed(AppRoutes.statistics);
+                      },
+                    ),
+
+                    settingCard(
+                      isDark: isDark,
+                      icon: DefaultImages.shippingIcn,
+                      title: 'shipping'.tr,
+                      subtitle: 'manage_shipping'.tr,
+                      function: () {
+                        Get.toNamed(AppRoutes.shipping);
+                      },
+                    ),
+
+                    settingCard(
+                      isDark: isDark,
+                      icon: DefaultImages.taxIcn,
+                      title: 'tax'.tr,
+                      subtitle: 'manage_tax'.tr,
+                      function: () {
+                        Get.toNamed(AppRoutes.tax);
+                      },
+                    ),
+
+                    settingCard(
+                      isDark: isDark,
+                      icon: DefaultImages.couponIcn,
+                      title: 'coupon'.tr,
+                      subtitle: 'manage_coupons'.tr,
+                      function: () {
+                        Get.toNamed(AppRoutes.coupon);
+                      },
+                    ),
+                  ],
+                ),
+
+                verticalSpace(28),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColor.cBackGround,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColor.themeGreenColor.withOpacity(0.2),
+                        offset: const Offset(0, 2),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: Column(
                     children: [
-                      settingCard(
+                      settingWidget(
+                        icon: DefaultImages.storeIcn,
+                        title: 'store_settings'.tr,
                         isDark: isDark,
-                        icon: DefaultImages.statisticIcn,
-                        title: 'analytics'.tr,
-                        subtitle: 'view_store_performance'.tr,
                         function: () {
-                          Get.toNamed(AppRoutes.statistics);
+                          Get.to(() => StoreSettingScreen());
                         },
                       ),
 
-                      settingCard(
+                      settingWidget(
+                        icon: DefaultImages.settingIcn,
+                        title: 'settings'.tr,
                         isDark: isDark,
-                        icon: DefaultImages.shippingIcn,
-                        title: 'shipping'.tr,
-                        subtitle: 'manage_shipping'.tr,
                         function: () {
-                          Get.toNamed(AppRoutes.shipping);
+                          Get.toNamed(AppRoutes.appSettings);
                         },
                       ),
-
-                      settingCard(
+                      settingWidget(
+                        icon: DefaultImages.logoutIcn,
+                        title: 'log_out'.tr,
                         isDark: isDark,
-                        icon: DefaultImages.taxIcn,
-                        title: 'tax'.tr,
-                        subtitle: 'manage_tax'.tr,
                         function: () {
-                          Get.toNamed(AppRoutes.tax);
-                        },
-                      ),
+                          AppDialog.showCustomDialog(
+                              context: context,
+                              message: "logoutConfirm".tr,
+                              title: "logout".tr,
+                              lottieAsset: "assets/lottie/logout.json",
+                              confirmText: "yes".tr,
+                              popOnConfirm: false,
+                              onConfirm: () async {
+                                await FcmTokenService().clearFcmToken();
 
-                      settingCard(
-                        isDark: isDark,
-                        icon: DefaultImages.couponIcn,
-                        title: 'coupon'.tr,
-                        subtitle: 'manage_coupons'.tr,
-                        function: () {
-                          Get.toNamed(AppRoutes.coupon);
+                                if (Get.isRegistered<NotificationController>()) {
+                                  Get.find<NotificationController>().clearNotificationData();
+                                }
+
+                                Prefs.clear();
+
+                                Get.offAllNamed(AppRoutes.login);
+                            }
+                          );
                         },
                       ),
                     ],
                   ),
-
-                  verticalSpace(28),
-
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColor.cBackGround,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColor.themeGreenColor.withOpacity(0.2),
-                          offset: const Offset(0, 2),
-                          blurRadius: 8,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        settingWidget(
-                          icon: DefaultImages.storeIcn,
-                          title: 'store_settings'.tr,
-                          isDark: isDark,
-                          function: () {
-                            Get.to(() => StoreSettingScreen());
-                          },
-                        ),
-
-                        settingWidget(
-                          icon: DefaultImages.settingIcn,
-                          title: 'settings'.tr,
-                          isDark: isDark,
-                          function: () {
-                            Get.toNamed(AppRoutes.appSettings);
-                          },
-                        ),
-                        settingWidget(
-                          icon: DefaultImages.logoutIcn,
-                          title: 'log_out'.tr,
-                          isDark: isDark,
-                          function: () {
-                            AppDialog.showCustomDialog(
-                                context: context,
-                                message: "logoutConfirm".tr,
-                                title: "logout".tr,
-                                lottieAsset: "assets/lottie/logout.json",
-                                confirmText: "yes".tr,
-                                popOnConfirm: false,
-                                onConfirm: () async {
-                                  await FcmTokenService().clearFcmToken();
-
-                                  if (Get.isRegistered<NotificationController>()) {
-                                    Get.find<NotificationController>().clearNotificationData();
-                                  }
-
-                                  Prefs.clear();
-
-                                  Get.offAllNamed(AppRoutes.login);
-                              }
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );

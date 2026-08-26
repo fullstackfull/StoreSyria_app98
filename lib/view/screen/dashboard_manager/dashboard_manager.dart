@@ -5,8 +5,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:store_go_app/utils/colors.dart';
-import 'package:store_go_app/view/widget/custom_bottom_nav_bar/bar_item.dart';
-import 'package:store_go_app/view/widget/custom_bottom_nav_bar/custom_bottom_nav_bar.dart';
 import 'package:store_go_app/core/controller/dashboard_manager_controller/dashboard_manager_controller.dart';
 import 'package:store_go_app/core/controller/setting_controller/theme_controller.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
@@ -124,8 +122,7 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
             ),
           ),
         ),
-       );
+      );
     });
   }
 }
-

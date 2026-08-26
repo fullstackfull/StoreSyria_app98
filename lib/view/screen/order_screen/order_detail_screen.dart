@@ -51,246 +51,244 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: simpleAppBar(title: "order_details".tr),
-      body: SafeArea(
-        child: Obx(() {
-          if (orderController.isDetailLoading.value) {
-            return const Center(child: LoadingWidget());
-          }
-          if (orderController.errorMessage.isNotEmpty &&
-              orderController.orderDetail == null) {
-            return ErrorState(
-              message: orderController.errorMessage.value,
-              onRetry: getData,
-            );
-          }
-          if (orderController.orderDetail == null) {
-            return EmptyState(
-              message: "no_details_found".tr,
-              icon: Icons.info_outline,
-            );
-          }
+      body: Obx(() {
+        if (orderController.isDetailLoading.value) {
+          return const Center(child: LoadingWidget());
+        }
+        if (orderController.errorMessage.isNotEmpty &&
+            orderController.orderDetail == null) {
+          return ErrorState(
+            message: orderController.errorMessage.value,
+            onRetry: getData,
+          );
+        }
+        if (orderController.orderDetail == null) {
+          return EmptyState(
+            message: "no_details_found".tr,
+            icon: Icons.info_outline,
+          );
+        }
 
-          final detail = orderController.orderDetail!;
+        final detail = orderController.orderDetail!;
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header Section
-                Container(
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: borderColor),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text("order_id_label".tr,
-                                    style: TextStyle(fontSize: 12.sp, color: secondaryText)),
-                                verticalSpace(4.h),
-                                Text(
-                                  detail.orderId!,
-                                  style: TextStyle(
-                                      fontSize: 16.sp,
-                                      color: accentColor,
-                                      fontWeight: FontWeight.bold),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                          horizontalSpace(8.w),
-                          Flexible(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: _StatusBadge(
-                                status: detail.orderStatus ?? 0,
-                                statusText: detail.orderStatusText ?? 'Pending',
-                                onTap: () => _showStatusBottomSheet(context, detail),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(20.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Section
+              Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: borderColor),
                 ),
-
-                verticalSpace(20.h),
-
-                // Action Button
-                CommonIconButton(
-                  iconData: DefaultImages.categoriesIcn,
-                  title: 'view_invoice'.tr,
-                  height: 45.h,
-                  textColor: accentColor,
-                  btnColor: cardBg,
-                  bColor: borderColor,
-                  onPressed: () {
-                    Get.to(() => InvoicePdfViewScreen(
-                      productList: detail.product!,
-                      orderDetailData: detail,
-                      tax: orderController.extTax.value.toString(),
-                      deliveryCharge: double.parse(detail.deliveredCharge.toString()),
-                      couponAmount: double.parse(
-                        detail.couponInfo?.discountAmount.toString() ?? '0.0',
-                      ),
-                    ));
-                  },
-                ),
-
-                verticalSpace(25.h),
-
-                // Order Items Table
-                Text("order_items".tr,
-                    style: TextStyle(fontSize: 18.sp, color: accentColor, fontWeight: FontWeight.bold)),
-                verticalSpace(15.h),
-                Container(
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: borderColor),
-                  ),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                        child: Row(
-                          children: [
-                            SizedBox(width: 30.w,
-                                child: Text('#', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText))),
-                            Expanded(flex: 3,
-                                child: Text('product'.tr, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText))),
-                            Expanded(flex: 1,
-                                child: Text('qty'.tr, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText), textAlign: TextAlign.center)),
-                            Expanded(flex: 2,
-                                child: Text('price'.tr, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText), textAlign: TextAlign.right)),
-                            Expanded(flex: 2,
-                                child: Text('total'.tr, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText), textAlign: TextAlign.right)),
-                          ],
-                        ),
-                      ),
-                      Divider(height: 1.h, color: dividerColor),
-                      ListView.separated(
-                        itemCount: detail.product!.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final product = detail.product![index];
-                          final total = double.parse(product.qty!.toString()) *
-                              double.parse(product.finalPrice!.toString());
-                          return orderItemWidget(
-                            index: index + 1,
-                            name: product.name!,
-                            quantity: product.qty.toString(),
-                            price: product.finalPrice!,
-                            totals: total.toStringAsFixed(2),
-                            secondaryText: secondaryText,
-                            primaryText: primaryText,
-                            accentColor: accentColor,
-                          );
-                        },
-                        separatorBuilder: (_, __) => Divider(
-                            height: 1.h,
-                            color: dividerColor,
-                            indent: 16.w,
-                            endIndent: 16.w),
-                      ),
-                    ],
-                  ),
-                ),
-
-                verticalSpace(25.h),
-
-                // Payment Summary
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
                   children: [
-                    Text("payment_summary".tr,
-                        style: TextStyle(fontSize: 18.sp, color: accentColor, fontWeight: FontWeight.bold)),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _PaymentStatusBadge(
-                          isPaid: (detail.paymentStatus ?? 'Unpaid').toLowerCase() == 'paid',
-                          onTap: () => _showPaymentStatusBottomSheet(context, detail),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text("order_id_label".tr,
+                                  style: TextStyle(fontSize: 12.sp, color: secondaryText)),
+                              verticalSpace(4.h),
+                              Text(
+                                detail.orderId!,
+                                style: TextStyle(
+                                    fontSize: 16.sp,
+                                    color: accentColor,
+                                    fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                        horizontalSpace(8.w),
+                        Flexible(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: _StatusBadge(
+                              status: detail.orderStatus ?? 0,
+                              statusText: detail.orderStatusText ?? 'Pending',
+                              onTap: () => _showStatusBottomSheet(context, detail),
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
-                verticalSpace(15.h),
-                grandTotalsWidget(
-                  grandTotal: detail.finalPrice!,
-                  extTax: orderController.extTax.value.toString(),
-                  applyCoupon: detail.couponInfo?.discountAmount ?? "0",
-                  shippingPrice: detail.deliveredCharge!,
-                  subTotal: detail.subTotal!,
-                  paymentType: detail.paymnetType!,
-                  accentColor: accentColor,
+              ),
+
+              verticalSpace(20.h),
+
+              // Action Button
+              CommonIconButton(
+                iconData: DefaultImages.categoriesIcn,
+                title: 'view_invoice'.tr,
+                height: 45.h,
+                textColor: accentColor,
+                btnColor: cardBg,
+                bColor: borderColor,
+                onPressed: () {
+                  Get.to(() => InvoicePdfViewScreen(
+                    productList: detail.product!,
+                    orderDetailData: detail,
+                    tax: orderController.extTax.value.toString(),
+                    deliveryCharge: double.parse(detail.deliveredCharge.toString()),
+                    couponAmount: double.parse(
+                      detail.couponInfo?.discountAmount.toString() ?? '0.0',
+                    ),
+                  ));
+                },
+              ),
+
+              verticalSpace(25.h),
+
+              // Order Items Table
+              Text("order_items".tr,
+                  style: TextStyle(fontSize: 18.sp, color: accentColor, fontWeight: FontWeight.bold)),
+              verticalSpace(15.h),
+              Container(
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: borderColor),
                 ),
-
-                verticalSpace(25.h),
-
-                // Shipping & Billing Info
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
                   children: [
-                    Expanded(
-                      child: infoSectionCard(
-                        title: "shipping_info".tr,
-                        icon: Icons.local_shipping_outlined,
-                        data: {
-                          "Name": detail.deliveryInformations!.name!,
-                          "Phone": detail.deliveryInformations!.phone!,
-                          "City": detail.deliveryInformations!.city!,
-                          "Address": "${detail.deliveryInformations!.state!} - ${detail.deliveryInformations!.country!}",
-                        },
-                        isDark: isDark,
-                        secondaryText: secondaryText,
-                        primaryText: primaryText,
-                        accentColor: accentColor,
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 30.w,
+                              child: Text('#', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText))),
+                          Expanded(flex: 3,
+                              child: Text('product'.tr, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText))),
+                          Expanded(flex: 1,
+                              child: Text('qty'.tr, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText), textAlign: TextAlign.center)),
+                          Expanded(flex: 2,
+                              child: Text('price'.tr, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText), textAlign: TextAlign.right)),
+                          Expanded(flex: 2,
+                              child: Text('total'.tr, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: secondaryText), textAlign: TextAlign.right)),
+                        ],
                       ),
                     ),
-                    horizontalSpace(15.w),
-                    Expanded(
-                      child: infoSectionCard(
-                        title: "billing_info".tr,
-                        icon: Icons.receipt_long_outlined,
-                        data: {
-                          "Name": detail.billingInformations!.name!,
-                          "Email": detail.billingInformations!.email!,
-                          "City": detail.billingInformations!.city!,
-                          "Zip": detail.billingInformations!.postCode!,
-                        },
-                        isDark: isDark,
-                        secondaryText: secondaryText,
-                        primaryText: primaryText,
-                        accentColor: accentColor,
-                      ),
+                    Divider(height: 1.h, color: dividerColor),
+                    ListView.separated(
+                      itemCount: detail.product!.length,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final product = detail.product![index];
+                        final total = double.parse(product.qty!.toString()) *
+                            double.parse(product.finalPrice!.toString());
+                        return orderItemWidget(
+                          index: index + 1,
+                          name: product.name!,
+                          quantity: product.qty.toString(),
+                          price: product.finalPrice!,
+                          totals: total.toStringAsFixed(2),
+                          secondaryText: secondaryText,
+                          primaryText: primaryText,
+                          accentColor: accentColor,
+                        );
+                      },
+                      separatorBuilder: (_, __) => Divider(
+                          height: 1.h,
+                          color: dividerColor,
+                          indent: 16.w,
+                          endIndent: 16.w),
                     ),
                   ],
                 ),
-                verticalSpace(25.h),
+              ),
 
-                // Notes Section
-                _buildNotesSection(context, detail, isDark, secondaryText, primaryText, accentColor, borderColor, cardBg),
-              ],
-            ),
-          );
-        }),
-      ),
+              verticalSpace(25.h),
+
+              // Payment Summary
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("payment_summary".tr,
+                      style: TextStyle(fontSize: 18.sp, color: accentColor, fontWeight: FontWeight.bold)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _PaymentStatusBadge(
+                        isPaid: (detail.paymentStatus ?? 'Unpaid').toLowerCase() == 'paid',
+                        onTap: () => _showPaymentStatusBottomSheet(context, detail),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              verticalSpace(15.h),
+              grandTotalsWidget(
+                grandTotal: detail.finalPrice!,
+                extTax: orderController.extTax.value.toString(),
+                applyCoupon: detail.couponInfo?.discountAmount ?? "0",
+                shippingPrice: detail.deliveredCharge!,
+                subTotal: detail.subTotal!,
+                paymentType: detail.paymnetType!,
+                accentColor: accentColor,
+              ),
+
+              verticalSpace(25.h),
+
+              // Shipping & Billing Info
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: infoSectionCard(
+                      title: "shipping_info".tr,
+                      icon: Icons.local_shipping_outlined,
+                      data: {
+                        "Name": detail.deliveryInformations!.name!,
+                        "Phone": detail.deliveryInformations!.phone!,
+                        "City": detail.deliveryInformations!.city!,
+                        "Address": "${detail.deliveryInformations!.state!} - ${detail.deliveryInformations!.country!}",
+                      },
+                      isDark: isDark,
+                      secondaryText: secondaryText,
+                      primaryText: primaryText,
+                      accentColor: accentColor,
+                    ),
+                  ),
+                  horizontalSpace(15.w),
+                  Expanded(
+                    child: infoSectionCard(
+                      title: "billing_info".tr,
+                      icon: Icons.receipt_long_outlined,
+                      data: {
+                        "Name": detail.billingInformations!.name!,
+                        "Email": detail.billingInformations!.email!,
+                        "City": detail.billingInformations!.city!,
+                        "Zip": detail.billingInformations!.postCode!,
+                      },
+                      isDark: isDark,
+                      secondaryText: secondaryText,
+                      primaryText: primaryText,
+                      accentColor: accentColor,
+                    ),
+                  ),
+                ],
+              ),
+              verticalSpace(25.h),
+
+              // Notes Section
+              _buildNotesSection(context, detail, isDark, secondaryText, primaryText, accentColor, borderColor, cardBg),
+            ],
+          ),
+        );
+      }),
     );
   }
 

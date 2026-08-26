@@ -113,53 +113,51 @@ class _ProductsScreenState extends State<ProductsScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              verticalSpace(12.h),
-              Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder,
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            verticalSpace(12.h),
+            Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder,
+                borderRadius: BorderRadius.circular(10.r),
               ),
-              verticalSpace(16.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'filter_by_category'.tr,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: primaryText,
-                    ),
+            ),
+            verticalSpace(16.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'filter_by_category'.tr,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: primaryText,
                   ),
                 ),
               ),
-              verticalSpace(10.h),
-              ...addProductController.categoryTypeList.map((cat) {
-                final isSelected =
-                    addProductController.category.value == cat.name;
-                return ListTile(
-                  title: Text(
-                    cat.name ?? '',
-                    style: TextStyle(fontSize: 14.sp, color: primaryText),
-                  ),
-                  trailing: isSelected
-                      ? Icon(Icons.check_circle,
-                      color: AppColor.themeNavyBlueColor)
-                      : null,
-                  onTap: () => Navigator.pop(context, cat),
-                );
-              }),
-              verticalSpace(10.h),
-            ],
-          ),
+            ),
+            verticalSpace(10.h),
+            ...addProductController.categoryTypeList.map((cat) {
+              final isSelected =
+                  addProductController.category.value == cat.name;
+              return ListTile(
+                title: Text(
+                  cat.name ?? '',
+                  style: TextStyle(fontSize: 14.sp, color: primaryText),
+                ),
+                trailing: isSelected
+                    ? Icon(Icons.check_circle,
+                    color: AppColor.themeNavyBlueColor)
+                    : null,
+                onTap: () => Navigator.pop(context, cat),
+              );
+            }),
+            verticalSpace(10.h),
+          ],
         );
       },
     );
@@ -203,266 +201,264 @@ class _ProductsScreenState extends State<ProductsScreen>
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: isDark  ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8),
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-            child: Column(
-              children: [
-                HeaderWidget(
-                  context: context,
-                  title: "products".tr,
-                  label: "new_product".tr,
-                  onNewLabelTap: () => Get.to(() => AddNewProductScreen(isUpdate: false)),
-                ),
+        body: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+          child: Column(
+            children: [
+              HeaderWidget(
+                context: context,
+                title: "products".tr,
+                label: "new_product".tr,
+                onNewLabelTap: () => Get.to(() => AddNewProductScreen(isUpdate: false)),
+              ),
 
-                verticalSpace(16.h),
+              verticalSpace(16.h),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: SearchRowWidget(
-                        context: context,
-                        controller: searchController,
-                        hint: 'search'.tr,
-                        onChanged: (value) {
-                          //ToDO :: api search product
-                        },
-                      ),
+              Row(
+                children: [
+                  Expanded(
+                    child: SearchRowWidget(
+                      context: context,
+                      controller: searchController,
+                      hint: 'search'.tr,
+                      onChanged: (value) {
+                        //ToDO :: api search product
+                      },
                     ),
+                  ),
 
-                    horizontalSpace(10.w),
-                    Obx(() {
-                      final hasFilter =
-                          addProductController.category.value.isNotEmpty;
-                      return GestureDetector(
-                        onTap: _showCategoryFilterBottomSheet,
-                        child: Container(
-                          height: 44.h,
-                          width: 44.h,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? DarkThemeColor.cCardBackground
-                                : AppColor.cWhite,
-                            borderRadius: BorderRadius.circular(30.r),
-                            border: hasFilter
-                                ? Border.all(
-                                color: AppColor.themeNavyBlueColor,
-                                width: 1.2)
-                                : null,
-                          ),
-                          child: Icon(
-                            Icons.filter_list,
-                            color: hasFilter
-                                ? AppColor.themeNavyBlueColor
-                                : (isDark
-                                ? Colors.grey.shade400
-                                : AppColor.cFont),
-                          ),
+                  horizontalSpace(10.w),
+                  Obx(() {
+                    final hasFilter =
+                        addProductController.category.value.isNotEmpty;
+                    return GestureDetector(
+                      onTap: _showCategoryFilterBottomSheet,
+                      child: Container(
+                        height: 44.h,
+                        width: 44.h,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? DarkThemeColor.cCardBackground
+                              : AppColor.cWhite,
+                          borderRadius: BorderRadius.circular(30.r),
+                          border: hasFilter
+                              ? Border.all(
+                              color: AppColor.themeNavyBlueColor,
+                              width: 1.2)
+                              : null,
                         ),
-                      );
-                    }),
-                  ],
-                ),
-
-                verticalSpace(24.h),
-
-                Expanded(
-                  child: Obx(() {
-                    if (productController.isLoading.value &&
-                        productController.currantPage.value == 1) {
-                      return const Center(
-                        child: LoadingWidget(),
-                      );
-                    }
-
-                    if (productController.errorMessage.isNotEmpty &&
-                        productController.productList.isEmpty) {
-                      return RefreshIndicator(
-                        backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
-                        onRefresh: _fetchInitialData,
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * .6,
-                              child: Center(
-                                child: ErrorState(
-                                  message: productController.errorMessage.value,
-                                  onRetry: _fetchInitialData,
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: Icon(
+                          Icons.filter_list,
+                          color: hasFilter
+                              ? AppColor.themeNavyBlueColor
+                              : (isDark
+                              ? Colors.grey.shade400
+                              : AppColor.cFont),
                         ),
-                      );
-                    }
-
-                    if (productController.productList.isEmpty) {
-                      return RefreshIndicator(
-                        backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
-                        onRefresh: _fetchInitialData,
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * .6,
-                              child: Center(
-                                child: EmptyState(
-                                  message: "no_products_found".tr,
-                                  icon: Icons.production_quantity_limits,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return RefreshIndicator(
-                      backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
-                      onRefresh: _fetchInitialData,
-                      child: CustomScrollView(
-                        controller: scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        slivers: [
-                          // Header
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.only(bottom: 15.h),
-                              child: sectionHeaderWithFilterWidget(
-                                isFilter: false,
-                                num: addProductController.categoryId.value.isNotEmpty
-                                    ? productController.productList.length
-                                    : (productController.productModel?.data?.total ?? 0),
-                                context: context,
-                                title: "all_products".tr,
-                                filterLabel:
-                                addProductController.category.value.isNotEmpty
-                                    ? addProductController.category.value
-                                    : "filter_by_category".tr,
-                                onFilterTap:
-                                addProductController.category.value.isNotEmpty
-                                    ? _clearCategoryFilter
-                                    : _showCategoryFilterBottomSheet,
-                              ),
-                            ),
-                          ),
-
-                          // Products Grid
-                          SliverPadding(
-                            padding: EdgeInsets.only(bottom: 20.h),
-                            sliver: SliverGrid(
-                              delegate: SliverChildBuilderDelegate(
-                                    (context, index) {
-                                  final product =
-                                  productController.productList[index];
-
-                                  return allProductsListItemWidget(
-                                    productId: product.id.toString(),
-                                    trackStock: product.trackStock == 1,
-                                    status: product.status!,
-                                    context: context,
-                                    imageUrl: product.coverImageUrl ?? '',
-                                    categoryName: product.categoryName ?? '',
-                                    productName: product.name ?? '',
-                                    price: product.price?.toString() ?? '0',
-
-                                    salePrice:
-                                    (product.salePrice != null &&
-                                        product.salePrice != product.price)
-                                        ? product.salePrice.toString()
-                                        : null,
-
-                                    stock: product.productStock?.toString() ?? '-',
-
-                                    stockStatus: product.stockStatus,
-
-                                    rating: product.averageRating?.toDouble() ?? 0.0,
-
-                                    hasVariant: product.variantProduct == 1,
-
-                                    onTap: () => Get.to(
-                                          () => ProductDetailScreen(
-                                        product: product,
-                                        categoryId: product.categoryId?.toString() ?? '',
-                                        productId: product.id?.toString() ?? '',
-                                        id: product.id.toString(),
-                                      ),
-                                    ),
-
-                                    viewFun: () => Get.to(
-                                          () => ProductDetailScreen(
-                                        product: product,
-                                        categoryId: product.categoryId?.toString() ?? '',
-                                        productId: product.id?.toString() ?? '',
-                                        id: product.id.toString(),
-                                      ),
-                                    ),
-
-                                    showChangeAction: true,
-
-                                    changeFun: () => Get.to(
-                                          () => AddNewProductScreen(
-                                        isUpdate: true,
-                                        productId: product.id?.toString(),
-                                        productName: product.name,
-                                        trending: product.trending?.toString(),
-                                        qty: product.productStock?.toString(),
-                                        disAmountController: product.discountPrice,
-                                        priceController: product.originalPrice,
-                                        productTax: product.retuenText,
-                                        variantName: product.variantAttribute?.toString(),
-                                        productCategories: product.categoryName,
-                                        productDescription: product.description,
-                                      ),
-                                    )?.then((_) => getData()),
-
-                                    deleteFun: () {
-                                      AppDialog.showCustomDialog(
-                                        context: context,
-                                        title: 'delete'.tr,
-                                        message: 'deleteProduct'.tr,
-                                        lottieAsset: 'assets/lottie/delete_icon.json',
-                                        confirmColor: Colors.red,
-                                        onConfirm: () async {
-                                          await productController.deleteProductData(
-                                            productId: product.id.toString(),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  );
-                                },
-                                childCount: productController.productList.length,
-                              ),
-                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 220.w,
-                                crossAxisSpacing: 12.w,
-                                mainAxisSpacing: 12.h,
-                                mainAxisExtent: 255.h,
-                              ),
-                            ),
-                          ),
-
-
-                          if (productController.isScroll.value)
-                            SliverToBoxAdapter(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20.h),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColor.themeNavyBlueColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
                       ),
                     );
                   }),
-                ),
-              ],
-            ),
+                ],
+              ),
+
+              verticalSpace(24.h),
+
+              Expanded(
+                child: Obx(() {
+                  if (productController.isLoading.value &&
+                      productController.currantPage.value == 1) {
+                    return const Center(
+                      child: LoadingWidget(),
+                    );
+                  }
+
+                  if (productController.errorMessage.isNotEmpty &&
+                      productController.productList.isEmpty) {
+                    return RefreshIndicator(
+                      backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
+                      onRefresh: _fetchInitialData,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * .6,
+                            child: Center(
+                              child: ErrorState(
+                                message: productController.errorMessage.value,
+                                onRetry: _fetchInitialData,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (productController.productList.isEmpty) {
+                    return RefreshIndicator(
+                      backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
+                      onRefresh: _fetchInitialData,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * .6,
+                            child: Center(
+                              child: EmptyState(
+                                message: "no_products_found".tr,
+                                icon: Icons.production_quantity_limits,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
+                    onRefresh: _fetchInitialData,
+                    child: CustomScrollView(
+                      controller: scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        // Header
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 15.h),
+                            child: sectionHeaderWithFilterWidget(
+                              isFilter: false,
+                              num: addProductController.categoryId.value.isNotEmpty
+                                  ? productController.productList.length
+                                  : (productController.productModel?.data?.total ?? 0),
+                              context: context,
+                              title: "all_products".tr,
+                              filterLabel:
+                              addProductController.category.value.isNotEmpty
+                                  ? addProductController.category.value
+                                  : "filter_by_category".tr,
+                              onFilterTap:
+                              addProductController.category.value.isNotEmpty
+                                  ? _clearCategoryFilter
+                                  : _showCategoryFilterBottomSheet,
+                            ),
+                          ),
+                        ),
+
+                        // Products Grid
+                        SliverPadding(
+                          padding: EdgeInsets.only(bottom: 20.h),
+                          sliver: SliverGrid(
+                            delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                final product =
+                                productController.productList[index];
+
+                                return allProductsListItemWidget(
+                                  productId: product.id.toString(),
+                                  trackStock: product.trackStock == 1,
+                                  status: product.status!,
+                                  context: context,
+                                  imageUrl: product.coverImageUrl ?? '',
+                                  categoryName: product.categoryName ?? '',
+                                  productName: product.name ?? '',
+                                  price: product.price?.toString() ?? '0',
+
+                                  salePrice:
+                                  (product.salePrice != null &&
+                                      product.salePrice != product.price)
+                                      ? product.salePrice.toString()
+                                      : null,
+
+                                  stock: product.productStock?.toString() ?? '-',
+
+                                  stockStatus: product.stockStatus,
+
+                                  rating: product.averageRating?.toDouble() ?? 0.0,
+
+                                  hasVariant: product.variantProduct == 1,
+
+                                  onTap: () => Get.to(
+                                        () => ProductDetailScreen(
+                                      product: product,
+                                      categoryId: product.categoryId?.toString() ?? '',
+                                      productId: product.id?.toString() ?? '',
+                                      id: product.id.toString(),
+                                    ),
+                                  ),
+
+                                  viewFun: () => Get.to(
+                                        () => ProductDetailScreen(
+                                      product: product,
+                                      categoryId: product.categoryId?.toString() ?? '',
+                                      productId: product.id?.toString() ?? '',
+                                      id: product.id.toString(),
+                                    ),
+                                  ),
+
+                                  showChangeAction: true,
+
+                                  changeFun: () => Get.to(
+                                        () => AddNewProductScreen(
+                                      isUpdate: true,
+                                      productId: product.id?.toString(),
+                                      productName: product.name,
+                                      trending: product.trending?.toString(),
+                                      qty: product.productStock?.toString(),
+                                      disAmountController: product.discountPrice,
+                                      priceController: product.originalPrice,
+                                      productTax: product.retuenText,
+                                      variantName: product.variantAttribute?.toString(),
+                                      productCategories: product.categoryName,
+                                      productDescription: product.description,
+                                    ),
+                                  )?.then((_) => getData()),
+
+                                  deleteFun: () {
+                                    AppDialog.showCustomDialog(
+                                      context: context,
+                                      title: 'delete'.tr,
+                                      message: 'deleteProduct'.tr,
+                                      lottieAsset: 'assets/lottie/delete_icon.json',
+                                      confirmColor: Colors.red,
+                                      onConfirm: () async {
+                                        await productController.deleteProductData(
+                                          productId: product.id.toString(),
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              childCount: productController.productList.length,
+                            ),
+                            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 220.w,
+                              crossAxisSpacing: 12.w,
+                              mainAxisSpacing: 12.h,
+                              mainAxisExtent: 255.h,
+                            ),
+                          ),
+                        ),
+
+
+                        if (productController.isScroll.value)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20.h),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColor.themeNavyBlueColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
         ),
       ),

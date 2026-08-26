@@ -614,9 +614,6 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top: false,
-      bottom: true,
-      maintainBottomViewPadding: true,
       child: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
@@ -663,17 +660,17 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
                           ),
                         ),
                       ),
-
+      
                       const SizedBox(height: 22),
-
+      
                       _buildHeader(),
-
+      
                       const SizedBox(height: 24),
-
+      
                       _buildTextField(),
-
+      
                       const SizedBox(height: 18),
-
+      
                       _buildAttachment(
                         title: 'category_image'.tr,
                         hint: 'add_category_image'.tr,
@@ -681,9 +678,9 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
                         icon: Icons.image_outlined,
                         onTap: () => _pickImage(isIcon: false),
                       ),
-
+      
                       const SizedBox(height: 14),
-
+      
                       _buildAttachment(
                         title: 'category_icon'.tr,
                         hint: 'add_category_icon'.tr,
@@ -691,17 +688,17 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
                         icon: Icons.insert_emoticon_outlined,
                         onTap: () => _pickImage(isIcon: true),
                       ),
-
+      
                       const SizedBox(height: 18),
-
+      
                       _buildTrendingSwitch(),
-
+      
                       const SizedBox(height: 12),
-
+      
                       _buildStatusSwitch(),
-
+      
                       const SizedBox(height: 28),
-
+      
                       _buildButtons(),
                       const SizedBox(height: 4),
                                         ],

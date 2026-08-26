@@ -69,23 +69,21 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.cWhite,
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-          assetImageWidget(
-                    image: DefaultImages.storeGoLogo,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+        assetImageWidget(
+                  image: DefaultImages.storeGoLogo,
+            ),
+
+            const SizedBox(height: 50),
+
+            CircularProgressIndicator(
+                strokeWidth: 3,
+                color: AppColor.themeNavyBlueColor,
               ),
-
-              const SizedBox(height: 50),
-
-              CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: AppColor.themeNavyBlueColor,
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );

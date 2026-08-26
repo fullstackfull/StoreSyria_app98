@@ -47,74 +47,72 @@ class _LoyaltyProgramScreenState extends State<LoyaltyProgramScreen> {
       child: Scaffold(
         backgroundColor: AppColor.cBackGround,
         appBar: simpleAppBar(title: "", date: ""),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Obx(
-              () {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Store Loyalty Program",
-                      style: pRegular20,
-                    ),
-                    verticalSpace(25),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "Status:",
-                          style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
-                        ),
-                        horizontalSpace(10),
-                        CupertinoSwitch(
-                          value: loyaltyController.isStatus.value,
-                          onChanged: (value) {
-                            loyaltyController.isStatus.value = value;
-                            if (value == true) {
-                              loyaltyController.status.value = 'on';
-                            } else {
-                              loyaltyController.status.value = 'off';
-                            }
-                            print("-----------${loyaltyController.status.value}");
-                          },
-                          activeColor: AppColor.themeGreenColor,
-                        ),
-                      ],
-                    ),
-                    verticalSpace(20),
-                    AddProductTextField(
-                      controller: loyaltyController.rewardPointController,
-                      labelText: 'Reward points on orders of \$1000',
-                      hintText: 'Enter reward',
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {},
-                    ),
-                    verticalSpace(25),
-                    Center(
-                      child: CommonIconButton(
-                        iconData: DefaultImages.whiteDoneIcn,
-                        title: 'Save changes',
-                        onPressed: () {
-                          if (loyaltyController.rewardPointController.text.isNotEmpty) {
-                            if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                              commonToast(AppConstant.demoString);
-                            } else {
-                              loyaltyController.setLoyaltyData(status: loyaltyController.status.value, point: loyaltyController.rewardPointController.text.trim());
-                            }
-                          } else {
-                            commonToast("Please enter points");
-                          }
-                        },
-                        btnColor: AppColor.themeGreenColor,
-                        bColor: AppColor.themeGreenColor,
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Obx(
+            () {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Store Loyalty Program",
+                    style: pRegular20,
+                  ),
+                  verticalSpace(25),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        "Status:",
+                        style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
                       ),
+                      horizontalSpace(10),
+                      CupertinoSwitch(
+                        value: loyaltyController.isStatus.value,
+                        onChanged: (value) {
+                          loyaltyController.isStatus.value = value;
+                          if (value == true) {
+                            loyaltyController.status.value = 'on';
+                          } else {
+                            loyaltyController.status.value = 'off';
+                          }
+                          print("-----------${loyaltyController.status.value}");
+                        },
+                        activeColor: AppColor.themeGreenColor,
+                      ),
+                    ],
+                  ),
+                  verticalSpace(20),
+                  AddProductTextField(
+                    controller: loyaltyController.rewardPointController,
+                    labelText: 'Reward points on orders of \$1000',
+                    hintText: 'Enter reward',
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {},
+                  ),
+                  verticalSpace(25),
+                  Center(
+                    child: CommonIconButton(
+                      iconData: DefaultImages.whiteDoneIcn,
+                      title: 'Save changes',
+                      onPressed: () {
+                        if (loyaltyController.rewardPointController.text.isNotEmpty) {
+                          if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+                            commonToast(AppConstant.demoString);
+                          } else {
+                            loyaltyController.setLoyaltyData(status: loyaltyController.status.value, point: loyaltyController.rewardPointController.text.trim());
+                          }
+                        } else {
+                          commonToast("Please enter points");
+                        }
+                      },
+                      btnColor: AppColor.themeGreenColor,
+                      bColor: AppColor.themeGreenColor,
                     ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

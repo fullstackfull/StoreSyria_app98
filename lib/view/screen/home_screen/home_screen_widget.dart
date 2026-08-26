@@ -33,7 +33,9 @@ Widget buildAppTitleRow(String date) {
     children: [
       Text(
         "Dashboard".tr,
-        style: pMedium16.copyWith(fontSize: 20, fontWeight: FontWeight.w700),
+        style: pBold24.copyWith(
+          color: AppColor.themeNavyBlueColor,
+        ),
       ),
       Obx(() => Stack(
         clipBehavior: Clip.none,

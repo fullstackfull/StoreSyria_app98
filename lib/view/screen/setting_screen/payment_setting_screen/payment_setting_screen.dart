@@ -43,85 +43,83 @@ class _PaymentSettingScreenState extends State<PaymentSettingScreen> {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
       appBar: simpleAppBar(title: ''),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Store Payment Setting",
-                  style: pRegular20,
-                ),
-                verticalSpace(20),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: AddProductTextField(
-                        controller: paymentSettingController.currencyController,
-                        labelText: 'Currency *',
-                        hintText: 'USD',
-                        onChanged: (value) {},
-                      ),
+      body: Padding(
+        padding: EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Store Payment Setting",
+                style: pRegular20,
+              ),
+              verticalSpace(20),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: AddProductTextField(
+                      controller: paymentSettingController.currencyController,
+                      labelText: 'Currency *',
+                      hintText: 'USD',
+                      onChanged: (value) {},
                     ),
-                    horizontalSpace(15),
-                    Expanded(
-                      flex: 1,
-                      child: AddProductTextField(
-                        controller:
-                            paymentSettingController.currencySymbolController,
-                        labelText: 'Currency Symbol *',
-                        hintText: '\$',
-                        onChanged: (value) {},
-                      ),
+                  ),
+                  horizontalSpace(15),
+                  Expanded(
+                    flex: 1,
+                    child: AddProductTextField(
+                      controller:
+                          paymentSettingController.currencySymbolController,
+                      labelText: 'Currency Symbol *',
+                      hintText: '\$',
+                      onChanged: (value) {},
                     ),
-                  ],
-                ),
-                verticalSpace(10),
-                // buildPayment(
-                //   title: 'COD',
-                //   onTap: () {
-                //     Get.to(() => CODScreen(
-                //               currency: paymentSettingController
-                //                   .currencyController.text,
-                //               currencySymbol: paymentSettingController
-                //                   .currencySymbolController.text,
-                //               description:
-                //                   paymentSettingController.codDescription.value,
-                //               isCodEnable:
-                //                   paymentSettingController.isCodEnabled.value,
-                //               image:
-                //                   paymentSettingController.codImage.value,
-                //             ))!
-                //         .then((value) => getData());
-                //   },
-                // ),
-                // buildPayment(
-                //   title: 'Bank Transfer',
-                //   onTap: () {
-                //     Get.to(() => BankTransferScreen(
-                //           currency:
-                //               paymentSettingController.currencyController.text,
-                //           currencySymbol: paymentSettingController
-                //               .currencySymbolController.text,
-                //         ));
-                //   },
-                // ),
-                buildPayment(
-                  title: 'Stripe',
-                  onTap: () {
-                    Get.to(() => StripeScreen(
-                          currency:
-                              paymentSettingController.currencyController.text,
-                          currencySymbol: paymentSettingController
-                              .currencySymbolController.text,
-                        ));
-                  },
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+              verticalSpace(10),
+              // buildPayment(
+              //   title: 'COD',
+              //   onTap: () {
+              //     Get.to(() => CODScreen(
+              //               currency: paymentSettingController
+              //                   .currencyController.text,
+              //               currencySymbol: paymentSettingController
+              //                   .currencySymbolController.text,
+              //               description:
+              //                   paymentSettingController.codDescription.value,
+              //               isCodEnable:
+              //                   paymentSettingController.isCodEnabled.value,
+              //               image:
+              //                   paymentSettingController.codImage.value,
+              //             ))!
+              //         .then((value) => getData());
+              //   },
+              // ),
+              // buildPayment(
+              //   title: 'Bank Transfer',
+              //   onTap: () {
+              //     Get.to(() => BankTransferScreen(
+              //           currency:
+              //               paymentSettingController.currencyController.text,
+              //           currencySymbol: paymentSettingController
+              //               .currencySymbolController.text,
+              //         ));
+              //   },
+              // ),
+              buildPayment(
+                title: 'Stripe',
+                onTap: () {
+                  Get.to(() => StripeScreen(
+                        currency:
+                            paymentSettingController.currencyController.text,
+                        currencySymbol: paymentSettingController
+                            .currencySymbolController.text,
+                      ));
+                },
+              ),
+            ],
           ),
         ),
       ),

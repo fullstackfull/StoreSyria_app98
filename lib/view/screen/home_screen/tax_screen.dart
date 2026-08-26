@@ -68,34 +68,32 @@ class _TaxScreenState extends State<TaxScreen> {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
       appBar: simpleAppBar(title: "Tax", date: "Monday, 30 Jan"),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(24.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CommonIconButton(
-                title: 'Add Tax',
-                iconData: DefaultImages.addCircleIcn,
-                onPressed: () {
-                  taxController.clearTaxFields();
-                  _showTaxBottomSheet(isUpdate: false);
-                },
-                height: 51.h,
-              ),
-              SizedBox(height: 20.h),
-              Text("Tax", style: pRegular20),
-              SizedBox(height: 25.h),
+      body: Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CommonIconButton(
+              title: 'Add Tax',
+              iconData: DefaultImages.addCircleIcn,
+              onPressed: () {
+                taxController.clearTaxFields();
+                _showTaxBottomSheet(isUpdate: false);
+              },
+              height: 51.h,
+            ),
+            SizedBox(height: 20.h),
+            Text("Tax", style: pRegular20),
+            SizedBox(height: 25.h),
 
-              // Table Header (Static)
-              _buildTableHeader(),
-              SizedBox(height: 10.h),
-              horizontalDivider(),
+            // Table Header (Static)
+            _buildTableHeader(),
+            SizedBox(height: 10.h),
+            horizontalDivider(),
 
-              // List Content (Reactive)
-              Expanded(child: Obx(() => _buildBody())),
-            ],
-          ),
+            // List Content (Reactive)
+            Expanded(child: Obx(() => _buildBody())),
+          ],
         ),
       ),
     );

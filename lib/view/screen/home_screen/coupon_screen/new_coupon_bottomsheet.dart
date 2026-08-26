@@ -789,9 +789,6 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top: false,
-      bottom: true,
-      maintainBottomViewPadding: true,
       child: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
@@ -852,13 +849,13 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
                           ),
                         ),
                       ),
-
+      
                       const SizedBox(height: 22),
-
+      
                       _buildHeader(),
-
+      
                       const SizedBox(height: 24),
-
+      
                       _buildTextField(
                         title: 'coupon_name'.tr,
                         hint: 'enter_coupon_name'.tr,
@@ -868,13 +865,13 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
                           return Validator.validateRequired(value ?? '');
                         },
                       ),
-
+      
                       const SizedBox(height: 18),
-
+      
                       _buildCodeField(),
-
+      
                       const SizedBox(height: 18),
-
+      
                       _buildTextField(
                         title: 'discount_amount'.tr,
                         hint: 'enter_discount_amount'.tr,
@@ -885,31 +882,31 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
                         ),
                         validator: (value) {
                           final discount = value?.trim() ?? '';
-
+      
                           if (discount.isEmpty) {
                             return 'discount_required'.tr;
                           }
-
+      
                           final discountValue = double.tryParse(discount);
-
+      
                           if (discountValue == null) {
                             return 'discount_must_be_number'.tr;
                           }
-
+      
                           if (discountValue < 0) {
                             return 'discount_must_be_positive'.tr;
                           }
-
+      
                           if (discountValue > 100) {
                             return 'discount_must_be_less_than_or_equal_100'.tr;
                           }
-
+      
                           return null;
                         },
                       ),
-
+      
                       const SizedBox(height: 18),
-
+      
                       _buildTextField(
                         title: 'coupon_limit'.tr,
                         hint: 'enter_coupon_limit'.tr,
@@ -920,21 +917,21 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
                           return Validator.validateRequired(value ?? '');
                         },
                       ),
-
+      
                       const SizedBox(height: 18),
-
+      
                       _buildDateField(),
-
+      
                       const SizedBox(height: 18),
-
+      
                       _buildCouponType(),
-
+      
                       const SizedBox(height: 12),
-
+      
                       _buildStatusSwitch(),
-
+      
                       const SizedBox(height: 28),
-
+      
                       _buildButtons(),
                       const SizedBox(height: 4),
                     ],

@@ -113,94 +113,92 @@ class _ProductDetailScreenState
         title: 'product_details'.tr,
       ),
       backgroundColor: backgroundColor,
-      body: SafeArea(
-        child: GetBuilder<ProductDetailController>(
-          builder: (controller) {
-            final product = controller.product;
+      body: GetBuilder<ProductDetailController>(
+        builder: (controller) {
+          final product = controller.product;
 
-            if (product == null) {
-              return const Center(
-                child: LoadingWidget(),
-              );
-            }
-
-            return RefreshIndicator(
-              onRefresh: _loadData,
-              child: SingleChildScrollView(
-                physics:
-                const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(
-                  16.w,
-                  10.h,
-                  16.w,
-                  30.h,
-                ),
-                child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
-                  children: [
-                    _buildImageSlider(
-                      cardColor: cardColor,
-                      borderColor: borderColor,
-                      isDark: isDark,
-                    ),
-
-                    verticalSpace(18.h),
-
-                    _buildBasicInfoCard(
-                      product: product,
-                      cardColor: cardColor,
-                      borderColor: borderColor,
-                      primaryTextColor:
-                      primaryTextColor,
-                      secondaryTextColor:
-                      secondaryTextColor,
-                      isDark: isDark,
-                    ),
-
-                    verticalSpace(16.h),
-
-                    _buildPropertiesCard(
-                      product: product,
-                      cardColor: cardColor,
-                      borderColor: borderColor,
-                      primaryTextColor:
-                      primaryTextColor,
-                      secondaryTextColor:
-                      secondaryTextColor,
-                      isDark: isDark,
-                    ),
-
-                    verticalSpace(16.h),
-
-                    _buildStatusCard(
-                      product: product,
-                      cardColor: cardColor,
-                      borderColor: borderColor,
-                      primaryTextColor:
-                      primaryTextColor,
-                      secondaryTextColor:
-                      secondaryTextColor,
-                      isDark: isDark,
-                    ),
-
-                    verticalSpace(16.h),
-
-                    _buildReviewsCard(
-                      cardColor: cardColor,
-                      borderColor: borderColor,
-                      primaryTextColor:
-                      primaryTextColor,
-                      secondaryTextColor:
-                      secondaryTextColor,
-                      isDark: isDark,
-                    ),
-                  ],
-                ),
-              ),
+          if (product == null) {
+            return const Center(
+              child: LoadingWidget(),
             );
-          },
-        ),
+          }
+
+          return RefreshIndicator(
+            onRefresh: _loadData,
+            child: SingleChildScrollView(
+              physics:
+              const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(
+                16.w,
+                10.h,
+                16.w,
+                30.h,
+              ),
+              child: Column(
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
+                children: [
+                  _buildImageSlider(
+                    cardColor: cardColor,
+                    borderColor: borderColor,
+                    isDark: isDark,
+                  ),
+
+                  verticalSpace(18.h),
+
+                  _buildBasicInfoCard(
+                    product: product,
+                    cardColor: cardColor,
+                    borderColor: borderColor,
+                    primaryTextColor:
+                    primaryTextColor,
+                    secondaryTextColor:
+                    secondaryTextColor,
+                    isDark: isDark,
+                  ),
+
+                  verticalSpace(16.h),
+
+                  _buildPropertiesCard(
+                    product: product,
+                    cardColor: cardColor,
+                    borderColor: borderColor,
+                    primaryTextColor:
+                    primaryTextColor,
+                    secondaryTextColor:
+                    secondaryTextColor,
+                    isDark: isDark,
+                  ),
+
+                  verticalSpace(16.h),
+
+                  _buildStatusCard(
+                    product: product,
+                    cardColor: cardColor,
+                    borderColor: borderColor,
+                    primaryTextColor:
+                    primaryTextColor,
+                    secondaryTextColor:
+                    secondaryTextColor,
+                    isDark: isDark,
+                  ),
+
+                  verticalSpace(16.h),
+
+                  _buildReviewsCard(
+                    cardColor: cardColor,
+                    borderColor: borderColor,
+                    primaryTextColor:
+                    primaryTextColor,
+                    secondaryTextColor:
+                    secondaryTextColor,
+                    isDark: isDark,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

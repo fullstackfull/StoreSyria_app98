@@ -18,7 +18,7 @@ simpleAppBar({bool isBack = true, required String title, String? date}) {
   return PreferredSize(
     preferredSize: Size(Get.width, 70),
     child: Padding(
-      padding: EdgeInsets.only(top: Get.height * 0.07, left: 15, right: 15),
+      padding: EdgeInsets.only(top: Get.height * 0.05, left: 15, right: 15),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

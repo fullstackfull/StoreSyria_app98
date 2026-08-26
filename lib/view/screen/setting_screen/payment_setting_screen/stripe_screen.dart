@@ -53,114 +53,112 @@ class _StripeScreenState extends State<StripeScreen> {
       child: Scaffold(
         backgroundColor: AppColor.cBackGround,
         appBar: simpleAppBar(title: "Stripe"),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Obx(() {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "Status:",
-                          style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
-                        ),
-                        horizontalSpace(10),
-                        CupertinoSwitch(
-                          value: stripeController.isStatus.value,
-                          onChanged: (value) {
-                            stripeController.isStatus.value = value;
-                            if (value == true) {
-                              stripeController.status.value = 'on';
-                            } else {
-                              stripeController.status.value = 'off';
-                            }
-                            print("-----------${stripeController.status.value}");
-                          },
-                          activeColor: AppColor.themeGreenColor,
-                        ),
-                      ],
-                    ),
-                    verticalSpace(10),
-                    AddProductTextField(
-                      controller: stripeController.keyController,
-                      labelText: 'Publishable Key',
-                      hintText: 'pk_test_aLoicAw16w12wxLlmI9uluaf008XMnn2VJ',
-                      obscureText: Prefs.getBool(AppConstant.isDemoMode),
-                      obscuringCharacter: '*',
-                    ),
-                    verticalSpace(10),
-                    AddProductTextField(
-                      controller: stripeController.secretController,
-                      labelText: 'Stripe Secret',
-                      hintText: 'sk_test_Nxr9kmP8BvNr8rPp7TiTvDZr005whVFgmH',
-                      obscureText: Prefs.getBool(AppConstant.isDemoMode),
-                      obscuringCharacter: '*',
-                    ),
-                    verticalSpace(10),
-                    AddProductTextField(
-                      controller: stripeController.descriptionController,
-                      labelText: 'Description',
-                      hintText: 'stripe',
-                      maxLines: 6,
-                    ),
-                    verticalSpace(10),
-                    Text(
-                      "Image",
-                      style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
-                    ),
-                    verticalSpace(10),
-                    CommonIconButton(
-                      title: "Choose file here",
-                      iconData: DefaultImages.whiteUploadIcn,
-                      onPressed: () {
-                        stripeController.pickImages();
-                      },
-                    ),
-                    verticalSpace(15),
-                    SizedBox(
-                      width: 150,
-                      height: 80,
-                       child: stripeController.imagePath.value == ''
-                           ? CachedNetworkImage(
-                               imageUrl: getImageUrl(stripeController.networkImage.value),
-                         errorWidget: (context, url, error) => SizedBox(),
-                         fit: BoxFit.cover,
-                             )
-                           : Image.file(File(stripeController.imagePath.value)),
-                    ),
-                    verticalSpace(25),
-                    CommonButton(
-                      title: "Save",
-                      onPressed: () {
-                        FocusScope.of(context).requestFocus(FocusNode());
-                        Future.delayed(
-                          Duration(milliseconds: 500),
-                          () {
-                            if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                              commonToast(AppConstant.demoString);
-                            } else {
-                              stripeController.setStripeTransferData(
-                                  currencyName: widget.currency,
-                                  currency: widget.currencySymbol,
-                                  status: stripeController.status.value,
-                                  bankInfo: stripeController.descriptionController.text.trim(),
-                                  secret: stripeController.secretController.text.trim(),
-                                  key: stripeController.keyController.text.trim(),
-                                  image: stripeController.imagePath.value);
-                            }
-                          },
-                        );
-                      },
-                    )
-                  ],
-                ),
-              );
-            }),
-          ),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Obx(() {
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        "Status:",
+                        style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
+                      ),
+                      horizontalSpace(10),
+                      CupertinoSwitch(
+                        value: stripeController.isStatus.value,
+                        onChanged: (value) {
+                          stripeController.isStatus.value = value;
+                          if (value == true) {
+                            stripeController.status.value = 'on';
+                          } else {
+                            stripeController.status.value = 'off';
+                          }
+                          print("-----------${stripeController.status.value}");
+                        },
+                        activeColor: AppColor.themeGreenColor,
+                      ),
+                    ],
+                  ),
+                  verticalSpace(10),
+                  AddProductTextField(
+                    controller: stripeController.keyController,
+                    labelText: 'Publishable Key',
+                    hintText: 'pk_test_aLoicAw16w12wxLlmI9uluaf008XMnn2VJ',
+                    obscureText: Prefs.getBool(AppConstant.isDemoMode),
+                    obscuringCharacter: '*',
+                  ),
+                  verticalSpace(10),
+                  AddProductTextField(
+                    controller: stripeController.secretController,
+                    labelText: 'Stripe Secret',
+                    hintText: 'sk_test_Nxr9kmP8BvNr8rPp7TiTvDZr005whVFgmH',
+                    obscureText: Prefs.getBool(AppConstant.isDemoMode),
+                    obscuringCharacter: '*',
+                  ),
+                  verticalSpace(10),
+                  AddProductTextField(
+                    controller: stripeController.descriptionController,
+                    labelText: 'Description',
+                    hintText: 'stripe',
+                    maxLines: 6,
+                  ),
+                  verticalSpace(10),
+                  Text(
+                    "Image",
+                    style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
+                  ),
+                  verticalSpace(10),
+                  CommonIconButton(
+                    title: "Choose file here",
+                    iconData: DefaultImages.whiteUploadIcn,
+                    onPressed: () {
+                      stripeController.pickImages();
+                    },
+                  ),
+                  verticalSpace(15),
+                  SizedBox(
+                    width: 150,
+                    height: 80,
+                     child: stripeController.imagePath.value == ''
+                         ? CachedNetworkImage(
+                             imageUrl: getImageUrl(stripeController.networkImage.value),
+                       errorWidget: (context, url, error) => SizedBox(),
+                       fit: BoxFit.cover,
+                           )
+                         : Image.file(File(stripeController.imagePath.value)),
+                  ),
+                  verticalSpace(25),
+                  CommonButton(
+                    title: "Save",
+                    onPressed: () {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      Future.delayed(
+                        Duration(milliseconds: 500),
+                        () {
+                          if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+                            commonToast(AppConstant.demoString);
+                          } else {
+                            stripeController.setStripeTransferData(
+                                currencyName: widget.currency,
+                                currency: widget.currencySymbol,
+                                status: stripeController.status.value,
+                                bankInfo: stripeController.descriptionController.text.trim(),
+                                secret: stripeController.secretController.text.trim(),
+                                key: stripeController.keyController.text.trim(),
+                                image: stripeController.imagePath.value);
+                          }
+                        },
+                      );
+                    },
+                  )
+                ],
+              ),
+            );
+          }),
         ),
       ),
     );

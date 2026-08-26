@@ -64,148 +64,146 @@ class _ShippingScreenState extends State<ShippingScreen> {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
       appBar: simpleAppBar(title: "Shipping"),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CommonIconButton(
-                title: 'Add Shipping',
-                iconData: DefaultImages.addCircleIcn,
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    backgroundColor: AppColor.cBackGround,
-                    barrierColor: AppColor.cGreyOpacity,
-                    isScrollControlled: true,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CommonIconButton(
+              title: 'Add Shipping',
+              iconData: DefaultImages.addCircleIcn,
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: AppColor.cBackGround,
+                  barrierColor: AppColor.cGreyOpacity,
+                  isScrollControlled: true,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
                     ),
-                    builder: (context) {
-                      return AddShippingWidget(
-                        isUpdate: false,
-                      );
-                    },
-                  );
-                },
-                height: 51,
-              ),
-              verticalSpace(20),
-              Text(
-                "Shipping",
-                style: pRegular20,
-              ),
-              verticalSpace(15),
-              Obx(() {
-                return Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: shippingController.shippingList.length,
-                    shrinkWrap: true,
-                    physics: AlwaysScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      ShippingData shipping = shippingController.shippingList[index];
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Slidable(
-                          key: ValueKey(index),
-                          endActionPane: ActionPane(
-                            motion: ScrollMotion(),
-                            children: [
-                              slidableActionWidget(
-                                  onTap: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      backgroundColor: AppColor.cBackGround,
-                                      barrierColor: AppColor.cGreyOpacity,
-                                      isScrollControlled: true,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(30),
-                                          topRight: Radius.circular(30),
-                                        ),
+                  ),
+                  builder: (context) {
+                    return AddShippingWidget(
+                      isUpdate: false,
+                    );
+                  },
+                );
+              },
+              height: 51,
+            ),
+            verticalSpace(20),
+            Text(
+              "Shipping",
+              style: pRegular20,
+            ),
+            verticalSpace(15),
+            Obx(() {
+              return Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: shippingController.shippingList.length,
+                  shrinkWrap: true,
+                  physics: AlwaysScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    ShippingData shipping = shippingController.shippingList[index];
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Slidable(
+                        key: ValueKey(index),
+                        endActionPane: ActionPane(
+                          motion: ScrollMotion(),
+                          children: [
+                            slidableActionWidget(
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    backgroundColor: AppColor.cBackGround,
+                                    barrierColor: AppColor.cGreyOpacity,
+                                    isScrollControlled: true,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(30),
+                                        topRight: Radius.circular(30),
                                       ),
-                                      builder: (context) {
-                                        return AddShippingWidget(
-                                          isUpdate: true,
-                                          shippingId: shipping.id.toString(),
-                                          name: shipping.name,
-                                          description: shipping.description,
-                                        );
-                                      },
-                                    );
-                                  },
-                                  image: DefaultImages.changeIcn,
-                                  title: "Edit"),
-                              slidableActionWidget(
-                                  onTap: () {
-                                    if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                      commonToast(AppConstant.demoString);
-                                    } else {
-                                      shippingController.deleteShippingData(shippingId: shipping.id.toString());
-                                    }
-                                  },
-                                  image: DefaultImages.deleteIcn,
-                                  title: "Delete",
-                                  color: AppColor.cRedText),
+                                    ),
+                                    builder: (context) {
+                                      return AddShippingWidget(
+                                        isUpdate: true,
+                                        shippingId: shipping.id.toString(),
+                                        name: shipping.name,
+                                        description: shipping.description,
+                                      );
+                                    },
+                                  );
+                                },
+                                image: DefaultImages.changeIcn,
+                                title: "Edit"),
+                            slidableActionWidget(
+                                onTap: () {
+                                  if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+                                    commonToast(AppConstant.demoString);
+                                  } else {
+                                    shippingController.deleteShippingData(shippingId: shipping.id.toString());
+                                  }
+                                },
+                                image: DefaultImages.deleteIcn,
+                                title: "Delete",
+                                color: AppColor.cRedText),
+                          ],
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColor.cWhite,
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: AppColor.themeGreenColor),
+                            boxShadow: [
+                              BoxShadow(color: AppColor.cShadow),
                             ],
                           ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColor.cWhite,
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(color: AppColor.themeGreenColor),
-                              boxShadow: [
-                                BoxShadow(color: AppColor.cShadow),
-                              ],
-                            ),
-                            padding: EdgeInsets.all(15),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CachedNetworkImage(
-                                   imageUrl: getImageUrl(shippingController.imageBaseUrl.value + (shipping.imagePath ?? '')),
-                                   width: 45,
-                                   height: 45,
-                                   errorWidget: (context, url, error) => Icon(Icons.local_shipping, size: 45),
-                                   fit: BoxFit.cover,
-                                 ),
-                                horizontalSpace(15),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            shipping.name!,
-                                            style: pMedium14,
-                                          ),
-                                        ],
-                                      ),
-                                      verticalSpace(8),
-                                      Text(
-                                        shipping.description!,
-                                        style: pRegular12,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
+                          padding: EdgeInsets.all(15),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CachedNetworkImage(
+                                 imageUrl: getImageUrl(shippingController.imageBaseUrl.value + (shipping.imagePath ?? '')),
+                                 width: 45,
+                                 height: 45,
+                                 errorWidget: (context, url, error) => Icon(Icons.local_shipping, size: 45),
+                                 fit: BoxFit.cover,
+                               ),
+                              horizontalSpace(15),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          shipping.name!,
+                                          style: pMedium14,
+                                        ),
+                                      ],
+                                    ),
+                                    verticalSpace(8),
+                                    Text(
+                                      shipping.description!,
+                                      style: pRegular12,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
                           ),
                         ),
-                      );
-                    },
-                  ),
-                );
-              })
-            ],
-          ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            })
+          ],
         ),
       ),
     );
