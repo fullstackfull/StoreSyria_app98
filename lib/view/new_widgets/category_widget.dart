@@ -79,7 +79,9 @@ Widget buildCategoryWidget({
   return Container(
     decoration: BoxDecoration(
       color: cardColor,
-      border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+      border: Border.all(
+        color: AppColor.themeNavyBlueColor.withOpacity(0.3),
+      ),
       borderRadius: BorderRadius.circular(22.r),
       boxShadow: isDark
           ? null
@@ -96,13 +98,17 @@ Widget buildCategoryWidget({
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+
+        // =====================================================
+        // IMAGE
+        // =====================================================
+
         AspectRatio(
           aspectRatio: 1.22,
           child: Stack(
             fit: StackFit.expand,
             children: [
 
-              // IMAGE
               hasImage
                   ? CachedNetworkImage(
                 imageUrl: imageUrl,
@@ -122,6 +128,8 @@ Widget buildCategoryWidget({
                   : _imagePlaceholder(
                 isDark: isDark,
               ),
+
+              // IMAGE GRADIENT
               Positioned.fill(
                 child: IgnorePointer(
                   child: DecoratedBox(
@@ -144,6 +152,8 @@ Widget buildCategoryWidget({
                   ),
                 ),
               ),
+
+              // MENU
               Positioned(
                 top: 9.h,
                 right: 9.w,
@@ -157,6 +167,8 @@ Widget buildCategoryWidget({
                   danger: danger,
                 ),
               ),
+
+              // NAME + ICON
               Positioned(
                 left: 13.w,
                 right: 13.w,
@@ -205,24 +217,27 @@ Widget buildCategoryWidget({
 
                     SizedBox(width: 10.w),
 
-                    Text(
-                      name,
-                      maxLines: 1,
-                      overflow:
-                      TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.sp,
-                        fontWeight:
-                        FontWeight.w800,
-                        letterSpacing: -.3,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black
-                                .withOpacity(.35),
-                            blurRadius: 8,
-                          ),
-                        ],
+                    // FULL CATEGORY NAME
+                    Expanded(
+                      child: Text(
+                        name,
+                        softWrap: true,
+                        maxLines: 2,
+                        overflow: TextOverflow.visible,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.sp,
+                          fontWeight:
+                          FontWeight.w800,
+                          letterSpacing: -.3,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black
+                                  .withOpacity(.35),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -238,90 +253,87 @@ Widget buildCategoryWidget({
 
         Padding(
           padding: EdgeInsets.fromLTRB(
-            13.w,
+            10.w,
             13.h,
-            13.w,
+            10.w,
             13.h,
           ),
-          child: Column(
+          child: Row(
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
 
-                  Expanded(
-                    child: _dashboardStat(
-                      icon:
-                      Icons.inventory_2_outlined,
-                      label:
-                      'Products'.tr,
-                      value:
-                      totalProducts.toString(),
-                      color: accent,
-                      primaryText:
-                      primaryText,
-                      secondaryText:
-                      secondaryText,
-                      surfaceColor:
-                      surfaceColor,
-                    ),
-                  ),
+              // PRODUCTS
+              Expanded(
+                child: _dashboardStat(
+                  icon:
+                  Icons.inventory_2_outlined,
+                  label:
+                  'Products'.tr,
+                  value:
+                  totalProducts.toString(),
+                  color: accent,
+                  primaryText:
+                  primaryText,
+                  secondaryText:
+                  secondaryText,
+                  surfaceColor:
+                  surfaceColor,
+                ),
+              ),
 
-                  _verticalDivider(
-                    color: borderColor,
-                  ),
+              _verticalDivider(
+                color: borderColor,
+              ),
 
-                  Expanded(
-                    child: _dashboardStat(
-                      icon: isTrending
-                          ? Icons
-                          .trending_up_outlined
-                          : Icons
-                          .trending_flat_rounded,
-                      label:
-                      'Trending'.tr,
-                      value: isTrending
-                          ? 'Yes'.tr
-                          : 'No'.tr,
-                      color: isTrending
-                          ? warning
-                          : secondaryText,
-                      primaryText:
-                      primaryText,
-                      secondaryText:
-                      secondaryText,
-                      surfaceColor:
-                      surfaceColor,
-                    ),
-                  ),
+              // TRENDING
+              Expanded(
+                child: _dashboardStat(
+                  icon: isTrending
+                      ? Icons.trending_up_outlined
+                      : Icons.trending_flat_rounded,
+                  label:
+                  'Trending'.tr,
+                  value: isTrending
+                      ? 'Yes'.tr
+                      : 'No'.tr,
+                  color: isTrending
+                      ? warning
+                      : secondaryText,
+                  primaryText:
+                  primaryText,
+                  secondaryText:
+                  secondaryText,
+                  surfaceColor:
+                  surfaceColor,
+                ),
+              ),
 
-                  _verticalDivider(
-                    color: borderColor,
-                  ),
+              _verticalDivider(
+                color: borderColor,
+              ),
 
-                  Expanded(
-                    child: _dashboardStat(
-                      icon: isActive
-                          ? Icons
-                          .verified_outlined
-                          : Icons
-                          .block_outlined,
-                      label:
-                      'Status'.tr,
-                      value: isActive
-                          ? 'Active'.tr
-                          : 'Inactive'.tr,
-                      color: isActive
-                          ? success
-                          : danger,
-                      primaryText:
-                      primaryText,
-                      secondaryText:
-                      secondaryText,
-                      surfaceColor:
-                      surfaceColor,
-                    ),
-                  ),
-                ],
+              // STATUS
+              Expanded(
+                child: _dashboardStat(
+                  icon: isActive
+                      ? Icons.verified_outlined
+                      : Icons.block_outlined,
+                  label:
+                  'Status'.tr,
+                  value: isActive
+                      ? 'Active'.tr
+                      : 'Inactive'.tr,
+                  color: isActive
+                      ? success
+                      : danger,
+                  primaryText:
+                  primaryText,
+                  secondaryText:
+                  secondaryText,
+                  surfaceColor:
+                  surfaceColor,
+                ),
               ),
             ],
           ),
@@ -355,7 +367,8 @@ Widget _categoryMenu({
     elevation: 10,
     color: menuColor,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15.r),
+      borderRadius:
+      BorderRadius.circular(15.r),
     ),
 
     icon: Container(
@@ -369,7 +382,8 @@ Widget _categoryMenu({
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.18),
+            color:
+            Colors.black.withOpacity(.18),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),
@@ -427,11 +441,11 @@ Widget _categoryMenu({
           'assets/lottie/delete_icon.json',
           confirmColor: danger,
           onConfirm: () =>
-            categoryController
-                .deleteCategoriesData(
-              categoryId:
-              category.id ?? 0,
-            ),
+              categoryController
+                  .deleteCategoriesData(
+                categoryId:
+                category.id ?? 0,
+              ),
         );
       }
     },
@@ -494,14 +508,19 @@ Widget _menuItem({
 
       SizedBox(width: 10.w),
 
-      Text(
-        title,
-        style: TextStyle(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w600,
-          color: isDark
-              ? Colors.white
-              : const Color(0xFF202124),
+      // FULL MENU TEXT
+      Flexible(
+        child: Text(
+          title,
+          softWrap: true,
+          overflow: TextOverflow.visible,
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+            color: isDark
+                ? Colors.white
+                : const Color(0xFF202124),
+          ),
         ),
       ),
     ],
@@ -522,8 +541,10 @@ Widget _dashboardStat({
   required Color surfaceColor,
 }) {
   return Column(
+    mainAxisSize: MainAxisSize.min,
     children: [
 
+      // ICON
       Container(
         width: 36.w,
         height: 36.w,
@@ -541,11 +562,12 @@ Widget _dashboardStat({
 
       SizedBox(height: 6.h),
 
+      // VALUE
       Text(
         value,
-        maxLines: 1,
-        overflow:
-        TextOverflow.ellipsis,
+        softWrap: true,
+        textAlign: TextAlign.center,
+        overflow: TextOverflow.visible,
         style: TextStyle(
           color: primaryText,
           fontSize: 9.sp,
@@ -553,14 +575,14 @@ Widget _dashboardStat({
         ),
       ),
 
-      SizedBox(height: 2.h),
+      SizedBox(height: 3.h),
 
+      // FULL LABEL
       Text(
         label,
-        maxLines: 1,
-        overflow:
-        TextOverflow.ellipsis,
+        softWrap: true,
         textAlign: TextAlign.center,
+        overflow: TextOverflow.visible,
         style: TextStyle(
           color: secondaryText,
           fontSize: 7.5.sp,
@@ -580,10 +602,10 @@ Widget _verticalDivider({
 }) {
   return Container(
     width: 1,
-    height: 48.h,
+    height: 55.h,
     color: color,
     margin: EdgeInsets.symmetric(
-      horizontal: 5.w,
+      horizontal: 4.w,
     ),
   );
 }
@@ -637,7 +659,7 @@ Widget _imageLoading({
       child: SizedBox(
         width: 24.w,
         height: 24.w,
-        ),
+      ),
     ),
   );
 }

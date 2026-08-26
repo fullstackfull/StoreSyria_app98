@@ -202,7 +202,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                               maxCrossAxisExtent: 220.w,
                               crossAxisSpacing: 12.w,
                               mainAxisSpacing: 12.h,
-                              mainAxisExtent: 225.h,
+                              mainAxisExtent: 235.h,
                             ),
                           ),
                         ),

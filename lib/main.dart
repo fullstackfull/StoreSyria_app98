@@ -52,5 +52,5 @@ Future<void> main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
-  runApp(DevicePreview(enabled: true, builder: (context) => StoreGoApp()));
+  runApp(DevicePreview(enabled: false, builder: (context) => StoreGoApp()));
 }

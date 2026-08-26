@@ -419,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 maxCrossAxisExtent: 220.w,
                                 crossAxisSpacing: 12.w,
                                 mainAxisSpacing: 12.h,
-                                mainAxisExtent: 225.h,
+                                mainAxisExtent: 285.h,
                               ),
                               itemBuilder: (context, index) {
                                 final category = categoryController.categoriesList[index];

@@ -39,7 +39,7 @@ Widget settingCard({
           ),
         ),
 
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,8 +48,8 @@ Widget settingCard({
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: isDark
                         ? AppColor.themeGreenColor.withOpacity(0.12)
@@ -59,8 +59,8 @@ Widget settingCard({
                   child: Center(
                     child: assetSvdImageWidget(
                       image: icon,
-                      width: 24,
-                      height: 24,
+                      width: 22,
+                      height: 22,
                       colorFilter: ColorFilter.mode(
                         isDark
                             ? AppColor.themeGreenColor.withOpacity(0.3)

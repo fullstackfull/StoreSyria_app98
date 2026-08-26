@@ -111,7 +111,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                 onNewLabelTap: () {},
               ),
 
-              verticalSpace(16.h),
+              verticalSpace(10.h),
 
               Obx(() {
                 return orderStatusTabsWidget(
@@ -149,8 +149,6 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                   },
                 ),
               ),
-
-              verticalSpace(24.h),
 
               Expanded(
                 child: Obx(() {

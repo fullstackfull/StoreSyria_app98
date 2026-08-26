@@ -1004,16 +1004,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ),
                 ),
 
-                Padding(
-                  padding: EdgeInsets.all(20.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'add_new_note'.tr,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'add_new_note'.tr,
                             style: TextStyle(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.bold,
@@ -1178,6 +1180,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                     ],
                   ),
+                    ),
+                  ),
                 ),
                 SizedBox(height: MediaQuery.of(context).padding.bottom),
               ],
@@ -1282,16 +1286,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ),
                 ),
 
-                Padding(
-                  padding: EdgeInsets.all(20.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'update_payment_status'.tr,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'update_payment_status'.tr,
                             style: TextStyle(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.bold,
@@ -1393,6 +1399,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                       )),
                     ],
+                  ),
+                    ),
                   ),
                 ),
                 SizedBox(height: MediaQuery.of(context).padding.bottom),
