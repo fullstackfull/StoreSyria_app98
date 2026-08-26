@@ -16,7 +16,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 
 class EmailSettingScreen extends StatefulWidget {
-  EmailSettingScreen({Key? key}) : super(key: key);
+  const EmailSettingScreen({super.key});
 
   @override
   State<EmailSettingScreen> createState() => _EmailSettingScreenState();
@@ -33,7 +33,6 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       getData();
