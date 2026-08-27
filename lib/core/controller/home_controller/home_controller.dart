@@ -8,7 +8,6 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 
-
 class HomeController extends GetxController {
   DashboardRepository dashboardRepository = DashboardRepository();
   RxList<ProductData> topProductList = <ProductData>[].obs;

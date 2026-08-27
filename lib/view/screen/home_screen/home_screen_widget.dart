@@ -24,7 +24,7 @@ import 'package:store_go_app/core/controller/notification_controller/notificatio
 import 'package:store_go_app/view/screen/notification_screen/notification_screen.dart';
 
 Widget buildAppTitleRow(String date) {
-  final NotificationController notificationController = Get.put(NotificationController());
+  final NotificationController notificationController = Get.find<NotificationController>();
   final isDark = Get.isDarkMode;
 
   return Row(

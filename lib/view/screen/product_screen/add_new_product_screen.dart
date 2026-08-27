@@ -54,7 +54,7 @@ class AddNewProductScreen extends StatefulWidget {
 }
 
 class _AddNewProductScreenState extends State<AddNewProductScreen> {
-  AddProductController addProductController = Get.put(AddProductController());
+  AddProductController addProductController = Get.find<AddProductController>();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override

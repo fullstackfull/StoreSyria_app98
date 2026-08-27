@@ -132,11 +132,11 @@ class AddProductController extends GetxController {
             moreInfoController.value.clear();
           }
         } else {
-          commonToast(data['data']?['message'] ?? "Error");
+         // commonToast(data['data']?['message'] ?? "Error");
         }
       },
       onFailure: (reason, message, validationErrors) {
-        commonToast(message);
+       // commonToast(message);
       },
     );
   }

@@ -317,7 +317,7 @@ const Map<String, String> ar = {
   "product_status": "حالة المنتج",
   "visible": "مرئي",
   "No Image Found": "لم يتم العثور على صورة",
-  "Powered by Lynomia": "صنع بواسطة Lynomia",
+  "Powered by Lynomia": "تم التطوير بواسطة Lynomia",
   "Close": "إغلاق",
   "Create": "إنشاء",
   "Add Shipping": "إضافة شحن",

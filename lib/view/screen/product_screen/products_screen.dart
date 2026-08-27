@@ -31,8 +31,7 @@ class ProductsScreen extends StatefulWidget {
 class _ProductsScreenState extends State<ProductsScreen>
     with AutomaticKeepAliveClientMixin {
   final ProductController productController = Get.find<ProductController>();
-  final AddProductController addProductController =
-  Get.put(AddProductController());
+  final AddProductController addProductController = Get.put(AddProductController());
   final ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
 
@@ -79,7 +78,7 @@ class _ProductsScreenState extends State<ProductsScreen>
     await productController.getProductData(productController.currantPage.value);
 
     if (addProductController.categoryTypeList.isEmpty) {
-      await addProductController.getCreateProductData(isUpdate: false);
+    //  await addProductController.getCreateProductData(isUpdate: false);
 
       if (addProductController.categoryTypeList.isNotEmpty) {
         if (addProductController.category.value.isEmpty) {

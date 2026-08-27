@@ -59,6 +59,7 @@ class AddReviewController extends GetxController {
       },
     );
   }
+
   Future<void> getReviewData(String id) async {
     //Loader.showLoader();
 

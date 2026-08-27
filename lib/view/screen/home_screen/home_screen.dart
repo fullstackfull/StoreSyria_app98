@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   final CategoryController categoryController = Get.put(CategoryController());
   final ProductController productController = Get.put(ProductController(),permanent: true);
   final OrderController orderController = Get.put(OrderController());
-  final NotificationController notificationController = Get.put(NotificationController());
+  //final NotificationController notificationController = Get.put(NotificationController());
   final ThemeController themeController = Get.find<ThemeController>();
   final GlobalKey<LiquidPullToRefreshState> _refreshIndicatorKey = GlobalKey<LiquidPullToRefreshState>();  @override
   bool get wantKeepAlive => true;
@@ -59,10 +59,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     await homeController.getDashboardData();
     await homeController.getImageBaseUrl();
     homeController.imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
-    // جلب الإشعارات عند فتح التطبيق
-    await notificationController.getNotifications();
-    // جلب الكاتيجوري
-    await categoryController.getCategoryData(1);
+    //await notificationController.getNotifications();
+    //await categoryController.getCategoryData(1);
   }
 
   @override

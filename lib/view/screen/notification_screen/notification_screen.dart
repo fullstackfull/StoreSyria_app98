@@ -21,7 +21,7 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> with AutomaticKeepAliveClientMixin {
-  NotificationController notificationController = Get.put(NotificationController());
+  final NotificationController notificationController = Get.find<NotificationController>();
   bool _isFirstLoad = true;
 
   @override

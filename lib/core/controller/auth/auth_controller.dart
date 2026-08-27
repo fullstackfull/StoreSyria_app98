@@ -17,6 +17,8 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 
+import '../notification_controller/notification_controller.dart';
+
 class AuthController extends GetxController {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -85,26 +87,60 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> logout() async {
+    isLoading.value = true;
 
-  // loginFunction(int index) {
-  //   switch (index) {
-  //     case 0:
-  //       break;
-  //     case 1:
-  //       // do something else
-  //       break;
-  //   }
-  // }
-  //
-  // signUpFunction(int index) {
-  //   switch (index) {
-  //     case 0:
-  //       break;
-  //     case 1:
-  //       // do something else
-  //       break;
-  //   }
-  // }
+    try {
+      final token = Prefs.getToken();
+
+      final url = Uri.parse(
+        API.baseUrl + API.logutUrl,
+      );
+
+      log('=== LOGOUT URL === $url');
+
+      final response = await http.post(
+        url,
+        headers: {
+          ...NetworkHttps.baseHeaders,
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      log('=== LOGOUT STATUS === ${response.statusCode}');
+      log('=== LOGOUT BODY === ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+
+        if (decoded['status'] == 1 ||
+            decoded['success'] == true) {
+          await _clearLocalSession();
+
+          commonToast(
+            decoded['message'] ??
+                decoded['data']?['message'] ??
+                'Logout Successfully',
+          );
+
+          Get.offAllNamed(AppRoutes.login);
+        } else {
+          commonToast(
+            decoded['message'] ??
+                decoded['data']?['message'] ??
+                'Logout failed',
+          );
+        }
+      } else {
+        commonToast('Logout failed');
+      }
+    } catch (e) {
+      log('=== LOGOUT ERROR === $e');
+      commonToast('An unexpected error occurred');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
 
   Future<void> loginAuth({required String email, required String password}) async {
@@ -189,6 +225,33 @@ class AuthController extends GetxController {
     } catch (e) {
       print('❌ خطأ في إرسال FCM Token بعد تسجيل الدخول: $e');
     }
+  }
+
+  Future<void> _clearLocalSession() async {
+    // Clear FCM token
+    try {
+      await FcmTokenService().clearFcmToken();
+    } catch (e) {
+      log('FCM clear error: $e');
+    }
+
+    // Clear notifications
+    if (Get.isRegistered<NotificationController>()) {
+      Get.find<NotificationController>()
+          .clearNotificationData();
+    }
+
+    // Clear authentication data
+    await Prefs.remove(Prefs.KEY_TOKEN);
+    await Prefs.remove(Prefs.USER_ID);
+    await Prefs.remove(Prefs.storeId);
+
+    // Clear user information
+    await Prefs.remove(AppConstant.name);
+    await Prefs.remove(AppConstant.emailId);
+
+    // Clear controllers
+    clear();
   }
 
   @override

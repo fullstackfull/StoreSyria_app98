@@ -6,14 +6,11 @@ import 'package:store_go_app/core/controller/setting_controller/theme_controller
 import 'package:store_go_app/routes/routes.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/images.dart';
-import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/view/screen/auth/login_widget.dart';
 import 'package:store_go_app/view/screen/setting_screen/store_setting_screen.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
-import 'package:store_go_app/core/services/fcm_token_service.dart';
-import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
+import '../../../core/controller/auth/auth_controller.dart';
 import '../../new_widgets/settings_card.dart';
 
 
@@ -156,17 +153,7 @@ class SettingScreen extends StatelessWidget {
                               confirmText: "yes".tr,
                               popOnConfirm: false,
                               onConfirm: () async {
-                                await FcmTokenService().clearFcmToken();
-
-                                if (Get.isRegistered<NotificationController>()) {
-                                  Get.find<NotificationController>().clearNotificationData();
-                                }
-
-                                await Prefs.remove(Prefs.KEY_TOKEN);
-                                await Prefs.remove(Prefs.USER_ID);
-                                await Prefs.remove(Prefs.storeId);
-
-                                Get.offAllNamed(AppRoutes.login);
+                                Get.find<AuthController>().logout();
                             }
                           );
                         },

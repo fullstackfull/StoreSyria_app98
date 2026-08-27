@@ -15,8 +15,7 @@ class NotificationController extends GetxController with WidgetsBindingObserver 
   NotificationModelData? notificationData;
   int? lastSavedCount;
 
-  /// 👆 معرّفات الإشعارات التي ضغط عليها المستخدم فعلياً (محلية فقط)
-  /// مستقلة تماماً عن is_read التي تتحكم بعداد الجرس
+
   final RxSet<int> tappedNotificationIds = <int>{}.obs;
 
   @override
