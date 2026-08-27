@@ -8,7 +8,13 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 
+import 'cahe.dart';
+
 class HomeController extends GetxController {
+  // مفاتيح الكاش الخاصة بهاد الكنترولر
+  static const String _cacheDashboardKey = 'home_dashboard_data';
+  static const String _cacheImageUrlKey = 'home_image_url_data';
+
   DashboardRepository dashboardRepository = DashboardRepository();
   RxList<ProductData> topProductList = <ProductData>[].obs;
   RxList<RecentOrder> recentOrderList = <RecentOrder>[].obs;
@@ -21,6 +27,49 @@ class HomeController extends GetxController {
   ImageUrlData? imageUrlData;
   List<Store> myStoreList = [Store(name: 'Grocery', id: 3), Store(id: 7, name: "Babycare")];
 
+  @override
+  void onInit() {
+    super.onInit();
+    // نحمّل آخر بيانات محفوظة محلياً فوراً (لو موجودة) عشان الشاشة
+    // تفتح مباشرة بدون لودر. الطلب الحقيقي من السيرفر بيصير بعدها
+    // بالخلفية (زي ما هو مبرمج أصلاً بـ getData() بالشاشة) وبيحدّث
+    // نفس المتغيرات لما يوصل رد جديد.
+    _loadCachedDashboard();
+    _loadCachedImageUrl();
+  }
+
+  void _loadCachedDashboard() {
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheDashboardKey);
+    if (cached == null) return;
+    try {
+      dashboardData = DashboardData.fromJson(cached);
+      topProductList.value = dashboardData!.product ?? [];
+      recentOrderList.value = dashboardData!.recentOrder ?? [];
+      couponsList.value = dashboardData!.coupons ?? [];
+      topProductList.refresh();
+      recentOrderList.refresh();
+      couponsList.refresh();
+      update();
+    } catch (_) {
+      // لو تغير شكل البيانات وصار الكاش القديم غير متوافق، نتجاهله
+      // ونخلي الطلب العادي من السيرفر يعبّي البيانات كالمعتاد.
+      dashboardData = null;
+    }
+  }
+
+  void _loadCachedImageUrl() {
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheImageUrlKey);
+    if (cached == null) return;
+    try {
+      imageUrlData = ImageUrlData.fromJson(cached);
+      if (imageUrlData?.imageUrl != null) {
+        imageBaseUrl.value = imageUrlData!.imageUrl!;
+      }
+    } catch (_) {
+      imageUrlData = null;
+    }
+  }
+
   getImageBaseUrl() async {
     isDataAvailable.value = true;
 
@@ -32,6 +81,7 @@ class HomeController extends GetxController {
         imageBaseUrl.value = imageUrlData!.imageUrl!;
         Prefs.setString(AppConstant.imageUrl, imageUrlData!.imageUrl!);
         Prefs.setString(AppConstant.paymentUrl, imageUrlData!.paymentUrl!);
+        CacheService.save(_cacheImageUrlKey, data['data']);
       },
       onFailure: (reason, message, errors) {
         commonToast(message);
@@ -51,20 +101,20 @@ class HomeController extends GetxController {
         if (data['status'] == 1) {
           isStore.value = false;
           commonToast(data['data']['message']);
-          
+
           // تحديث Store ID محلياً
           Prefs.setStoreID(storeId);
-          
+
           // إرسال FCM Token للسيرفر مع المتجر الجديد
           _sendFcmTokenAfterStoreChange(storeId);
-          
+
           getDashboardData();
         } else {
           commonToast(data['data']['message']);
         }
       },
       onFailure: (reason, message, errors) {
-       // commonToast(message);
+        // commonToast(message);
       },
     );
 
@@ -88,6 +138,10 @@ class HomeController extends GetxController {
         couponsList.refresh();
 
         update();
+
+        // نخزن آخر رد ناجح محلياً عشان يستخدم كبيانات فورية
+        // بالمرة الجاية اللي المستخدم يفتح فيها الشاشة.
+        CacheService.save(_cacheDashboardKey, data['data']);
       },
       onFailure: (reason, message, errors) {
         commonToast(message);
