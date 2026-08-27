@@ -18,6 +18,7 @@ class AddProductController extends GetxController {
   ProductRepository productRepository = ProductRepository();
 
   RxBool isTrending = true.obs;
+  RxBool isStatus = true.obs;
   RxBool isVariant = false.obs;
 
   var productName = TextEditingController().obs;
@@ -33,6 +34,7 @@ class AddProductController extends GetxController {
 
   RxString lastPrice = ''.obs;
   RxString trending = '1'.obs;
+  RxString status = '1'.obs;
   RxString category = ''.obs;
   RxString variantType = ''.obs;
   List variantTypeList = ["Collection Horizontal", "DropDown"];
@@ -144,6 +146,7 @@ class AddProductController extends GetxController {
   Future<void> addProductData({
     required String name,
     required bool isUpdate,
+    required String status,
     required String categoryId,
     required String productId,
     required String description,
@@ -172,8 +175,9 @@ class AddProductController extends GetxController {
       'discount_amount': discountAmount,
       'product_stock': productStock,
       'trending': trending,
+      //TODO :: variant_product
       'variant_product': '0',
-      'status': '1',
+      'status': status,
       'tag': tag,
 
       'array[0][section_name]': 'Product - Other Description',

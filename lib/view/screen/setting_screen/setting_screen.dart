@@ -31,7 +31,7 @@ class SettingScreen extends StatelessWidget {
             Theme.of(context).brightness == Brightness.dark;
 
         return Scaffold(
-          backgroundColor: AppColor.cBackGround,
+          backgroundColor: isDark  ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8),
           body: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(

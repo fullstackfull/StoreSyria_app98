@@ -12,7 +12,6 @@ import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/powered_by_lynomia.dart';
 import '../../widget/app_dialog.dart';
 
-
 class NormalLoginWidget extends StatefulWidget {
   NormalLoginWidget({super.key});
 
@@ -124,8 +123,7 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                             suffix: IconButton(
                               onPressed: () {
                                 authController.isObscure.value =
-                                !authController
-                                    .isObscure.value;
+                                !authController.isObscure.value;
                               },
                               icon: Icon(
                                 authController.isObscure.value

@@ -176,10 +176,6 @@ Widget mainCard({
       ? DarkThemeColor.cText
       : AppColor.cText;
 
-  final Color secondaryText = isDark
-      ? DarkThemeColor.cSecondaryText
-      : AppColor.cFont;
-
   return Material(
     color: Colors.transparent,
     child: InkWell(

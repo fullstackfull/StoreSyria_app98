@@ -24,6 +24,7 @@ import 'package:store_go_app/core/controller/product_controller/add_product_cont
 class AddNewProductScreen extends StatefulWidget {
   final bool isUpdate;
   final String? productId;
+  final String? status;
   final String? productName;
   final String? qty;
   final String? productCategories;
@@ -47,6 +48,7 @@ class AddNewProductScreen extends StatefulWidget {
     this.priceController,
     this.disAmountController,
     this.trending,
+    this.status,
   });
 
   @override
@@ -70,9 +72,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     if (widget.isUpdate) {
       addProductController.productName.value.text = widget.productName ?? '';
       addProductController.stockQtyController.value.text = widget.qty ?? '';
-      // ملاحظة: ما بنعبي حقل الوصف بالـ HTML الخام هون -
-      // الوصف الحالي بينعرض Read-only بالأسفل، وحقل الكتابة يضل فاضي
-      // لحتى يكتب المستخدم نص عادي جديد لو بدو يغيّر الوصف.
       addProductController.priceController.value.text = widget.priceController ?? '';
       addProductController.disAmountController.value.text = widget.disAmountController ?? '';
     } else {
@@ -103,7 +102,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
       child: Scaffold(
         backgroundColor: bgColor,
         appBar: simpleAppBar(
-          title: widget.isUpdate ? "Update Product" : "New Product",
+          title: widget.isUpdate ? "update_product".tr : "new_product".tr,
         ),
         body: SafeArea(
           child: Obx(() {
@@ -121,7 +120,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                       borderColor: borderColor,
                       softBg: softBg,
                       textColor: textColor,
-                      title: "Basic Information",
+                      title: "basic_information".tr,
                       icon: Icons.inventory_2_outlined,
                       child: _buildBasicInfoSection(textColor, hintColor, borderColor, cardColor, softBg, isDark),
                     ),
@@ -131,7 +130,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                       borderColor: borderColor,
                       softBg: softBg,
                       textColor: textColor,
-                      title: "Description",
+                      title: "description".tr,
                       icon: Icons.description_outlined,
                       child: _buildDescriptionSection(textColor, hintColor, borderColor, cardColor, softBg, isDark),
                     ),
@@ -141,7 +140,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                       borderColor: borderColor,
                       softBg: softBg,
                       textColor: textColor,
-                      title: "Product Images",
+                      title: "product_images".tr,
                       icon: Icons.image_outlined,
                       child: _buildImagesSection(textColor, hintColor, borderColor, softBg),
                     ),
@@ -151,7 +150,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                       borderColor: borderColor,
                       softBg: softBg,
                       textColor: textColor,
-                      title: "Price & Stock",
+                      title: "price_and_stock".tr,
                       icon: Icons.payments_outlined,
                       child: _buildPricingSection(textColor, hintColor, borderColor, cardColor, softBg, isDark),
                     ),
@@ -229,8 +228,8 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
       children: [
         AddProductTextField(
           controller: addProductController.productName.value,
-          labelText: "Product Name *",
-          hintText: 'Enter product name',
+          labelText: "product_name_required".tr,
+          hintText: 'enter_product_name'.tr,
           onChanged: (value) {
             Validator.validateRequired(value);
           },
@@ -240,8 +239,8 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         ),
         verticalSpace(14.h),
         commonDropdownButtonWidget(
-          labelText: 'Category',
-          hint: 'Select category',
+          labelText: 'category'.tr,
+          hint: 'select_category'.tr,
           value: addProductController.category.value.isEmpty
               ? null
               : addProductController.categoryTypeList.any((e) => e.name == addProductController.category.value)
@@ -259,7 +258,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           },
           validator: (value) {
             if (value == null || value.isEmpty || addProductController.categoryId.value.isEmpty) {
-              return "Please select a category";
+              return "please_select_category".tr;
             }
             return null;
           },
@@ -268,10 +267,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     );
   }
 
-  // --- Description ---
-  // وضع Update: الوصف الحالي (HTML) يظهر فوق Read-only فقط، وتحته حقل نص عادي
-  // لكتابة وصف جديد (بدون أي وسوم HTML) لو بدو المستخدم يغيّره.
-  // وضع Add: حقل نص عادي بس، بدون معاينة (لأنو ما في وصف حالي أصلاً).
   // --- Description Section ---
   Widget _buildDescriptionSection(
       Color textColor, Color hintColor, Color borderColor, Color cardColor, Color softBg, bool isDark) {
@@ -286,13 +281,13 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         // 1. عرض الوصف الحالي (HTML) فقط في حالة التعديل
         if (hasCurrentDescription) ...[
           Text(
-            "Current Description (Read Only)",
+            "current_description_readonly".tr,
             style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
           ),
           verticalSpace(8.h),
           Container(
             width: double.infinity,
-            constraints: BoxConstraints(minHeight: 80.h, maxHeight: 200.h), // تحديد ارتفاع مناسب
+            constraints: BoxConstraints(minHeight: 80.h, maxHeight: 200.h),
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
               color: softBg,
@@ -322,16 +317,16 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           verticalSpace(16.h),
 
           Text(
-            "New Description (Optional)",
+            "new_description_optional".tr,
             style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
           ),
           verticalSpace(8.h),
         ],
         AddProductTextField(
           controller: addProductController.productDescriptionController.value,
-          labelText: hasCurrentDescription ? null : 'product_description'.tr, // إخفاء الليبل إذا عرضنا العنوان بالأعلى
+          labelText: hasCurrentDescription ? null : 'product_description'.tr,
           hintText: hasCurrentDescription
-              ? 'Enter new description to replace the old one...'
+              ? 'enter_new_description_replace'.tr
               : 'product_description'.tr,
           maxLines: 5,
           validator: (value) {
@@ -347,7 +342,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Cover Image",
+          "cover_image".tr,
           style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
         ),
         verticalSpace(8.h),
@@ -380,7 +375,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                       Icon(Icons.cloud_upload_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
                       verticalSpace(6.h),
                       Text(
-                        "Drop files here to upload",
+                        "drop_files_upload".tr,
                         style: pSemiBold12.copyWith(color: textColor),
                         textAlign: TextAlign.center,
                       ),
@@ -397,7 +392,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         ),
         verticalSpace(18.h),
         Text(
-          "Sub Images",
+          "sub_images".tr,
           style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
         ),
         verticalSpace(8.h),
@@ -429,7 +424,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                       Icon(Icons.add_photo_alternate_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
                       verticalSpace(6.h),
                       Text(
-                        "Choose files",
+                        "choose_files".tr,
                         style: pSemiBold12.copyWith(color: textColor),
                       ),
                     ],
@@ -471,26 +466,55 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             color: softBg,
             borderRadius: BorderRadius.circular(12.r),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
             children: [
-              Text(
-                "Trending",
-                style: pRegular12.copyWith(color: textColor),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "trending".tr,
+                    style: pRegular12.copyWith(color: textColor),
+                  ),
+                  CupertinoSwitch(
+                    value: addProductController.isTrending.value,
+                    onChanged: (value) {
+                      addProductController.isTrending.value = value;
+                      if (value == true) {
+                        addProductController.trending.value = '1';
+                      } else {
+                        addProductController.trending.value = '0';
+                      }
+                    },
+                    activeColor: AppColor.themeNavyBlueColor,
+                    thumbColor: AppColor.cWhite,
+                    trackColor: AppColor.cFont,
+                  ),
+                ],
               ),
-              CupertinoSwitch(
-                value: addProductController.isTrending.value,
-                onChanged: (value) {
-                  addProductController.isTrending.value = value;
-                  if (value == true) {
-                    addProductController.trending.value = '1';
-                  } else {
-                    addProductController.trending.value = '0';
-                  }
-                },
-                activeColor: AppColor.themeNavyBlueColor,
-                thumbColor: AppColor.cWhite,
-                trackColor: AppColor.cFont,
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "status".tr,
+                    style: pRegular12.copyWith(color: textColor),
+                  ),
+                  CupertinoSwitch(
+                    value: addProductController.isStatus.value,
+                    onChanged: (value) {
+                      addProductController.isStatus.value = value;
+
+                      if (value == true) {
+                        addProductController.status.value = 1.toString();
+                      } else {
+                        addProductController.status.value = 0.toString();
+                      }
+                    },
+                    activeColor: AppColor.themeNavyBlueColor,
+                    thumbColor: AppColor.cWhite,
+                    trackColor: AppColor.cFont,
+                  ),
+                ],
               ),
             ],
           ),
@@ -498,16 +522,16 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         verticalSpace(16.h),
         AddProductTextField(
             controller: addProductController.priceController.value,
-            labelText: 'Price',
-            hintText: 'Enter price',
+            labelText: 'price'.tr,
+            hintText: 'enter_price'.tr,
             validator: (value) {
               return Validator.validateRequired(value!);
             },
             keyboardType: TextInputType.number),
         verticalSpace(12.h),
         commonDropdownButtonWidget(
-          labelText: 'Discount Type',
-          hint: 'Select option',
+          labelText: 'discount_type'.tr,
+          hint: 'select_option'.tr,
           value: addProductController.discountType.value,
           list: addProductController.discountTypeList,
           validator: (value) {
@@ -520,8 +544,8 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         verticalSpace(12.h),
         AddProductTextField(
             controller: addProductController.disAmountController.value,
-            labelText: 'Discount Amount',
-            hintText: 'Enter discount',
+            labelText: 'discount_amount'.tr,
+            hintText: 'enter_discount'.tr,
             validator: (value) {
               return Validator.validateRequired(value!);
             },
@@ -529,8 +553,8 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         verticalSpace(12.h),
         AddProductTextField(
           controller: addProductController.stockQtyController.value,
-          labelText: 'Stock',
-          hintText: 'Enter stock',
+          labelText: 'stock'.tr,
+          hintText: 'enter_stock'.tr,
           keyboardType: TextInputType.number,
           validator: (value) {
             return Validator.validateRequired(value!);
@@ -545,7 +569,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         CommonIconButton(
-            title: 'Close',
+            title: 'close'.tr,
             iconData: DefaultImages.closeIcn,
             onPressed: () {
               Get.back();
@@ -555,7 +579,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             btnColor: AppColor.cButton,
             textColor: AppColor.cDarkGreyFont),
         CommonIconButton(
-          title: widget.isUpdate ? "Update" : 'Create',
+          title: widget.isUpdate ? "update".tr : 'create'.tr,
           iconData: DefaultImages.whiteDoneIcn,
           onPressed: () {
             final isFormValid = formKey.currentState!.validate();
@@ -564,18 +588,18 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             }
 
             if (addProductController.coverImage.value == '') {
-              commonToast("Please add a cover image");
+              commonToast("please_add_cover_image".tr);
               return;
             }
 
             if (addProductController.selectedSubImages.isEmpty) {
-              commonToast("Please add a sub image");
+              commonToast("please_add_sub_image".tr);
               return;
             }
 
             if (widget.isUpdate == true) {
               if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                commonToast(AppConstant.demoString);
+                commonToast(AppConstant.demoString.tr);
               } else {
                 _submitProductData();
               }
@@ -592,6 +616,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
 
   void _submitProductData() {
     addProductController.addProductData(
+      status: widget.status ?? '',
       isUpdate: widget.isUpdate,
       tag: addProductController.groupValue.value,
       name: addProductController.productName.value.text.trim(),

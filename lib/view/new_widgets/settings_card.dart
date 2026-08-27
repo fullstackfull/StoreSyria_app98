@@ -52,8 +52,8 @@ Widget settingCard({
                   height: 40,
                   decoration: BoxDecoration(
                     color: isDark
-                        ? AppColor.themeGreenColor.withOpacity(0.12)
-                        : AppColor.themeGreenColor.withOpacity(0.08),
+                        ? AppColor.themeNavyBlueColor.withOpacity(0.12)
+                        : AppColor.themeNavyBlueColor.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(13),
                   ),
                   child: Center(
@@ -134,7 +134,7 @@ Widget settingWidget({
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColor.themeGreenColor.withOpacity(0.06),
+                color: AppColor.themeNavyBlueColor.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
