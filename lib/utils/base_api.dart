@@ -1,7 +1,7 @@
 
 class API {
-  //static String baseUrl = "https://storesyria.com/api/admin";
-  static String baseUrl = "https://designer-railway-lyrically.ngrok-free.dev/api/admin";
+  static String baseUrl = "https://storesyria.com/api/admin";
+  //static String baseUrl = "https://designer-railway-lyrically.ngrok-free.dev/api/admin";
   static String loginUrl = '/adminlogin';
   static String logutUrl = '/adminlogout';
   static String dashboardUrl = '/dashboard';
