@@ -13,6 +13,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/controller/product_controller/product_detail_controller.dart';
 import 'package:store_go_app/core/controller/product_controller/add_review_controller.dart';
 import '../../../core/model/product_model.dart';
+import '../../widget/app_dialog.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String categoryId;
@@ -822,6 +823,10 @@ class _ProductDetailScreenState
         itemBuilder: (context, index) {
           final review = reviewController.reviewList[index];
 
+          // ✅ التحقق مما إذا كان التقييم للمستخدم الحالي
+          final currentUserId = reviewController.userId.value.toString();
+          final isMyReview = review.userId?.toString() == currentUserId;
+
           final time = DateTime.tryParse(review.createdAt ?? '') ??
               DateTime.now();
 
@@ -882,6 +887,44 @@ class _ProductDetailScreenState
                         ],
                       ),
                     ),
+
+                    if (isMyReview) ...[
+                      IconButton(
+                        icon: Icon(Icons.edit_outlined, size: 18.sp, color: AppColor.themeGreenColor),
+                        onPressed: () {
+                          Get.to(() => AddRatingScreen(
+                            id: widget.id,
+                            categoryId: widget.categoryId,
+                            productId: widget.productId,
+                            reviewId: review.id.toString(), // مهم للتحديث
+                            isUpdate: true,
+                            rate: rating,
+                            title: review.title,
+                            description: review.description,
+                          ));
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete_outline, size: 18.sp, color: Colors.red),
+                        onPressed: () {
+                          AppDialog.showCustomDialog(
+                            context: context,
+                            title: 'delete'.tr,
+                            message: 'are_you_sure_delete_review'.tr,
+                            lottieAsset: 'assets/lottie/delete_icon.json',
+                            confirmColor: Colors.red,
+                            onConfirm: () async {
+                              await reviewController.deleteReviewData(
+                                reviewId: review.id.toString(),
+                                productId: widget.productId,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+
+                    horizontalSpace(5.w),
 
                     RatingBar.builder(
                       initialRating: rating,

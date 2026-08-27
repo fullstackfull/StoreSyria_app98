@@ -149,8 +149,6 @@ class AddReviewController extends GetxController {
               "Deleted",
         );
 
-        //Get.back();
-
         await getReviewData(productId);
       },
       onFailure: (reason, message, validationErrors) {

@@ -361,4 +361,5 @@ const Map<String, String> en = {
   'Devices': 'Devices',
   'Visitors by device': 'Visitors by device',
   'Visitors by browser': 'Visitors by browser',
+  'please login to continue to your store!': 'Please login to continue to your store!',
 };

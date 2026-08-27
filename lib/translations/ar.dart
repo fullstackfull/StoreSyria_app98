@@ -362,4 +362,5 @@ const Map<String, String> ar = {
   'Devices': 'الأجهزة',
   'Visitors by device': 'الزوار حسب الجهاز',
   'Visitors by browser': 'الزوار حسب المتصفح',
+  'please login to continue to your store!': 'يرجى تسجيل الدخول للمتابعة إلى متجرك!',
 };

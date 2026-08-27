@@ -78,7 +78,7 @@ class _ProductsScreenState extends State<ProductsScreen>
     await productController.getProductData(productController.currantPage.value);
 
     if (addProductController.categoryTypeList.isEmpty) {
-    //  await addProductController.getCreateProductData(isUpdate: false);
+      await addProductController.getCreateProductData(isUpdate: false);
 
       if (addProductController.categoryTypeList.isNotEmpty) {
         if (addProductController.category.value.isEmpty) {

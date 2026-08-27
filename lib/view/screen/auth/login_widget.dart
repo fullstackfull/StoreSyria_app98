@@ -102,7 +102,6 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                           validator: (value) =>
                               Validator.validateEmail(value!),
                           keyboardType: TextInputType.emailAddress,
-                          autofocus: true,
                         ),
 
                         SizedBox(height: 20.h),
@@ -134,7 +133,6 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                                     : Icons.visibility_outlined
                               ),
                             ),
-                            autofocus: true,
                           ),
                         ),
 
