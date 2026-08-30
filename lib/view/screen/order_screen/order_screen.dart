@@ -378,7 +378,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                                 date: order.orderDate!,
                                 formatType: formatForDateTime(FormatType.date),
                               ),
-                              maskedName: order.userName ?? '',
+                              maskedName: order.userName ?? 'no name',
                               price: "${order.finalPrice}",
                               primaryBadgeLabel: order.paymentStatus,
                               secondaryBadgeLabel: "paid".tr,

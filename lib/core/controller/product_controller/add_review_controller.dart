@@ -25,6 +25,9 @@ class AddReviewController extends GetxController {
   GetReviewUser? getReviewUser;
   ReviewModel? reviewModel;
   RxList<ReviewData> reviewList = <ReviewData>[].obs;
+  final RxBool isReviewLoading = false.obs;
+  final RxBool isAddReviewLoading = false.obs;
+
 
   @override
   void onInit() {
@@ -34,113 +37,100 @@ class AddReviewController extends GetxController {
     userValue.value = Prefs.getString("name") ?? '';
   }
 
-  Future<void> getReviewUserData() async {
-   // Loader.showLoader();
-
-    final response = await reviewRepository.getReviewUserData();
-
-    //Loader.hideLoader();
-
-    response.fold(
-      onSuccess: (data) {
-        if (data['status'] == 1) {
-          reviewModel = ReviewModel.fromJson(data);
-
-          reviewList.assignAll(reviewModel?.data ?? []);
-
-          imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
-        } else {
-          reviewList.clear();
-          imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
-        }
-      },
-      onFailure: (reason, message, validationErrors) {
-        //commonToast(message);
-      },
-    );
-  }
+  // Future<void> getReviewUserData() async {
+  //  // Loader.showLoader();
+  //
+  //   final response = await reviewRepository.getReviewUserData();
+  //
+  //   //Loader.hideLoader();
+  //
+  //   response.fold(
+  //     onSuccess: (data) {
+  //       if (data['status'] == 1) {
+  //         reviewModel = ReviewModel.fromJson(data);
+  //
+  //         reviewList.assignAll(reviewModel?.data ?? []);
+  //
+  //         imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
+  //       } else {
+  //         reviewList.clear();
+  //         imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
+  //       }
+  //     },
+  //     onFailure: (reason, message, validationErrors) {
+  //       //commonToast(message);
+  //     },
+  //   );
+  // }
 
   Future<void> getReviewData(String id) async {
-    //Loader.showLoader();
+    try {
+      isReviewLoading.value = true;
 
-    final response = await reviewRepository.getReviewData(id);
+      final response = await reviewRepository.getReviewData(id);
 
-    //Loader.hideLoader();
+      response.fold(
+        onSuccess: (data) {
+          if (data['status'] == 1) {
+            reviewModel = ReviewModel.fromJson(data);
 
-    response.fold(
-      onSuccess: (data) {
-        if (data['status'] == 1) {
-          reviewModel = ReviewModel.fromJson(data);
+            reviewList.assignAll(
+              reviewModel?.data ?? [],
+            );
 
-          reviewList.assignAll(reviewModel?.data ?? []);
-
-          imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
-        } else {
-          // commonToast(data['data']?['message'] ?? "Error");
-        }
-      },
-      onFailure: (reason, message, validationErrors) {
-        //commonToast(message);
-      },
-    );
-  }
-
-  String convertToAgo(DateTime input) {
-    Duration diff = DateTime.now().difference(input);
-
-    if (diff.inDays >= 30) {
-      return '${(diff.inDays / 30).toStringAsFixed(0)} months ago';
-    } else if (diff.inDays >= 1) {
-      return '${diff.inDays} days ago';
-    } else if (diff.inHours >= 1) {
-      return '${diff.inHours} hours ago';
-    } else if (diff.inMinutes >= 1) {
-      return '${diff.inMinutes} minutes ago';
-    } else if (diff.inSeconds >= 1) {
-      return '${diff.inSeconds} seconds ago';
-    } else {
-      return 'just now';
+            imageBaseUrl.value =
+                Prefs.getString(AppConstant.imageUrl);
+          } else {
+            // إذا ما في reviews
+            reviewList.clear();
+          }
+        },
+        onFailure: (reason, message, validationErrors) {
+          reviewList.clear();
+        },
+      );
+    } catch (e) {
+      reviewList.clear();
+    } finally {
+      isReviewLoading.value = false;
     }
   }
 
-  Future<void> changeReviewData(
-      int reviewId, {
-        required String productId,
-      }) async {
-    Loader.showLoader();
 
-    final response =
-    await reviewRepository.changeReviewStatus(reviewId);
-
-    Loader.hideLoader();
-
-    response.fold(
-      onSuccess: (data) {
-        commonToast(
-          data['data']?['message'] ??
-              data['message'] ??
-              "Success",
-        );
-
-        getReviewData(productId);
-      },
-      onFailure: (reason, message, validationErrors) {
-        commonToast(message);
-      },
-    );
-  }
+  // Future<void> changeReviewData(
+  //     int reviewId, {
+  //       required String productId,
+  //     }) async {
+  //   //Loader.showLoader();
+  //
+  //   final response =
+  //   await reviewRepository.changeReviewStatus(reviewId);
+  //
+  //   //Loader.hideLoader();
+  //
+  //   response.fold(
+  //     onSuccess: (data) {
+  //       commonToast(
+  //         data['data']?['message'] ??
+  //             data['message'] ??
+  //             "Success",
+  //       );
+  //
+  //       getReviewData(productId);
+  //     },
+  //     onFailure: (reason, message, validationErrors) {
+  //       commonToast(message);
+  //     },
+  //   );
+  // }
 
 
   Future<void> deleteReviewData({
     required String reviewId,
     required String productId,
   }) async {
-    Loader.showLoader();
 
     final response = await reviewRepository.deleteReviewData(reviewId);
-
-    Loader.hideLoader();
-
     response.fold(
       onSuccess: (data) async {
         commonToast(
@@ -156,6 +146,7 @@ class AddReviewController extends GetxController {
       },
     );
   }
+
   Future<void> addReview({
     required bool isUpdate,
     required String userId,
@@ -168,46 +159,41 @@ class AddReviewController extends GetxController {
     required String rating,
     required String status,
   }) async {
-    Loader.showLoader();
+    try {
+      isAddReviewLoading.value = true;
 
-    final response = await reviewRepository.addReviewData(
-      isUpdate: isUpdate,
-      userId: userId,
-      id: id,
-      title: title,
-      reviewId: reviewId,
-      description: description,
-      categoryId: categoryId,
-      productId: productId,
-      rating: rating,
-      status: status,
-    );
+      final response = await reviewRepository.addReviewData(
+        isUpdate: isUpdate,
+        userId: userId,
+        title: title,
+        reviewId: reviewId,
+        description: description,
+        categoryId: categoryId,
+        productId: productId,
+        rating: rating,
+        status: status,
+      );
 
-    Loader.hideLoader();
+      response.fold(
+        onSuccess: (data) async {
+          commonToast(
+            data['data']?['message'] ??
+                data['message'] ??
+                "Success",
+          );
 
-    response.fold(
-      onSuccess: (data) {
-        commonToast(
-          data['data']?['message'] ??
-              data['message'] ??
-              "Success",
-        );
+          await getReviewData(productId);
 
-        clear();
-
-        Get.back();
-
-        getReviewData(productId);
-      },
-      onFailure: (reason, message, validationErrors) {
-        commonToast(message);
-      },
-    );
-  }
-
-  clear() {
-    nameController.clear();
-    titleController.clear();
-    descriptionController.clear();
+          Get.back();
+        },
+        onFailure: (reason, message, validationErrors) {
+          commonToast(message);
+        },
+      );
+    } catch (e) {
+      log('addReview error: $e');
+    } finally {
+      isAddReviewLoading.value = false;
+    }
   }
 }

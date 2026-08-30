@@ -192,21 +192,25 @@ Widget allOrdersListItemWidget({
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  SvgPicture.asset(DefaultImages.ordersIcn,
-                      width: 18.h, color: AppColor.cGreenFont),
-                  Text(
-                    " $orderId",
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w800,
-                      color: textColor,
+              Expanded(
+                child: Row(
+                  children: [
+                    SvgPicture.asset(DefaultImages.ordersIcn,
+                        width: 20.h, color: AppColor.cGreenFont),
+                    Flexible(
+                      child: Text(
+                        " $orderId",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w800,
+                          color: textColor,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               PopupMenuButton<String>(
                 padding: EdgeInsets.zero,

@@ -299,5 +299,4 @@ class AddProductController extends GetxController {
     groupValue.value = 'none';
     isTrending.value = true;
   }
-
 }

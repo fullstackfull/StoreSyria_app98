@@ -5,11 +5,12 @@ import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 
 class ReviewRepository {
-  getReviewUserData() async {
-    String endPoint = API.createReviewUrl + API.storeIdUrl + Prefs.getStoreID();
-    var response = await NetworkHttps.getRequest(endPoint);
-    return response;
-  }
+
+  // getReviewUserData() async {
+  //   String endPoint = API.createReviewUrl + API.storeIdUrl + Prefs.getStoreID();
+  //   var response = await NetworkHttps.getRequest(endPoint);
+  //   return response;
+  // }
 
   getReviewData(id) async {
     String endPoint = API.reviewListUrl + API.storeIdUrl + Prefs.getStoreID()+API.productIdUrl+id;
@@ -17,22 +18,18 @@ class ReviewRepository {
     return response;
   }
 
-  changeReviewStatus(int reviewId) async {
-    String endPoint = API.reviewStatusUrl;
-    var response = await NetworkHttps.postRequest(
-        endPoint, {
-          "store_id": Prefs.getStoreID(),
-          'id': reviewId,
-        });
-    return response;
-  }
+  // changeReviewStatus(int reviewId) async {
+  //   String endPoint = API.reviewStatusUrl;
+  //   var response = await NetworkHttps.postRequest(
+  //       endPoint, {
+  //         "store_id": Prefs.getStoreID(),
+  //         'id': reviewId,
+  //       });
+  //   return response;
+  // }
 
   deleteReviewData(String reviewId) async {
-    String endPoint = API.deleteReviewUrl +
-        API.storeIdUrl +
-        Prefs.getStoreID() +
-        API.reviewIdUrl +
-        reviewId;
+    String endPoint = API.deleteReviewUrl + reviewId;
     var response = await NetworkHttps.deleteRequest(endPoint);
     return response;
   }
@@ -40,7 +37,6 @@ class ReviewRepository {
   addReviewData({
     required bool isUpdate,
     required String userId,
-    required String id,
     required String reviewId,
     required String title,
     required String description,
@@ -54,14 +50,13 @@ class ReviewRepository {
         ? {
             'store_id': Prefs.getStoreID(),
             'user_id': userId,
-            'review_id': reviewId,
+            'id': reviewId,
             'title': title,
             'description': description,
             'category_id': categoryId,
             'product_id': productId,
             'rating': rating,
             'status': status,
-            'id' : id
           }
         : {
             'store_id': Prefs.getStoreID(),
@@ -72,7 +67,6 @@ class ReviewRepository {
             'product_id': productId,
             'rating': rating,
             'status': status,
-            'id' : id
           };
     var response = await NetworkHttps.postRequest(endPoint, data);
     return response;

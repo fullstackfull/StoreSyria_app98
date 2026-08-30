@@ -70,6 +70,22 @@ class HomeController extends GetxController {
     }
   }
 
+  void _resetDashboardData() {
+    dashboardData = null;
+
+    topProductList.clear();
+    recentOrderList.clear();
+    couponsList.clear();
+
+    topProductList.refresh();
+    recentOrderList.refresh();
+    couponsList.refresh();
+
+    update();
+
+    CacheService.clear(_cacheDashboardKey);
+  }
+
   getImageBaseUrl() async {
     isDataAvailable.value = true;
 
@@ -102,11 +118,14 @@ class HomeController extends GetxController {
           isStore.value = false;
           commonToast(data['data']['message']);
 
-          // تحديث Store ID محلياً
           Prefs.setStoreID(storeId);
 
-          // إرسال FCM Token للسيرفر مع المتجر الجديد
           _sendFcmTokenAfterStoreChange(storeId);
+
+          // منسح بيانات المتجر القديم فوراً (قوائم + كاش) قبل
+          // ما نطلب بيانات المتجر الجديد، عشان تضمن إنو كل شي
+          // عم يترجع يتحمّل من جديد وما في أي بيانات قديمة ظاهرة.
+          _resetDashboardData();
 
           getDashboardData();
         } else {

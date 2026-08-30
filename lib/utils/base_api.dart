@@ -1,9 +1,9 @@
 
 class API {
-  //static String baseUrl = "https://storesyria.com/api/admin";
-  static String baseUrl = "https://designer-railway-lyrically.ngrok-free.dev/api/admin";
+  static String baseUrl = "https://storesyria.com/api/admin";
+  //static String baseUrl = "https://designer-railway-lyrically.ngrok-free.dev/api/admin";
   static String loginUrl = '/adminlogin';
-  static String logutUrl = '/adminlogout';
+  static String logoutUrl = '/adminlogout';
   static String dashboardUrl = '/dashboard';
 
   static String imageBaseUrl = '/base_url';
@@ -59,14 +59,12 @@ class API {
   static String pageUrl = '?page=';
   static String andPageUrl = '&page=';
 
-  static String createReviewUrl = '/createreview';
+  // static String createReviewUrl = '/createreview';
   static String addReviewUrl = '/addreview';
   static String updateReviewUrl = '/updatereview';
   static String reviewListUrl = '/reviewlist';
-  static String reviewStatusUrl = '/reviewstatus';
-  static String deleteReviewUrl = '/deletereview';
-
-  static String reviewIdUrl = '&review_id=';
+  // static String reviewStatusUrl = '/reviewstatus';
+  static String deleteReviewUrl = '/deletereview/';
 
   static String staticsDataUrl = '/staticsdata';
   static String editProfileUrl = '/editprofile';

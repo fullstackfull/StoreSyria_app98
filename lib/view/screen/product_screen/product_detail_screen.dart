@@ -13,6 +13,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/controller/product_controller/product_detail_controller.dart';
 import 'package:store_go_app/core/controller/product_controller/add_review_controller.dart';
 import '../../../core/model/product_model.dart';
+import '../../new_widgets/convert_to_ago.dart';
 import '../../widget/app_dialog.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -37,14 +38,11 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState
     extends State<ProductDetailScreen> {
 
-  final ProductDetailController productDetailController =
-  Get.put(ProductDetailController());
+  final ProductDetailController productDetailController = Get.put(ProductDetailController());
 
-  final AddReviewController reviewController =
-  Get.put(AddReviewController());
+  final AddReviewController reviewController = Get.put(AddReviewController());
 
-  final PageController _pageController =
-  PageController();
+  final PageController _pageController = PageController();
 
   int _currentImageIndex = 0;
   @override
@@ -65,11 +63,9 @@ class _ProductDetailScreenState
   }
 
   Future<void> _loadData() async {
-    await productDetailController
-        .getProductDetail(widget.productId);
+    await productDetailController.getProductDetail(widget.productId);
 
-    await reviewController
-        .getReviewData(widget.productId);
+    await reviewController.getReviewData(widget.productId);
 
     if (mounted) {
       setState(() {});
@@ -114,99 +110,97 @@ class _ProductDetailScreenState
         title: 'product_details'.tr,
       ),
       backgroundColor: backgroundColor,
-      body: GetBuilder<ProductDetailController>(
-        builder: (controller) {
-          final product = controller.product;
-
-          if (product == null) {
-            return const Center(
-              child: LoadingWidget(),
+      body: SafeArea(
+        child: GetBuilder<ProductDetailController>(
+          builder: (controller) {
+            final product = controller.product;
+        
+            if (product == null) {
+              return const Center(
+                child: LoadingWidget(),
+              );
+            }
+        
+            return RefreshIndicator(
+              onRefresh: _loadData,
+              child: SingleChildScrollView(
+                physics:
+                const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  16.w,
+                  10.h,
+                  16.w,
+                  30.h,
+                ),
+                child: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: [
+                    _buildImageSlider(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      isDark: isDark,
+                    ),
+        
+                    verticalSpace(18.h),
+        
+                    _buildBasicInfoCard(
+                      product: product,
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      primaryTextColor:
+                      primaryTextColor,
+                      secondaryTextColor:
+                      secondaryTextColor,
+                      isDark: isDark,
+                    ),
+        
+                    verticalSpace(16.h),
+        
+                    _buildPropertiesCard(
+                      product: product,
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      primaryTextColor:
+                      primaryTextColor,
+                      secondaryTextColor:
+                      secondaryTextColor,
+                      isDark: isDark,
+                    ),
+        
+                    verticalSpace(16.h),
+        
+                    _buildStatusCard(
+                      product: product,
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      primaryTextColor:
+                      primaryTextColor,
+                      secondaryTextColor:
+                      secondaryTextColor,
+                      isDark: isDark,
+                    ),
+        
+                    verticalSpace(16.h),
+        
+                    _buildReviewsCard(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      primaryTextColor:
+                      primaryTextColor,
+                      secondaryTextColor:
+                      secondaryTextColor,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
+              ),
             );
-          }
-
-          return RefreshIndicator(
-            onRefresh: _loadData,
-            child: SingleChildScrollView(
-              physics:
-              const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(
-                16.w,
-                10.h,
-                16.w,
-                30.h,
-              ),
-              child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
-                children: [
-                  _buildImageSlider(
-                    cardColor: cardColor,
-                    borderColor: borderColor,
-                    isDark: isDark,
-                  ),
-
-                  verticalSpace(18.h),
-
-                  _buildBasicInfoCard(
-                    product: product,
-                    cardColor: cardColor,
-                    borderColor: borderColor,
-                    primaryTextColor:
-                    primaryTextColor,
-                    secondaryTextColor:
-                    secondaryTextColor,
-                    isDark: isDark,
-                  ),
-
-                  verticalSpace(16.h),
-
-                  _buildPropertiesCard(
-                    product: product,
-                    cardColor: cardColor,
-                    borderColor: borderColor,
-                    primaryTextColor:
-                    primaryTextColor,
-                    secondaryTextColor:
-                    secondaryTextColor,
-                    isDark: isDark,
-                  ),
-
-                  verticalSpace(16.h),
-
-                  _buildStatusCard(
-                    product: product,
-                    cardColor: cardColor,
-                    borderColor: borderColor,
-                    primaryTextColor:
-                    primaryTextColor,
-                    secondaryTextColor:
-                    secondaryTextColor,
-                    isDark: isDark,
-                  ),
-
-                  verticalSpace(16.h),
-
-                  _buildReviewsCard(
-                    cardColor: cardColor,
-                    borderColor: borderColor,
-                    primaryTextColor:
-                    primaryTextColor,
-                    secondaryTextColor:
-                    secondaryTextColor,
-                    isDark: isDark,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }
-
-  // ============================================================
-  // IMAGE SLIDER + ZOOM
-  // ============================================================
 
   Widget _buildImageSlider({
     required Color cardColor,
@@ -295,8 +289,7 @@ class _ProductDetailScreenState
               children: List.generate(
                 images.length,
                     (index) {
-                  final isActive =
-                      _currentImageIndex == index;
+                  final isActive = _currentImageIndex == index;
 
                   return AnimatedContainer(
                     curve: Curves.easeInOut,
@@ -314,10 +307,8 @@ class _ProductDetailScreenState
                     isActive ? 11.w : 7.w,
                     decoration: BoxDecoration(
                       color: isActive
-                          ? AppColor
-                          .themeNavyBlueColor
-                          : Colors
-                          .grey.shade400,
+                          ? AppColor.themeNavyBlueColor
+                          : Colors.grey.shade400,
                       borderRadius:
                       BorderRadius.circular(
                         10.r,
@@ -594,7 +585,6 @@ class _ProductDetailScreenState
       stockLabel = 'on_backorder'.tr;
       stockColor = const Color(0xFFEF6C00);
     } else {
-      // Fallback لأي قيمة غير معروفة
       stockIcon = Icons.help_outline_rounded;
       stockLabel = stockStatus.isEmpty
           ? 'unknown'.tr
@@ -657,7 +647,7 @@ class _ProductDetailScreenState
             ],
           ),
          ],
-          ),
+       ),
     );
   }
   // ============================================================
@@ -719,11 +709,8 @@ class _ProductDetailScreenState
                     decoration:
                     BoxDecoration(
                       color: hasReview
-                          ? Colors.grey
-                          .withOpacity(0.12)
-                          : AppColor
-                          .themeGreenColor
-                          .withOpacity(0.1),
+                          ? Colors.grey.withOpacity(0.12)
+                          : AppColor.themeGreenColor.withOpacity(0.1),
                       borderRadius:
                       BorderRadius.circular(
                         20.r,
@@ -819,48 +806,57 @@ class _ProductDetailScreenState
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: reviewController.reviewList.length,
-        separatorBuilder: (_, __) => verticalSpace(12.h),
+        separatorBuilder: (_, __) => verticalSpace(14.h),
         itemBuilder: (context, index) {
           final review = reviewController.reviewList[index];
 
-          // ✅ التحقق مما إذا كان التقييم للمستخدم الحالي
           final currentUserId = reviewController.userId.value.toString();
           final isMyReview = review.userId?.toString() == currentUserId;
 
-          final time = DateTime.tryParse(review.createdAt ?? '') ??
-              DateTime.now();
+          final time = DateTime.tryParse(review.createdAt ?? '') ?? DateTime.now();
 
-          final rating = double.tryParse(
-            review.ratingNo?.toString() ?? '0',
-          ) ??
-              0;
+          final rating = double.tryParse(review.ratingNo?.toString() ?? '0') ?? 0;
+
+          final reviewStatus = review.status?.toString() ?? '0';
+          final isReviewVisible = reviewStatus == '1';
 
           return Container(
-            padding: EdgeInsets.all(14.w),
+            padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: isDark
-                  ? DarkThemeColor.cCardBackground
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(14.r),
+              color: isDark ? DarkThemeColor.cCardBackground : Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
               border: Border.all(color: borderColor),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0 : 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: 40.w,
-                      height: 40.w,
-                      padding: EdgeInsets.all(9.w),
+                      width: 42.w,
+                      height: 42.w,
                       decoration: BoxDecoration(
-                        color: secondaryTextColor.withOpacity(0.08),
+                        color: AppColor.themeGreenColor.withOpacity(0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.person_outline,
-                        color: secondaryTextColor,
-                        size: 20.sp,
+                      alignment: Alignment.center,
+                      child: Text(
+                        (review.userName != null &&
+                            review.userName!.trim().isNotEmpty)
+                            ? review.userName!.trim()[0].toUpperCase()
+                            : '?',
+                        style: pBold14.copyWith(
+                          color: AppColor.themeGreenColor,
+                          fontSize: 16.sp,
+                        ),
                       ),
                     ),
 
@@ -870,43 +866,155 @@ class _ProductDetailScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            review.userName ?? 'User',
-                            style: pSemiBold12.copyWith(
-                              color: primaryTextColor,
-                              fontSize: 13.sp,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  review.userName ?? 'User',
+                                  style: pSemiBold12.copyWith(
+                                    color: primaryTextColor,
+                                    fontSize: 13.5.sp,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              RatingBar.builder(
+                                initialRating: rating,
+                                itemCount: 5,
+                                itemSize: 13.sp,
+                                ignoreGestures: true,
+                                itemBuilder: (_, __) => const Icon(
+                                  Icons.star_rounded,
+                                  color: Color(0xFFFFC107),
+                                ),
+                                onRatingUpdate: (_) {},
+                              ),
+                            ],
                           ),
-                          verticalSpace(3.h),
-                          Text(
-                            reviewController.convertToAgo(time),
-                            style: pRegular10.copyWith(
-                              color: secondaryTextColor,
-                            ),
+
+                          verticalSpace(4.h),
+
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 11.sp,
+                                color: secondaryTextColor,
+                              ),
+                              horizontalSpace(3.w),
+                              Text(
+                                convertToAgo(time),
+                                style: pRegular10.copyWith(
+                                  color: secondaryTextColor,
+                                ),
+                              ),
+
+                              horizontalSpace(8.w),
+
+                              // === بادج حالة الظهور ===
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8.w,
+                                  vertical: 3.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: (isReviewVisible
+                                      ? const Color(0xFF2E7D32)
+                                      : Colors.grey)
+                                      .withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isReviewVisible
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                      size: 10.sp,
+                                      color: isReviewVisible
+                                          ? const Color(0xFF2E7D32)
+                                          : Colors.grey.shade700,
+                                    ),
+                                    horizontalSpace(3.w),
+                                    Text(
+                                      isReviewVisible
+                                          ? 'visible'.tr
+                                          : 'hidden'.tr,
+                                      style: pMedium12.copyWith(
+                                        fontSize: 9.5.sp,
+                                        color: isReviewVisible
+                                            ? const Color(0xFF2E7D32)
+                                            : Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
+                  ],
+                ),
 
-                    if (isMyReview) ...[
-                      IconButton(
-                        icon: Icon(Icons.edit_outlined, size: 18.sp, color: AppColor.themeGreenColor),
-                        onPressed: () {
+                if (review.title != null && review.title!.isNotEmpty) ...[
+                  verticalSpace(10.h),
+                  Text(
+                    review.title!,
+                    style: pSemiBold12.copyWith(
+                      color: primaryTextColor,
+                      fontSize: 13.sp,
+                    ),
+                  ),
+                ],
+
+                if (review.description != null &&
+                    review.description!.isNotEmpty) ...[
+                  verticalSpace(6.h),
+                  Text(
+                    review.description!,
+                    style: pRegular12.copyWith(
+                      color: secondaryTextColor,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+
+                // أزرار التعديل/الحذف تحت (نفس المنطق، مكان أنضف)
+                if (isMyReview) ...[
+                  verticalSpace(10.h),
+                  Divider(height: 1, thickness: 1, color: borderColor),
+                  verticalSpace(6.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _reviewActionButton(
+                        icon: Icons.edit_outlined,
+                        label: 'edit'.tr,
+                        color: AppColor.themeGreenColor,
+                        onTap: () {
                           Get.to(() => AddRatingScreen(
                             id: widget.id,
                             categoryId: widget.categoryId,
                             productId: widget.productId,
-                            reviewId: review.id.toString(), // مهم للتحديث
+                            reviewId: review.id.toString(),
                             isUpdate: true,
                             rate: rating,
                             title: review.title,
                             description: review.description,
+                            status: reviewStatus,
                           ));
                         },
                       ),
-                      IconButton(
-                        icon: Icon(Icons.delete_outline, size: 18.sp, color: Colors.red),
-                        onPressed: () {
+                      horizontalSpace(10.w),
+                      _reviewActionButton(
+                        icon: Icons.delete_outline,
+                        label: 'delete'.tr,
+                        color: Colors.red,
+                        onTap: () {
                           AppDialog.showCustomDialog(
                             context: context,
                             title: 'delete'.tr,
@@ -923,46 +1031,6 @@ class _ProductDetailScreenState
                         },
                       ),
                     ],
-
-                    horizontalSpace(5.w),
-
-                    RatingBar.builder(
-                      initialRating: rating,
-                      itemCount: 5,
-                      itemSize: 14.sp,
-                      ignoreGestures: true,
-                      itemBuilder: (_, __) => const Icon(
-                        Icons.star_rounded,
-                        color: Color(0xFFFFC107),
-                      ),
-                      onRatingUpdate: (_) {},
-                    ),
-                  ],
-                ),
-
-                if (review.title != null && review.title!.isNotEmpty) ...[
-                  verticalSpace(10.h),
-                  Text(
-                    review.title!,
-                    style: pSemiBold12.copyWith(color: primaryTextColor),
-                  ),
-                ],
-
-                if (review.description != null &&
-                    review.description!.isNotEmpty) ...[
-                  verticalSpace(10.h),
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: borderColor,
-                  ),
-                  verticalSpace(10.h),
-                  Text(
-                    review.description!,
-                    style: pRegular12.copyWith(
-                      color: secondaryTextColor,
-                      height: 1.5,
-                    ),
                   ),
                 ],
               ],
@@ -971,6 +1039,37 @@ class _ProductDetailScreenState
         },
       );
     });
+  }
+
+
+  Widget _reviewActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14.sp, color: color),
+            horizontalSpace(4.w),
+            Text(
+              label,
+              style: pMedium12.copyWith(fontSize: 11.sp, color: color),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // ============================================================
@@ -1064,8 +1163,7 @@ class _ProductDetailScreenState
             padding:
             EdgeInsets.all(7.w),
             decoration: BoxDecoration(
-              color: secondaryTextColor
-                  .withOpacity(0.08),
+              color: secondaryTextColor.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(

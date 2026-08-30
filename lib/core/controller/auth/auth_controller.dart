@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'dart:developer';
 
@@ -94,7 +92,7 @@ class AuthController extends GetxController {
       final token = Prefs.getToken();
 
       final url = Uri.parse(
-        API.baseUrl + API.logutUrl,
+        API.baseUrl + API.logoutUrl,
       );
 
       log('=== LOGOUT URL === $url');

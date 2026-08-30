@@ -15,6 +15,45 @@ import 'package:store_go_app/core/controller/onboarding_controller/onboarding_co
 
 GetStorage? getStorage;
 
+// Future<void> main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//
+//   await SystemChrome.setPreferredOrientations([
+//     DeviceOrientation.portraitUp,
+//   ]);
+//
+//   await Firebase.initializeApp();
+//
+//   await GetStorage.init();
+//   getStorage = GetStorage();
+//
+//   final language = Prefs.getLanguage();
+//   print('🌐 Current Language: $language');
+//
+//   await FirebaseMessagingService().initialize();
+//   await FcmTokenService().initialize();
+//
+//   await dotenv.load(fileName: "assets/.env");
+//   String isDemoMode = dotenv.get(AppConstant.isDemoMode);
+//   Prefs.setBool(AppConstant.isDemoMode, bool.parse(isDemoMode));
+//
+//   final onboardingController = OnboardingController();
+//   final isOnboardingCompleted = onboardingController.isOnboardingCompleted;
+//   print('🔍 حالة OnBoarding: $isOnboardingCompleted');
+//
+//   final token = Prefs.getToken();
+//   print("hi $token");
+//   print("isDemo========> $isDemoMode = ${Prefs.getBool(AppConstant.isDemoMode)}");
+//   FlutterError.onError = (errorDetails) {
+//     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+//   };
+//   PlatformDispatcher.instance.onError = (error, stack) {
+//     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+//     return true;
+//   };
+//   runApp(DevicePreview(enabled: false, builder: (context) => StoreGoApp()));
+// }
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -23,33 +62,56 @@ Future<void> main() async {
   ]);
 
   await Firebase.initializeApp();
-
   await GetStorage.init();
+
   getStorage = GetStorage();
 
-  final language = Prefs.getLanguage();
-  print('🌐 Current Language: $language');
+  runApp(
+    DevicePreview(
+      enabled: false,
+      builder: (context) => StoreGoApp(),
+    ),
+  );
 
-  await FirebaseMessagingService().initialize();
-  await FcmTokenService().initialize();
+  // Initialization after UI starts
+  _initializeApp();
+}
 
-  await dotenv.load(fileName: "assets/.env");
-  String isDemoMode = dotenv.get(AppConstant.isDemoMode);
-  Prefs.setBool(AppConstant.isDemoMode, bool.parse(isDemoMode));
-  
-  final onboardingController = OnboardingController();
-  final isOnboardingCompleted = onboardingController.isOnboardingCompleted;
-  print('🔍 حالة OnBoarding: $isOnboardingCompleted');
-  
-  final token = Prefs.getToken();
-  print("hi $token");
-  print("isDemo========> $isDemoMode = ${Prefs.getBool(AppConstant.isDemoMode)}");
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
-  runApp(DevicePreview(enabled: false, builder: (context) => StoreGoApp()));
+Future<void> _initializeApp() async {
+  try {
+    final language = Prefs.getLanguage();
+    print('🌐 Current Language: $language');
+
+    await FirebaseMessagingService().initialize();
+    await FcmTokenService().initialize();
+
+    await dotenv.load(
+      fileName: "assets/.env",
+    );
+
+    final isDemoMode = dotenv.get(AppConstant.isDemoMode);
+
+    Prefs.setBool(
+      AppConstant.isDemoMode,
+      bool.parse(isDemoMode),
+    );
+
+    final onboardingController = OnboardingController();
+
+    final isOnboardingCompleted =
+        onboardingController.isOnboardingCompleted;
+
+    print('🔍 حالة OnBoarding: $isOnboardingCompleted');
+
+    final token = Prefs.getToken();
+
+    print("token: $token");
+    print(
+      "isDemo => $isDemoMode = "
+          "${Prefs.getBool(AppConstant.isDemoMode)}",
+    );
+  } catch (e, stack) {
+    print('❌ App initialization error: $e');
+    print(stack);
+  }
 }
