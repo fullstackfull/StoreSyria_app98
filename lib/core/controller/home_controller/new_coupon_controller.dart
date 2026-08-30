@@ -10,7 +10,13 @@ import 'package:store_go_app/core/model/view_used_coupon_model.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 
-class NewCouponController extends GetxController {
+import 'cahe.dart';
+import 'store_change_service.dart';
+
+class NewCouponController extends GetxController implements StoreAware {
+  // مفتاح الكاش الخاص بأول صفحة من الكوبونات
+  static const String _cacheCouponKey = 'home_coupon_list_data';
+
   final CouponRepository couponRepository = CouponRepository();
 
   CouponModel? couponModel;
@@ -100,6 +106,51 @@ class NewCouponController extends GetxController {
 
   /// رسالة عندما لا يوجد بيانات للكوبون
   final RxString usedCouponEmptyMessage = ''.obs;
+
+  // ============================================================
+  // LIFECYCLE
+  // ============================================================
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    // نحمّل آخر بيانات محفوظة محلياً (صفحة ١) فوراً عشان الشاشة
+    // تفتح مباشرة بدون ما تنتظر السيرفر. الطلب الحقيقي بيصير
+    // بعدها بالخلفية (زي ما هو مبرمج أصلاً بالشاشة).
+    _loadCachedCoupons();
+
+    // نسجل هاد الكنترولر بالسيرفيس المركزي عشان ينعمله reset
+    // تلقائياً لما يتغير المتجر.
+    StoreChangeService.instance.register(() => this);
+  }
+
+  void _loadCachedCoupons() {
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheCouponKey);
+    if (cached == null) return;
+    try {
+      couponModel = CouponModel.fromJson(cached);
+
+      final pagination = couponModel?.data;
+      couponsList.assignAll(pagination?.data ?? []);
+
+      currentPage.value = pagination?.currentPage ?? 1;
+      lastPage.value = pagination?.lastPage ?? 1;
+      hasMore.value = currentPage.value < lastPage.value;
+    } catch (_) {
+      couponModel = null;
+    }
+  }
+
+  /// بتنستدعى تلقائياً من StoreChangeService لما يتغير المتجر:
+  /// بتمسح القائمة + الكاش المحلي وترجع تجيب صفحة ١ من جديد
+  /// (بنفس منطق awaitRefresh() الموجود أصلاً).
+  @override
+  void resetForStoreChange() {
+    couponModel = null;
+    CacheService.clear(_cacheCouponKey);
+    awaitRefresh();
+  }
 
   // ============================================================
   // DATE
@@ -200,6 +251,10 @@ class NewCouponController extends GetxController {
 
             if (page == 1) {
               couponsList.assignAll(newItems);
+
+              // نخزن آخر رد ناجح لصفحة ١ محلياً عشان يستخدم كبيانات
+              // فورية بالمرة الجاية اللي المستخدم يفتح فيها الشاشة.
+              CacheService.save(_cacheCouponKey, data);
             } else {
               couponsList.addAll(newItems);
             }

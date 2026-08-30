@@ -4,8 +4,12 @@ import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/config/repository/product_repository.dart';
+import 'package:store_go_app/core/controller/home_controller/cahe.dart';
+import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
 
-class ProductController extends GetxController {
+class ProductController extends GetxController implements StoreAware {
+  static const String _cacheProductKey = 'home_product_list_data';
+
   ProductRepository productRepository = ProductRepository();
 
   ProductModel? productModel;
@@ -20,6 +24,49 @@ class ProductController extends GetxController {
   RxBool isLoading = false.obs;
   RxString imageBaseUrl = ''.obs;
   RxString errorMessage = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    // نحمّل آخر بيانات محفوظة محلياً (صفحة ١) فوراً عشان الشاشة
+    // تفتح مباشرة بدون ما تنتظر السيرفر. الطلب الحقيقي (اللي
+    // بتستدعيه الشاشة عادة بـ initState) بيصير بعدها بالخلفية.
+    _loadCachedProducts();
+
+    // نسجل هاد الكنترولر بالسيرفيس المركزي عشان ينعمله reset
+    // تلقائياً لما يتغير المتجر.
+    StoreChangeService.instance.register(() => this);
+  }
+
+  void _loadCachedProducts() {
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheProductKey);
+    if (cached == null) return;
+    try {
+      productModel = ProductModel.fromJson(cached);
+      productList.value = productModel?.data?.data ?? [];
+
+      isScroll.value =
+          productModel?.data?.currentPage != productModel?.data?.lastPage;
+    } catch (_) {
+      productModel = null;
+    }
+  }
+
+  /// بتنستدعى تلقائياً من StoreChangeService لما يتغير المتجر:
+  /// بتمسح القائمة + الكاش المحلي وترجع تجيب صفحة ١ من جديد.
+  @override
+  void resetForStoreChange() {
+    productModel = null;
+    productList.clear();
+
+    currantPage.value = 1;
+    isScroll.value = true;
+
+    CacheService.clear(_cacheProductKey);
+
+    getProductData(1);
+  }
 
   Future<void> getProductData(int page) async {
     isLoading.value = true;
@@ -37,6 +84,10 @@ class ProductController extends GetxController {
 
           if (page == 1) {
             productList.clear();
+
+            // نخزن آخر رد ناجح لصفحة ١ محلياً عشان يستخدم كبيانات
+            // فورية بالمرة الجاية اللي المستخدم يفتح فيها الشاشة.
+            CacheService.save(_cacheProductKey, data);
           }
 
           productList.addAll(productModel?.data?.data ?? []);

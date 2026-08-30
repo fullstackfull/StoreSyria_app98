@@ -2,13 +2,19 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-
 import 'package:store_go_app/core/model/notification_model.dart';
 import 'package:store_go_app/network_dio/network_dio.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import 'package:store_go_app/core/controller/home_controller/cahe.dart';
+import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
 
-class NotificationController extends GetxController with WidgetsBindingObserver {
+class NotificationController extends GetxController
+    with WidgetsBindingObserver
+    implements StoreAware {
+
+  static const String _cacheNotificationKey = 'home_notification_list_data';
+
   RxList<NotificationData> notificationList = <NotificationData>[].obs;
   RxBool isLoading = false.obs;
   RxInt unreadCount = 0.obs;
@@ -24,6 +30,37 @@ class NotificationController extends GetxController with WidgetsBindingObserver 
     WidgetsBinding.instance.addObserver(this);
     _loadLastSavedCount();
     _loadTappedIds();
+    _loadCachedNotifications();
+    StoreChangeService.instance.register(() => this);
+    getNotifications();
+  }
+
+  void _loadCachedNotifications() {
+    final cached =
+    CacheService.get<Map<String, dynamic>>(_cacheNotificationKey);
+    if (cached == null) return;
+    try {
+      NotificationModel model = NotificationModel.fromJson(cached);
+      notificationData = model.data;
+      notificationList.value = notificationData?.data ?? [];
+
+      _calculateUnreadCount(model.count ?? 0);
+
+      notificationList.refresh();
+    } catch (_) {
+      notificationData = null;
+    }
+  }
+
+  @override
+  void resetForStoreChange() {
+    notificationList.clear();
+    notificationList.refresh();
+    notificationData = null;
+    unreadCount.value = 0;
+
+    CacheService.clear(_cacheNotificationKey);
+
     getNotifications();
   }
 
@@ -41,7 +78,6 @@ class NotificationController extends GetxController with WidgetsBindingObserver 
     }
   }
 
-  /// 📥 جلب الإشعارات من السيرفر
   Future<void> getNotifications({bool showLoading = true}) async {
     if (showLoading && notificationList.isEmpty) {
       isLoading.value = true;
@@ -61,6 +97,10 @@ class NotificationController extends GetxController with WidgetsBindingObserver 
           
           notificationList.refresh();
           update();
+
+          // نخزن آخر رد ناجح محلياً عشان يستخدم كبيانات فورية
+          // بالمرة الجاية اللي المستخدم يفتح فيها التطبيق/الشاشة.
+          CacheService.save(_cacheNotificationKey, data);
         },
         onFailure: (reason, message, errors) {
           print('❌ فشل جلب الإشعارات: $message');

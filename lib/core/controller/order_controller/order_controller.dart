@@ -9,7 +9,14 @@ import 'package:store_go_app/core/model/order_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 
-class OrderController extends GetxController {
+import 'package:store_go_app/core/controller/home_controller/cahe.dart';
+import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
+
+class OrderController extends GetxController implements StoreAware {
+  // مفتاح الكاش الخاص بأول صفحة من الطلبات (الحالة الافتراضية،
+  // بدون فلترة تاريخ/حالة توصيل)
+  static const String _cacheOrderKey = 'home_order_list_data';
+
   // ==================== Dependencies ====================
   final TextEditingController searchController = TextEditingController();
   final SearchRepository searchRepository = SearchRepository();
@@ -47,6 +54,43 @@ class OrderController extends GetxController {
   void onInit() {
     super.onInit();
     resetPagination();
+
+    // نحمّل آخر بيانات محفوظة محلياً (صفحة ١، بدون فلاتر) فوراً
+    // عشان الشاشة تفتح مباشرة بدون ما تنتظر السيرفر. الطلب
+    // الحقيقي بيصير بعدها بالخلفية.
+    _loadCachedOrders();
+
+    // نسجل هاد الكنترولر بالسيرفيس المركزي عشان ينعمله reset
+    // تلقائياً لما يتغير المتجر.
+    StoreChangeService.instance.register(() => this);
+  }
+
+  void _loadCachedOrders() {
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheOrderKey);
+    if (cached == null) return;
+    try {
+      orderModel = OrderModel.fromJson(cached);
+      orderList.value = orderModel?.data?.data ?? [];
+
+      currantPage.value = orderModel?.data?.currentPage ?? 1;
+      isScroll.value = currantPage.value < (orderModel?.data?.lastPage ?? 1);
+      isDataAvailable.value = orderList.isNotEmpty;
+    } catch (_) {
+      orderModel = null;
+    }
+  }
+
+  /// بتنستدعى تلقائياً من StoreChangeService لما يتغير المتجر:
+  /// بتمسح القائمة + الكاش المحلي وترجع تجيب صفحة ١ من جديد.
+  @override
+  void resetForStoreChange() {
+    orderModel = null;
+    orderList.clear();
+
+    CacheService.clear(_cacheOrderKey);
+
+    resetPagination();
+    getOrderData(1);
   }
 
   @override
@@ -136,6 +180,16 @@ class OrderController extends GetxController {
           isScroll.value = page < lastPage;
 
           isDataAvailable.value = orderList.isNotEmpty;
+
+          // نخزن آخر رد ناجح لصفحة ١ بدون فلاتر محلياً عشان يستخدم
+          // كبيانات فورية بالمرة الجاية اللي المستخدم يفتح فيها
+          // الشاشة (منتجنب تخزين نتايج مفلترة بنفس المفتاح).
+          if (page == 1 &&
+              deliveredStatus == null &&
+              fromDate == null &&
+              toDate == null) {
+            CacheService.save(_cacheOrderKey, data);
+          }
         },
         onFailure: (reason, message, validationErrors) {
           errorMessage.value = message;

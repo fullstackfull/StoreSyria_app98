@@ -8,9 +8,10 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 
+import 'store_change_service.dart';
 import 'cahe.dart';
 
-class HomeController extends GetxController {
+class HomeController extends GetxController implements StoreAware {
   // مفاتيح الكاش الخاصة بهاد الكنترولر
   static const String _cacheDashboardKey = 'home_dashboard_data';
   static const String _cacheImageUrlKey = 'home_image_url_data';
@@ -36,6 +37,17 @@ class HomeController extends GetxController {
     // نفس المتغيرات لما يوصل رد جديد.
     _loadCachedDashboard();
     _loadCachedImageUrl();
+
+    // نسجل هاد الكنترولر بالسيرفيس المركزي عشان ينعمله reset
+    // تلقائياً لما يتغير المتجر، بدون الحاجة لاستدعاء يدوي.
+    StoreChangeService.instance.register(() => this);
+  }
+
+  /// بتنستدعى تلقائياً من StoreChangeService لما يتغير المتجر.
+  @override
+  void resetForStoreChange() {
+    _resetDashboardData();
+    getDashboardData();
   }
 
   void _loadCachedDashboard() {
@@ -70,6 +82,9 @@ class HomeController extends GetxController {
     }
   }
 
+  /// بتمسح كل بيانات الداشبورد (القوائم + الكاش المحلي) فوراً.
+  /// بتنستدعى لما يتغير المتجر عشان ما تضل بيانات المتجر القديم
+  /// ظاهرة أو محفوظة بالكاش لحد ما يوصل رد المتجر الجديد.
   void _resetDashboardData() {
     dashboardData = null;
 
@@ -122,12 +137,12 @@ class HomeController extends GetxController {
 
           _sendFcmTokenAfterStoreChange(storeId);
 
-          // منسح بيانات المتجر القديم فوراً (قوائم + كاش) قبل
-          // ما نطلب بيانات المتجر الجديد، عشان تضمن إنو كل شي
-          // عم يترجع يتحمّل من جديد وما في أي بيانات قديمة ظاهرة.
-          _resetDashboardData();
-
-          getDashboardData();
+          // بدل ما ننادي getDashboardData() هون بس، منطلق حدث
+          // مركزي وكل الكنترولرز المسجلة (Home, Category, Product,
+          // Coupon, Order, Notification...) بتتصفر وتعيد التحميل
+          // لحالها تلقائياً، كل وحدة حسب الـ resetForStoreChange
+          // تبعها.
+          StoreChangeService.instance.notifyStoreChanged();
         } else {
           commonToast(data['data']['message']);
         }

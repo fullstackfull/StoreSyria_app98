@@ -14,7 +14,14 @@ import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/core/model/categories_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 
-class CategoryController extends GetxController {
+import 'cahe.dart';
+import 'store_change_service.dart';
+
+class CategoryController extends GetxController implements StoreAware {
+  // مفتاح الكاش الخاص بأول صفحة من الكاتيجوريز (Pagination العادي
+  // بيضل يشتغل بالخلفية زي ما هو، منكيش أول صفحة بس عشان الفتح الفوري)
+  static const String _cacheCategoryKey = 'home_category_list_data';
+
   TextEditingController categoryName = TextEditingController();
   TextEditingController searchController = TextEditingController();
   RxString filePath = ''.obs;
@@ -34,6 +41,53 @@ class CategoryController extends GetxController {
   CategoriesModel? categoriesModel;
   CategoryData? categoryData;
   RxList<CategoryData> categoriesList = <CategoryData>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    // نحمّل آخر بيانات محفوظة محلياً (صفحة ١) فوراً عشان الشاشة
+    // تفتح مباشرة بدون ما تنتظر السيرفر. الطلب الحقيقي (اللي
+    // بتستدعيه الشاشة عادة بـ initState) بيصير بعدها بالخلفية
+    // وبيحدّث نفس القائمة.
+    _loadCachedCategories();
+
+    // نسجل هاد الكنترولر بالسيرفيس المركزي عشان ينعمله reset
+    // تلقائياً لما يتغير المتجر.
+    StoreChangeService.instance.register(() => this);
+  }
+
+  void _loadCachedCategories() {
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheCategoryKey);
+    if (cached == null) return;
+    try {
+      categoriesModel = CategoriesModel.fromJson(cached);
+      categoriesList.value = categoriesModel?.data?.data ?? [];
+      categoriesList.refresh();
+
+      isScroll.value =
+          categoriesModel?.data?.currentPage != categoriesModel?.data?.lastPage;
+    } catch (_) {
+      // لو تغير شكل البيانات وصار الكاش القديم غير متوافق، نتجاهله
+      categoriesModel = null;
+    }
+  }
+
+  /// بتنستدعى تلقائياً من StoreChangeService لما يتغير المتجر:
+  /// بتمسح القائمة + الكاش المحلي وترجع تجيب صفحة ١ من جديد.
+  @override
+  void resetForStoreChange() {
+    categoriesModel = null;
+    categoriesList.clear();
+    categoriesList.refresh();
+
+    currantPage.value = 1;
+    isScroll.value = true;
+
+    CacheService.clear(_cacheCategoryKey);
+
+    getCategoryData(1);
+  }
 
   pickFile() async {
     FilePickerResult? result = await FilePicker.pickFiles();
@@ -77,6 +131,10 @@ class CategoryController extends GetxController {
 
           if (page == 1) {
             categoriesList.value = newItems;
+
+            // نخزن آخر رد ناجح لصفحة ١ محلياً عشان يستخدم كبيانات
+            // فورية بالمرة الجاية اللي المستخدم يفتح فيها الشاشة.
+            CacheService.save(_cacheCategoryKey, data);
           } else {
             categoriesList.addAll(newItems);
           }
