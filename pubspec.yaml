@@ -75,6 +75,7 @@ dependencies:
   intl: ^0.20.2
   lottie: ^3.3.3
   flutter_html: ^3.0.0
+  logger: ^2.7.0
 
 dev_dependencies:
   flutter_test:
@@ -104,6 +105,30 @@ flutter:
    - assets/images/
    - assets/lottie/
    - assets/.env
+
+  fonts:
+       - family: Tajawal
+         fonts:
+           - asset: assets/fonts/Tajawal-ExtraLight.ttf
+             weight: 200
+
+           - asset: assets/fonts/Tajawal-Light.ttf
+             weight: 300
+
+           - asset: assets/fonts/Tajawal-Regular.ttf
+             weight: 400
+
+           - asset: assets/fonts/Tajawal-Medium.ttf
+             weight: 500
+
+           - asset: assets/fonts/Tajawal-Bold.ttf
+             weight: 700
+
+           - asset: assets/fonts/Tajawal-ExtraBold.ttf
+             weight: 800
+
+           - asset: assets/fonts/Tajawal-Black.ttf
+             weight: 900
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

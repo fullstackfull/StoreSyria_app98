@@ -412,4 +412,5 @@ const Map<String, String> en = {
   'enter_valid_name': 'Enter valid name',
   'mobile_number_required': 'Mobile number is required',
   'please_enter_valid_mobile': 'Please enter valid mobile number',
+  'reset':"Reset"
 };

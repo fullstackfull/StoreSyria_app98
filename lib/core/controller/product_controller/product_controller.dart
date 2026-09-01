@@ -13,6 +13,8 @@ class ProductController extends GetxController implements StoreAware {
   ProductRepository productRepository = ProductRepository();
 
   ProductModel? productModel;
+  RxString filterCategory = ''.obs;
+  RxString filterCategoryId = ''.obs;
 
   RxList<ProductData> productList = <ProductData>[].obs;
 
@@ -28,14 +30,8 @@ class ProductController extends GetxController implements StoreAware {
   @override
   void onInit() {
     super.onInit();
-
-    // نحمّل آخر بيانات محفوظة محلياً (صفحة ١) فوراً عشان الشاشة
-    // تفتح مباشرة بدون ما تنتظر السيرفر. الطلب الحقيقي (اللي
-    // بتستدعيه الشاشة عادة بـ initState) بيصير بعدها بالخلفية.
     _loadCachedProducts();
 
-    // نسجل هاد الكنترولر بالسيرفيس المركزي عشان ينعمله reset
-    // تلقائياً لما يتغير المتجر.
     StoreChangeService.instance.register(() => this);
   }
 
@@ -69,42 +65,49 @@ class ProductController extends GetxController implements StoreAware {
   }
 
   Future<void> getProductData(int page) async {
+    // 1) حماية من التكرار: لو في طلب شغال حالياً، تجاهل أي طلب جديد
+    if (isLoading.value) return;
+
     isLoading.value = true;
     Loader.showLoader();
 
     final response = await productRepository.getProductData(page);
 
     Loader.hideLoader();
+    isLoading.value = false; // 2) ننقلها هون فوق، تنفذ بكل الحالات (نجاح أو فشل)
 
     response.fold(
       onSuccess: (data) {
-        isLoading.value = false;
         if (data['status'] == 1) {
           productModel = ProductModel.fromJson(data);
 
           if (page == 1) {
             productList.clear();
-
-            // نخزن آخر رد ناجح لصفحة ١ محلياً عشان يستخدم كبيانات
-            // فورية بالمرة الجاية اللي المستخدم يفتح فيها الشاشة.
             CacheService.save(_cacheProductKey, data);
           }
 
           productList.addAll(productModel?.data?.data ?? []);
 
-          isScroll.value =
-              currantPage.value != productModel?.data?.lastPage;
+          isScroll.value = page != productModel?.data?.lastPage;
         } else {
           commonToast(
             data['data']?['message'] ??
                 data['message'] ??
                 'Error',
           );
+          if (currantPage.value == page) {
+            currantPage.value -= 1;
+          }
         }
       },
       onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
         commonToast(message);
+
+        // 4) فشل بالشبكة — رجع الصفحة للخلف حتى تقدر تعيد تحميلها
+        if (currantPage.value == page) {
+          currantPage.value -= 1;
+        }
       },
     );
   }

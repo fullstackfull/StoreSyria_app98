@@ -413,4 +413,5 @@ const Map<String, String> ar = {
   'enter_valid_name': 'أدخل اسم صالح',
   'mobile_number_required': 'رقم الهاتف مطلوب',
   'please_enter_valid_mobile': 'يرجى إدخال رقم هاتف صالح',
+  'reset'  : "إلغاء الفتر"
 };

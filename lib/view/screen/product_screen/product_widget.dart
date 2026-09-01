@@ -1,5 +1,4 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -9,6 +8,7 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../utils/images.dart';
+import '../../new_widgets/network_image_widget.dart';
 import '../../widget/icon_and_image.dart';
 
 Widget allProductsListItemWidget({
@@ -203,42 +203,18 @@ Widget allProductsListItemWidget({
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-
                   // ==================================================
                   // PRODUCT IMAGE
                   // ==================================================
-
                   Hero(
                     tag: 'product_image_$productId',
                     child: isValidImageUrl
-                        ? CachedNetworkImage(
+                        ? productNetworkImage(
                       imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) {
-                        return Container(
-                          color: imageBackground,
-                          child: Center(
-                            child: SizedBox(
-                              width: 18.w,
-                              height: 18.w,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.5,
-                                color: accentColor,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      errorWidget: (_, __, ___) {
-                        return Container(
-                          color: imageBackground,
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            color: subTextColor,
-                            size: 24.sp,
-                          ),
-                        );
-                      },
+                      fit: BoxFit.contain,
+                      backgroundColor: imageBackground,
+                      iconColor: subTextColor,
+                      loadingColor: accentColor,
                     )
                         : Container(
                       color: imageBackground,
@@ -249,7 +225,6 @@ Widget allProductsListItemWidget({
                       ),
                     ),
                   ),
-
                   // ==================================================
                   // HIDDEN BADGE
                   // ==================================================

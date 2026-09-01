@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors, avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -51,9 +49,15 @@ class _ProductsScreenState extends State<ProductsScreen>
         productController.isScroll.value = true;
         productController.imageBaseUrl.value =
             Prefs.getString(AppConstant.imageUrl);
-        addProductController.category.value = "";
-        addProductController.categoryId.value = "";
+        addProductController.category.value = '';
+        addProductController.categoryId.value = '';
+
+        productController.filterCategory.value = '';
+        productController.filterCategoryId.value = '';
+
+        productController.errorMessage.value = '';
         productController.productList.clear();
+
         getData();
       }
     });
@@ -62,10 +66,9 @@ class _ProductsScreenState extends State<ProductsScreen>
   }
 
   void _onScroll() {
-    // The filtered/search endpoint (searchProductData) has no pagination,
-    // so we only auto-load more pages for the plain unfiltered list.
     if (!productController.isScroll.value) return;
-    if (addProductController.categoryId.value.isNotEmpty) return;
+    if (productController.filterCategoryId.value.isNotEmpty) return;
+    if (productController.isLoading.value) return;
 
     if (scrollController.position.pixels >=
         scrollController.position.maxScrollExtent - 200) {
@@ -76,19 +79,8 @@ class _ProductsScreenState extends State<ProductsScreen>
 
   Future<void> getData() async {
     await productController.getProductData(productController.currantPage.value);
-
     if (addProductController.categoryTypeList.isEmpty) {
       await addProductController.getCreateProductData(isUpdate: false);
-
-      if (addProductController.categoryTypeList.isNotEmpty) {
-        if (addProductController.category.value.isEmpty) {
-          addProductController.category.value =
-              addProductController.categoryTypeList.first.name ?? "";
-          addProductController.categoryId.value =
-              addProductController.categoryTypeList.first.id?.toString() ??
-                  "";
-        }
-      }
     }
   }
 
@@ -101,62 +93,287 @@ class _ProductsScreenState extends State<ProductsScreen>
 
   Future<void> _showCategoryFilterBottomSheet() async {
     if (addProductController.categoryTypeList.isEmpty) return;
-    final isDark = Get.isDarkMode;
-    final cardBg = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-    final primaryText = isDark ? Colors.white : AppColor.cText;
 
-    final selected = await showModalBottomSheet<Category>(
+    final isDark = Get.isDarkMode;
+
+    final cardBg =
+    isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
+
+    final backgroundColor =
+    isDark ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8);
+
+    final primaryText =
+    isDark ? Colors.white : AppColor.cText;
+
+    final secondaryText =
+    isDark ? Colors.grey.shade400 : AppColor.cFont;
+
+    final borderColor =
+    isDark ? DarkThemeColor.cBorder : AppColor.cBorder;
+
+    String selectedCategoryId =
+        productController.filterCategoryId.value;
+
+    final selected = await showModalBottomSheet<Category?>(
       context: context,
-      backgroundColor: cardBg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            verticalSpace(12.h),
-            Container(
-              width: 40.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder,
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-            ),
-            verticalSpace(16.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'filter_by_category'.tr,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: primaryText,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SafeArea(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.78,
+                ),
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(28.r),
                   ),
                 ),
-              ),
-            ),
-            verticalSpace(10.h),
-            ...addProductController.categoryTypeList.map((cat) {
-              final isSelected =
-                  addProductController.category.value == cat.name;
-              return ListTile(
-                title: Text(
-                  cat.name ?? '',
-                  style: TextStyle(fontSize: 14.sp, color: primaryText),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    verticalSpace(10.h),
+              
+                    Container(
+                      width: 42.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: borderColor,
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                    ),
+              
+                    verticalSpace(18.h),
+              
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42.w,
+                            height: 42.w,
+                            decoration: BoxDecoration(
+                              color: AppColor.themeNavyBlueColor
+                                  .withOpacity(.10),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.filter_list_rounded,
+                              color: AppColor.themeNavyBlueColor,
+                              size: 22.sp,
+                            ),
+                          ),
+              
+                          horizontalSpace(12.w),
+              
+                          Expanded(
+                            child: Text(
+                              'filter_by_category'.tr,
+                              style: TextStyle(
+                                fontSize: 17.sp,
+                                fontWeight: FontWeight.w700,
+                                color: primaryText,
+                              ),
+                            ),
+                          ),
+              
+                          TextButton(
+                            onPressed: () {
+                              selectedCategoryId = '';
+              
+                              addProductController.category.value = '';
+                              addProductController.categoryId.value = '';
+              
+                              productController.filterCategory.value = '';
+                              productController.filterCategoryId.value = '';
+              
+                              productController.currantPage.value = 1;
+                              productController.isScroll.value = true;
+              
+                              setModalState(() {});
+              
+                              Navigator.pop(sheetContext);
+              
+                              _fetchInitialData();
+                            },
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 6.h,
+                              ),
+                              minimumSize: Size.zero,
+                              tapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              'reset'.tr,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColor.themeNavyBlueColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+              
+                    verticalSpace(16.h),
+              
+                    Divider(
+                      height: 1,
+                      color: borderColor.withOpacity(.6),
+                    ),
+              
+                    verticalSpace(8.h),
+              
+                    Flexible(
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.fromLTRB(
+                          16.w,
+                          8.h,
+                          16.w,
+                          20.h,
+                        ),
+                        itemCount:
+                        addProductController.categoryTypeList.length,
+                        separatorBuilder: (_, __) =>
+                            verticalSpace(8.h),
+                        itemBuilder: (context, index) {
+                          final cat =
+                          addProductController.categoryTypeList[index];
+              
+                          final categoryId =
+                              cat.id?.toString() ?? '';
+              
+                          final isSelected =
+                              selectedCategoryId == categoryId;
+              
+                          return InkWell(
+                            borderRadius:
+                            BorderRadius.circular(14.r),
+                            onTap: () {
+                              selectedCategoryId = categoryId;
+              
+                              setModalState(() {});
+              
+                              Navigator.pop(
+                                sheetContext,
+                                cat,
+                              );
+                            },
+                            child: AnimatedContainer(
+                              duration:
+                              const Duration(milliseconds: 180),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 14.w,
+                                vertical: 13.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColor.themeNavyBlueColor
+                                    .withOpacity(.08)
+                                    : cardBg,
+                                borderRadius:
+                                BorderRadius.circular(14.r),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColor.themeNavyBlueColor
+                                      : borderColor,
+                                  width: isSelected ? 1.3 : 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 38.w,
+                                    height: 38.w,
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? AppColor.themeNavyBlueColor
+                                          .withOpacity(.12)
+                                          : (isDark
+                                          ? Colors.white.withOpacity(.05)
+                                          : Colors.grey.withOpacity(.08)),
+                                      borderRadius:
+                                      BorderRadius.circular(10.r),
+                                    ),
+                                    child: Icon(
+                                      Icons.category_outlined,
+                                      size: 19.sp,
+                                      color: isSelected
+                                          ? AppColor.themeNavyBlueColor
+                                          : secondaryText,
+                                    ),
+                                  ),
+              
+                                  horizontalSpace(12.w),
+              
+                                  Expanded(
+                                    child: Text(
+                                      cat.name ?? '',
+                                      maxLines: 1,
+                                      overflow:
+                                      TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.w500,
+                                        color: primaryText,
+                                      ),
+                                    ),
+                                  ),
+              
+                                  AnimatedSwitcher(
+                                    duration:
+                                    const Duration(milliseconds: 180),
+                                    child: isSelected
+                                        ? Container(
+                                      key: const ValueKey('selected'),
+                                      width: 26.w,
+                                      height: 26.w,
+                                      decoration: BoxDecoration(
+                                        color: AppColor
+                                            .themeNavyBlueColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.check,
+                                        size: 17.sp,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                        : Container(
+                                      key: const ValueKey('unselected'),
+                                      width: 26.w,
+                                      height: 26.w,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: borderColor,
+                                          width: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                trailing: isSelected
-                    ? Icon(Icons.check_circle,
-                    color: AppColor.themeNavyBlueColor)
-                    : null,
-                onTap: () => Navigator.pop(context, cat),
-              );
-            }),
-            verticalSpace(10.h),
-          ],
+              ),
+            );
+          },
         );
       },
     );
@@ -164,22 +381,50 @@ class _ProductsScreenState extends State<ProductsScreen>
     if (selected != null) {
       final categoryId = selected.id?.toString() ?? '';
 
-      addProductController.category.value = selected.name ?? '';
-      addProductController.categoryId.value = categoryId;
+      addProductController.category.value =
+          selected.name ?? '';
 
-      // searchProductData has no pagination (see repository: it's a plain
-      // POST with store_id + category_id), so stop auto-loading more pages.
+      addProductController.categoryId.value =
+          categoryId;
+
+      productController.filterCategory.value =
+          selected.name ?? '';
+
+      productController.filterCategoryId.value =
+          categoryId;
+
       productController.isScroll.value = false;
       productController.currantPage.value = 1;
 
-      await productController.searchProductData(categoryId);
+      // Clear old products before filtering
+      productController.productList.clear();
+
+      // Clear old error
+      productController.errorMessage.value = '';
+
+      // Start loading
+      productController.isLoading.value = true;
+
+      try {
+        await productController.searchProductData(
+          categoryId,
+        );
+      } finally {
+        productController.isLoading.value = false;
+      }
     }
   }
 
   void _clearCategoryFilter() {
     addProductController.category.value = '';
     addProductController.categoryId.value = '';
+
+    productController.filterCategory.value = '';
+    productController.filterCategoryId.value = '';
+
+    productController.currantPage.value = 1;
     productController.isScroll.value = true;
+
     _fetchInitialData();
   }
 
@@ -229,14 +474,18 @@ class _ProductsScreenState extends State<ProductsScreen>
                   horizontalSpace(10.w),
                   Obx(() {
                     final hasFilter =
-                        addProductController.category.value.isNotEmpty;
+                        productController.filterCategoryId.value.isNotEmpty;
                     return GestureDetector(
                       onTap: _showCategoryFilterBottomSheet,
                       child: Container(
                         height: 44.h,
                         width: 44.h,
                         decoration: BoxDecoration(
-                          color: isDark
+                          color: hasFilter ?
+                          isDark
+                              ? DarkThemeColor.cCardBackground
+                              : AppColor.themeNavyBlueColor :
+                          isDark
                               ? DarkThemeColor.cCardBackground
                               : AppColor.cWhite,
                           borderRadius: BorderRadius.circular(30.r),
@@ -249,7 +498,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                         child: Icon(
                           Icons.filter_list,
                           color: hasFilter
-                              ? AppColor.themeNavyBlueColor
+                              ? AppColor.cWhite
                               : (isDark
                               ? Colors.grey.shade400
                               : AppColor.cFont),
@@ -327,17 +576,17 @@ class _ProductsScreenState extends State<ProductsScreen>
                             padding: EdgeInsets.only(bottom: 15.h),
                             child: sectionHeaderWithFilterWidget(
                               isFilter: false,
-                              num: addProductController.categoryId.value.isNotEmpty
+                              num: productController.filterCategoryId.value.isNotEmpty
                                   ? productController.productList.length
                                   : (productController.productModel?.data?.total ?? 0),
                               context: context,
                               title: "all_products".tr,
                               filterLabel:
-                              addProductController.category.value.isNotEmpty
+                              productController.filterCategoryId.value.isNotEmpty
                                   ? addProductController.category.value
                                   : "filter_by_category".tr,
                               onFilterTap:
-                              addProductController.category.value.isNotEmpty
+                              productController.filterCategoryId.value.isNotEmpty
                                   ? _clearCategoryFilter
                                   : _showCategoryFilterBottomSheet,
                             ),

@@ -1,57 +1,210 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings, avoid_print
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:store_go_app/network_dio/result.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/screen/auth/login_widget.dart';
-import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 
 class NetworkHttps {
   NetworkHttps._privateConstructor();
 
-  static final NetworkHttps getInstance = NetworkHttps._privateConstructor();
+  static final NetworkHttps getInstance =
+  NetworkHttps._privateConstructor();
+
+  // ===========================================================================
+  // LOGGER
+  // ===========================================================================
+
+  static final Logger logger = Logger(
+    printer: PrettyPrinter(
+      methodCount: 0,
+      errorMethodCount: 5,
+      lineLength: 120,
+      colors: true,
+      printEmojis: true,
+      dateTimeFormat: DateTimeFormat.none,
+    ),
+  );
+
+  // ===========================================================================
+  // HEADERS
+  // ===========================================================================
 
   static final Map<String, String> baseHeaders = {
-    HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
-    HttpHeaders.cacheControlHeader: "no-cache",
-    'Accept': 'application/json',
+    HttpHeaders.contentTypeHeader:
+    'application/json; charset=utf-8',
+    HttpHeaders.cacheControlHeader:
+    'no-cache',
+    'Accept':
+    'application/json',
   };
 
-  /// دالة مساعدة لبناء الهيدرز مع التوكن
+  // ===========================================================================
+  // AUTH HEADERS
+  // ===========================================================================
+
   static Map<String, String> _getAuthHeaders() {
     final token = Prefs.getToken();
+
     final headers = Map<String, String>.from(baseHeaders);
+
     if (token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
     }
+
     return headers;
   }
 
-  /// دالة معالجة الأخطاء الموحدة
-  static Failure<T> _handleErrorResponse<T>(http.Response response) {
+  // ===========================================================================
+  // PRETTY JSON
+  // ===========================================================================
+
+  static String _prettyJson(dynamic data) {
+    try {
+      if (data is String) {
+        try {
+          data = jsonDecode(data);
+        } catch (_) {
+          return data;
+        }
+      }
+
+      return const JsonEncoder.withIndent('  ').convert(data);
+    } catch (_) {
+      return data.toString();
+    }
+  }
+
+  // ===========================================================================
+  // REQUEST LOGGER
+  // ===========================================================================
+
+  static void _logRequest({
+    required String method,
+    required String url,
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) {
+    final buffer = StringBuffer();
+
+    buffer.writeln('══════════════════════════════════════════════════════');
+    buffer.writeln('🚀 $method REQUEST');
+    buffer.writeln('══════════════════════════════════════════════════════');
+
+    buffer.writeln('URL:');
+    buffer.writeln(url);
+
+    if (body != null && body.isNotEmpty) {
+      buffer.writeln('\nBODY:');
+      buffer.writeln(_prettyJson(body));
+    }
+
+    buffer.writeln(
+      '══════════════════════════════════════════════════════',
+    );
+
+    logger.d(buffer.toString());
+  }
+
+  // ===========================================================================
+  // RESPONSE LOGGER
+  // ===========================================================================
+
+  static void _logResponse({
+    required String method,
+    required String url,
+    required http.Response response,
+  }) {
+    final buffer = StringBuffer();
+
+    buffer.writeln('══════════════════════════════════════════════════════');
+    buffer.writeln('📥 $method RESPONSE');
+    buffer.writeln('══════════════════════════════════════════════════════');
+
+    buffer.writeln('URL:');
+    buffer.writeln(url);
+
+    buffer.writeln('\nSTATUS CODE:');
+    buffer.writeln(response.statusCode);
+
+    buffer.writeln('\nRESPONSE:');
+
+    if (response.body.isEmpty) {
+      buffer.writeln('(empty response)');
+    } else {
+      buffer.writeln(_prettyJson(response.body));
+    }
+
+    buffer.writeln(
+      '══════════════════════════════════════════════════════',
+    );
+
+    logger.d(buffer.toString());
+  }
+
+  // ===========================================================================
+  // ERROR LOGGER
+  // ===========================================================================
+
+  static void _logError({
+    required String method,
+    required String url,
+    dynamic error,
+    StackTrace? stackTrace,
+  }) {
+    logger.e(
+      '''
+══════════════════════════════════════════════════════
+❌ $method ERROR
+══════════════════════════════════════════════════════
+URL:
+$url
+
+ERROR:
+$error
+══════════════════════════════════════════════════════
+''',
+      error: error,
+      stackTrace: stackTrace,
+    );
+  }
+
+  // ===========================================================================
+  // ERROR RESPONSE
+  // ===========================================================================
+
+  static Failure<T> _handleErrorResponse<T>(
+      http.Response response,
+      ) {
     String message = "An error occurred";
+
     Map<String, dynamic>? validationErrors;
+
     FailureReason reason = FailureReason.unknown;
 
     try {
       final body = json.decode(response.body);
+
       if (body is Map) {
-        message = body['message'] ??
-            body['data']?['message'] ??
-            body['error'] ??
-            "Unknown error";
+        message =
+            body['message'] ??
+                body['data']?['message'] ??
+                body['error'] ??
+                "Unknown error";
 
         if (body['errors'] != null) {
-          validationErrors = body['errors'];
+          validationErrors =
+          Map<String, dynamic>.from(body['errors']);
+
           reason = FailureReason.validation;
         }
       }
-    } catch (e) {
-      message = "Server error: ${response.statusCode}";
+    } catch (_) {
+      message =
+      "Server error: ${response.statusCode}";
     }
 
     switch (response.statusCode) {
@@ -59,99 +212,192 @@ class NetworkHttps {
         reason = FailureReason.unauthorized;
         _handleUnauthorized();
         break;
+
       case 400:
         reason = FailureReason.validation;
         break;
+
       case 404:
         message = "Resource not found";
         break;
+
       case 500:
         message = "Server internal error";
         break;
+
       default:
         reason = FailureReason.unknown;
     }
 
-    return Failure<T>(reason, message, validationErrors: validationErrors);
+    return Failure<T>(
+      reason,
+      message,
+      validationErrors: validationErrors,
+    );
   }
+
+  // ===========================================================================
+  // UNAUTHORIZED
+  // ===========================================================================
 
   static void _handleUnauthorized() async {
     await Prefs.clear();
-    // التحقق مما إذا لم نكن بالفعل في شاشة تسجيل الدخول لتجنب التكرار
+
     if (Get.currentRoute != '/login') {
       Get.offAll(() => NormalLoginWidget());
     }
   }
 
-  // --------------------------------------------------------------------------
-  // GET Request
-  // --------------------------------------------------------------------------
-  static Future<Result<Map<String, dynamic>>> getRequest(String endPoint) async {
-    var getUrl = API.baseUrl + endPoint;
-    print("GET API URL===> $getUrl");
+  // ===========================================================================
+  // GET
+  // ===========================================================================
+
+  static Future<Result<Map<String, dynamic>>> getRequest(
+      String endPoint,
+      ) async {
+    final getUrl = API.baseUrl + endPoint;
 
     try {
       final headers = _getAuthHeaders();
-      var response = await http.get(Uri.parse(getUrl), headers: headers);
 
-      print("statusCode===> ${response.statusCode}");
+      _logRequest(
+        method: 'GET',
+        url: getUrl,
+        headers: headers,
+      );
+
+      final response = await http.get(
+        Uri.parse(getUrl),
+        headers: headers,
+      );
+
+      _logResponse(
+        method: 'GET',
+        url: getUrl,
+        response: response,
+      );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print("========== API RESPONSE ==========");
-        print(data);
-        print("==================================");
-        return Success(data);
-      } else {
-        return _handleErrorResponse(response);
+        final data = jsonDecode(response.body);
+
+        return Success(
+          Map<String, dynamic>.from(data),
+        );
       }
-    } on SocketException {
-      return Failure(FailureReason.network, "No Internet connection.");
-    } on HttpException {
-      return Failure(FailureReason.network, "Connection failed.");
-    } catch (e) {
-      print("err->${e.toString()}");
-      return Failure(FailureReason.unknown, "Unexpected error: ${e.toString()}");
+
+      return _handleErrorResponse(response);
+    } on SocketException catch (e, stackTrace) {
+      _logError(
+        method: 'GET',
+        url: getUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.network,
+        "No Internet connection.",
+      );
+    } on HttpException catch (e, stackTrace) {
+      _logError(
+        method: 'GET',
+        url: getUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.network,
+        "Connection failed.",
+      );
+    } catch (e, stackTrace) {
+      _logError(
+        method: 'GET',
+        url: getUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.unknown,
+        "Unexpected error: ${e.toString()}",
+      );
     }
   }
 
-  // --------------------------------------------------------------------------
-  // POST Request
-  // --------------------------------------------------------------------------
-  static Future<Result<Map<String, dynamic>>> postRequest(String endPoint, Map data) async {
-    String postUrl = API.baseUrl + endPoint;
-    print("POST API URL===> $postUrl");
-    print("data===> ${jsonEncode(data)}");
+  // ===========================================================================
+  // POST
+  // ===========================================================================
+
+  static Future<Result<Map<String, dynamic>>> postRequest(
+      String endPoint,
+      Map data,
+      ) async {
+    final postUrl = API.baseUrl + endPoint;
 
     try {
       final headers = _getAuthHeaders();
-      var response = await http.post(
+
+      _logRequest(
+        method: 'POST',
+        url: postUrl,
+        headers: headers,
+        body: Map<String, dynamic>.from(data),
+      );
+
+      final response = await http.post(
         Uri.parse(postUrl),
         body: jsonEncode(data),
         headers: headers,
       );
 
-      print("statusCode===> ${response.statusCode}");
+      _logResponse(
+        method: 'POST',
+        url: postUrl,
+        response: response,
+      );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = json.decode(response.body);
-        print("========== API RESPONSE ==========");
-        print(data);
-        print("==================================");
-        return Success(data);
-      } else {
-        return _handleErrorResponse(response);
+      if (response.statusCode == 200 ||
+          response.statusCode == 201) {
+        final decoded = jsonDecode(response.body);
+
+        return Success(
+          Map<String, dynamic>.from(decoded),
+        );
       }
-    } on SocketException {
-      return Failure(FailureReason.network, "No Internet connection.");
-    } catch (e) {
-      print("err->${e.toString()}");
-      return Failure(FailureReason.unknown, "Unexpected error: ${e.toString()}");
+
+      return _handleErrorResponse(response);
+    } on SocketException catch (e, stackTrace) {
+      _logError(
+        method: 'POST',
+        url: postUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.network,
+        "No Internet connection.",
+      );
+    } catch (e, stackTrace) {
+      _logError(
+        method: 'POST',
+        url: postUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.unknown,
+        "Unexpected error: ${e.toString()}",
+      );
     }
   }
-  // -------------------------------------------------------------------------
-  // Multiple Request
-  // -------------------------------------------------------------------------
+
+  // ===========================================================================
+  // MULTIPART
+  // ===========================================================================
+
   static Future<Result<Map<String, dynamic>>> multipartRequest({
     required String endPoint,
     required Map<String, String> fields,
@@ -159,76 +405,187 @@ class NetworkHttps {
     List<String>? multiFiles,
     String multiFileKey = 'product_image[]',
   }) async {
+    final url = API.baseUrl + endPoint;
+
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse(API.baseUrl + endPoint),
+        Uri.parse(url),
       );
 
-      request.headers.addAll(_getAuthHeaders());
+      final headers = _getAuthHeaders();
+
+      request.headers.addAll(headers);
       request.fields.addAll(fields);
+
+      // -----------------------------------------------------------------------
+      // LOG MULTIPART REQUEST
+      // -----------------------------------------------------------------------
+
+      _logRequest(
+        method: 'MULTIPART POST',
+        url: url,
+        headers: headers,
+        body: Map<String, dynamic>.from(fields),
+      );
+
+      // -----------------------------------------------------------------------
+      // SINGLE FILES
+      // -----------------------------------------------------------------------
 
       if (files != null) {
         for (final file in files.entries) {
-          if (file.value.isNotEmpty && File(file.value).existsSync()) {
+          if (file.value.isNotEmpty &&
+              File(file.value).existsSync()) {
             request.files.add(
-              await http.MultipartFile.fromPath(file.key, file.value),
+              await http.MultipartFile.fromPath(
+                file.key,
+                file.value,
+              ),
             );
           }
         }
       }
+
+      // -----------------------------------------------------------------------
+      // MULTIPLE FILES
+      // -----------------------------------------------------------------------
 
       if (multiFiles != null) {
         for (final path in multiFiles) {
-          if (path.isNotEmpty && File(path).existsSync()) {
+          if (path.isNotEmpty &&
+              File(path).existsSync()) {
             request.files.add(
-              await http.MultipartFile.fromPath(multiFileKey, path),
+              await http.MultipartFile.fromPath(
+                multiFileKey,
+                path,
+              ),
             );
           }
         }
       }
 
+      // -----------------------------------------------------------------------
+      // SEND
+      // -----------------------------------------------------------------------
+
       final streamedResponse = await request.send();
 
-      final response = await http.Response.fromStream(streamedResponse);
+      final response =
+      await http.Response.fromStream(streamedResponse);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return Success(jsonDecode(response.body));
-      } else {
-        return _handleErrorResponse(response);
+      // -----------------------------------------------------------------------
+      // LOG RESPONSE
+      // -----------------------------------------------------------------------
+
+      _logResponse(
+        method: 'MULTIPART POST',
+        url: url,
+        response: response,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 201) {
+        final decoded = jsonDecode(response.body);
+
+        return Success(
+          Map<String, dynamic>.from(decoded),
+        );
       }
 
-    } on SocketException {
-      return Failure(FailureReason.network, "No Internet connection.");
-    } catch (e) {
-      return Failure(FailureReason.unknown, e.toString());
+      return _handleErrorResponse(response);
+    } on SocketException catch (e, stackTrace) {
+      _logError(
+        method: 'MULTIPART POST',
+        url: url,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.network,
+        "No Internet connection.",
+      );
+    } catch (e, stackTrace) {
+      _logError(
+        method: 'MULTIPART POST',
+        url: url,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.unknown,
+        e.toString(),
+      );
     }
   }
 
-  // --------------------------------------------------------------------------
-  // DELETE Request
-  // --------------------------------------------------------------------------
-  static Future<Result<Map<String, dynamic>>> deleteRequest(String endPoint) async {
-    String deleteUrl = API.baseUrl + endPoint;
-    print("DELETE API URL===> $deleteUrl");
+  // ===========================================================================
+  // DELETE
+  // ===========================================================================
+
+  static Future<Result<Map<String, dynamic>>> deleteRequest(
+      String endPoint,
+      ) async {
+    final deleteUrl = API.baseUrl + endPoint;
 
     try {
       final headers = _getAuthHeaders();
-      var response = await http.delete(Uri.parse(deleteUrl), headers: headers);
 
-      print("statusCode===> ${response.statusCode}");
+      _logRequest(
+        method: 'DELETE',
+        url: deleteUrl,
+        headers: headers,
+      );
 
-      if (response.statusCode == 200 || response.statusCode == 204) { // 204 No Content is common for delete
-        final body = response.body.isEmpty ? {} : json.decode(response.body);
+      final response = await http.delete(
+        Uri.parse(deleteUrl),
+        headers: headers,
+      );
+
+      _logResponse(
+        method: 'DELETE',
+        url: deleteUrl,
+        response: response,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 204) {
+        final body = response.body.isEmpty
+            ? <String, dynamic>{}
+            : Map<String, dynamic>.from(
+          jsonDecode(response.body),
+        );
+
         return Success(body);
-      } else {
-        return _handleErrorResponse(response);
       }
-    } on SocketException {
-      return Failure(FailureReason.network, "No Internet connection.");
-    } catch (e) {
-      print("err->${e.toString()}");
-      return Failure(FailureReason.unknown, "Unexpected error: ${e.toString()}");
+
+      return _handleErrorResponse(response);
+    } on SocketException catch (e, stackTrace) {
+      _logError(
+        method: 'DELETE',
+        url: deleteUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.network,
+        "No Internet connection.",
+      );
+    } catch (e, stackTrace) {
+      _logError(
+        method: 'DELETE',
+        url: deleteUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.unknown,
+        "Unexpected error: ${e.toString()}",
+      );
     }
   }
 }

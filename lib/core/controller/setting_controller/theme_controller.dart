@@ -22,6 +22,9 @@ class ThemeController extends GetxController {
     if (isDarkTheme) {
       AppDarkTheme.darkColor();
       return ThemeData.dark().copyWith(
+        textTheme: ThemeData.light().textTheme.apply(
+          fontFamily: 'Tajawal',
+        ),
         scrollbarTheme: scrollbarTheme,
         primaryColor: AppColor.themeNavyBlueColor,
         scaffoldBackgroundColor: DarkThemeColor.cBackGround,
@@ -41,6 +44,9 @@ class ThemeController extends GetxController {
     } else {
       AppLightTheme.lightThemeColor();
       return ThemeData.light().copyWith(
+        textTheme: ThemeData.light().textTheme.apply(
+          fontFamily: 'Tajawal',
+        ),
         scrollbarTheme: scrollbarTheme,
         primaryColor: AppColor.themeNavyBlueColor,
         scaffoldBackgroundColor: AppColor.cBackGround,

@@ -6,6 +6,8 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
+import '../../../core/model/categories_model.dart';
+import '../../../core/model/create_product_model.dart';
 import 'product_widget.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -238,26 +240,22 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           },
         ),
         verticalSpace(14.h),
-        commonDropdownButtonWidget(
+        commonDropdownButtonWidget<Category>(
           labelText: 'category'.tr,
           hint: 'select_category'.tr,
-          value: addProductController.category.value.isEmpty
-              ? null
-              : addProductController.categoryTypeList.any((e) => e.name == addProductController.category.value)
-              ? addProductController.category.value
-              : null,
-          list: addProductController.categoryTypeList.map((e) => e.name).toList(),
-          onChanged: (value) {
-            if (value != null) {
-              addProductController.category.value = value;
-              final selectedCat = addProductController.categoryTypeList.firstWhereOrNull((c) => c.name == value);
-              if (selectedCat != null) {
-                addProductController.categoryId.value = selectedCat.id.toString();
-              }
+          value: addProductController.categoryTypeList.firstWhereOrNull(
+                (c) => c.id.toString() == addProductController.categoryId.value,
+          ),
+          list: addProductController.categoryTypeList,
+          itemLabel: (cat) => cat.name ?? "",
+          onChanged: (cat) {
+            if (cat != null) {
+              addProductController.categoryId.value = cat.id.toString();
+              addProductController.category.value = cat.name ?? "";
             }
           },
-          validator: (value) {
-            if (value == null || value.isEmpty || addProductController.categoryId.value.isEmpty) {
+          validator: (cat) {
+            if (cat == null) {
               return "please_select_category".tr;
             }
             return null;
