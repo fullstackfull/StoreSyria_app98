@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../utils/colors.dart';
 import '../../utils/text_style.dart';
 import '../widget/common_space_divider_widget.dart';
@@ -28,19 +27,15 @@ Widget settingCard({
                   : AppColor.themeGreenColor.withOpacity(0.2),
               offset: const Offset(0, 2),
               blurRadius: 8,
-              spreadRadius: 0,
             ),
           ],
-
           border: Border.all(
             color: isDark
                 ? AppColor.cFont.withOpacity(0.05)
                 : Colors.transparent,
           ),
         ),
-
         padding: const EdgeInsets.all(14),
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -70,7 +65,6 @@ Widget settingCard({
                     ),
                   ),
                 ),
-
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 14,
@@ -83,24 +77,26 @@ Widget settingCard({
 
             const Spacer(),
 
+            // Card Title
             Text(
               title,
-              style: pMedium14.copyWith(
-                color: AppColor.cFont,
+              style: pSemiBold16.copyWith(
+                color: AppColor.themeNavyBlueColor,
               ),
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
 
             if (subtitle != null && subtitle!.isNotEmpty) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 5),
+
+              // Card Subtitle
               Text(
                 subtitle!,
-                style: pRegular10.copyWith(
+                style: pMedium12.copyWith(
                   color: isDark
                       ? AppColor.cFont.withOpacity(0.55)
-                      : Colors.grey,
-                  fontSize: 9.sp,
+                      : AppColor.cFont.withOpacity(0.55),
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -155,8 +151,8 @@ Widget settingWidget({
             Expanded(
               child: Text(
                 title,
-                style: pRegular14.copyWith(
-                  color: AppColor.cFont,
+                style: pSemiBold16.copyWith(
+                  color: AppColor.themeNavyBlueColor,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
