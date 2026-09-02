@@ -36,8 +36,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: AppColor.cBackGround,
+      backgroundColor: isDark ? AppColor.cBackGround : AppColor.cLight,
       appBar: simpleAppBar(title: "analytics".tr),
       body: Padding(
         padding: const EdgeInsets.all(24),

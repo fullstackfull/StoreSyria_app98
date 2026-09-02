@@ -63,7 +63,6 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
       ) async {
     final bytes = await build(pageFormat);
 
-    // تحديد مسار التحميل
     final directory = Directory('/storage/emulated/0/Download');
     if (!directory.existsSync()) {
       directory.createSync();
@@ -73,7 +72,7 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
     await file.writeAsBytes(bytes);
 
     if (mounted) {
-      commonToast("document_saved".tr); // ترجمة رسالة الحفظ
+      commonToast("document_saved".tr);
       await OpenFile.open(file.path);
     }
   }
@@ -81,7 +80,7 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround;
+    final bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
 
     final actions = <PdfPreviewAction>[
       if (!kIsWeb)
@@ -93,13 +92,13 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: simpleAppBar(title: 'invoice'.tr), // ترجمة عنوان الشاشة
+      appBar: simpleAppBar(title: 'invoice'.tr),
       body: Padding(
         padding: EdgeInsets.only(top: 10.h),
         child: PdfPreview(
           maxPageWidth: 700,
           pdfPreviewPageDecoration: BoxDecoration(
-            color: Colors.grey.shade200, // خلفية محايدة لعرض الـ PDF
+            color: Colors.white,
             boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12)],
           ),
           scrollViewDecoration: BoxDecoration(color: bgColor),
@@ -126,10 +125,10 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
   }
 
   _showSharedToast(BuildContext context) {
-    commonToast("document_shared_success".tr); // ترجمة رسالة المشاركة
+    commonToast("document_shared_success".tr);
   }
 
   _showPrintedToast(BuildContext context) {
-    commonToast('document_printed_success'.tr); // ترجمة رسالة الطباعة
+    commonToast('document_printed_success'.tr);
   }
 }

@@ -175,7 +175,7 @@ class ProductData {
     productCode = json['product_code'] as String?;
     tag = json['tag'] as String?;
     tagApi = json['tag_api'] as String?;
-    categoryName = json['category_name'] as String?;
+    categoryName = json['name'] as String?;
     themeId = json['theme_id'] as String?;
     stockOrderStatus = json['stock_order_status'] as String?;
     productType = json['product_type'] as String?;

@@ -89,7 +89,7 @@ class _ProductDetailScreenState
 
     final backgroundColor = isDark
         ? DarkThemeColor.cBackGround
-        : const Color(0xFFF5F6F8);
+        : AppColor.cLight;
 
     final cardColor = isDark
         ? DarkThemeColor.cCardBackground

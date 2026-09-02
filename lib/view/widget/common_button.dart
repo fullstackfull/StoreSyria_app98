@@ -118,7 +118,7 @@ class CommonIconButton extends StatelessWidget {
             horizontalSpace(10),
             Text(
               title!,
-              style: pMedium12.copyWith(color: textColor ?? AppColor.cWhite),
+              style: pBold12.copyWith(color: textColor ?? AppColor.cWhite),
               textAlign: TextAlign.center,
             ),
           ],

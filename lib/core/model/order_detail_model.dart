@@ -70,8 +70,8 @@ class OrderDetailData {
       this.deliveryInformations,
       this.paymnetType,
       this.paymnet,
-        this.paymentStatus,
-        this.notes,
+      this.paymentStatus,
+      this.notes,
       this.delivery,
       this.deliveredCharge,
       this.couponInfo,
@@ -198,7 +198,7 @@ class Product {
   String? qty;
   String? variantId;
   String? variantName;
-  int? productReturn;
+  bool? productReturn;
 
   Product({this.productId, this.image, this.name, this.orignalPrice, this.totalOrignalPrice, this.perProductDiscountPrice, this.discountPrice, this.finalPrice, this.qty, this.variantId, this.variantName, this.productReturn});
 
@@ -215,8 +215,13 @@ class Product {
     qty = myPaymnetType == "POS" ? json["quantity"].toString() : json['qty'].toString();
     variantId = json['variant_id'].toString();
     variantName = json['variant_name'];
-    productReturn = json['return'];
-  }
+    final returnValue = json['return'];
+
+    if (returnValue == true || returnValue == 1 || returnValue == '1') {
+      productReturn = true;
+    } else {
+      productReturn = false;
+    }  }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();

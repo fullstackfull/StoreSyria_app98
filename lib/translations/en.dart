@@ -412,5 +412,19 @@ const Map<String, String> en = {
   'enter_valid_name': 'Enter valid name',
   'mobile_number_required': 'Mobile number is required',
   'please_enter_valid_mobile': 'Please enter valid mobile number',
-  'reset':"Reset"
+  'reset':"Reset",
+  'failed_to_load_orders': 'Failed to load orders.',
+  'unexpected_error_loading_orders':
+  'An unexpected error occurred while loading orders.',
+  'failed_to_search_orders': 'Failed to search orders.',
+  'failed_to_load_order_details': 'Failed to load order details.',
+  'failed_to_process_order_details': 'Failed to process order details.',
+  'order_status_updated_successfully': 'Order status updated successfully.',
+  'failed_to_update_order_status': 'Failed to update order status.',
+  'order_note_added_successfully': 'Order note added successfully.',
+  'failed_to_add_order_note': 'Failed to add order note.',
+  'order_note_deleted_successfully': 'Order note deleted successfully.',
+  'failed_to_delete_order_note': 'Failed to delete order note.',
+  'order_deleted_successfully': 'Order deleted successfully.',
+  'failed_to_delete_order': 'Failed to delete order.',
 };

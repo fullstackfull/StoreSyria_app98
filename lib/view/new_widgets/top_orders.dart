@@ -1,10 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/images.dart';
 import '../../utils/colors.dart';
+import 'order_status_badge.dart';
 
 Widget topOrderCardWidget({
   required BuildContext context,
@@ -146,13 +146,17 @@ Widget allOrdersListItemWidget({
   required String date,
   required String maskedName,
   required String price,
-  String? primaryBadgeLabel,
+  int? primaryBadgeLabel,
   String? secondaryBadgeLabel,
+  String? changeText,
+  String? changeText2,
   VoidCallback? onTap,
   VoidCallback? viewFun,
   VoidCallback? deleteFun,
   VoidCallback? changeFun,
+  VoidCallback? changeFun2,
   bool showChangeAction = false,
+  bool showChangeAction2 = false,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
@@ -161,6 +165,7 @@ Widget allOrdersListItemWidget({
 
   final bool canView = viewFun != null;
   final bool canChange = showChangeAction && changeFun != null;
+  final bool canChange2 = showChangeAction2 && changeFun2 != null;
   final bool canDelete = deleteFun != null;
 
   PopupMenuEntry<String> divider() => PopupMenuItem<String>(
@@ -252,6 +257,9 @@ Widget allOrdersListItemWidget({
                     case 'change':
                       changeFun?.call();
                       break;
+                    case 'change2':
+                      changeFun2?.call();
+                      break;
                     case 'delete':
                       deleteFun?.call();
                       break;
@@ -302,7 +310,35 @@ Widget allOrdersListItemWidget({
                             ),
                             SizedBox(width: 10.w),
                             Text(
-                              'change'.tr,
+                              changeText ?? 'change'.tr,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: AppColor.themeNavyBlueColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (canChange2) {
+                    if (items.isNotEmpty) items.add(divider());
+                    items.add(
+                      PopupMenuItem(
+                        value: 'change2',
+                        height: 42.h,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.edit_outlined,
+                              size: 18.sp,
+                              color: AppColor.themeNavyBlueColor,
+                            ),
+                            SizedBox(width: 10.w),
+                            Text(
+                              changeText2 ??'change2'.tr,
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 color: AppColor.themeNavyBlueColor,
@@ -402,10 +438,16 @@ Widget allOrdersListItemWidget({
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (secondaryBadgeLabel != null)
-                orderStatusBadgeWidget(
-                  label: secondaryBadgeLabel,
-                  type: OrderBadgeType.success,
-                  icon: Icons.verified_outlined,
+                CommonStatusBadge(
+                  isCard: true,
+                  type: StatusBadgeType.payment,
+                  paymentStatus: secondaryBadgeLabel,
+                ),
+              if (primaryBadgeLabel != null)
+                CommonStatusBadge(
+                  isCard: true,
+                  type: StatusBadgeType.order,
+                  orderStatus: primaryBadgeLabel,
                 ),
               Flexible(
                 child: Text(

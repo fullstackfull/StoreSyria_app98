@@ -27,7 +27,7 @@ class OnboardingScreen extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: isDark ? AppColor.themeNavyBlueColor : AppColor.cWhite,
+        backgroundColor: isDark ? AppColor.themeNavyBlueColor : AppColor.cLight,
         // ============================================================
         // FIX: استبدلنا GetBuilder بـ Obx هون تحديداً، لأن currentPage
         // هو RxInt (.obs) وGetBuilder ما بيسمعله إلا لو نادينا

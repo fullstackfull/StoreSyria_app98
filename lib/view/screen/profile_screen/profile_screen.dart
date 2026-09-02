@@ -48,12 +48,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
       child: Scaffold(
-        backgroundColor: AppColor.cBackGround,
+        backgroundColor: isDark ? AppColor.cBackGround : AppColor.cLight,
         appBar: simpleAppBar(title: "My Account", date: "Monday, 30 Jan"),
         body: SafeArea(
           child: Padding(

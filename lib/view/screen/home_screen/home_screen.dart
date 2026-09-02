@@ -452,8 +452,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                   date: order.orderDate ?? '',
                                   maskedName: order.userName ?? '',
                                   price: "${order.finalPrice ?? '0.00'}",
-                                  //primaryBadgeLabel: order.paymentStatus,
-                                  secondaryBadgeLabel: "paid".tr,
+                                  //paymentStatusLabel:order.paymentStatus,
+                                  //orderStatusLabel: order.deliveredStatusString,
                                   onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id?.toString() ?? "")),
                                   viewFun: () => Get.to(() => OrderDetailScreen(orderId: order.id?.toString() ?? "")),
                                   deleteFun: () {

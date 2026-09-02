@@ -7,8 +7,10 @@ import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/order_screen/order_detail_screen.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
+import '../../../core/model/order_model.dart';
 import '../../new_widgets/filter_tabs.dart';
 import '../../new_widgets/header_widget.dart';
+import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/search_widget.dart';
 import '../../new_widgets/top_orders.dart';
 import '../../widget/error_empty_state.dart';
@@ -61,7 +63,8 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
     if (scrollController.position.pixels >=
         scrollController.position.maxScrollExtent - 200) {
 
-      if (orderController.isLoadingMore.value) return;
+      // ⭐ لودينغ خاص بـ "تحميل المزيد" فقط، مش اللودينغ العام
+      if (orderController.isLoadingMoreOrders.value) return;
 
       final nextPage = orderController.currantPage.value + 1;
 
@@ -152,7 +155,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
 
               Expanded(
                 child: Obx(() {
-                  if (orderController.isLoading.value && orderController.currantPage.value == 1) {
+                  if (orderController.isLoadingOrders.value && orderController.currantPage.value == 1) {
                     return const Center(child: LoadingWidget());
                   }
 
@@ -205,208 +208,148 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                     child: ListView.builder(
                       controller: scrollController,
                       itemCount: orderController.orderList.length + (orderController.isScroll.value ? 1 : 0) + 1,
-                      // itemCount: orderController.orderList.length + (orderController.isScroll.value ? 1 : 0) + 2,
-                     // itemBuilder: (context, index) {
-                        // if (index == 0) {
-                        //   return Padding(
-                        //     padding: EdgeInsets.only(bottom: 20.h),
-                        //     child: Column(
-                        //       crossAxisAlignment: CrossAxisAlignment.start,
-                        //       children: [
-                        //         sectionHeaderWithFilterWidget(
-                        //           context: context,
-                        //           title: "top_orders".tr,
-                        //           filterLabel: selectedDateRange != null
-                        //               ? "${dateFormatted(date: selectedDateRange!.start.toString(), formatType: formatForDateTime(FormatType.date))} - "
-                        //               "${dateFormatted(date: selectedDateRange!.end.toString(), formatType: formatForDateTime(FormatType.date))}"
-                        //               : "filter_by_date".tr,
-                        //           onFilterTap: () async {
-                        //             final range = await showDateRangeBottomSheet(
-                        //               context: context,
-                        //               initialRange: selectedDateRange,
-                        //             );
-                        //
-                        //             if (range != null) {
-                        //               setState(() {
-                        //                 selectedDateRange = range;
-                        //               });
-                        //
-                        //               _fetchInitialData(
-                        //                 deliveredStatus: orderController.selectedStatus.value == 0
-                        //                     ? null
-                        //                     : orderController.selectedStatus.value - 1,
-                        //               );
-                        //             }
-                        //           },
-                        //         ),
-                        //         verticalSpace(14.h),
-                        //         SizedBox(
-                        //           height: 150.h,
-                        //           child: ListView.builder(
-                        //             scrollDirection: Axis.horizontal,
-                        //             itemCount: topOrders.length,
-                        //             itemBuilder: (context, i) {
-                        //               final order = topOrders[i];
-                        //               return topOrderCardWidget(
-                        //                 context: context,
-                        //                 orderId: order.productOrderId ?? '',
-                        //                 date: dateFormatted(date: order.orderDate!, formatType: formatForDateTime(FormatType.date)),
-                        //                 maskedName: order.userName ?? '',
-                        //                 price: "${order.finalPrice}",
-                        //                 primaryBadgeLabel: order.paymentStatus,
-                        //                 secondaryBadgeLabel: "paid".tr,
-                        //                 onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
-                        //               );
-                        //             },
-                        //           ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   );
-                        // }
-
-                        // if (index == 1) {
-                        //   return Padding(
-                        //     padding: EdgeInsets.only(bottom: 15.h),
-                        //     child: Text(
-                        //       "all_orders".tr,
-                        //       style: TextStyle(
-                        //         fontSize: 20.sp,
-                        //         fontWeight: FontWeight.w800,
-                        //         color: isDark ? Colors.white : Colors.black,
-                        //       ),
-                        //     ),
-                        //   );
-                        // }
-                        //
-                        // final listIndex = index - 2;
-                        //
-                        // if (listIndex == orderController.orderList.length) {
-                        //   return Padding(
-                        //     padding: EdgeInsets.symmetric(vertical: 20.h),
-                        //     child: Center(child: CircularProgressIndicator(color: AppColor.themeNavyBlueColor)),
-                        //   );
-                        // }
-                        //
-                        // final order = orderController.orderList[listIndex];
-                        // return Padding(
-                        //   padding: EdgeInsets.only(bottom: 12.h),
-                        //   child: allOrdersListItemWidget(
-                        //     context: context,
-                        //     orderId: order.productOrderId ?? '',
-                        //     date: dateFormatted(date: order.orderDate!, formatType: formatForDateTime(FormatType.date)),
-                        //     maskedName: order.userName ?? '',
-                        //     price: "${order.finalPrice}",
-                        //     primaryBadgeLabel: order.paymentStatus,
-                        //     secondaryBadgeLabel: "paid".tr,
-                        //     onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
-                        //     viewFun: () => Get.to(() => OrderDetailScreen(orderId: order.id.toString())),
-                        //     deleteFun: () {
-                        //       AppDialog.showCustomDialog(
-                        //         iconColor: AppColor.cRedText,
-                        //         confirmColor: AppColor.cRedText,
-                        //         context: context,
-                        //         onConfirm: () => orderController.deleteOrderData(orderId: order.id.toString()),
-                        //       );
-                        //     },
-                        //   ),
-                        // );
-                        itemBuilder: (context, index) {
-                         if (index == 0) {
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: 15.h),
-                              child: sectionHeaderWithFilterWidget(
-                                isFilter: true,
-                                num: orderController.orderModel?.data?.total ?? 0,
-                                context: context,
-                                title: "all_orders".tr,
-                                filterLabel: selectedDateRange != null
-                                    ? "${dateFormatted(
-                                  date: selectedDateRange!.start.toString(),
-                                  formatType: formatForDateTime(FormatType.date),
-                                )} - ${dateFormatted(
-                                  date: selectedDateRange!.end.toString(),
-                                  formatType: formatForDateTime(FormatType.date),
-                                )}"
-                                    : "filter_by_date".tr,
-                                onFilterTap: () async {
-                                  final range = await showDateRangeBottomSheet(
-                                    context: context,
-                                    initialRange: selectedDateRange,
-                                  );
-
-                                  if (range != null) {
-                                    setState(() {
-                                      selectedDateRange = range;
-                                    });
-
-                                    await _fetchInitialData(
-                                      deliveredStatus:
-                                      orderController.selectedStatus.value == 0
-                                          ? null
-                                          : orderController.selectedStatus.value - 1,
-                                    );
-                                  }
-                                },
-                              ),
-                            );
-                          }
-
-                          // ==================== ORDERS LOADING ====================
-                          final listIndex = index - 1;
-
-                          if (listIndex == orderController.orderList.length) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20.h),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: AppColor.themeNavyBlueColor,
-                                ),
-                              ),
-                            );
-                          }
-
-                          // ==================== ORDER ITEM ====================
-                          final order = orderController.orderList[listIndex];
-
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
                           return Padding(
-                            padding: EdgeInsets.only(bottom: 12.h),
-                            child: allOrdersListItemWidget(
+                            padding: EdgeInsets.only(bottom: 15.h),
+                            child: sectionHeaderWithFilterWidget(
+                              isFilter: true,
+                              num: orderController.orderModel?.data?.total ?? 0,
                               context: context,
-                              orderId: order.productOrderId ?? '',
-                              date: dateFormatted(
-                                date: order.orderDate!,
+                              title: "all_orders".tr,
+                              filterLabel: selectedDateRange != null
+                                  ? "${dateFormatted(
+                                date: selectedDateRange!.start.toString(),
                                 formatType: formatForDateTime(FormatType.date),
-                              ),
-                              maskedName: order.userName ?? 'no name',
-                              price: "${order.finalPrice}",
-                              primaryBadgeLabel: order.paymentStatus,
-                              secondaryBadgeLabel: "paid".tr,
-                              onTap: () => Get.to(
-                                    () => OrderDetailScreen(
-                                  orderId: order.id.toString(),
-                                ),
-                              ),
-                              viewFun: () => Get.to(
-                                    () => OrderDetailScreen(
-                                  orderId: order.id.toString(),
-                                ),
-                              ),
-                              deleteFun: () {
-                                AppDialog.showCustomDialog(
-                                  message: "deleteOrder",
-                                  lottieAsset: 'assets/lottie/delete_icon.json',
-                                  iconColor: AppColor.cRedText,
-                                  confirmColor: AppColor.cRedText,
+                              )} - ${dateFormatted(
+                                date: selectedDateRange!.end.toString(),
+                                formatType: formatForDateTime(FormatType.date),
+                              )}"
+                                  : "filter_by_date".tr,
+                              onFilterTap: () async {
+                                final range = await showDateRangeBottomSheet(
                                   context: context,
-                                  onConfirm: () => orderController.deleteOrderData(
-                                    orderId: order.id.toString(),
-                                  ),
+                                  initialRange: selectedDateRange,
                                 );
+
+                                if (range != null) {
+                                  setState(() {
+                                    selectedDateRange = range;
+                                  });
+
+                                  await _fetchInitialData(
+                                    deliveredStatus:
+                                    orderController.selectedStatus.value == 0
+                                        ? null
+                                        : orderController.selectedStatus.value - 1,
+                                  );
+                                }
                               },
                             ),
                           );
-                        },
+                        }
+
+                        // ==================== ORDERS PAGINATION LOADER ====================
+                        final listIndex = index - 1;
+
+                        if (listIndex == orderController.orderList.length) {
+                          return Obx(() => Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20.h),
+                            child: Center(
+                              child: orderController.isLoadingMoreOrders.value
+                                  ? CircularProgressIndicator(
+                                color: AppColor.themeNavyBlueColor,
+                              )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ));
+                        }
+
+                        // ==================== ORDER ITEM ====================
+                        final order = orderController.orderList[listIndex];
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: allOrdersListItemWidget(
+                            showChangeAction: true,
+                            showChangeAction2: true,
+                            context: context,
+                            changeText: "change_payment_status",
+                            changeText2: "change_order_status",
+                            changeFun2: () {
+                              OrderStatusBottomSheet.show<OrderData>(
+                                context,
+                                order,
+
+                                getOrderStatus: (model) =>
+                                model.deliveredStatus ?? 0,
+
+                                getProductOrderId: (model) =>
+                                model.productOrderId ?? '',
+
+                                getPaymentStatus: (model) =>
+                                model.paymentStatus ?? 'Unpaid',
+
+                                setOrderStatus: (model, newStatus) {
+                                  model.deliveredStatus = newStatus;
+                                },
+
+                                setOrderStatusText: (model, newStatusText) {
+                                },
+
+                                onUpdated: () {
+                                  orderController.orderList.refresh();
+                                },
+                              );
+                            },
+                            changeFun: () {
+                              showPaymentStatusBottomSheet<OrderData>(
+                                context,
+                                order,
+                                getPaymentStatus: (model) => model.paymentStatus ?? '',
+                                getProductOrderId: (model) => model.productOrderId ?? '',
+                                getDeliveredStatus: (model) => model.deliveredStatus ?? 0,
+                                setPaymentStatus: (model, newStatus) {
+                                  model.paymentStatus = newStatus;
+                                },
+                                onUpdated: () {
+                                  orderController.orderList.refresh();
+                                },
+                              );
+                            },
+                            orderId: order.productOrderId ?? '',
+                            date: dateFormatted(
+                              date: order.orderDate!,
+                              formatType: formatForDateTime(FormatType.date),
+                            ),
+                            maskedName: (order.userName?.isEmpty ?? true) ? 'no_name'.tr : order.userName ?? "",                            price: "${order.finalPrice}",
+                            secondaryBadgeLabel:order.paymentStatus,
+                            primaryBadgeLabel: order.deliveredStatus,
+                            onTap: () => Get.to(
+                                  () => OrderDetailScreen(
+                                orderId: order.id.toString(),
+                              ),
+                            ),
+                            viewFun: () => Get.to(
+                                  () => OrderDetailScreen(
+                                orderId: order.id.toString(),
+                              ),
+                            ),
+                            deleteFun: () {
+                              AppDialog.showCustomDialog(
+                                message: "deleteOrder",
+                                lottieAsset: 'assets/lottie/delete_icon.json',
+                                iconColor: AppColor.cRedText,
+                                confirmColor: AppColor.cRedText,
+                                context: context,
+                                onConfirm: () => orderController.deleteOrderData(
+                                  orderId: order.id.toString(),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
                   );
                 }),

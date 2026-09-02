@@ -27,7 +27,7 @@ class StoreSettingScreen extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark  ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8),
+      backgroundColor: isDark  ? DarkThemeColor.cBackGround : AppColor.cLight,
       appBar: simpleAppBar(
         title: 'store_settings'.tr,
       ),
@@ -191,7 +191,8 @@ class StoreSettingScreen extends StatelessWidget {
               ),
             ),
           ],
-        ),        ),
+        ),
+      ),
     );
   }
 }

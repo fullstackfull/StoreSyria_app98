@@ -444,7 +444,7 @@ class _ProductsScreenState extends State<ProductsScreen>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: isDark  ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8),
+        backgroundColor: isDark  ? DarkThemeColor.cBackGround : AppColor.cLight,
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           child: Column(
