@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors, avoid_print
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -33,10 +32,6 @@ Widget allProductsListItemWidget({
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  // ==================================================
-  // COLORS
-  // ==================================================
-
   final cardColor = isDark
       ? const Color(0xFF1E1E1E)
       : Colors.white;
@@ -62,9 +57,6 @@ Widget allProductsListItemWidget({
   const dangerColor = Color(0xFFEF4444);
   const warningColor = Colors.orange;
 
-  // ==================================================
-  // PRODUCT LOGIC
-  // ==================================================
 
   final variant = hasVariant == true;
 
@@ -80,10 +72,6 @@ Widget allProductsListItemWidget({
       stockValue == 'out_of_stock' ||
           stockValue == '0';
 
-  // ==================================================
-  // PRICE LOGIC
-  // ==================================================
-
   final finalPrice = double.tryParse(price) ?? 0;
 
   final sale = double.tryParse(salePrice ?? '') ?? 0;
@@ -97,9 +85,6 @@ Widget allProductsListItemWidget({
   final displayPrice =
   hasDiscount ? sale : finalPrice;
 
-  // ==================================================
-  // IMAGE
-  // ==================================================
 
   final isValidImageUrl =
       imageUrl.trim().isNotEmpty &&
@@ -107,10 +92,6 @@ Widget allProductsListItemWidget({
               imageUrl.startsWith('http') ||
                   imageUrl.startsWith('assets')
           );
-
-  // ==================================================
-  // STOCK COLOR
-  // ==================================================
 
   Color stockColor() {
     if (variant || !trackStock) {
@@ -160,10 +141,6 @@ Widget allProductsListItemWidget({
     return dangerColor.withOpacity(.10);
   }
 
-  // ==================================================
-  // MENU
-  // ==================================================
-
   final hasMenu =
       viewFun != null ||
           (showChangeAction && changeFun != null) ||
@@ -193,19 +170,11 @@ Widget allProductsListItemWidget({
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            // ==================================================
-            // IMAGE
-            // ==================================================
-
             AspectRatio(
               aspectRatio: 1.18,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // ==================================================
-                  // PRODUCT IMAGE
-                  // ==================================================
                   Hero(
                     tag: 'product_image_$productId',
                     child: isValidImageUrl
@@ -225,10 +194,6 @@ Widget allProductsListItemWidget({
                       ),
                     ),
                   ),
-                  // ==================================================
-                  // HIDDEN BADGE
-                  // ==================================================
-
                   if (isHidden)
                     Positioned(
                       top: 7.h,
@@ -267,10 +232,6 @@ Widget allProductsListItemWidget({
                         ),
                       ),
                     ),
-
-                  // ==================================================
-                  // OUT OF STOCK OVERLAY
-                  // ==================================================
 
                   if (isOutOfStock)
                     Positioned.fill(
@@ -317,10 +278,6 @@ Widget allProductsListItemWidget({
                         ),
                       ),
                     ),
-
-                  // ==================================================
-                  // MENU
-                  // ==================================================
 
                   if (hasMenu)
                     Positioned(
@@ -460,10 +417,6 @@ Widget allProductsListItemWidget({
               ),
             ),
 
-            // ==================================================
-            // CONTENT
-            // ==================================================
-
             Padding(
               padding: EdgeInsets.fromLTRB(
                 9.w,
@@ -475,11 +428,6 @@ Widget allProductsListItemWidget({
                 crossAxisAlignment:
                 CrossAxisAlignment.start,
                 children: [
-
-                  // ==================================================
-                  // CATEGORY
-                  // ==================================================
-
                   if (categoryName.trim().isNotEmpty)
                     Text(
                       categoryName,
@@ -493,10 +441,6 @@ Widget allProductsListItemWidget({
                     ),
 
                   SizedBox(height: 2.h),
-
-                  // ==================================================
-                  // PRODUCT NAME
-                  // ==================================================
 
                   Text(
                     productName.trim().isNotEmpty
@@ -513,11 +457,6 @@ Widget allProductsListItemWidget({
                   ),
 
                   SizedBox(height: 5.h),
-
-                  // ==================================================
-                  // RATING + VARIANT
-                  // ==================================================
-
                   Row(
                     children: [
 
@@ -540,12 +479,7 @@ Widget allProductsListItemWidget({
                     ],
                   ),
 
-
                   SizedBox(height: 6.h),
-
-                  // ==================================================
-                  // STOCK
-                  // ==================================================
 
                   Row(
                     children: [
@@ -618,10 +552,6 @@ Widget allProductsListItemWidget({
                     ],
                   ),
 
-                  // ==================================================
-                  // NOT TRACKED
-                  // ==================================================
-
                   if (!trackStock) ...[
                     SizedBox(height: 5.h),
 
@@ -668,11 +598,6 @@ Widget allProductsListItemWidget({
                       ),
                     ),
                   ],
-
-                  // ==================================================
-                  // PRICE
-                  // ==================================================
-
                   if (!variant && displayPrice > 0) ...[
                     SizedBox(height: 7.h),
 
@@ -682,7 +607,7 @@ Widget allProductsListItemWidget({
                       children: [
 
                         Text(
-                          '${displayPrice.toStringAsFixed(2)}\$',
+                          '${displayPrice.toStringAsFixed(2)}',
                           maxLines: 1,
                           overflow:
                           TextOverflow.ellipsis,
@@ -699,7 +624,7 @@ Widget allProductsListItemWidget({
 
                           Flexible(
                             child: Text(
-                              '${finalPrice.toStringAsFixed(2)}\$',
+                              '${finalPrice.toStringAsFixed(2)}',
                               maxLines: 1,
                               overflow:
                               TextOverflow.ellipsis,
@@ -718,10 +643,6 @@ Widget allProductsListItemWidget({
                       ],
                     ),
                   ],
-
-                  // ==================================================
-                  // VARIANT MESSAGE
-                  // ==================================================
 
                   if (variant) ...[
                     SizedBox(height: 5.h),
@@ -767,9 +688,8 @@ class AddProductTextField extends StatefulWidget {
   final String? obscuringCharacter;
   final int? maxLines;
 
-  // --- الإضافات الجديدة ---
-  final bool isEditMode;      // لتحديد وضع التعديل
-  final String? htmlContent;  // محتوى HTML للعرض في وضع التعديل
+  final bool isEditMode;
+  final String? htmlContent;
 
   const AddProductTextField({
     Key? key,
@@ -791,7 +711,7 @@ class AddProductTextField extends StatefulWidget {
     this.suffix,
     this.focusNode,
     this.maxLines,
-    this.isEditMode = false, // الافتراضي إضافة
+    this.isEditMode = false,
     this.htmlContent,
   }) : super(key: key);
 
@@ -851,10 +771,8 @@ class _AddProductTextFieldState extends State<AddProductTextField> {
           if (widget.labelText != null && widget.labelText!.isNotEmpty)
             verticalSpace(15.h),
 
-          // Logic: Show HTML in Edit Mode OR TextField in Add Mode
           if (widget.isEditMode && widget.htmlContent != null && widget.htmlContent!.isNotEmpty)
 
-          // --- عرض HTML في وضع التعديل ---
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
@@ -881,7 +799,6 @@ class _AddProductTextFieldState extends State<AddProductTextField> {
             )
           else
 
-          // --- عرض TextField عادي (وضع الإضافة أو لا يوجد محتوى HTML) ---
             TextFormField(
               controller: widget.controller,
               cursorColor: accentColor,

@@ -23,7 +23,7 @@ Widget HeaderWidget({
   final accent = AppColor.themeNavyBlueColor;
 
   return Padding(
-    padding: EdgeInsets.only(top: 10.w),
+    padding: EdgeInsets.only(top: 12.w),
     child: Row(
       children: [
         if (showBackButton)
@@ -69,8 +69,8 @@ Widget HeaderWidget({
             onTap: onNewLabelTap,
             child: Container(
               padding: EdgeInsets.symmetric(
-                horizontal: 14.w,
-                vertical: 10.h,
+                horizontal: 8.w,
+                vertical: 7.h,
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30.r),
@@ -91,7 +91,7 @@ Widget HeaderWidget({
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: accent,
                     ),

@@ -306,14 +306,14 @@ Widget allOrdersListItemWidget({
                             Icon(
                               Icons.edit_outlined,
                               size: 18.sp,
-                              color: AppColor.themeNavyBlueColor,
+                              color: AppColor.themeGreenColor,
                             ),
                             SizedBox(width: 10.w),
                             Text(
                               changeText ?? 'change'.tr,
                               style: TextStyle(
                                 fontSize: 14.sp,
-                                color: AppColor.themeNavyBlueColor,
+                                color: AppColor.themeGreenColor,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -334,14 +334,14 @@ Widget allOrdersListItemWidget({
                             Icon(
                               Icons.edit_outlined,
                               size: 18.sp,
-                              color: AppColor.themeNavyBlueColor,
+                              color: Colors.green,
                             ),
                             SizedBox(width: 10.w),
                             Text(
-                              changeText2 ??'change2'.tr,
+                              changeText2 ??'change2',
                               style: TextStyle(
                                 fontSize: 14.sp,
-                                color: AppColor.themeNavyBlueColor,
+                                color: Colors.green,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

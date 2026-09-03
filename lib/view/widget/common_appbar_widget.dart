@@ -37,14 +37,7 @@ simpleAppBar({bool isBack = true, required String title, String? date}) {
                           border: Border.all(color: borderColor),
                           borderRadius: BorderRadius.circular(15.r),
                         ),
-                        child: Align(
-                          child: assetSvdImageWidget(
-                              image: DefaultImages.backIcn,
-                              width: 11,
-                              height: 10,
-                              color : isDark ? AppColor.cWhite : AppColor.themeNavyBlueColor
-                          ),
-                        ),
+                        child: Icon(Icons.arrow_back,color: AppColor.themeNavyBlueColor),
                       ),
                     )
                   : SizedBox(),

@@ -63,7 +63,6 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
     if (scrollController.position.pixels >=
         scrollController.position.maxScrollExtent - 200) {
 
-      // ⭐ لودينغ خاص بـ "تحميل المزيد" فقط، مش اللودينغ العام
       if (orderController.isLoadingMoreOrders.value) return;
 
       final nextPage = orderController.currantPage.value + 1;
@@ -274,8 +273,8 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                             showChangeAction: true,
                             showChangeAction2: true,
                             context: context,
-                            changeText: "change_payment_status",
-                            changeText2: "change_order_status",
+                            changeText: "change_payment_status".tr,
+                            changeText2: "change_order_status".tr,
                             changeFun2: () {
                               OrderStatusBottomSheet.show<OrderData>(
                                 context,
@@ -322,7 +321,8 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                               date: order.orderDate!,
                               formatType: formatForDateTime(FormatType.date),
                             ),
-                            maskedName: (order.userName?.isEmpty ?? true) ? 'no_name'.tr : order.userName ?? "",                            price: "${order.finalPrice}",
+                            maskedName: (order.userName?.isEmpty ?? true) ? 'no_name'.tr : order.userName ?? "",
+                            price: "${order.finalPrice}",
                             secondaryBadgeLabel:order.paymentStatus,
                             primaryBadgeLabel: order.deliveredStatus,
                             onTap: () => Get.to(

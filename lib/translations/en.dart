@@ -427,4 +427,6 @@ const Map<String, String> en = {
   'failed_to_delete_order_note': 'Failed to delete order note.',
   'order_deleted_successfully': 'Order deleted successfully.',
   'failed_to_delete_order': 'Failed to delete order.',
+  "change_payment_status"  : "payment status",
+  "change_order_status"  : "order status"
 };

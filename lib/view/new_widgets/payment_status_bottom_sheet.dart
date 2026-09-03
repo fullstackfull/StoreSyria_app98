@@ -5,6 +5,7 @@ import '../../core/controller/order_controller/order_controller.dart';
 import '../../utils/colors.dart';
 import '../widget/app_dialog.dart';
 import '../widget/common_space_divider_widget.dart';
+import 'order_status_badge.dart';
 
 void showPaymentStatusBottomSheet<T>(
     BuildContext context,
@@ -247,6 +248,7 @@ void showPaymentStatusBottomSheet<T>(
     const Duration(milliseconds: 250),
   );
 }
+
 class _PaymentOptionCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -348,7 +350,8 @@ class OrderStatusBottomSheet {
         required String Function(T model) getProductOrderId,
         required String Function(T model) getPaymentStatus,
         required void Function(T model, int newStatus) setOrderStatus,
-        required void Function(T model, String newStatusText) setOrderStatusText,
+        required void Function(T model, String newStatusText)
+        setOrderStatusText,
         VoidCallback? onUpdated,
       }) {
     final OrderController orderController =
@@ -361,462 +364,398 @@ class OrderStatusBottomSheet {
 
     final noteController = TextEditingController();
 
-    final statuses = [
-      _StatusItem(
-        0,
-        'Pending',
-        'الطلب قيد الانتظار',
-        Icons.hourglass_empty,
-        const Color(0xFFFFF3E0),
-        const Color(0xFFE65100),
-      ),
-      _StatusItem(
-        1,
-        'Delivered',
-        'تم التوصيل بنجاح',
-        Icons.check_circle_outline,
-        const Color(0xFFE8F5E9),
-        const Color(0xFF2E7D32),
-      ),
-      _StatusItem(
-        2,
-        'Cancel',
-        'تم إلغاء الطلب',
-        Icons.cancel_outlined,
-        const Color(0xFFFFEBEE),
-        const Color(0xFFC62828),
-      ),
-      _StatusItem(
-        3,
-        'Return',
-        'طلب إرجاع',
-        Icons.undo,
-        const Color(0xFFF3E5F5),
-        const Color(0xFF7B1FA2),
-      ),
-      _StatusItem(
-        4,
-        'Confirmed',
-        'تم تأكيد الطلب',
-        Icons.verified,
-        const Color(0xFFE3F2FD),
-        const Color(0xFF1565C0),
-      ),
-      _StatusItem(
-        5,
-        'Picked Up',
-        'تم الاستلام من المتجر',
-        Icons.inventory_2_outlined,
-        const Color(0xFFE0F7FA),
-        const Color(0xFF00838F),
-      ),
-      _StatusItem(
-        6,
-        'Shipped',
-        'تم الشحن',
-        Icons.local_shipping_outlined,
-        const Color(0xFFFFF8E1),
-        const Color(0xFFF57F17),
-      ),
-    ];
+    const statusIds = [0, 1, 2, 3, 4, 5, 6];
 
     Get.bottomSheet(
-      StatefulBuilder(
-        builder: (context, setState) {
-          return Container(
-            constraints: BoxConstraints(
-              maxHeight:
-              MediaQuery.of(context).size.height * 0.85,
-            ),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? DarkThemeColor.cBackGround
-                  : Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(24.r),
-                topRight: Radius.circular(24.r),
+      _BouncyBottomSheet(
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight:
+                MediaQuery.of(context).size.height * 0.85,
               ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Handle
-                Container(
-                  margin: EdgeInsets.only(top: 12.h),
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? DarkThemeColor.cBorder
-                        : Colors.grey.shade300,
-                    borderRadius:
-                    BorderRadius.circular(2.r),
-                  ),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? DarkThemeColor.cBackGround
+                    : Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24.r),
+                  topRight: Radius.circular(24.r),
                 ),
-
-                // Header
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    20.w,
-                    16.h,
-                    20.w,
-                    0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'update_order_status'.tr,
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? Colors.white
-                              : AppColor.cText,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Get.back(),
-                        child: Container(
-                          padding: EdgeInsets.all(6.w),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? DarkThemeColor.cCardBackground
-                                : Colors.grey.shade100,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.close,
-                            size: 18.sp,
-                            color: isDark
-                                ? Colors.white70
-                                : Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                verticalSpace(16.h),
-
-                // Scrollable content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20.w,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(top: 12.h),
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? DarkThemeColor.cBorder
+                          : Colors.grey.shade300,
+                      borderRadius:
+                      BorderRadius.circular(2.r),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  ),
+
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      20.w,
+                      16.h,
+                      20.w,
+                      0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
                       children: [
-                        // Statuses
-                        ...statuses.map(
-                              (s) => GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                tempStatus = s.id;
-                              });
-                            },
-                            child: AnimatedContainer(
-                              duration:
-                              const Duration(milliseconds: 200),
-                              margin: EdgeInsets.only(
-                                bottom: 8.h,
-                              ),
-                              padding:
-                              EdgeInsets.all(14.w),
-                              decoration: BoxDecoration(
-                                color: tempStatus == s.id
-                                    ? s.bgColor.withOpacity(
-                                  isDark ? 0.15 : 1,
-                                )
-                                    : (isDark
-                                    ? DarkThemeColor
-                                    .cCardBackground
-                                    : Colors.grey.shade50),
-                                borderRadius:
-                                BorderRadius.circular(14.r),
-                                border: Border.all(
-                                  color: tempStatus == s.id
-                                      ? s.textColor
-                                      : (isDark
-                                      ? DarkThemeColor.cBorder
-                                      : Colors
-                                      .grey.shade200),
-                                  width: tempStatus == s.id
-                                      ? 2
-                                      : 1,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 44.w,
-                                    height: 44.w,
-                                    decoration: BoxDecoration(
-                                      color: s.bgColor
-                                          .withOpacity(
-                                        isDark ? 0.3 : 1,
-                                      ),
-                                      borderRadius:
-                                      BorderRadius.circular(
-                                        12.r,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      s.icon,
-                                      color: s.textColor,
-                                      size: 22.sp,
-                                    ),
-                                  ),
-
-                                  horizontalSpace(14.w),
-
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
-                                      children: [
-                                        Text(
-                                          s.name,
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight:
-                                            FontWeight.w600,
-                                            color: isDark
-                                                ? Colors.white
-                                                : AppColor.cText,
-                                          ),
-                                        ),
-                                        verticalSpace(2.h),
-                                        Text(
-                                          s.desc,
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: isDark
-                                                ? Colors.grey.shade400
-                                                : AppColor.cFont,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  AnimatedOpacity(
-                                    duration:
-                                    const Duration(
-                                      milliseconds: 200,
-                                    ),
-                                    opacity:
-                                    tempStatus == s.id
-                                        ? 1
-                                        : 0,
-                                    child: Container(
-                                      width: 26.w,
-                                      height: 26.w,
-                                      decoration:
-                                      BoxDecoration(
-                                        color: s.textColor,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                        size: 16.sp,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        verticalSpace(16.h),
-
-                        // Note
-                        Container(
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
+                        Text(
+                          'update_order_status'.tr,
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
                             color: isDark
-                                ? DarkThemeColor
-                                .cCardBackground
-                                : Colors.grey.shade50,
-                            borderRadius:
-                            BorderRadius.circular(14.r),
-                            border: Border.all(
-                              color: isDark
-                                  ? DarkThemeColor.cBorder
-                                  : Colors.grey.shade200,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'status_note'.tr,
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight:
-                                  FontWeight.w600,
-                                  color: isDark
-                                      ? Colors.white
-                                      : AppColor.cText,
-                                ),
-                              ),
-                              verticalSpace(8.h),
-                              TextField(
-                                controller: noteController,
-                                maxLines: 2,
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  color: isDark
-                                      ? Colors.white
-                                      : AppColor.cText,
-                                ),
-                                decoration:
-                                InputDecoration(
-                                  hintText:
-                                  'add_status_note'.tr,
-                                  hintStyle: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: isDark
-                                        ? Colors.grey.shade500
-                                        : AppColor.cFont
-                                        .withOpacity(0.6),
-                                  ),
-                                  filled: true,
-                                  fillColor: isDark
-                                      ? DarkThemeColor
-                                      .cBackGround
-                                      : Colors.white,
-                                  border:
-                                  OutlineInputBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(
-                                      10.r,
-                                    ),
-                                    borderSide:
-                                    BorderSide.none,
-                                  ),
-                                  contentPadding:
-                                  EdgeInsets.all(12.w),
-                                ),
-                              ),
-                            ],
+                                ? Colors.white
+                                : AppColor.cText,
                           ),
                         ),
-
-                        verticalSpace(20.h),
+                        GestureDetector(
+                          onTap: () => Get.back(),
+                          child: Container(
+                            padding: EdgeInsets.all(6.w),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? DarkThemeColor
+                                  .cCardBackground
+                                  : Colors.grey.shade100,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 18.sp,
+                              color: isDark
+                                  ? Colors.white70
+                                  : Colors.grey,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ),
 
-                // Confirm button
-                Container(
-                  padding: EdgeInsets.fromLTRB(
-                    20.w,
-                    0,
-                    20.w,
-                    20.h +
-                        MediaQuery.of(context)
-                            .padding
-                            .bottom,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? DarkThemeColor.cBackGround
-                        : Colors.white,
-                  ),
-                  child: Obx(
-                        () => AppButton(
-                      text: 'confirm_update'.tr,
-                      isLoading: orderController
-                          .isUpdatingOrderStatus.value,
-                      onPressed: orderController
-                          .isUpdatingOrderStatus.value
-                          ? null
-                          : () async {
-                        final selectedStatus =
-                        statuses.firstWhere(
-                              (status) =>
-                          status.id == tempStatus,
-                        );
+                  verticalSpace(16.h),
 
-                        Get.back();
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                      ),
+                      child: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+                          ...statusIds.map(
+                                (statusId) {
+                              final isSelected =
+                                  tempStatus == statusId;
 
-                        final success =
-                        await orderController
-                            .updateOrderStatus(
-                          productOrderId:
-                          getProductOrderId(model)
-                              .replaceAll('#', ''),
-                          deliveredStatus:
-                          tempStatus,
-                          paymentStatus:
-                          getPaymentStatus(model),
-                          note: noteController.text
-                              .trim()
-                              .isEmpty
-                              ? null
-                              : noteController.text
-                              .trim(),
-                        );
+                              final config =
+                              StatusBadgeHelper
+                                  .getOrderConfig(
+                                statusId,
+                              );
 
-                        if (success) {
-                          // تحديث الـ model نفسه
-                          setOrderStatus(
-                            model,
-                            tempStatus,
-                          );
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    tempStatus = statusId;
+                                  });
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(
+                                    milliseconds: 200,
+                                  ),
+                                  margin: EdgeInsets.only(
+                                    bottom: 8.h,
+                                  ),
+                                  padding:
+                                  EdgeInsets.all(14.w),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? (isDark
+                                        ? config
+                                        .backgroundColor
+                                        .withOpacity(0.15)
+                                        : config
+                                        .backgroundColor)
+                                        : (isDark
+                                        ? DarkThemeColor
+                                        .cCardBackground
+                                        : Colors
+                                        .grey.shade50),
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                        14.r),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? config.textColor
+                                          : (isDark
+                                          ? DarkThemeColor
+                                          .cBorder
+                                          : Colors.grey
+                                          .shade200),
+                                      width:
+                                      isSelected ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CommonStatusBadge(
+                                        type:
+                                        StatusBadgeType.order,
+                                        orderStatus: statusId,
+                                        showArrow: false,
+                                        isCard: true,
+                                      ),
 
-                          setOrderStatusText(
-                            model,
-                            selectedStatus.name,
-                          );
+                                      SizedBox(width: 12.w),
 
-                          // تحديث الشاشة / القائمة
-                          onUpdated?.call();
-                        }
-                      },
+                                      Expanded(
+                                        child: Text(
+                                          StatusBadgeHelper
+                                              .getOrderDescription(
+                                            statusId,
+                                          ),
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: isDark
+                                                ? Colors
+                                                .grey.shade400
+                                                : AppColor.cFont,
+                                          ),
+                                        ),
+                                      ),
+
+                                      AnimatedOpacity(
+                                        duration:
+                                        const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        opacity:
+                                        isSelected ? 1 : 0,
+                                        child: Container(
+                                          width: 26.w,
+                                          height: 26.w,
+                                          decoration:
+                                          BoxDecoration(
+                                            color:
+                                            config.textColor,
+                                            shape:
+                                            BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.check,
+                                            color: Colors.white,
+                                            size: 16.sp,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          verticalSpace(16.h),
+
+                          Container(
+                            padding: EdgeInsets.all(16.w),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? DarkThemeColor
+                                  .cCardBackground
+                                  : Colors.grey.shade50,
+                              borderRadius:
+                              BorderRadius.circular(14.r),
+                              border: Border.all(
+                                color: isDark
+                                    ? DarkThemeColor.cBorder
+                                    : Colors.grey.shade200,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'status_note'.tr,
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight:
+                                    FontWeight.w600,
+                                    color: isDark
+                                        ? Colors.white
+                                        : AppColor.cText,
+                                  ),
+                                ),
+
+                                verticalSpace(8.h),
+
+                                TextField(
+                                  controller: noteController,
+                                  maxLines: 2,
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    color: isDark
+                                        ? Colors.white
+                                        : AppColor.cText,
+                                  ),
+                                  decoration:
+                                  InputDecoration(
+                                    hintText:
+                                    'add_status_note'.tr,
+                                    hintStyle: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: isDark
+                                          ? Colors.grey.shade500
+                                          : AppColor.cFont
+                                          .withOpacity(0.6),
+                                    ),
+                                    filled: true,
+                                    fillColor: isDark
+                                        ? DarkThemeColor
+                                        .cBackGround
+                                        : Colors.white,
+                                    border:
+                                    OutlineInputBorder(
+                                      borderRadius:
+                                      BorderRadius.circular(
+                                          10.r),
+                                      borderSide:
+                                      BorderSide.none,
+                                    ),
+                                    contentPadding:
+                                    EdgeInsets.all(12.w),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          verticalSpace(20.h),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+
+                  Container(
+                    padding: EdgeInsets.fromLTRB(
+                      20.w,
+                      0,
+                      20.w,
+                      20.h +
+                          MediaQuery.of(context)
+                              .padding
+                              .bottom,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? DarkThemeColor.cBackGround
+                          : Colors.white,
+                    ),
+                    child: Obx(
+                          () => AppButton(
+                        text: 'confirm_update'.tr,
+                        isLoading: orderController
+                            .isUpdatingOrderStatus.value,
+                        onPressed: orderController
+                            .isUpdatingOrderStatus.value
+                            ? null
+                            : () async {
+                          final selectedStatus =
+                              tempStatus;
+
+                          Get.back();
+
+                          final success =
+                          await orderController
+                              .updateOrderStatus(
+                            productOrderId:
+                            getProductOrderId(model)
+                                .replaceAll('#', ''),
+                            deliveredStatus:
+                            selectedStatus,
+                            paymentStatus:
+                            getPaymentStatus(model),
+                            note: noteController.text
+                                .trim()
+                                .isEmpty
+                                ? null
+                                : noteController.text
+                                .trim(),
+                          );
+
+                          if (success) {
+                            setOrderStatus(
+                              model,
+                              selectedStatus,
+                            );
+
+                            setOrderStatusText(
+                              model,
+                              StatusBadgeHelper
+                                  .getOrderName(
+                                selectedStatus,
+                              ),
+                            );
+
+                            onUpdated?.call();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       enterBottomSheetDuration:
-      const Duration(milliseconds: 300),
+      const Duration(milliseconds: 1),
       exitBottomSheetDuration:
       const Duration(milliseconds: 250),
     );
   }
 }
 
-class _StatusItem {
-  final int id;
-  final String name;
-  final String desc;
-  final IconData icon;
-  final Color bgColor;
-  final Color textColor;
+class _BouncyBottomSheet extends StatelessWidget {
+  final Widget child;
 
-  _StatusItem(
-      this.id,
-      this.name,
-      this.desc,
-      this.icon,
-      this.bgColor,
-      this.textColor,
-      );
+  const _BouncyBottomSheet({
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 1.0, end: 0.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutBack,
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, height * value),
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
 }

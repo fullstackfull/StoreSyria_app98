@@ -222,25 +222,12 @@ Widget sectionHeaderWithFilterWidget({
       Expanded(
         child: Row(
           children: [
-            Container(
-              width: 32.w,
-              height: 32.w,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.grey,
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                num.toString(),
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColor.themeNavyBlueColor,
-                ),
+            Text(
+              num.toString(),
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColor.themeNavyBlueColor,
               ),
             ),
             SizedBox(width: 10.w),

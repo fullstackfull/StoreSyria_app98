@@ -427,4 +427,6 @@ const Map<String, String> ar = {
   'failed_to_delete_order_note': 'فشل حذف ملاحظة الطلب.',
   'order_deleted_successfully': 'تم حذف الطلب بنجاح.',
   'failed_to_delete_order': 'فشل حذف الطلب.',
+  "change_payment_status"  : "حالة الدفع",
+  "change_order_status"  : "حالة الطلب"
 };

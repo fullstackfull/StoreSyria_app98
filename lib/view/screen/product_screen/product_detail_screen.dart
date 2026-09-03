@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,14 +38,16 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState
     extends State<ProductDetailScreen> {
+  final ProductDetailController productDetailController =
+  Get.put(ProductDetailController());
 
-  final ProductDetailController productDetailController = Get.put(ProductDetailController());
-
-  final AddReviewController reviewController = Get.put(AddReviewController());
+  final AddReviewController reviewController =
+  Get.put(AddReviewController());
 
   final PageController _pageController = PageController();
 
   int _currentImageIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -63,9 +66,13 @@ class _ProductDetailScreenState
   }
 
   Future<void> _loadData() async {
-    await productDetailController.getProductDetail(widget.productId);
+    await productDetailController.getProductDetail(
+      widget.productId,
+    );
 
-    await reviewController.getReviewData(widget.productId);
+    await reviewController.getReviewData(
+      widget.productId,
+    );
 
     if (mounted) {
       setState(() {});
@@ -113,14 +120,14 @@ class _ProductDetailScreenState
       body: SafeArea(
         child: GetBuilder<ProductDetailController>(
           builder: (controller) {
-            final product = controller.product;
-        
+            final ProductData? product = controller.product;
+
             if (product == null) {
               return const Center(
                 child: LoadingWidget(),
               );
             }
-        
+
             return RefreshIndicator(
               onRefresh: _loadData,
               child: SingleChildScrollView(
@@ -141,9 +148,9 @@ class _ProductDetailScreenState
                       borderColor: borderColor,
                       isDark: isDark,
                     ),
-        
+
                     verticalSpace(18.h),
-        
+
                     _buildBasicInfoCard(
                       product: product,
                       cardColor: cardColor,
@@ -154,9 +161,9 @@ class _ProductDetailScreenState
                       secondaryTextColor,
                       isDark: isDark,
                     ),
-        
+
                     verticalSpace(16.h),
-        
+
                     _buildPropertiesCard(
                       product: product,
                       cardColor: cardColor,
@@ -167,9 +174,9 @@ class _ProductDetailScreenState
                       secondaryTextColor,
                       isDark: isDark,
                     ),
-        
+
                     verticalSpace(16.h),
-        
+
                     _buildStatusCard(
                       product: product,
                       cardColor: cardColor,
@@ -180,9 +187,9 @@ class _ProductDetailScreenState
                       secondaryTextColor,
                       isDark: isDark,
                     ),
-        
+
                     verticalSpace(16.h),
-        
+
                     _buildReviewsCard(
                       cardColor: cardColor,
                       borderColor: borderColor,
@@ -201,14 +208,26 @@ class _ProductDetailScreenState
       ),
     );
   }
+  Widget _buildSvgImage(String url, Color background) {
+    return SvgPicture.network(
+      url,
+      fit: BoxFit.contain,
+      placeholderBuilder: (context) {
+        return Container(color: background);
+      },
+    );
+  }
 
   Widget _buildImageSlider({
     required Color cardColor,
     required Color borderColor,
     required bool isDark,
   }) {
-    final images =
-    productDetailController.getProductImages();
+    final images = productDetailController.getProductImages();
+
+    final imageBackground = isDark
+        ? Colors.white.withOpacity(.05)
+        : const Color(0xFFF3F4F6);
 
     if (images.isEmpty) {
       return SizedBox(
@@ -229,46 +248,40 @@ class _ProductDetailScreenState
           height: 260.h,
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius:
-            BorderRadius.circular(14.r),
-            border: Border.all(
-              color: borderColor,
-            ),
+            borderRadius: BorderRadius.circular(14.r),
+            border: Border.all(color: borderColor),
           ),
           child: ClipRRect(
-            borderRadius:
-            BorderRadius.circular(14.r),
+            borderRadius: BorderRadius.circular(14.r),
             child: PageView.builder(
               controller: _pageController,
               itemCount: images.length,
               onPageChanged: (index) {
                 if (!mounted) return;
-
                 setState(() {
                   _currentImageIndex = index;
                 });
               },
               itemBuilder: (context, index) {
+                final imageUrl = images[index];
+                final isSvg = imageUrl.toLowerCase().trim().endsWith('.svg');
+
                 return Hero(
-                  tag: 'product_image_${widget.productId}',
-                  child: CachedNetworkImage(
-                    imageUrl: images[index],
+                  tag: 'product_image_${widget.productId}_$index',
+                  child: isSvg
+                      ? _buildSvgImage(imageUrl, imageBackground)
+                      : CachedNetworkImage(
+                    imageUrl: imageUrl,
                     fit: BoxFit.contain,
-                    placeholder:
-                        (context, url) {
-                      return const Center(
-                        child: LoadingWidget(),
-                      );
+                    placeholder: (context, url) {
+                      return Container(color: imageBackground);
                     },
-                    errorWidget:
-                        (context, url, error) {
+                    errorWidget: (context, url, error) {
                       return Center(
                         child: Icon(
-                          Icons
-                              .broken_image_outlined,
+                          Icons.broken_image_outlined,
                           size: 50.sp,
-                          color:
-                          Colors.grey.shade400,
+                          color: Colors.grey.shade400,
                         ),
                       );
                     },
@@ -281,11 +294,9 @@ class _ProductDetailScreenState
 
         if (images.length > 1)
           Padding(
-            padding:
-            EdgeInsets.only(top: 10.h),
+            padding: EdgeInsets.only(top: 10.h),
             child: Row(
-              mainAxisAlignment:
-              MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 images.length,
                     (index) {
@@ -293,26 +304,15 @@ class _ProductDetailScreenState
 
                   return AnimatedContainer(
                     curve: Curves.easeInOut,
-                    duration:
-                    const Duration(
-                      milliseconds: 250,
-                    ),
-                    margin:
-                    EdgeInsets.symmetric(
-                      horizontal: 3.w,
-                    ),
-                    width:
-                    isActive ? 11.w : 7.w,
-                    height:
-                    isActive ? 11.w : 7.w,
+                    duration: const Duration(milliseconds: 250),
+                    margin: EdgeInsets.symmetric(horizontal: 3.w),
+                    width: isActive ? 11.w : 7.w,
+                    height: isActive ? 11.w : 7.w,
                     decoration: BoxDecoration(
                       color: isActive
                           ? AppColor.themeNavyBlueColor
                           : Colors.grey.shade400,
-                      borderRadius:
-                      BorderRadius.circular(
-                        10.r,
-                      ),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                   );
                 },
@@ -328,42 +328,28 @@ class _ProductDetailScreenState
   // ============================================================
 
   Widget _buildBasicInfoCard({
-    required dynamic product,
+    required ProductData product,
     required Color cardColor,
     required Color borderColor,
     required Color primaryTextColor,
     required Color secondaryTextColor,
     required bool isDark,
   }) {
-    final price = _value(
-      product,
-      'finalPrice',
-      fallback: _value(
-        product,
-        'price',
-        fallback: '0',
-      ),
-    );
+    final String price =
+    product.finalPrice?.toString().trim().isNotEmpty == true
+        ? product.finalPrice.toString()
+        : product.price?.toString() ?? '0';
 
-    final salePrice = _value(
-      product,
-      'salePrice',
-    );
+    final String salePrice =
+        product.salePrice?.toString() ?? '';
 
-    final productStock = _value(
-      product,
-      'productStock',
-      fallback: '0',
-    );
+    final String productStock =
+        product.productStock?.toString() ?? '0';
 
-    final sku = _value(
-      product,
-      'productCode',
-      fallback: _value(
-        product,
-        'sku',
-      ),
-    );
+    final String sku =
+    product.productCode?.toString().trim().isNotEmpty == true
+        ? product.productCode.toString()
+        :  '';
 
     return productInfoContainer(
       backgroundColor: cardColor,
@@ -394,7 +380,7 @@ class _ProductDetailScreenState
             Icons.price_change,
           ),
 
-          if (salePrice.isNotEmpty) ...[
+          if (salePrice.trim().isNotEmpty) ...[
             _thinDivider(borderColor),
 
             _infoRow(
@@ -411,7 +397,6 @@ class _ProductDetailScreenState
 
           _thinDivider(borderColor),
 
-          // PRODUCT STOCK
           _infoRow(
             label: 'product_stock'.tr,
             value: productStock,
@@ -428,7 +413,7 @@ class _ProductDetailScreenState
           _infoRow(
             label: 'sku'.tr,
             value:
-            sku.isEmpty ? '-' : sku,
+            sku.trim().isEmpty ? '-' : sku,
             primaryTextColor:
             primaryTextColor,
             secondaryTextColor:
@@ -446,27 +431,21 @@ class _ProductDetailScreenState
   // ============================================================
 
   Widget _buildPropertiesCard({
-    required dynamic product,
+    required ProductData product,
     required Color cardColor,
     required Color borderColor,
     required Color primaryTextColor,
     required Color secondaryTextColor,
     required bool isDark,
   }) {
-    final categoryId = _value(
-      product,
-      'categoryId',
-    );
+    final String categoryName =
+        product.categoryName?.trim() ?? '';
 
-    final weight = _value(
-      product,
-      'productWeight',
-    );
+    final String weight =
+        product.productWeight?.toString().trim() ?? '';
 
-    final description = _value(
-      product,
-      'description',
-    );
+    final String description =
+        product.description?.trim() ?? '';
 
     return productInfoContainer(
       backgroundColor: cardColor,
@@ -488,9 +467,9 @@ class _ProductDetailScreenState
           _propertyRow(
             icon: Icons.grid_view_rounded,
             title: 'category'.tr,
-            subtitle: categoryId.isEmpty
+            subtitle: categoryName.isEmpty
                 ? '-'
-                : '#$categoryId',
+                : categoryName,
             primaryTextColor:
             primaryTextColor,
             secondaryTextColor:
@@ -510,8 +489,7 @@ class _ProductDetailScreenState
           ),
 
           _propertyRow(
-            icon:
-            Icons.description,
+            icon: Icons.description,
             title: 'description'.tr,
             subtitle: description.isEmpty
                 ? '-'
@@ -527,65 +505,71 @@ class _ProductDetailScreenState
     );
   }
 
-// ============================================================
-// STATUS CARD
-// ============================================================
+  // ============================================================
+  // STATUS CARD
+  // ============================================================
 
   Widget _buildStatusCard({
-    required dynamic product,
+    required ProductData product,
     required Color cardColor,
     required Color borderColor,
     required Color primaryTextColor,
     required Color secondaryTextColor,
     required bool isDark,
   }) {
-    final status = _value(
-      product,
-      'status',
-      fallback: '0',
-    );
+    final String status =
+        product.status?.toString() ?? '0';
 
-    final stockStatus = _value(
-      product,
-      'stockStatus',
-      fallback: 'in_stock',
-    ).toLowerCase().trim();
+    final String stockStatus =
+        product.stockStatus
+            ?.toString()
+            .toLowerCase()
+            .trim() ??
+            'in_stock';
 
-    final trackStock = _value(
-      product,
-      'trackStock',
-      fallback: '0',
-    );
+    final String trackStock =
+        product.trackStock?.toString() ?? '0';
 
-    final isVisible = status == '1';
+    final bool isVisible = status == '1';
 
-    final isInStock = stockStatus == 'in_stock';
-    final isOutOfStock = stockStatus == 'out_of_stock';
-    final isOnBackorder = stockStatus == 'on_backorder';
+    final bool isInStock =
+        stockStatus == 'in_stock';
 
-    final isTrackStock =
+    final bool isOutOfStock =
+        stockStatus == 'out_of_stock';
+
+    final bool isOnBackorder =
+        stockStatus == 'on_backorder';
+
+    final bool isTrackStock =
         trackStock == '1' ||
             trackStock.toLowerCase() == 'true';
 
-    // Stock status properties
     IconData stockIcon;
     String stockLabel;
     Color stockColor;
 
     if (isInStock) {
-      stockIcon = Icons.inventory_2_outlined;
+      stockIcon =
+          Icons.inventory_2_outlined;
       stockLabel = 'in_stock'.tr;
-      stockColor = const Color(0xFF2E7D32);
+      stockColor =
+      const Color(0xFF2E7D32);
     } else if (isOutOfStock) {
-      stockIcon = Icons.remove_shopping_cart_outlined;
+      stockIcon =
+          Icons.remove_shopping_cart_outlined;
       stockLabel = 'out_of_stock'.tr;
-      stockColor = const Color(0xFFD32F2F);
+      stockColor =
+      const Color(0xFFD32F2F);
     } else if (isOnBackorder) {
-      stockIcon = Icons.schedule_outlined;
+      stockIcon =
+          Icons.schedule_outlined;
       stockLabel = 'on_backorder'.tr;
-      stockColor = const Color(0xFFEF6C00);
+      stockColor =
+      const Color(0xFFEF6C00);
     } else {
-      stockIcon = Icons.help_outline_rounded;
+      stockIcon =
+          Icons.help_outline_rounded;
       stockLabel = stockStatus.isEmpty
           ? 'unknown'.tr
           : stockStatus;
@@ -596,7 +580,8 @@ class _ProductDetailScreenState
       backgroundColor: cardColor,
       borderColor: borderColor,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
         children: [
           Text(
             'product_status'.tr,
@@ -612,7 +597,6 @@ class _ProductDetailScreenState
             spacing: 4.w,
             runSpacing: 8.h,
             children: [
-              // VISIBILITY
               _statusChip(
                 icon: isVisible
                     ? Icons.visibility_outlined
@@ -622,17 +606,17 @@ class _ProductDetailScreenState
                     : 'hidden'.tr,
                 color: isVisible
                     ? const Color(0xFF2E7D32)
-                    : isDark ? Colors.grey : Colors.grey.shade800,
+                    : isDark
+                    ? Colors.grey
+                    : Colors.grey.shade800,
               ),
 
-              // STOCK STATUS
               _statusChip(
                 icon: stockIcon,
                 label: stockLabel,
                 color: stockColor,
               ),
 
-              // TRACK STOCK
               _statusChip(
                 icon: isTrackStock
                     ? Icons.track_changes_rounded
@@ -642,14 +626,17 @@ class _ProductDetailScreenState
                     : 'not_tracked'.tr,
                 color: isTrackStock
                     ? AppColor.themeGreenColor
-                    : isDark ? Colors.grey : Colors.grey.shade800,
+                    : isDark
+                    ? Colors.grey
+                    : Colors.grey.shade800,
               ),
             ],
           ),
-         ],
-       ),
+        ],
+      ),
     );
   }
+
   // ============================================================
   // REVIEWS CARD
   // ============================================================
@@ -689,15 +676,14 @@ class _ProductDetailScreenState
                       ? null
                       : () {
                     Get.to(
-                          () =>
-                          AddRatingScreen(
-                            id: widget.id,
-                            categoryId:
-                            widget.categoryId,
-                            productId:
-                            widget.productId,
-                            isUpdate: false,
-                          ),
+                          () => AddRatingScreen(
+                        id: widget.id,
+                        categoryId:
+                        widget.categoryId,
+                        productId:
+                        widget.productId,
+                        isUpdate: false,
+                      ),
                     );
                   },
                   child: Container(
@@ -709,8 +695,11 @@ class _ProductDetailScreenState
                     decoration:
                     BoxDecoration(
                       color: hasReview
-                          ? Colors.grey.withOpacity(0.12)
-                          : AppColor.themeGreenColor.withOpacity(0.1),
+                          ? Colors.grey
+                          .withOpacity(0.12)
+                          : AppColor
+                          .themeGreenColor
+                          .withOpacity(0.1),
                       borderRadius:
                       BorderRadius.circular(
                         20.r,
@@ -737,8 +726,7 @@ class _ProductDetailScreenState
 
                         Text(
                           hasReview
-                              ? 'Already Reviewed'
-                              .tr
+                              ? 'Already Reviewed'.tr
                               : 'write_review'.tr,
                           style:
                           pMedium12.copyWith(
@@ -771,6 +759,10 @@ class _ProductDetailScreenState
     );
   }
 
+  // ============================================================
+  // REVIEWS LIST
+  // ============================================================
+
   Widget _buildReviewsList({
     required Color primaryTextColor,
     required Color secondaryTextColor,
@@ -780,7 +772,8 @@ class _ProductDetailScreenState
     return Obx(() {
       if (reviewController.reviewList.isEmpty) {
         return Padding(
-          padding: EdgeInsets.symmetric(vertical: 30.h),
+          padding:
+          EdgeInsets.symmetric(vertical: 30.h),
           child: Center(
             child: Column(
               children: [
@@ -804,57 +797,99 @@ class _ProductDetailScreenState
 
       return ListView.separated(
         shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: reviewController.reviewList.length,
-        separatorBuilder: (_, __) => verticalSpace(14.h),
+        physics:
+        const NeverScrollableScrollPhysics(),
+        itemCount:
+        reviewController.reviewList.length,
+        separatorBuilder: (_, __) =>
+            verticalSpace(14.h),
         itemBuilder: (context, index) {
-          final review = reviewController.reviewList[index];
+          final review =
+          reviewController.reviewList[index];
 
-          final currentUserId = reviewController.userId.value.toString();
-          final isMyReview = review.userId?.toString() == currentUserId;
+          final currentUserId =
+          reviewController.userId.value
+              .toString();
 
-          final time = DateTime.tryParse(review.createdAt ?? '') ?? DateTime.now();
+          final isMyReview =
+              review.userId?.toString() ==
+                  currentUserId;
 
-          final rating = double.tryParse(review.ratingNo?.toString() ?? '0') ?? 0;
+          final time =
+              DateTime.tryParse(
+                review.createdAt ?? '',
+              ) ??
+                  DateTime.now();
 
-          final reviewStatus = review.status?.toString() ?? '0';
-          final isReviewVisible = reviewStatus == '1';
+          final rating =
+              double.tryParse(
+                review.ratingNo?.toString() ??
+                    '0',
+              ) ??
+                  0;
+
+          final reviewStatus =
+              review.status?.toString() ?? '0';
+
+          final isReviewVisible =
+              reviewStatus == '1';
 
           return Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: isDark ? DarkThemeColor.cCardBackground : Colors.white,
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: borderColor),
+              color: isDark
+                  ? DarkThemeColor
+                  .cCardBackground
+                  : Colors.white,
+              borderRadius:
+              BorderRadius.circular(16.r),
+              border: Border.all(
+                color: borderColor,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0 : 0.03),
+                  color: Colors.black.withOpacity(
+                    isDark ? 0 : 0.03,
+                  ),
                   blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  offset:
+                  const Offset(0, 4),
                 ),
               ],
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
                   children: [
                     Container(
                       width: 42.w,
                       height: 42.w,
-                      decoration: BoxDecoration(
-                        color: AppColor.themeGreenColor.withOpacity(0.12),
+                      decoration:
+                      BoxDecoration(
+                        color: AppColor
+                            .themeGreenColor
+                            .withOpacity(0.12),
                         shape: BoxShape.circle,
                       ),
-                      alignment: Alignment.center,
+                      alignment:
+                      Alignment.center,
                       child: Text(
                         (review.userName != null &&
-                            review.userName!.trim().isNotEmpty)
-                            ? review.userName!.trim()[0].toUpperCase()
+                            review.userName!
+                                .trim()
+                                .isNotEmpty)
+                            ? review.userName!
+                            .trim()[0]
+                            .toUpperCase()
                             : '?',
-                        style: pBold14.copyWith(
-                          color: AppColor.themeGreenColor,
+                        style:
+                        pBold14.copyWith(
+                          color: AppColor
+                              .themeGreenColor,
                           fontSize: 16.sp,
                         ),
                       ),
@@ -864,31 +899,49 @@ class _ProductDetailScreenState
 
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                        CrossAxisAlignment
+                            .start,
                         children: [
                           Row(
                             children: [
                               Expanded(
                                 child: Text(
-                                  review.userName ?? 'User',
-                                  style: pSemiBold12.copyWith(
-                                    color: primaryTextColor,
-                                    fontSize: 13.5.sp,
+                                  review.userName ??
+                                      'User',
+                                  style:
+                                  pSemiBold12
+                                      .copyWith(
+                                    color:
+                                    primaryTextColor,
+                                    fontSize:
+                                    13.5.sp,
                                   ),
                                   maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  overflow:
+                                  TextOverflow
+                                      .ellipsis,
                                 ),
                               ),
+
                               RatingBar.builder(
-                                initialRating: rating,
+                                initialRating:
+                                rating,
                                 itemCount: 5,
                                 itemSize: 13.sp,
-                                ignoreGestures: true,
-                                itemBuilder: (_, __) => const Icon(
-                                  Icons.star_rounded,
-                                  color: Color(0xFFFFC107),
+                                ignoreGestures:
+                                true,
+                                itemBuilder:
+                                    (_, __) =>
+                                const Icon(
+                                  Icons
+                                      .star_rounded,
+                                  color: Color(
+                                    0xFFFFC107,
+                                  ),
                                 ),
-                                onRatingUpdate: (_) {},
+                                onRatingUpdate:
+                                    (_) {},
                               ),
                             ],
                           ),
@@ -898,55 +951,95 @@ class _ProductDetailScreenState
                           Row(
                             children: [
                               Icon(
-                                Icons.access_time_rounded,
+                                Icons
+                                    .access_time_rounded,
                                 size: 11.sp,
-                                color: secondaryTextColor,
+                                color:
+                                secondaryTextColor,
                               ),
-                              horizontalSpace(3.w),
+
+                              horizontalSpace(
+                                  3.w),
+
                               Text(
-                                convertToAgo(time),
-                                style: pRegular10.copyWith(
-                                  color: secondaryTextColor,
+                                convertToAgo(
+                                    time),
+                                style:
+                                pRegular10
+                                    .copyWith(
+                                  color:
+                                  secondaryTextColor,
                                 ),
                               ),
 
-                              horizontalSpace(8.w),
+                              horizontalSpace(
+                                  8.w),
 
-                              // === بادج حالة الظهور ===
                               Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8.w,
-                                  vertical: 3.h,
+                                padding:
+                                EdgeInsets
+                                    .symmetric(
+                                  horizontal:
+                                  8.w,
+                                  vertical:
+                                  3.h,
                                 ),
-                                decoration: BoxDecoration(
+                                decoration:
+                                BoxDecoration(
                                   color: (isReviewVisible
-                                      ? const Color(0xFF2E7D32)
-                                      : Colors.grey)
-                                      .withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20.r),
+                                      ? const Color(
+                                    0xFF2E7D32,
+                                  )
+                                      : Colors
+                                      .grey)
+                                      .withOpacity(
+                                      0.1),
+                                  borderRadius:
+                                  BorderRadius
+                                      .circular(
+                                    20.r,
+                                  ),
                                 ),
                                 child: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisSize:
+                                  MainAxisSize
+                                      .min,
                                   children: [
                                     Icon(
                                       isReviewVisible
-                                          ? Icons.visibility_outlined
-                                          : Icons.visibility_off_outlined,
+                                          ? Icons
+                                          .visibility_outlined
+                                          : Icons
+                                          .visibility_off_outlined,
                                       size: 10.sp,
                                       color: isReviewVisible
-                                          ? const Color(0xFF2E7D32)
-                                          : Colors.grey.shade700,
+                                          ? const Color(
+                                        0xFF2E7D32,
+                                      )
+                                          : Colors
+                                          .grey
+                                          .shade700,
                                     ),
-                                    horizontalSpace(3.w),
+
+                                    horizontalSpace(
+                                        3.w),
+
                                     Text(
                                       isReviewVisible
                                           ? 'visible'.tr
                                           : 'hidden'.tr,
-                                      style: pMedium12.copyWith(
-                                        fontSize: 9.5.sp,
+                                      style:
+                                      pMedium12
+                                          .copyWith(
+                                        fontSize:
+                                        9.5.sp,
                                         color: isReviewVisible
-                                            ? const Color(0xFF2E7D32)
-                                            : Colors.grey.shade700,
+                                            ? const Color(
+                                          0xFF2E7D32,
+                                        )
+                                            : Colors
+                                            .grey
+                                            .shade700,
                                       ),
                                     ),
                                   ],
@@ -960,71 +1053,111 @@ class _ProductDetailScreenState
                   ],
                 ),
 
-                if (review.title != null && review.title!.isNotEmpty) ...[
+                if (review.title != null &&
+                    review.title!
+                        .isNotEmpty) ...[
                   verticalSpace(10.h),
                   Text(
                     review.title!,
-                    style: pSemiBold12.copyWith(
-                      color: primaryTextColor,
+                    style:
+                    pSemiBold12.copyWith(
+                      color:
+                      primaryTextColor,
                       fontSize: 13.sp,
                     ),
                   ),
                 ],
 
                 if (review.description != null &&
-                    review.description!.isNotEmpty) ...[
+                    review.description!
+                        .isNotEmpty) ...[
                   verticalSpace(6.h),
                   Text(
                     review.description!,
-                    style: pRegular12.copyWith(
-                      color: secondaryTextColor,
+                    style:
+                    pRegular12.copyWith(
+                      color:
+                      secondaryTextColor,
                       height: 1.5,
                     ),
                   ),
                 ],
 
-                // أزرار التعديل/الحذف تحت (نفس المنطق، مكان أنضف)
                 if (isMyReview) ...[
                   verticalSpace(10.h),
-                  Divider(height: 1, thickness: 1, color: borderColor),
+
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: borderColor,
+                  ),
+
                   verticalSpace(6.h),
+
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment:
+                    MainAxisAlignment.end,
                     children: [
                       _reviewActionButton(
-                        icon: Icons.edit_outlined,
+                        icon:
+                        Icons.edit_outlined,
                         label: 'edit'.tr,
-                        color: AppColor.themeGreenColor,
+                        color: AppColor
+                            .themeGreenColor,
                         onTap: () {
-                          Get.to(() => AddRatingScreen(
-                            id: widget.id,
-                            categoryId: widget.categoryId,
-                            productId: widget.productId,
-                            reviewId: review.id.toString(),
-                            isUpdate: true,
-                            rate: rating,
-                            title: review.title,
-                            description: review.description,
-                            status: reviewStatus,
-                          ));
+                          Get.to(
+                                () =>
+                                AddRatingScreen(
+                                  id: widget.id,
+                                  categoryId:
+                                  widget.categoryId,
+                                  productId:
+                                  widget.productId,
+                                  reviewId:
+                                  review.id
+                                      .toString(),
+                                  isUpdate: true,
+                                  rate: rating,
+                                  title:
+                                  review.title,
+                                  description:
+                                  review.description,
+                                  status:
+                                  reviewStatus,
+                                ),
+                          );
                         },
                       ),
+
                       horizontalSpace(10.w),
+
                       _reviewActionButton(
-                        icon: Icons.delete_outline,
+                        icon:
+                        Icons.delete_outline,
                         label: 'delete'.tr,
                         color: Colors.red,
                         onTap: () {
-                          AppDialog.showCustomDialog(
+                          AppDialog
+                              .showCustomDialog(
                             context: context,
-                            title: 'delete'.tr,
-                            message: 'are_you_sure_delete_review'.tr,
-                            lottieAsset: 'assets/lottie/delete_icon.json',
-                            confirmColor: Colors.red,
-                            onConfirm: () async {
-                              await reviewController.deleteReviewData(
-                                reviewId: review.id.toString(),
-                                productId: widget.productId,
+                            title:
+                            'delete'.tr,
+                            message:
+                            'are_you_sure_delete_review'
+                                .tr,
+                            lottieAsset:
+                            'assets/lottie/delete_icon.json',
+                            confirmColor:
+                            Colors.red,
+                            onConfirm:
+                                () async {
+                              await reviewController
+                                  .deleteReviewData(
+                                reviewId:
+                                review.id
+                                    .toString(),
+                                productId:
+                                widget.productId,
                               );
                             },
                           );
@@ -1041,6 +1174,9 @@ class _ProductDetailScreenState
     });
   }
 
+  // ============================================================
+  // REVIEW ACTION BUTTON
+  // ============================================================
 
   Widget _reviewActionButton({
     required IconData icon,
@@ -1050,21 +1186,34 @@ class _ProductDetailScreenState
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20.r),
+      borderRadius:
+      BorderRadius.circular(20.r),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: 10.w,
+          vertical: 6.h,
+        ),
         decoration: BoxDecoration(
           color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius:
+          BorderRadius.circular(20.r),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize:
+          MainAxisSize.min,
           children: [
-            Icon(icon, size: 14.sp, color: color),
+            Icon(
+              icon,
+              size: 14.sp,
+              color: color,
+            ),
             horizontalSpace(4.w),
             Text(
               label,
-              style: pMedium12.copyWith(fontSize: 11.sp, color: color),
+              style: pMedium12.copyWith(
+                fontSize: 11.sp,
+                color: color,
+              ),
             ),
           ],
         ),
@@ -1092,7 +1241,8 @@ class _ProductDetailScreenState
         children: [
           Expanded(
             child: Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize:
+              MainAxisSize.min,
               children: [
                 if (leadingIcon != null) ...[
                   Icon(
@@ -1124,7 +1274,8 @@ class _ProductDetailScreenState
           Flexible(
             child: Text(
               value,
-              textAlign: TextAlign.right,
+              textAlign:
+              TextAlign.right,
               style:
               pSemiBold12.copyWith(
                 color:
@@ -1163,19 +1314,22 @@ class _ProductDetailScreenState
             padding:
             EdgeInsets.all(7.w),
             decoration: BoxDecoration(
-              color: secondaryTextColor.withOpacity(0.08),
+              color: secondaryTextColor
+                  .withOpacity(0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
               size: 17.sp,
-              color: secondaryTextColor,
+              color:
+              secondaryTextColor,
             ),
           ),
 
           title: Text(
             title,
-            style: pSemiBold12.copyWith(
+            style:
+            pSemiBold12.copyWith(
               color:
               primaryTextColor,
               fontSize: 13.5.sp,
@@ -1250,80 +1404,6 @@ class _ProductDetailScreenState
         ],
       ),
     );
-  }
-
-  // ============================================================
-  // SAFE GETTER
-  // ============================================================
-
-  String _value(
-      dynamic object,
-      String field, {
-        String fallback = '',
-      }) {
-    try {
-      dynamic value;
-
-      switch (field) {
-        case 'finalPrice':
-          value = object.finalPrice;
-          break;
-
-        case 'price':
-          value = object.price;
-          break;
-
-        case 'salePrice':
-          value = object.salePrice;
-          break;
-
-        case 'productCode':
-          value = object.productCode;
-          break;
-
-        case 'sku':
-          value = object.sku;
-          break;
-
-        case 'stockStatus':
-          value = object.stockStatus;
-          break;
-
-        case 'productStock':
-          value = object.productStock;
-          break;
-
-        case 'trackStock':
-          value = object.trackStock;
-          break;
-
-        case 'status':
-          value = object.status;
-          break;
-
-        case 'categoryId':
-          value = object.categoryId;
-          break;
-
-        case 'productWeight':
-          value = object.productWeight;
-          break;
-
-        case 'description':
-          value = object.description;
-          break;
-
-        default:
-          value = null;
-      }
-
-      if (value != null &&
-          value.toString().trim().isNotEmpty) {
-        return value.toString();
-      }
-    } catch (_) {}
-
-    return fallback;
   }
 
   // ============================================================
