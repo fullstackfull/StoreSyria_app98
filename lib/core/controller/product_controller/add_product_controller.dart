@@ -30,7 +30,7 @@ class AddProductController extends GetxController {
   var otherDescriptionController = TextEditingController().obs;
   var moreInfoController = TextEditingController().obs;
   var priceController = TextEditingController().obs;
-  var disAmountController = TextEditingController().obs;
+  var salePriceController = TextEditingController().obs;
 
   RxString lastPrice = ''.obs;
   RxString trending = '1'.obs;
@@ -60,6 +60,8 @@ class AddProductController extends GetxController {
   RxString categoryId = ''.obs;
   RxString discountType = 'Flat'.obs;
   List discountTypeList = ['Flat', "Percentage"];
+  RxString existingCoverImageUrl = ''.obs;
+  RxList<String> existingSubImages = <String>[].obs;
 
   CreateProductModel? createProductModel;
 
@@ -151,6 +153,7 @@ class AddProductController extends GetxController {
     required String productId,
     required String description,
     required String price,
+    required String salePrice,
     required String tag,
     required String discountType,
     required String discountAmount,
@@ -163,7 +166,6 @@ class AddProductController extends GetxController {
     required String moreInformationImage,
     required List<String> selectedSubImages,
   }) async {
-    Loader.showLoader();
 
     final fields = <String, String>{
       'store_id': Prefs.getStoreID(),
@@ -171,6 +173,7 @@ class AddProductController extends GetxController {
       'category_id': categoryId,
       'description': description,
       'price': price,
+      'sale_price': salePrice,
       'discount_type': discountType,
       'discount_amount': discountAmount,
       'product_stock': productStock,
@@ -257,7 +260,6 @@ class AddProductController extends GetxController {
       multiFiles: selectedSubImages,
     );
 
-    Loader.hideLoader();
 
     response.fold(
       onSuccess: (data) {
@@ -289,7 +291,7 @@ class AddProductController extends GetxController {
     otherDescriptionController.value.clear();
     moreInfoController.value.clear();
     priceController.value.clear();
-    disAmountController.value.clear();
+    salePriceController.value.clear();
     selectedSubImages.clear();
     coverImage.value = '';
     otherDescriptionImage.value = '';
@@ -297,6 +299,8 @@ class AddProductController extends GetxController {
     category.value = '';
     categoryId.value = '';
     groupValue.value = 'none';
+    existingCoverImageUrl.value = '';
+    existingSubImages.clear();
     isTrending.value = true;
   }
 }

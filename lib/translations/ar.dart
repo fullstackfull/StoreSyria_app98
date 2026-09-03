@@ -413,7 +413,7 @@ const Map<String, String> ar = {
   'enter_valid_name': 'أدخل اسم صالح',
   'mobile_number_required': 'رقم الهاتف مطلوب',
   'please_enter_valid_mobile': 'يرجى إدخال رقم هاتف صالح',
-  'reset'  : "إلغاء الفتر",
+  'reset'  : "إلغاء الفلترة",
   'failed_to_load_orders': 'فشل تحميل الطلبات.',
   'unexpected_error_loading_orders': 'حدث خطأ غير متوقع أثناء تحميل الطلبات.',
   'failed_to_search_orders': 'فشل البحث عن الطلبات.',

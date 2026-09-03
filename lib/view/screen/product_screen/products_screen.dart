@@ -649,19 +649,23 @@ class _ProductsScreenState extends State<ProductsScreen>
                                   changeFun: () => Get.to(
                                         () => AddNewProductScreen(
                                       isUpdate: true,
+                                      status: product.status,
                                       productId: product.id?.toString(),
                                       productName: product.name,
                                       trending: product.trending?.toString(),
                                       qty: product.productStock?.toString(),
-                                      disAmountController: product.discountPrice,
-                                      priceController: product.originalPrice,
                                       productTax: product.retuenText,
                                       variantName: product.variantAttribute?.toString(),
                                       productCategories: product.categoryName,
+                                      categoryId: product.categoryId?.toString(),
+                                      discountType: product.discountType,
+                                      coverImageUrl: product.coverImageUrl,
+                                      //subImageUrls: product.subImages,
+                                      price: product.price,
+                                      salePrice: product.salePrice,
                                       productDescription: product.description,
                                     ),
-                                  )?.then((_) => getData()),
-
+                                  ),
                                   deleteFun: () {
                                     AppDialog.showCustomDialog(
                                       context: context,

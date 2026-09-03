@@ -3,10 +3,7 @@
 import 'dart:io';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:store_go_app/utils/constant.dart';
-import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import '../../../core/model/categories_model.dart';
 import '../../../core/model/create_product_model.dart';
 import 'product_widget.dart';
 import 'package:get/get.dart';
@@ -26,31 +23,41 @@ import 'package:store_go_app/core/controller/product_controller/add_product_cont
 class AddNewProductScreen extends StatefulWidget {
   final bool isUpdate;
   final String? productId;
-  final String? status;
+  final int? status;
   final String? productName;
+  final double? price;
+  final String? discount;
+  final double? salePrice;
   final String? qty;
   final String? productCategories;
   final String? productTax;
   final String? variantName;
   final String? productDescription;
-  final String? priceController;
-  final String? disAmountController;
   final String? trending;
+  final String? categoryId;
+  final String? discountType;
+  final String? coverImageUrl;
+  final List<String>? subImageUrls;
 
   const AddNewProductScreen({
     super.key,
     required this.isUpdate,
     this.productId,
+    this.price,
     this.productName,
     this.qty,
     this.productCategories,
+    this.categoryId,
+    this.discountType,
+    this.coverImageUrl,
+    this.subImageUrls,
     this.productTax,
     this.variantName,
     this.productDescription,
-    this.priceController,
-    this.disAmountController,
     this.trending,
     this.status,
+    this.discount,
+    this.salePrice,
   });
 
   @override
@@ -74,15 +81,27 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     if (widget.isUpdate) {
       addProductController.productName.value.text = widget.productName ?? '';
       addProductController.stockQtyController.value.text = widget.qty ?? '';
-      addProductController.priceController.value.text = widget.priceController ?? '';
-      addProductController.disAmountController.value.text = widget.disAmountController ?? '';
+      addProductController.priceController.value.text = widget.price.toString() ?? '';
+      addProductController.salePriceController.value.text = widget.salePrice.toString() ?? '';
+      addProductController.categoryId.value = widget.categoryId ?? '';
+      addProductController.category.value = widget.productCategories ?? '';
+
+      addProductController.discountType.value = widget.discountType ?? 'Flat';
+
+      addProductController.isTrending.value = widget.trending == '1';
+      addProductController.trending.value = widget.trending ?? '1';
+      addProductController.isStatus.value = widget.status == 1;
+      addProductController.status.value = widget.status?.toString() ?? '1';
+
+      addProductController.existingCoverImageUrl.value = widget.coverImageUrl ?? '';
+      addProductController.existingSubImages.assignAll(widget.subImageUrls ?? []);
     } else {
       addProductController.clear();
     }
   }
 
   void getData() async {
-    await addProductController.getCreateProductData(isUpdate: false);
+   // await addProductController.getCreateProductData(isUpdate: false);
   }
 
   @override
@@ -275,7 +294,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         // 1. عرض الوصف الحالي (HTML) فقط في حالة التعديل
         if (hasCurrentDescription) ...[
           Text(
@@ -366,22 +384,44 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                 child: SizedBox(
                   height: 99.h,
                   width: double.infinity,
-                  child: addProductController.coverImage.value == ''
-                      ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.cloud_upload_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
-                      verticalSpace(6.h),
-                      Text(
-                        "drop_files_upload".tr,
-                        style: pSemiBold12.copyWith(color: textColor),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  )
-                      : ClipRRect(
-                    borderRadius: BorderRadius.circular(14.r),
-                    child: Image.file(File(addProductController.coverImage.value), fit: BoxFit.cover, width: double.infinity),
+                  child: Builder(
+                    builder: (_) {
+                      if (addProductController.coverImage.value.isNotEmpty) {
+                        return Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(14.r),
+                              child: Image.file(
+                                File(addProductController.coverImage.value),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            ),
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: _removeImageButton(
+                                onTap: () => addProductController.coverImage.value = '',
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                      if (addProductController.existingCoverImageUrl.value.isNotEmpty) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(14.r),
+                          child: Image.network(
+                            addProductController.existingCoverImageUrl.value,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (_, __, ___) => _uploadPlaceholder(textColor),
+                          ),
+                        );
+                      }
+                      return _uploadPlaceholder(textColor);
+                    },
                   ),
                 ),
               ),
@@ -415,32 +455,88 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                 child: SizedBox(
                   height: 100.h,
                   width: double.infinity,
-                  child: addProductController.selectedSubImages.isEmpty
-                      ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_photo_alternate_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
-                      verticalSpace(6.h),
-                      Text(
-                        "choose_files".tr,
-                        style: pSemiBold12.copyWith(color: textColor),
-                      ),
-                    ],
-                  )
-                      : ListView.builder(
-                    itemCount: addProductController.selectedSubImages.length,
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: EdgeInsets.only(right: 8.w),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12.r),
-                          child: Image.file(
-                            File(addProductController.selectedSubImages[index]),
-                            fit: BoxFit.cover,
-                            width: 90.w,
+                  child: Builder(
+                    builder: (_) {
+                      final hasExisting = addProductController.existingSubImages.isNotEmpty;
+                      final hasNew = addProductController.selectedSubImages.isNotEmpty;
+
+                      if (!hasExisting && !hasNew) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_photo_alternate_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
+                            verticalSpace(6.h),
+                            Text(
+                              "choose_files".tr,
+                              style: pSemiBold12.copyWith(color: textColor),
+                            ),
+                          ],
+                        );
+                      }
+
+                      return ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          ...List.generate(
+                            addProductController.existingSubImages.length,
+                                (index) {
+                              final url = addProductController.existingSubImages[index];
+                              return Padding(
+                                padding: EdgeInsets.only(right: 8.w),
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      child: Image.network(
+                                        url,
+                                        fit: BoxFit.cover,
+                                        width: 90.w,
+                                        height: 100.h,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 2,
+                                      right: 2,
+                                      child: _removeImageButton(
+                                        onTap: () => addProductController.existingSubImages.removeAt(index),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
-                        ),
+                          // الصور الجديدة (محلية)
+                          ...List.generate(
+                            addProductController.selectedSubImages.length,
+                                (index) {
+                              final path = addProductController.selectedSubImages[index];
+                              return Padding(
+                                padding: EdgeInsets.only(right: 8.w),
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      child: Image.file(
+                                        File(path),
+                                        fit: BoxFit.cover,
+                                        width: 90.w,
+                                        height: 100.h,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 2,
+                                      right: 2,
+                                      child: _removeImageButton(
+                                        onTap: () => addProductController.selectedSubImages.removeAt(index),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -453,6 +549,34 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     );
   }
 
+  Widget _uploadPlaceholder(Color textColor) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.cloud_upload_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
+        verticalSpace(6.h),
+        Text(
+          "drop_files_upload".tr,
+          style: pSemiBold12.copyWith(color: textColor),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _removeImageButton({required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(3.w),
+        decoration: const BoxDecoration(
+          color: Colors.black54,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.close, size: 14.sp, color: Colors.white),
+      ),
+    );
+  }
   Widget _buildPricingSection(
       Color textColor, Color hintColor, Color borderColor, Color cardColor, Color softBg, bool isDark) {
     return Column(
@@ -525,7 +649,8 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             validator: (value) {
               return Validator.validateRequired(value!);
             },
-            keyboardType: TextInputType.number),
+            keyboardType: TextInputType.number
+        ),
         verticalSpace(12.h),
         commonDropdownButtonWidget(
           labelText: 'discount_type'.tr,
@@ -541,7 +666,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         ),
         verticalSpace(12.h),
         AddProductTextField(
-            controller: addProductController.disAmountController.value,
+            controller: addProductController.salePriceController.value,
             labelText: 'discount_amount'.tr,
             hintText: 'enter_discount'.tr,
             validator: (value) {
@@ -581,29 +706,25 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           iconData: DefaultImages.whiteDoneIcn,
           onPressed: () {
             final isFormValid = formKey.currentState!.validate();
-            if (!isFormValid) {
-              return;
-            }
+            if (!isFormValid) return;
 
-            if (addProductController.coverImage.value == '') {
+            final hasCover = addProductController.coverImage.value.isNotEmpty ||
+                addProductController.existingCoverImageUrl.value.isNotEmpty;
+
+            if (!hasCover) {
               commonToast("please_add_cover_image".tr);
               return;
             }
 
-            if (addProductController.selectedSubImages.isEmpty) {
+            final hasSubImages = addProductController.selectedSubImages.isNotEmpty ||
+                addProductController.existingSubImages.isNotEmpty;
+
+            if (!hasSubImages) {
               commonToast("please_add_sub_image".tr);
               return;
             }
 
-            if (widget.isUpdate == true) {
-              if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                commonToast(AppConstant.demoString.tr);
-              } else {
-                _submitProductData();
-              }
-            } else {
-              _submitProductData();
-            }
+            _submitProductData();
           },
           width: 190.w,
           height: 42.h,
@@ -614,16 +735,19 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
 
   void _submitProductData() {
     addProductController.addProductData(
-      status: widget.status ?? '',
+      status: widget.status.toString(),
       isUpdate: widget.isUpdate,
       tag: addProductController.groupValue.value,
       name: addProductController.productName.value.text.trim(),
       categoryId: addProductController.categoryId.value,
       productId: widget.productId ?? '',
-      description: addProductController.productDescriptionController.value.text.trim(),
+      description: addProductController.productDescriptionController.value.text.trim().isNotEmpty
+          ? addProductController.productDescriptionController.value.text.trim()
+          : (widget.isUpdate ? '' : ''),
       price: addProductController.priceController.value.text.trim(),
+      salePrice: addProductController.salePriceController.value.text.trim(),
       discountType: addProductController.discountType.value,
-      discountAmount: addProductController.disAmountController.value.text.trim(),
+      discountAmount: addProductController.salePriceController.value.text.trim(),
       productStock: addProductController.stockQtyController.value.text.trim(),
       trending: addProductController.trending.value,
       productOtherDescription: addProductController.otherDescriptionController.value.text.trim(),

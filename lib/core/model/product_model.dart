@@ -86,7 +86,7 @@ class ProductData {
 
   // --- أسعار وكميات ---
   double? price, salePrice;
-  String? finalPrice, originalPrice, discountPrice;
+  String? finalPrice;
   int? discountAmount;
   String? discountType;
 
@@ -121,7 +121,7 @@ class ProductData {
     this.isActive, this.maincategoryId, this.isReview, this.trackStock,
     this.minimumQuantity, this.maximumQuantity, this.lowStockThreshold,
     this.customFieldStatus, this.price, this.salePrice, this.finalPrice,
-    this.originalPrice, this.discountPrice, this.discountAmount, this.discountType,
+    this.discountAmount, this.discountType,
     this.name, this.slug, this.productCode, this.tag, this.tagApi,
     this.description, this.detail, this.specification, this.otherDescription,
     this.otherDescriptionApi, this.categoryName, this.defaultVariantName,
@@ -219,7 +219,6 @@ class ProductData {
     inCart = json['in_cart'] as bool?;
     inWhishlist = json['in_whishlist'] as bool?;
 
-    // معالجة الأسعار (لتفادي مشاكل دقة الأرقام العشرية الطويلة)
     try {
       price = json['price'] != null ? double.tryParse(json['price'].toString()) : null;
     } catch (_) { price = null; }
@@ -229,8 +228,6 @@ class ProductData {
     } catch (_) { salePrice = null; }
 
     finalPrice = json['final_price'] as String?;
-    originalPrice = json['original_price'] as String?;
-    discountPrice = json['discount_price'] as String?;
     discountType = json['discount_type'] as String?;
 
     // المصفوفات والكائنات الفرعية
@@ -288,8 +285,8 @@ class ProductData {
     data['default_variant_name'] = defaultVariantName; data['default_variant_price'] = defaultVariantPrice;
     data['in_cart'] = inCart; data['in_whishlist'] = inWhishlist;
     data['price'] = price; data['sale_price'] = salePrice;
-    data['final_price'] = finalPrice; data['original_price'] = originalPrice;
-    data['discount_price'] = discountPrice; data['discount_type'] = discountType;
+    data['final_price'] = finalPrice;
+    data['discount_type'] = discountType;
 
     // المصفوفات
     if (otherDescriptionArray != null) {
