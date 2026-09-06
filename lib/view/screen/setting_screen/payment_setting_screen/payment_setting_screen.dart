@@ -42,18 +42,17 @@ class _PaymentSettingScreenState extends State<PaymentSettingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
-      appBar: simpleAppBar(title: ''),
+      appBar: simpleAppBar(
+          title: "Store Payment Setting",
+          label: null,
+          isBack: true,
+          onNewLabelTap: (){}),
       body: Padding(
         padding: EdgeInsets.all(24),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Store Payment Setting",
-                style: pRegular20,
-              ),
-              verticalSpace(20),
               Row(
                 children: [
                   Expanded(

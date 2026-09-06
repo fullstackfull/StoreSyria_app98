@@ -55,7 +55,11 @@ class _BankTransferScreenState extends State<BankTransferScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColor.cBackGround,
-        appBar: simpleAppBar(title: "Bank Transfer"),
+        appBar: simpleAppBar(
+            title: "Bank Transfer",
+            isBack: true,
+            label: null,
+            onNewLabelTap: () {  }),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),

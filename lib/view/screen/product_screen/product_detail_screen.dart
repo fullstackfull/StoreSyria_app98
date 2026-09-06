@@ -115,6 +115,9 @@ class _ProductDetailScreenState
     return Scaffold(
       appBar: simpleAppBar(
         title: 'product_details'.tr,
+        label: null,
+        isBack: true,
+        onNewLabelTap: () {  },
       ),
       backgroundColor: backgroundColor,
       body: SafeArea(

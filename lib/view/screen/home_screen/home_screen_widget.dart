@@ -32,7 +32,8 @@ Widget buildAppTitleRow(String date) {
     children: [
       Text(
         "Dashboard".tr,
-        style: pBold24.copyWith(
+        style: pBold18.copyWith(
+          fontSize: 21.sp,
           color: isDark ? Colors.white : AppColor.themeNavyBlueColor,
         ),
       ),

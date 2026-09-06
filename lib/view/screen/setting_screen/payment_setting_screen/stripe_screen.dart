@@ -51,7 +51,11 @@ class _StripeScreenState extends State<StripeScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColor.cBackGround,
-        appBar: simpleAppBar(title: "Stripe"),
+        appBar: simpleAppBar(
+            title: "Stripe",
+            label: null,
+            isBack : true,
+            onNewLabelTap: () {  }),
         body: Padding(
           padding: const EdgeInsets.all(24),
           child: Obx(() {

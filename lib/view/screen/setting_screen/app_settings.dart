@@ -37,6 +37,9 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
       backgroundColor: isDark  ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8),
       appBar: simpleAppBar(
         title: 'settings'.tr,
+        label: null,
+        isBack: true,
+        onNewLabelTap: () {  },
       ),
       body: SafeArea(
         child: SingleChildScrollView(

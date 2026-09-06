@@ -3,6 +3,8 @@ import 'package:store_go_app/network_dio/network_dio.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 
+import '../../core/model/create_order_model.dart';
+
 class OrderRepository {
   getOrderData(
       int page,
@@ -24,6 +26,25 @@ class OrderRepository {
 
     var response = await NetworkHttps.getRequest(endPoint);
     print("response==========>$response");
+    return response;
+  }
+
+  createOrder({
+    required CreateOrderRequest request,
+  }) async {
+    final String endPoint = API.createOrderUrl;
+
+    final body = request.toJson();
+
+    print("createOrder body==========>$body");
+
+    final response = await NetworkHttps.postRequest(
+      endPoint,
+      body,
+    );
+
+    print("createOrder response==========>$response");
+
     return response;
   }
 

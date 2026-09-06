@@ -14,6 +14,7 @@ class API {
 
   static String categoryListUrl = '/categorylist';
   static String createProductUrl = '/createproduct';
+  static String createOrderUrl = '/createOrderViaApi';
   static String productListUrl = '/productlist';
   static String deleteProductListUrl = '/deleteproduct';
   static String searchProductListUrl = '/searchproduct';
@@ -86,4 +87,10 @@ class API {
   static String deleteStoreUrl = '/deletestore';
   static String fcmTokenUrl = '/store/fcm-token';
   static String notificationUrl = '/notification';
+
+  static String customersUrl = '/customerlist';
+  static String addCustomerUrl = '/AddCustomer';
+  static String deleteCustomerUrl = '/destroyCustomer/';
+  static String customerIdUrl = '&customer_id=';
+
 }

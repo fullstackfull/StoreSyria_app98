@@ -9,6 +9,7 @@ import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/setting_screen/store_setting_screen.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
+import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import '../../../core/controller/auth/auth_controller.dart';
 import '../../new_widgets/settings_card.dart';
@@ -31,27 +32,24 @@ class SettingScreen extends StatelessWidget {
             Theme.of(context).brightness == Brightness.dark;
 
         return Scaffold(
+          appBar: simpleAppBar(
+              title: "more".tr,
+              isBold: true,
+              label: null,
+              onNewLabelTap: () {}
+          ),
           backgroundColor: isDark  ? DarkThemeColor.cBackGround : AppColor.cLight,
           body: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(
               24,
-              35,
+              14,
               24,
               30,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'more'.tr,
-                  style: pBold24.copyWith(
-                    color: AppColor.themeNavyBlueColor,
-                  ),
-                ),
-
-                verticalSpace(12),
-
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -83,10 +81,10 @@ class SettingScreen extends StatelessWidget {
                     settingCard(
                       isDark: isDark,
                       icon: DefaultImages.taxIcn,
-                      title: 'tax'.tr,
-                      subtitle: 'manage_tax'.tr,
+                      title: 'customers'.tr,
+                      subtitle: 'manage_customer'.tr,
                       function: () {
-                        Get.toNamed(AppRoutes.tax);
+                        Get.toNamed(AppRoutes.customers);
                       },
                     ),
 

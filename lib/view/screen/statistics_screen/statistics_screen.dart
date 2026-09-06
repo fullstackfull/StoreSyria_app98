@@ -39,7 +39,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: isDark ? AppColor.cBackGround : AppColor.cLight,
-      appBar: simpleAppBar(title: "analytics".tr),
+      appBar: simpleAppBar(
+          title: "analytics".tr,
+          isBack: true,
+          label: null, onNewLabelTap: () {  }),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Obx(() {

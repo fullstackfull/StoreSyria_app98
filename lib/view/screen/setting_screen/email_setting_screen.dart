@@ -43,7 +43,11 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
-      appBar: simpleAppBar(title: "", date: ""),
+      appBar: simpleAppBar(
+          title: "Store Email Setting",
+          isBack: true,
+          label: null,
+          onNewLabelTap: () {  }),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -53,11 +57,6 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Store Email Setting",
-                    style: pRegular20,
-                  ),
-                  verticalSpace(20),
                   AddProductTextField(
                     controller: emailSettingController.mailDriver,
                     labelText: 'Mail Driver:',

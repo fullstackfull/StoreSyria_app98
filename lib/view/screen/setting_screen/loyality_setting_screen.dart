@@ -44,8 +44,12 @@ class _LoyaltyProgramScreenState extends State<LoyaltyProgramScreen> {
         FocusScope.of(context).requestFocus(FocusNode());
       },
       child: Scaffold(
+        appBar: simpleAppBar(
+            title: "Store Loyalty Program",
+            label: null,
+            isBack: true,
+            onNewLabelTap: (){}),
         backgroundColor: AppColor.cBackGround,
-        appBar: simpleAppBar(title: "", date: ""),
         body: Padding(
           padding: const EdgeInsets.all(24),
           child: Obx(
@@ -53,11 +57,6 @@ class _LoyaltyProgramScreenState extends State<LoyaltyProgramScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Store Loyalty Program",
-                    style: pRegular20,
-                  ),
-                  verticalSpace(25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [

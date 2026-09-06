@@ -60,7 +60,10 @@ class _CODScreenState extends State<CODScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColor.cBackGround,
-        appBar: simpleAppBar(title: 'Cash on Delivery'),
+        appBar: simpleAppBar(
+            title: 'Cash on Delivery',
+            isBack: true,
+            label: null, onNewLabelTap: () {  }),
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.all(24),

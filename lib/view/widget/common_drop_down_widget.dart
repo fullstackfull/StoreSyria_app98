@@ -13,7 +13,7 @@ Widget commonDropdownButtonWidget<T>({
   Widget? widget,
   String hint = '',
   List<T>? list,
-  String Function(T item)? itemLabel, // <-- جديد: شو يتعرض للمستخدم
+  String Function(T item)? itemLabel,
   ValueChanged<T?>? onChanged,
   FormFieldValidator<T>? validator,
 }) {

@@ -97,14 +97,23 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
       elevation: 0,
       scrolledUnderElevation: 0,
       leading: widget.isBack
-          ? IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: isDark ? DarkThemeColor.cText : AppColor.cText,
-                size: 20.sp,
-              ),
-              onPressed: () => Get.back(),
-            )
+          ? GestureDetector(
+        onTap: () {
+          Get.back();
+        },
+        child: Padding(
+          padding: EdgeInsets.all(9.w),
+          child: Container(
+            height: 10.h,
+            width: 10.w,
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColor.cBorder),
+              borderRadius: BorderRadius.circular(15.r),
+            ),
+            child: Icon(Icons.arrow_back,color: AppColor.themeNavyBlueColor),
+          ),
+        ),
+      )
           : null,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

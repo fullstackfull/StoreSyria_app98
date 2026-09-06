@@ -50,7 +50,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: simpleAppBar(title: "order_details".tr),
+      appBar: simpleAppBar(
+          title: "order_details".tr,
+          isBack : true,
+          label: null,
+          onNewLabelTap: () {  }
+      ),
       body: SafeArea(
         child: Obx(() {
           if (orderController.isLoadingOrderDetails.value) {

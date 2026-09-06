@@ -67,7 +67,11 @@ class _ShippingScreenState extends State<ShippingScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
-      appBar: simpleAppBar(title: "Shipping".tr),
+      appBar: simpleAppBar(
+          title: "Shipping".tr,
+          isBack: true,
+          label: null,
+          onNewLabelTap: () {  }),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(

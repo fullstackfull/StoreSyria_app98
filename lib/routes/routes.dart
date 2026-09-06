@@ -1,4 +1,7 @@
 import 'package:get/get.dart';
+import 'package:store_go_app/bindings/customer_binding.dart';
+import 'package:store_go_app/core/controller/customers/customer_controller.dart';
+import 'package:store_go_app/view/screen/customers/customer_screen.dart';
 import 'package:store_go_app/view/screen/setting_screen/app_settings.dart';
 import 'package:store_go_app/view/screen/setting_screen/language_screen.dart';
 import 'package:store_go_app/view/screen/welcome_screen.dart';
@@ -9,8 +12,8 @@ import '../bindings/shipping_binding.dart';
 import '../bindings/statistics_binding.dart';
 import '../bindings/tax_binding.dart';
 import '../view/screen/auth/login_widget.dart';
+import '../view/screen/coupon_screen/coupon_screen.dart';
 import '../view/screen/dashboard_manager/dashboard_manager.dart';
-import '../view/screen/home_screen/coupon_screen/coupon_screen.dart';
 import '../view/screen/home_screen/shipping_screen.dart';
 import '../view/screen/home_screen/tax_screen.dart';
 import '../view/screen/statistics_screen/statistics_screen.dart';
@@ -22,7 +25,6 @@ class AppRoutes {
   // Route Constants
   // =========================
   static const splash = '/splash';
-  static const splah = '/';
   static const onboarding = '/onboarding';
   static const login = '/login';
   static const dashboard = '/dashboard';
@@ -45,6 +47,7 @@ class AppRoutes {
   static const coupon = '/coupon';
   static const notifications = '/notifications';
   static const lang = '/lang';
+  static const customers = '/customers';
 
   // =========================
   // Pages
@@ -59,11 +62,6 @@ class AppRoutes {
       page: () => OnboardingScreen(),
       binding: OnboardingBinding(),
     ),
-
-  // GetPage(
-  //     name: splah,
-  //     page: () => AddVariantScreen(),
-  //   ),
 
     GetPage(
         name: login,
@@ -114,6 +112,12 @@ class AppRoutes {
     GetPage(
       name: AppRoutes.appSettings,
       page: () => AppSettingsScreen(),
+    ),
+
+    GetPage(
+      name: AppRoutes.customers,
+      page: () => CustomerScreen(),
+      binding: CustomerBinding()
     ),
   ];
 }

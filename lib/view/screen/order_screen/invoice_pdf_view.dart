@@ -92,7 +92,7 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: simpleAppBar(title: 'invoice'.tr),
+      appBar: simpleAppBar(title: 'invoice'.tr, label: '', onNewLabelTap: () {  }),
       body: Padding(
         padding: EdgeInsets.only(top: 10.h),
         child: PdfPreview(

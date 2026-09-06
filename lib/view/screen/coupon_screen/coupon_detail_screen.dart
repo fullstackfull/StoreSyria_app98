@@ -9,7 +9,7 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
-import '../../../widget/common_appbar_widget.dart';
+import '../../widget/common_appbar_widget.dart';
 
 class CouponDetailScreen extends StatefulWidget {
   final int couponId;
@@ -55,6 +55,9 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
             : const Color(0xFFF5F6F8),
         appBar: simpleAppBar(
           title: "Coupon Details".tr,
+          isBack: true,
+          label: null,
+          onNewLabelTap: () {  },
         ),
         body: Padding(
           padding: EdgeInsets.symmetric(

@@ -36,6 +36,9 @@ class _LanguageCurrenciesScreenState
         backgroundColor: AppColor.cBackGround,
         appBar: simpleAppBar(
           title: 'language_and_currency'.tr,
+          label: null,
+          onNewLabelTap: () {  },
+          isBack: true
         ),
         body: SafeArea(
           child: SingleChildScrollView(

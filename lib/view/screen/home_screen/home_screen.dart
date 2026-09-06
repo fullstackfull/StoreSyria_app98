@@ -13,7 +13,6 @@ import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/view/screen/home_screen/coupon_screen/new_coupon_bottomsheet.dart';
 import 'package:store_go_app/view/screen/order_screen/order_detail_screen.dart';
 import 'package:store_go_app/view/screen/product_screen/add_new_product_screen.dart';
 import 'package:store_go_app/view/screen/statistics_screen/statistics_screen.dart';
@@ -21,14 +20,14 @@ import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/home_controller.dart';
-import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/controller/home_controller/category_controller.dart';
 import '../../../core/model/static_model.dart';
 import '../../new_widgets/category_widget.dart';
-import '../../new_widgets/header_widget.dart';
 import '../../new_widgets/top_orders.dart';
+import '../../widget/common_appbar_widget.dart';
 import '../../widget/common_snak_bar_widget.dart';
+import '../coupon_screen/new_coupon_bottomsheet.dart';
 import '../statistics_screen/statistics_screen_widget.dart';
 import 'add_category_bottomsheet.dart';
 
@@ -310,8 +309,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           ],
                           verticalSpace(25),
 
-                          HeaderWidget(
-                            context: context,
+                          simpleAppBar(
                             title: "Statistics".tr,
                             label: "Show more statistics".tr,
                             onNewLabelTap: () => Get.to(() => StatisticsScreen()),
@@ -369,8 +367,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           ),
                           verticalSpace(18),
 
-                          HeaderWidget(
-                            context: context,
+                          simpleAppBar(
                             title: "Categories".tr,
                             label: "add_category".tr,
                             onNewLabelTap: () {
@@ -431,8 +428,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           }),
                           verticalSpace(25),
 
-                          HeaderWidget(
-                            context: context,
+                          simpleAppBar(
                             title: "Recent orders".tr,
                             label: "new_order".tr,
                             onNewLabelTap: () {},

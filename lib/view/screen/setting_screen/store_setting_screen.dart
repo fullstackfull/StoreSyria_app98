@@ -30,6 +30,9 @@ class StoreSettingScreen extends StatelessWidget {
       backgroundColor: isDark  ? DarkThemeColor.cBackGround : AppColor.cLight,
       appBar: simpleAppBar(
         title: 'store_settings'.tr,
+        label: null,
+        isBack: true,
+        onNewLabelTap: () {  },
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -84,7 +87,7 @@ class StoreSettingScreen extends StatelessWidget {
                   title: 'tax'.tr,
                   subtitle: 'manage_store_tax'.tr,
                   function: () {
-                    // Tax
+                    Get.toNamed(AppRoutes.tax);
                   },
                 ),
 

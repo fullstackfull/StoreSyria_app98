@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
       child: Scaffold(
         backgroundColor: isDark ? AppColor.cBackGround : AppColor.cLight,
-        appBar: simpleAppBar(title: "My Account", date: "Monday, 30 Jan"),
+        appBar: simpleAppBar(title: "My Account", label: '', onNewLabelTap: () {  }),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),

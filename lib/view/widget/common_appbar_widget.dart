@@ -9,11 +9,17 @@ import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 
-
-simpleAppBar({bool isBack = true, required String title, String? date}) {
+simpleAppBar({
+  bool isBack = false,
+  bool isBold = false,
+  required String title,
+  required String? label,
+  required VoidCallback onNewLabelTap,
+  }) {
   final isDark = Theme.of(Get.context!).brightness == Brightness.dark;
   final borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder;
   final textColor =  isDark ? AppColor.cWhite : AppColor.themeNavyBlueColor;
+  final accent = AppColor.themeNavyBlueColor;
 
   return PreferredSize(
     preferredSize: Size(Get.width, 70),
@@ -39,50 +45,53 @@ simpleAppBar({bool isBack = true, required String title, String? date}) {
                         ),
                         child: Icon(Icons.arrow_back,color: AppColor.themeNavyBlueColor),
                       ),
-                    )
+                  )
                   : SizedBox(),
               horizontalSpace(isBack == true ? 15 : 0),
               Text(
                 title,
-                style: pMedium18.copyWith(color: textColor),
+                style: isBold ? pBold18.copyWith(color: textColor,fontSize: 21.sp) : pMedium18.copyWith(color: textColor),
               ),
             ],
           ),
-          // Text(
-          //   // date,
-          //   dateFormatted(date: DateTime.now().toString(), formatType: mmmDdYyyy),
-          //   style: pRegular14,
-          // )
+          if (label != null)
+            GestureDetector(
+              onTap: onNewLabelTap,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 8.w,
+                  vertical: 7.h,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30.r),
+                  border: Border.all(
+                    color: accent,
+                    width: 1.3,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add,
+                      size: 18.sp,
+                      color: accent,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: accent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     ),
   );
-  // return AppBar(
-  //   elevation: 0,
-  //   leading: isBack == true
-  //       ? GestureDetector(
-  //           onTap: () {
-  //             Get.back();
-  //           },
-  //           child: Container(
-  //               height: 35,
-  //               width: 35,
-  //               decoration: BoxDecoration(border: Border.all(color: AppColor.cBorder),borderRadius: BorderRadius.circular(15)),
-  //               child: Align(child: assetSvdImageWidget(image: DefaultImages.backIcn, width: 11, height: 10))))
-  //       : SizedBox(),
-  //   backgroundColor: AppColor.cBackGround,
-  //   title: Text(
-  //     title,
-  //     style: pRegular14,
-  //   ),
-  //   actions: [
-  //     Padding(
-  //       padding: const EdgeInsets.all(15),
-  //       child: Text(
-  //         date,
-  //         style: pRegular14,
-  //       ),
-  //     )
-  //   ],
-  // );
 }

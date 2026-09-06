@@ -9,10 +9,10 @@ import 'package:store_go_app/view/screen/order_screen/order_detail_screen.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
 import '../../../core/model/order_model.dart';
 import '../../new_widgets/filter_tabs.dart';
-import '../../new_widgets/header_widget.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/search_widget.dart';
 import '../../new_widgets/top_orders.dart';
+import '../../widget/common_appbar_widget.dart';
 import '../../widget/error_empty_state.dart';
 import '../../widget/loading_widget.dart';
 import '../../new_widgets/date_filter.dart';
@@ -95,26 +95,22 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
   Widget build(BuildContext context) {
     super.build(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
+        appBar: simpleAppBar(
+          title: "orders".tr,
+          isBold: true,
+          label: "new_order".tr,
+          onNewLabelTap: () {},
+        ),
         backgroundColor: AppColor.cLight,
         body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // add order
-              HeaderWidget(
-                context: context,
-                title: "orders".tr,
-                label: "new_order".tr,
-                onNewLabelTap: () {},
-              ),
-
-              verticalSpace(10.h),
-
               Obx(() {
                 return orderStatusTabsWidget(
                   context: context,
@@ -134,7 +130,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                   },
                 );
               }),
-              verticalSpace(20.h),
+              verticalSpace(16.h),
 
               SizedBox(
                 width: double.infinity,
@@ -151,7 +147,7 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                   },
                 ),
               ),
-
+              verticalSpace(16.h),
               Expanded(
                 child: Obx(() {
                   if (orderController.isLoadingOrders.value && orderController.currantPage.value == 1) {

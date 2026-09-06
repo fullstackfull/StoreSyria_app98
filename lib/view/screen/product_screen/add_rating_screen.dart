@@ -87,9 +87,12 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: simpleAppBar(
+        isBack: true,
         title: widget.isUpdate == true
             ? 'update_review'.tr
             : 'add_review'.tr,
+        label: null,
+        onNewLabelTap: () {  },
       ),
       body: SafeArea(
         child: Padding(

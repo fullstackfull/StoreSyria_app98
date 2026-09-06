@@ -123,7 +123,10 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
       child: Scaffold(
         backgroundColor: bgColor,
         appBar: simpleAppBar(
+          isBack: true,
           title: widget.isUpdate ? "update_product".tr : "new_product".tr,
+          label: null,
+          onNewLabelTap: () { },
         ),
         body: SafeArea(
           child: Obx(() {

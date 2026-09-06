@@ -1,13 +1,13 @@
-// ignore_for_file: avoid_print, prefer_const_constructors
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/home_controller/category_controller.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
+import '../../new_widgets/app_txt_field.dart';
 
 class AddNewCategoriesWidget extends StatefulWidget {
   final bool isUpdate;
@@ -37,6 +37,7 @@ class AddNewCategoriesWidget extends StatefulWidget {
 class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   late CategoryController categoryController;
 
   late AnimationController _animationController;
@@ -80,6 +81,10 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     });
   }
 
+  // ============================================================
+  // SETUP DATA
+  // ============================================================
+
   void _setupData() {
     categoryController.categoryName.clear();
 
@@ -90,19 +95,21 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
       categoryController.iconPath.value = widget.icon ?? '';
 
       // Trending
-      final isTrending = widget.trending == '1';
+      final bool isTrending = widget.trending == '1';
+
       categoryController.isTrending.value = isTrending;
       categoryController.trending.value = isTrending ? '1' : '0';
 
       // Status
-      final isActive = widget.status == '1';
+      final bool isActive = widget.status == '1';
+
       categoryController.isActive.value = isActive;
     } else {
       categoryController.imagePath.value = '';
       categoryController.iconPath.value = '';
 
       categoryController.isTrending.value = false;
-      categoryController.trending.value = '1';
+      categoryController.trending.value = '0';
 
       categoryController.isActive.value = false;
     }
@@ -114,33 +121,59 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     super.dispose();
   }
 
+  // ============================================================
+  // THEME
+  // ============================================================
+
   bool get isDark =>
       Theme.of(context).brightness == Brightness.dark;
 
   Color get backgroundColor =>
-      isDark ? const Color(0xFF101820) : const Color(0xFFF7F8FA);
+      isDark
+          ? const Color(0xFF101820)
+          : const Color(0xFFF7F8FA);
 
   Color get cardColor =>
-      isDark ? const Color(0xFF182331) : Colors.white;
+      isDark
+          ? const Color(0xFF182331)
+          : Colors.white;
 
   Color get textColor =>
-      isDark ? Colors.white : const Color(0xFF172C4E);
+      isDark
+          ? Colors.white
+          : const Color(0xFF172C4E);
 
   Color get secondaryTextColor =>
-      isDark ? Colors.white70 : const Color(0xFF687386);
+      isDark
+          ? Colors.white70
+          : const Color(0xFF687386);
 
   Color get borderColor =>
-      isDark ? Colors.white12 : const Color(0xFFE2E6EC);
+      isDark
+          ? Colors.white12
+          : const Color(0xFFE2E6EC);
+
+  // ============================================================
+  // CLOSE
+  // ============================================================
 
   void _close() {
     FocusScope.of(context).unfocus();
     Get.back();
   }
 
-  Future<void> _pickImage({required bool isIcon}) async {
+  // ============================================================
+  // PICK IMAGE / ICON
+  // ============================================================
+
+  Future<void> _pickImage({
+    required bool isIcon,
+  }) async {
     final path = await categoryController.pickFile();
 
-    if (path == null || path.toString().isEmpty) return;
+    if (path == null || path.toString().isEmpty) {
+      return;
+    }
 
     if (isIcon) {
       categoryController.iconPath.value = path.toString();
@@ -149,6 +182,10 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     }
   }
 
+  // ============================================================
+  // HEADER
+  // ============================================================
+
   Widget _buildHeader() {
     return Row(
       children: [
@@ -156,7 +193,9 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: navyBlue.withOpacity(isDark ? 0.25 : 0.08),
+            color: navyBlue.withOpacity(
+              isDark ? 0.25 : 0.08,
+            ),
             borderRadius: BorderRadius.circular(12),
           ),
           child: IconButton(
@@ -168,7 +207,9 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
             ),
           ),
         ),
+
         const SizedBox(width: 14),
+
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +224,9 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
                   color: textColor,
                 ),
               ),
+
               const SizedBox(height: 4),
+
               Text(
                 widget.isUpdate
                     ? 'update_category_description'.tr
@@ -201,81 +244,194 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     );
   }
 
-  Widget _buildTextField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Category Name
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: 'category_name'.tr,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                ),
-              ),
-              const TextSpan(
-                text: ' *',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
+  // ============================================================
+  // TRENDING SWITCH
+  // ============================================================
+
+  Widget _buildTrendingSwitch() {
+    final bool isTrending =
+        categoryController.isTrending.value;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: borderColor,
         ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: categoryController.categoryName,
-          validator: (value) {
-            return Validator.validateRequired(value ?? "");
-          },
-          textInputAction: TextInputAction.done,
-          style: TextStyle(
-            fontSize: 14,
-            color: textColor,
-          ),
-          decoration: InputDecoration(
-            hintText: 'enter_category_name'.tr,
-            hintStyle: TextStyle(
-              fontSize: 13,
-              color: secondaryTextColor,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: navyBlue.withOpacity(
+                isDark ? 0.22 : 0.07,
+              ),
+              borderRadius: BorderRadius.circular(11.r),
             ),
-            prefixIcon: Icon(
-              Icons.category_outlined,
+            child: Icon(
+              isTrending
+                  ? Icons.local_fire_department_rounded
+                  : Icons.local_fire_department_outlined,
               color: navyBlue,
               size: 21,
             ),
-            filled: true,
-            fillColor: cardColor,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 15,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: borderColor),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: borderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: navyBlue,
-                width: 1.5,
-              ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'trending'.tr,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+
+                const SizedBox(height: 3),
+
+                Text(
+                  isTrending
+                      ? 'yes'.tr
+                      : 'no'.tr,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isTrending
+                        ? navyBlue
+                        : secondaryTextColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
+
+          CupertinoSwitch(
+            value: isTrending,
+            onChanged: (value) {
+              categoryController.isTrending.value =
+                  value;
+
+              categoryController.trending.value =
+              value ? '1' : '0';
+            },
+            activeColor: navyBlue,
+            thumbColor: Colors.white,
+            trackColor: isDark
+                ? Colors.white24
+                : const Color(0xFFD6DAE0),
+          ),
+        ],
+      ),
     );
   }
+
+  // ============================================================
+  // STATUS SWITCH
+  // ============================================================
+
+  Widget _buildStatusSwitch() {
+    final bool isActive =
+        categoryController.isActive.value;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: borderColor,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: navyBlue.withOpacity(
+                isDark ? 0.22 : 0.07,
+              ),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(
+              isActive
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.cancel_outlined,
+              color: navyBlue,
+              size: 21,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'status'.tr,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+
+                const SizedBox(height: 3),
+
+                Text(
+                  isActive
+                      ? 'active'.tr
+                      : 'inactive'.tr,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isActive
+                        ? navyBlue
+                        : secondaryTextColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          CupertinoSwitch(
+            value: isActive,
+            onChanged: (value) {
+              categoryController.isActive.value =
+                  value;
+            },
+            activeColor: navyBlue,
+            thumbColor: Colors.white,
+            trackColor: isDark
+                ? Colors.white24
+                : const Color(0xFFD6DAE0),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // ATTACHMENT
+  // ============================================================
 
   Widget _buildAttachment({
     required String title,
@@ -284,32 +440,17 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    final hasFile = path.isNotEmpty;
+    final bool hasFile = path.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // العنوان
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: title,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                ),
-              ),
-              const TextSpan(
-                text: ' *',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: textColor,
           ),
         ),
 
@@ -318,50 +459,41 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
         GestureDetector(
           onTap: onTap,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(
+              milliseconds: 200,
+            ),
             width: double.infinity,
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: cardColor,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: hasFile ? navyBlue : borderColor,
+                color: hasFile
+                    ? navyBlue
+                    : borderColor,
                 width: hasFile ? 1.2 : 1,
               ),
             ),
             child: Row(
               children: [
-                // الصورة
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius:
+                  BorderRadius.circular(11.r),
                   child: hasFile
                       ? Image.network(
                     path,
                     width: 60,
                     height: 60,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) {
-                      return Container(
-                        width: 60,
-                        height: 60,
-                        color: navyBlue.withOpacity(0.07),
-                        child: Icon(
-                          icon,
-                          color: navyBlue,
-                          size: 25,
-                        ),
+                    errorBuilder:
+                        (_, __, ___) {
+                      return _buildEmptyAttachmentIcon(
+                        icon,
                       );
                     },
                   )
-                      : Container(
-                    width: 60,
-                    height: 60,
-                    color: navyBlue.withOpacity(0.07),
-                    child: Icon(
-                      icon,
-                      color: navyBlue,
-                      size: 25,
-                    ),
+                      : _buildEmptyAttachmentIcon(
+                    icon,
                   ),
                 ),
 
@@ -369,14 +501,16 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
 
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
                     children: [
                       Text(
                         hasFile
                             ? path.split('/').last
                             : hint,
                         maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        overflow:
+                        TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: hasFile
@@ -394,7 +528,8 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
                           'tap_to_change'.tr,
                           style: TextStyle(
                             fontSize: 11,
-                            color: secondaryTextColor,
+                            color:
+                            secondaryTextColor,
                           ),
                         ),
                       ],
@@ -415,86 +550,24 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     );
   }
 
-  Widget _buildTrendingSwitch() {
-    final isTrending = categoryController.isTrending.value;
-
+  Widget _buildEmptyAttachmentIcon(
+      IconData icon,
+      ) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 12,
-      ),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: navyBlue.withOpacity(
-                isDark ? 0.22 : 0.07,
-              ),
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: Icon(
-              isTrending
-                  ? Icons.local_fire_department_rounded
-                  : Icons.local_fire_department_outlined,
-              color: navyBlue,
-              size: 21,
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'trending'.tr,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  isTrending
-                      ? 'yes'.tr
-                      : 'no'.tr,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isTrending
-                        ? navyBlue
-                        : secondaryTextColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          CupertinoSwitch(
-            value: isTrending,
-            onChanged: (value) {
-              categoryController.isTrending.value = value;
-              categoryController.trending.value = value ? '1' : '0';
-            },
-            activeColor: navyBlue,
-            thumbColor: Colors.white,
-            trackColor: isDark
-                ? Colors.white24
-                : const Color(0xFFD6DAE0),
-          ),
-        ],
+      width: 40.w,
+      height: 40.h,
+      color: navyBlue.withOpacity(0.07),
+      child: Icon(
+        icon,
+        color: navyBlue,
+        size: 25,
       ),
     );
   }
+
+  // ============================================================
+  // BUTTONS
+  // ============================================================
 
   Widget _buildButtons() {
     return Row(
@@ -505,9 +578,12 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
             child: OutlinedButton(
               onPressed: _close,
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: borderColor),
+                side: BorderSide(
+                  color: borderColor,
+                ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius:
+                  BorderRadius.circular(14),
                 ),
               ),
               child: Text(
@@ -521,14 +597,18 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
             ),
           ),
         ),
+
         const SizedBox(width: 12),
+
         Expanded(
           flex: 2,
           child: SizedBox(
             height: 48,
             child: ElevatedButton(
               onPressed: () {
-                if (_formKey.currentState?.validate() ?? false) {
+                if (_formKey.currentState
+                    ?.validate() ??
+                    false) {
                   _submit();
                 }
               },
@@ -537,11 +617,13 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius:
+                  BorderRadius.circular(14),
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment:
+                MainAxisAlignment.center,
                 children: [
                   Icon(
                     widget.isUpdate
@@ -549,7 +631,9 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
                         : Icons.add_rounded,
                     size: 19,
                   ),
+
                   const SizedBox(width: 8),
+
                   Text(
                     widget.isUpdate
                         ? 'update'.tr
@@ -568,48 +652,101 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     );
   }
 
+  // ============================================================
+  // SUBMIT
+  // ============================================================
+
   void _submit() {
     FocusScope.of(context).unfocus();
 
-    final name = categoryController.categoryName.text.trim();
-    final image = categoryController.imagePath.value;
-    final icon = categoryController.iconPath.value;
+    final String name =
+    categoryController.categoryName.text.trim();
 
-    if (name.isEmpty) {
-      commonToast('category_name_required'.tr);
+    final String image =
+        categoryController.imagePath.value;
+
+    final String icon =
+        categoryController.iconPath.value;
+
+    // ----------------------------------------------------------
+    // Name
+    // ----------------------------------------------------------
+
+    final nameError =
+    Validator.validateRequired(name);
+
+    if (nameError != null) {
+      commonToast(nameError);
       return;
     }
+
+    // ----------------------------------------------------------
+    // Image
+    // ----------------------------------------------------------
 
     if (image.isEmpty) {
-      commonToast('category_image_required'.tr);
+      commonToast(
+        'category_image_required'.tr,
+      );
       return;
     }
+
+    // ----------------------------------------------------------
+    // Icon
+    // ----------------------------------------------------------
 
     if (icon.isEmpty) {
-      commonToast('category_icon_required'.tr);
+      commonToast(
+        'category_icon_required'.tr,
+      );
       return;
     }
 
+    // ----------------------------------------------------------
+    // Demo mode
+    // ----------------------------------------------------------
+
     if (widget.isUpdate &&
-        Prefs.getBool(AppConstant.isDemoMode) == true) {
-      commonToast(AppConstant.demoString);
+        Prefs.getBool(
+          AppConstant.isDemoMode,
+        ) ==
+            true) {
+      commonToast(
+        AppConstant.demoString,
+      );
       return;
     }
+
+    // ----------------------------------------------------------
+    // Submit
+    // ----------------------------------------------------------
 
     categoryController.addCategoriesData(
       isUpdate: widget.isUpdate,
       categoryId: widget.categoryId ?? 0,
       name: name,
-      trending: categoryController.trending.value,
-      status: widget.status ?? '1',
 
-      // مهم: الصورة للصورة
+      // Trending من الـ Switch
+      trending:
+      categoryController.trending.value,
+
+      // Status من الـ Switch
+      status:
+      categoryController.isActive.value
+          ? '1'
+          : '0',
+
+      // Category Image
       imagePath: image,
 
-      // والأيقونة للأيقونة
+      // Category Icon
       iconImagePath: icon,
     );
   }
+
+  // ============================================================
+  // BUILD
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
@@ -617,18 +754,16 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
       child: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
-          return FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: child,
-            ),
+          return SlideTransition(
+            position: _slideAnimation,
+            child: child,
           );
         },
         child: Container(
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: const BorderRadius.vertical(
+            borderRadius:
+            const BorderRadius.vertical(
               top: Radius.circular(28),
             ),
           ),
@@ -637,154 +772,151 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
               left: 20,
               right: 20,
               top: 12,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              bottom:
+              MediaQuery.of(context)
+                  .viewInsets
+                  .bottom +
+                  16,
             ),
             child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
+              physics:
+              const BouncingScrollPhysics(),
               child: Obx(
                     () => Form(
-                      key: _formKey,
-                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // ------------------------------------------------
+                      // Drag Handle
+                      // ------------------------------------------------
+
                       Center(
                         child: Container(
                           width: 42,
                           height: 4,
-                          decoration: BoxDecoration(
+                          decoration:
+                          BoxDecoration(
                             color: isDark
                                 ? Colors.white24
-                                : const Color(0xFFD6DAE0),
-                            borderRadius: BorderRadius.circular(10),
+                                : const Color(
+                              0xFFD6DAE0,
+                            ),
+                            borderRadius:
+                            BorderRadius.circular(
+                              10,
+                            ),
                           ),
                         ),
                       ),
-      
+
                       const SizedBox(height: 22),
-      
+
+                      // ------------------------------------------------
+                      // Header
+                      // ------------------------------------------------
+
                       _buildHeader(),
-      
+
                       const SizedBox(height: 24),
-      
-                      _buildTextField(),
-      
+
+                      // ------------------------------------------------
+                      // Category Name
+                      // AppTextField + Validator
+                      // ------------------------------------------------
+
+                      AppTextField(
+                        title:
+                        'category_name'.tr,
+                        hint:
+                        'enter_category_name'.tr,
+                        controller:
+                        categoryController.categoryName,
+                        icon: Icons.category_outlined,
+                        validator: (value) {
+                          return Validator.validateRequired(value ?? '',
+                          );
+                        },
+                        textInputAction:
+                        TextInputAction.done,
+                      ),
+
                       const SizedBox(height: 18),
-      
+
+                      // ------------------------------------------------
+                      // Category Image
+                      // ------------------------------------------------
+
                       _buildAttachment(
-                        title: 'category_image'.tr,
-                        hint: 'add_category_image'.tr,
-                        path: categoryController.imagePath.value,
+                        title:
+                        'category_image'.tr,
+                        hint:
+                        'add_category_image'.tr,
+                        path:
+                        categoryController.imagePath.value,
                         icon: Icons.image_outlined,
-                        onTap: () => _pickImage(isIcon: false),
+                        onTap: () =>
+                            _pickImage(
+                              isIcon: false),
                       ),
-      
+
                       const SizedBox(height: 14),
-      
+
+                      // ------------------------------------------------
+                      // Category Icon
+                      // ------------------------------------------------
+
                       _buildAttachment(
-                        title: 'category_icon'.tr,
-                        hint: 'add_category_icon'.tr,
-                        path: categoryController.iconPath.value,
-                        icon: Icons.insert_emoticon_outlined,
-                        onTap: () => _pickImage(isIcon: true),
+                        title:
+                        'category_icon'.tr,
+                        hint:
+                        'add_category_icon'.tr,
+                        path:
+                        categoryController
+                            .iconPath
+                            .value,
+                        icon: Icons
+                            .insert_emoticon_outlined,
+                        onTap: () =>
+                            _pickImage(
+                              isIcon: true,
+                            ),
                       ),
-      
+
                       const SizedBox(height: 18),
-      
+
+                      // ------------------------------------------------
+                      // Trending
+                      // ------------------------------------------------
+
                       _buildTrendingSwitch(),
-      
+
                       const SizedBox(height: 12),
-      
+
+                      // ------------------------------------------------
+                      // Status
+                      // ------------------------------------------------
+
                       _buildStatusSwitch(),
-      
+
                       const SizedBox(height: 28),
-      
+
+                      // ------------------------------------------------
+                      // Buttons
+                      // ------------------------------------------------
+
                       _buildButtons(),
+
                       const SizedBox(height: 4),
-                                        ],
-                                      ),
-                    ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
-  Widget _buildStatusSwitch() {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 12,
-      ),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: navyBlue.withOpacity(
-                isDark ? 0.22 : 0.07,
-              ),
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: Icon(
-              categoryController.isActive.value
-                  ? Icons.check_circle_outline_rounded
-                  : Icons.cancel_outlined,
-              color: navyBlue,
-              size: 21,
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'status'.tr,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  categoryController.isActive.value
-                      ? 'active'.tr
-                      : 'inactive'.tr,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: categoryController.isActive.value
-                        ? navyBlue
-                        : secondaryTextColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          CupertinoSwitch(
-            value: categoryController.isActive.value,
-            onChanged: (value) {
-              categoryController.isActive.value = value;
-            },
-            activeColor: navyBlue,
-            thumbColor: Colors.white,
-            trackColor: isDark
-                ? Colors.white24
-                : const Color(0xFFD6DAE0),
-          ),
-        ],
       ),
     );
   }

@@ -70,7 +70,11 @@ class _TaxScreenState extends State<TaxScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
-      appBar: simpleAppBar(title: "tax".tr, date: "Monday, 30 Jan".tr),
+      appBar: simpleAppBar(
+          title: "tax".tr,
+          isBack: true,
+          label: null,
+          onNewLabelTap: () {  }),
       body: Padding(
         padding: EdgeInsets.all(24.w),
         child: Column(

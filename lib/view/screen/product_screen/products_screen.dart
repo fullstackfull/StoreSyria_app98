@@ -14,8 +14,8 @@ import 'package:store_go_app/view/widget/error_empty_state.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/model/create_product_model.dart';
 import '../../new_widgets/date_filter.dart';
-import '../../new_widgets/header_widget.dart';
 import '../../new_widgets/search_widget.dart';
+import '../../widget/common_appbar_widget.dart';
 import 'product_detail_screen.dart';
 
 class ProductsScreen extends StatefulWidget {
@@ -444,20 +444,18 @@ class _ProductsScreenState extends State<ProductsScreen>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
+        appBar:  simpleAppBar(
+          isBold: true,
+          title: "products".tr,
+          label: "new_product".tr,
+          onNewLabelTap: () => Get.to(
+               () => const AddNewProductScreen(isUpdate: false)),
+        ),
         backgroundColor: isDark  ? DarkThemeColor.cBackGround : AppColor.cLight,
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           child: Column(
             children: [
-              HeaderWidget(
-                context: context,
-                title: "products".tr,
-                label: "new_product".tr,
-                onNewLabelTap: () => Get.to(() => AddNewProductScreen(isUpdate: false)),
-              ),
-
-              verticalSpace(16.h),
-
               Row(
                 children: [
                   Expanded(
