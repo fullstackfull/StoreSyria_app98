@@ -29,6 +29,13 @@ class OrderRepository {
     return response;
   }
 
+getTopOrdersData()  async {
+    String endPoint = "${API.topOrdersUrl}${API.storeIdUrl}${Prefs.getStoreID()}";
+    var response = await NetworkHttps.getRequest(endPoint);
+    print("response==========>$response");
+    return response;
+  }
+
   createOrder({
     required CreateOrderRequest request,
   }) async {

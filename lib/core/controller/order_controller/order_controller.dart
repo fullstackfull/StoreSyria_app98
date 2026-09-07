@@ -10,6 +10,8 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
 
+import '../../model/top_order_model.dart';
+
 class OrderController extends GetxController implements StoreAware {
   static const String _cacheOrderKey = 'home_order_list_data';
 
@@ -38,6 +40,8 @@ class OrderController extends GetxController implements StoreAware {
   RxBool isSearching = false.obs;
   RxBool isDetailLoading = false.obs;
   RxString errorMessage = ''.obs;
+  RxList<OrderData> topOrderList = <OrderData>[].obs;
+  RxBool isLoadingTopOrders = false.obs;
 
   // ==================== Loading States ====================
 
@@ -72,6 +76,8 @@ class OrderController extends GetxController implements StoreAware {
     resetPagination();
 
     _loadCachedOrders();
+
+    getTopOrderData();
 
     StoreChangeService.instance.register(() => this);
   }
@@ -248,6 +254,33 @@ class OrderController extends GetxController implements StoreAware {
       } else {
         isLoadingMoreOrders.value = false;
       }
+    }
+  }
+
+  Future<void> getTopOrderData() async {
+    isLoadingTopOrders.value = true;
+
+    try {
+      final result = await orderRepository.getTopOrdersData();
+
+      result.fold(
+        onSuccess: (data) {
+          final model = TopOrderModel.fromJson(data);
+
+          final items = model.data?.topOrders ?? [];
+
+          topOrderList.value =
+              items.map((e) => e.toOrderData()).toList();
+        },
+        onFailure: (reason, message, validationErrors) {
+          commonToast('failed_to_load_orders'.tr);
+        },
+      );
+    } catch (e) {
+      commonToast('unexpected_error_loading_orders'.tr);
+      print('❌ getTopOrderData Error: $e');
+    } finally {
+      isLoadingTopOrders.value = false;
     }
   }
 

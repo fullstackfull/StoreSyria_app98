@@ -19,8 +19,7 @@ import 'loyality_setting_screen.dart';
 class StoreSettingScreen extends StatelessWidget {
   StoreSettingScreen({super.key});
 
-  final StoreSettingController storeSettingController =
-  Get.put(StoreSettingController());
+  final StoreSettingController storeSettingController = Get.put(StoreSettingController());
 
   @override
   Widget build(BuildContext context) {

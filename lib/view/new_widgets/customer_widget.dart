@@ -22,12 +22,10 @@ Widget customerWidget({
   final subTextColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
 
   final name = customer?.customerInfo?.name?.replaceAll('"', '').trim() ?? '';
-  final mobile =
-      customer?.customerInfo?.mobile?.replaceAll('"', '').trim() ?? '';
+  final mobile = customer?.customerInfo?.mobile?.replaceAll('"', '').trim() ?? '';
   final email = customer?.email?.replaceAll('"', '').trim() ?? '';
   final lastActive = customer?.lastActive?.replaceAll('"', '').trim() ?? '';
-  final totalSpend =
-      customer?.totalSpend?.replaceAll('"', '').trim() ?? '0.00';
+  final totalSpend = customer?.totalSpend?.replaceAll('"', '').trim() ?? '0.00';
   final aov = customer?.aov?.replaceAll('"', '').trim() ?? '0.00';
   final orders = customer?.orders ?? 0;
 

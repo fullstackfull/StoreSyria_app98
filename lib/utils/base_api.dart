@@ -96,4 +96,9 @@ class API {
   static String deleteCustomerUrl = '/destroyCustomer';
   static String customerIdUrl = '?customer_id=';
 
+  static String topOrdersUrl = '/Top_orders';
+  static String languagesUrl = '/getAvailableLanguages';
+  static String currenciesUrl = '/getCurrenciesApi';
+
+
 }

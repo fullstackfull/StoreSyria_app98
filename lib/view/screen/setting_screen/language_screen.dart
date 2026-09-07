@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/text_style.dart';
+import '../../../core/controller/setting_controller/store_setting_controller.dart';
 import '../../../translations/translation_service.dart';
 import '../../new_widgets/lang_widget.dart';
 import '../../widget/common_appbar_widget.dart';
@@ -16,6 +17,7 @@ class LanguageCurrenciesScreen extends StatefulWidget {
 
 class _LanguageCurrenciesScreenState
     extends State<LanguageCurrenciesScreen> {
+  final StoreSettingController controller = Get.find<StoreSettingController>();
   bool isLanguageExpanded = false;
   bool isCurrencyExpanded = false;
 
@@ -98,20 +100,23 @@ class _LanguageCurrenciesScreenState
                 mainCard(
                   icon: Icons.payments_outlined,
                   title: 'currencies'.tr,
-                  value: selectedCurrency == 'USD'
-                      ? '\$ USD'
-                      : 'ل.س SYP',
+                  value: _selectedCurrencyText(),
                   isExpanded: isCurrencyExpanded,
                   isDark: isDark,
                   onTap: () {
                     setState(() {
-                      isCurrencyExpanded =
-                      !isCurrencyExpanded;
+                      isCurrencyExpanded = !isCurrencyExpanded;
 
                       if (isCurrencyExpanded) {
                         isLanguageExpanded = false;
                       }
                     });
+
+                    if (isCurrencyExpanded &&
+                        controller.currencies.isEmpty &&
+                        !controller.isLoadingCurrencies.value) {
+                      controller.getCurrenciesData();
+                    }
                   },
                 ),
 
@@ -141,61 +146,96 @@ class _LanguageCurrenciesScreenState
   Widget _currencySelector({
     required bool isDark,
   }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppColor.cBackGround,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark
-              ? AppColor.cFont.withOpacity(0.06)
-              : Colors.transparent,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColor.themeGreenColor.withOpacity(
-              isDark ? 0.10 : 0.2,
+    return Obx(() {
+      if (controller.isLoadingCurrencies.value) {
+        return const Padding(
+          padding: EdgeInsets.all(30),
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      if (controller.currencies.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.all(30),
+          child: Center(
+            child: Text(
+              'no_currencies_found'.tr,
+              style: pRegular14.copyWith(
+                color: AppColor.cDarkGreyFont,
+              ),
             ),
-            offset: const Offset(0, 2),
-            blurRadius: 8,
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          _currencyOption(
-            title: 'us_dollar'.tr,
-            code: 'USD',
-            symbol: '\$',
-            selected: selectedCurrency == 'USD',
-            isDark: isDark,
-            onTap: () {
-              setState(() {
-                selectedCurrency = 'USD';
-                isCurrencyExpanded = false;
-              });
+        );
+      }
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColor.cBackGround,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isDark
+                ? AppColor.cFont.withOpacity(0.06)
+                : Colors.transparent,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColor.themeGreenColor.withOpacity(
+                isDark ? 0.10 : 0.2,
+              ),
+              offset: const Offset(0, 2),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Column(
+          children: List.generate(
+            controller.currencies.length,
+                (index) {
+              final currency = controller.currencies[index];
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: index ==
+                      controller.currencies.length - 1
+                      ? 0
+                      : 6,
+                ),
+                child: _currencyOption(
+                  title: currency.name,
+                  code: currency.code,
+                  symbol: currency.symbol,
+                  selected:
+                  selectedCurrency == currency.code,
+                  isDark: isDark,
+                  onTap: () {
+                    setState(() {
+                      selectedCurrency = currency.code;
+                      isCurrencyExpanded = false;
+                    });
+                  },
+                ),
+              );
             },
           ),
+        ),
+      );
+    });
+  }
 
-          const SizedBox(height: 6),
-
-          _currencyOption(
-            title: 'syrian_pound'.tr,
-            code: 'SYP',
-            symbol: 'ل.س',
-            selected: selectedCurrency == 'SYP',
-            isDark: isDark,
-            onTap: () {
-              setState(() {
-                selectedCurrency = 'SYP';
-                isCurrencyExpanded = false;
-              });
-            },
-          ),
-        ],
-      ),
+  String _selectedCurrencyText() {
+    final currency = controller.currencies.firstWhereOrNull(
+          (item) => item.code == selectedCurrency,
     );
+
+    if (currency == null) {
+      return selectedCurrency;
+    }
+
+    return '${currency.symbol} ${currency.code}';
   }
 
   Widget _currencyOption({

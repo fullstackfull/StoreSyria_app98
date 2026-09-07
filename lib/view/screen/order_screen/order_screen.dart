@@ -18,18 +18,20 @@ import '../../widget/loading_widget.dart';
 import '../../new_widgets/date_filter.dart';
 
 class OrderScreen extends StatefulWidget {
-
   const OrderScreen({super.key});
 
   @override
   State<OrderScreen> createState() => _OrderScreenState();
 }
 
-class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClientMixin {
+class _OrderScreenState extends State<OrderScreen>
+    with AutomaticKeepAliveClientMixin {
   final OrderController orderController = Get.find<OrderController>();
+
   late ScrollController scrollController;
 
   bool _isFirstLoad = true;
+
   DateTimeRange? selectedDateRange;
 
   @override
@@ -38,38 +40,51 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
   @override
   void initState() {
     super.initState();
+
     scrollController = ScrollController();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    scrollController.addListener(_onScroll);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_isFirstLoad) {
         _isFirstLoad = false;
-        _fetchInitialData();
+
+        await Future.wait([
+          _fetchInitialData(),
+          orderController.getTopOrderData(),
+        ]);
       }
     });
-
-    scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
+
     super.dispose();
   }
+
+  // ============================================================
+  // Scroll / Pagination
+  // ============================================================
 
   void _onScroll() {
     if (!orderController.isScroll.value) return;
 
+    if (!scrollController.hasClients) return;
+
     if (scrollController.position.pixels >=
         scrollController.position.maxScrollExtent - 200) {
-
       if (orderController.isLoadingMoreOrders.value) return;
 
-      final nextPage = orderController.currantPage.value + 1;
+      final nextPage =
+          orderController.currantPage.value + 1;
 
       orderController.getOrderData(
         nextPage,
-        deliveredStatus: orderController.selectedStatus.value == 0
+        deliveredStatus:
+        orderController.selectedStatus.value == 0
             ? null
             : orderController.selectedStatus.value - 1,
         fromDate: selectedDateRange?.start,
@@ -78,25 +93,41 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
     }
   }
 
-  Future<void> _fetchInitialData({int? deliveredStatus, bool useDateFilter = true}) async {
+  // ============================================================
+  // Initial / Refresh Data
+  // ============================================================
+
+  Future<void> _fetchInitialData({
+    int? deliveredStatus,
+    bool useDateFilter = true,
+  }) async {
     orderController.currantPage.value = 1;
     orderController.isScroll.value = true;
+
     orderController.orderList.clear();
 
     await orderController.getOrderData(
       1,
       deliveredStatus: deliveredStatus,
-      fromDate: useDateFilter ? selectedDateRange?.start : null,
-      toDate: useDateFilter ? selectedDateRange?.end : null,
+      fromDate:
+      useDateFilter ? selectedDateRange?.start : null,
+      toDate:
+      useDateFilter ? selectedDateRange?.end : null,
     );
   }
+
+  // ============================================================
+  // Build
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
       child: Scaffold(
         appBar: simpleAppBar(
           title: "orders".tr,
@@ -106,66 +137,142 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
         ),
         backgroundColor: AppColor.cLight,
         body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+          padding: EdgeInsets.symmetric(
+            horizontal: 20.w,
+            vertical: 10.h,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // add order
+              // ==================================================
+              // STATUS TABS
+              // ==================================================
+
               Obx(() {
                 return orderStatusTabsWidget(
                   context: context,
-                  selectedIndex: orderController.selectedStatus.value,
+                  selectedIndex:
+                  orderController.selectedStatus.value,
                   onChanged: (index) {
-                    orderController.selectedStatus.value = index;
+                    orderController.selectedStatus.value =
+                        index;
 
                     setState(() {
                       selectedDateRange = null;
                     });
 
                     if (index == 0) {
-                      _fetchInitialData(deliveredStatus: null,useDateFilter: false);
+                      _fetchInitialData(
+                        deliveredStatus: null,
+                        useDateFilter: false,
+                      );
                     } else {
-                      _fetchInitialData(deliveredStatus: index - 1, useDateFilter: false);
+                      _fetchInitialData(
+                        deliveredStatus: index - 1,
+                        useDateFilter: false,
+                      );
                     }
                   },
                 );
               }),
+
               verticalSpace(16.h),
+
+              // ==================================================
+              // SEARCH
+              // ==================================================
 
               SizedBox(
                 width: double.infinity,
                 child: SearchRowWidget(
                   context: context,
-                  controller: orderController.searchController,
+                  controller:
+                  orderController.searchController,
                   hint: 'search'.tr,
                   onChanged: (value) {
                     if (value.length > 2) {
-                      orderController.searchOrderData(name: value);
+                      orderController.searchOrderData(
+                        name: value,
+                      );
                     } else if (value.isEmpty) {
                       _fetchInitialData();
                     }
                   },
                 ),
               ),
+
               verticalSpace(16.h),
+
+              // ==================================================
+              // ORDERS
+              // ==================================================
+
               Expanded(
                 child: Obx(() {
-                  if (orderController.isLoadingOrders.value && orderController.currantPage.value == 1) {
-                    return const Center(child: LoadingWidget());
+                  final orderList =
+                      orderController.orderList;
+
+                  final topOrders =
+                      orderController.topOrderList;
+
+                  final isLoadingOrders =
+                      orderController.isLoadingOrders.value;
+
+                  final isLoadingTopOrders =
+                      orderController
+                          .isLoadingTopOrders
+                          .value;
+
+                  final hasTopOrders =
+                      topOrders.isNotEmpty;
+
+                  // ==================================================
+                  // MAIN LOADING
+                  // ==================================================
+
+                  if (isLoadingOrders &&
+                      orderController.currantPage.value == 1 &&
+                      orderList.isEmpty) {
+                    return const Center(
+                      child: LoadingWidget(),
+                    );
                   }
 
-                  if (orderController.errorMessage.isNotEmpty && orderController.orderList.isEmpty) {
+                  // ==================================================
+                  // ERROR
+                  // ==================================================
+
+                  if (orderController
+                      .errorMessage
+                      .isNotEmpty &&
+                      orderList.isEmpty &&
+                      !isLoadingOrders) {
                     return RefreshIndicator(
-                      onRefresh: () => _fetchInitialData(),
+                      onRefresh: () async {
+                        await Future.wait([
+                          _fetchInitialData(),
+                          orderController
+                              .getTopOrderData(),
+                        ]);
+                      },
                       child: ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
+                        physics:
+                        const AlwaysScrollableScrollPhysics(),
                         children: [
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * .6,
+                            height:
+                            MediaQuery.of(context)
+                                .size
+                                .height *
+                                .6,
                             child: Center(
                               child: ErrorState(
-                                message: orderController.errorMessage.value,
-                                onRetry: () => _fetchInitialData(),
+                                message: orderController
+                                    .errorMessage
+                                    .value,
+                                onRetry: () {
+                                  _fetchInitialData();
+                                },
                               ),
                             ),
                           ),
@@ -174,18 +281,36 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                     );
                   }
 
-                  if (orderController.orderList.isEmpty) {
+                  // ==================================================
+                  // EMPTY STATE
+                  // ==================================================
+
+                  if (orderList.isEmpty &&
+                      !isLoadingOrders) {
                     return RefreshIndicator(
-                      onRefresh: () => _fetchInitialData(),
+                      onRefresh: () async {
+                        await Future.wait([
+                          _fetchInitialData(),
+                          orderController
+                              .getTopOrderData(),
+                        ]);
+                      },
                       child: ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
+                        physics:
+                        const AlwaysScrollableScrollPhysics(),
                         children: [
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * .6,
+                            height:
+                            MediaQuery.of(context)
+                                .size
+                                .height *
+                                .6,
                             child: Center(
                               child: EmptyState(
-                                message: "no_orders_found".tr,
-                                icon: Icons.receipt_long_outlined,
+                                message:
+                                "no_orders_found".tr,
+                                icon: Icons
+                                    .receipt_long_outlined,
                               ),
                             ),
                           ),
@@ -194,17 +319,96 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                     );
                   }
 
-                  // TODO :: top order api
-                  final topOrders = orderController.orderList.take(5).toList();
+                  final itemCount =
+                      (hasTopOrders ? 1 : 0) + // Top Orders
+                          1 + // All Orders Header
+                          orderList.length +
+                          (orderController.isScroll.value ? 1 : 0);
 
                   return RefreshIndicator(
                     backgroundColor: Colors.white,
-                    onRefresh: () => _fetchInitialData(),
+                    onRefresh: () async {
+                      await Future.wait([
+                        _fetchInitialData(),
+                        orderController.getTopOrderData(),
+                      ]);
+                    },
                     child: ListView.builder(
                       controller: scrollController,
-                      itemCount: orderController.orderList.length + (orderController.isScroll.value ? 1 : 0) + 1,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: itemCount,
                       itemBuilder: (context, index) {
-                        if (index == 0) {
+                        // ==================================================
+                        // TOP ORDERS
+                        // ==================================================
+
+                        if (hasTopOrders && index == 0) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 10.h),
+                                child: Text(
+                                  "top_orders".tr,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(
+                                height: 173.h,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: topOrders.length,
+                                  separatorBuilder: (context, index) {
+                                    return SizedBox(width: 10.w);
+                                  },
+                                  itemBuilder: (context, topIndex) {
+                                    final order = topOrders[topIndex];
+
+                                    return topOrderCardWidget(
+                                      context: context,
+                                      orderId: order.productOrderId ?? '',
+                                      date: dateFormatted(
+                                        date: order.orderDate ?? '',
+                                        formatType: formatForDateTime(
+                                          FormatType.date,
+                                        ),
+                                      ),
+                                      maskedName:
+                                      (order.userName?.isEmpty ?? true)
+                                          ? 'no_name'.tr
+                                          : order.userName ?? '',
+                                      price: '${order.finalPrice}',
+                                      primaryBadgeLabel: order.deliveredStatus,
+                                      secondaryBadgeLabel: order.paymentStatus,
+                                      onTap: () {
+                                        Get.to(
+                                              () => OrderDetailScreen(
+                                            orderId: order.id.toString(),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+
+                              verticalSpace(16.h),
+                            ],
+                          );
+                        }
+
+                        // ==================================================
+                        // ALL ORDERS HEADER
+                        // ==================================================
+
+                        final headerIndex = hasTopOrders ? 1 : 0;
+
+                        if (index == headerIndex) {
                           return Padding(
                             padding: EdgeInsets.only(bottom: 15.h),
                             child: sectionHeaderWithFilterWidget(
@@ -215,10 +419,14 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                               filterLabel: selectedDateRange != null
                                   ? "${dateFormatted(
                                 date: selectedDateRange!.start.toString(),
-                                formatType: formatForDateTime(FormatType.date),
+                                formatType: formatForDateTime(
+                                  FormatType.date,
+                                ),
                               )} - ${dateFormatted(
                                 date: selectedDateRange!.end.toString(),
-                                formatType: formatForDateTime(FormatType.date),
+                                formatType: formatForDateTime(
+                                  FormatType.date,
+                                ),
                               )}"
                                   : "filter_by_date".tr,
                               onFilterTap: () async {
@@ -244,11 +452,19 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                           );
                         }
 
-                        // ==================== ORDERS PAGINATION LOADER ====================
-                        final listIndex = index - 1;
+                        // ==================================================
+                        // ORDER LIST INDEX
+                        // ==================================================
 
-                        if (listIndex == orderController.orderList.length) {
-                          return Obx(() => Padding(
+                        final orderStartIndex = hasTopOrders ? 2 : 1;
+                        final listIndex = index - orderStartIndex;
+
+                        // ==================================================
+                        // PAGINATION LOADER
+                        // ==================================================
+
+                        if (listIndex == orderList.length) {
+                          return Padding(
                             padding: EdgeInsets.symmetric(vertical: 20.h),
                             child: Center(
                               child: orderController.isLoadingMoreOrders.value
@@ -257,80 +473,55 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                               )
                                   : const SizedBox.shrink(),
                             ),
-                          ));
+                          );
                         }
 
-                        // ==================== ORDER ITEM ====================
-                        final order = orderController.orderList[listIndex];
+                        // حماية إضافية من RangeError
+                        if (listIndex < 0 || listIndex >= orderList.length) {
+                          return const SizedBox.shrink();
+                        }
+
+                        // ==================================================
+                        // ORDER ITEM
+                        // ==================================================
+
+                        final order = orderList[listIndex];
 
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: allOrdersListItemWidget(
-                            showChangeAction: true,
-                            showChangeAction2: true,
                             context: context,
-                            changeText: "change_payment_status".tr,
-                            changeText2: "change_order_status".tr,
-                            changeFun2: () {
-                              OrderStatusBottomSheet.show<OrderData>(
-                                context,
-                                order,
-
-                                getOrderStatus: (model) =>
-                                model.deliveredStatus ?? 0,
-
-                                getProductOrderId: (model) =>
-                                model.productOrderId ?? '',
-
-                                getPaymentStatus: (model) =>
-                                model.paymentStatus ?? 'Unpaid',
-
-                                setOrderStatus: (model, newStatus) {
-                                  model.deliveredStatus = newStatus;
-                                },
-
-                                setOrderStatusText: (model, newStatusText) {
-                                },
-
-                                onUpdated: () {
-                                  orderController.orderList.refresh();
-                                },
-                              );
-                            },
-                            changeFun: () {
-                              showPaymentStatusBottomSheet<OrderData>(
-                                context,
-                                order,
-                                getPaymentStatus: (model) => model.paymentStatus ?? '',
-                                getProductOrderId: (model) => model.productOrderId ?? '',
-                                getDeliveredStatus: (model) => model.deliveredStatus ?? 0,
-                                setPaymentStatus: (model, newStatus) {
-                                  model.paymentStatus = newStatus;
-                                },
-                                onUpdated: () {
-                                  orderController.orderList.refresh();
-                                },
-                              );
-                            },
                             orderId: order.productOrderId ?? '',
                             date: dateFormatted(
-                              date: order.orderDate!,
-                              formatType: formatForDateTime(FormatType.date),
+                              date: order.orderDate ?? '',
+                              formatType: formatForDateTime(
+                                FormatType.date,
+                              ),
                             ),
-                            maskedName: (order.userName?.isEmpty ?? true) ? 'no_name'.tr : order.userName ?? "",
-                            price: "${order.finalPrice}",
-                            secondaryBadgeLabel:order.paymentStatus,
+                            maskedName:
+                            (order.userName?.isEmpty ?? true)
+                                ? 'no_name'.tr
+                                : order.userName ?? '',
+                            price: '${order.finalPrice}',
+                            secondaryBadgeLabel: order.paymentStatus,
                             primaryBadgeLabel: order.deliveredStatus,
-                            onTap: () => Get.to(
-                                  () => OrderDetailScreen(
-                                orderId: order.id.toString(),
-                              ),
-                            ),
-                            viewFun: () => Get.to(
-                                  () => OrderDetailScreen(
-                                orderId: order.id.toString(),
-                              ),
-                            ),
+
+                            onTap: () {
+                              Get.to(
+                                    () => OrderDetailScreen(
+                                  orderId: order.id.toString(),
+                                ),
+                              );
+                            },
+
+                            viewFun: () {
+                              Get.to(
+                                    () => OrderDetailScreen(
+                                  orderId: order.id.toString(),
+                                ),
+                              );
+                            },
+
                             deleteFun: () {
                               AppDialog.showCustomDialog(
                                 message: "deleteOrder",
@@ -338,9 +529,10 @@ class _OrderScreenState extends State<OrderScreen> with AutomaticKeepAliveClient
                                 iconColor: AppColor.cRedText,
                                 confirmColor: AppColor.cRedText,
                                 context: context,
-                                onConfirm: () => orderController.deleteOrderData(
-                                  orderId: order.id.toString(),
-                                ),
+                                onConfirm: () =>
+                                    orderController.deleteOrderData(
+                                      orderId: order.id.toString(),
+                                    ),
                               );
                             },
                           ),

@@ -13,91 +13,139 @@ Widget topOrderCardWidget({
   required String date,
   required String maskedName,
   required String price,
-  String? primaryBadgeLabel,
+  int? primaryBadgeLabel,
   String? secondaryBadgeLabel,
   VoidCallback? onTap,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
   final textColor = isDark ? DarkThemeColor.cText : AppColor.cText;
-  final subTextColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
+  final subTextColor =
+  isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
 
   return GestureDetector(
     onTap: onTap,
     child: Container(
       width: 260.w,
-      padding: EdgeInsets.symmetric(vertical: 22.w,horizontal: 15.w),
+      padding: EdgeInsets.symmetric(
+        vertical: 18.h,
+        horizontal: 15.w,
+      ),
       margin: EdgeInsets.only(right: 12.w),
       decoration: BoxDecoration(
+        border: Border.all(
+          color: AppColor.themeNavyBlueColor.withOpacity(0.3),
+        ),
         color: cardColor,
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Flexible(
-            child: Text(
-              "$orderId  🔥",
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textColor),
+          /// ================= ORDER ID =================
+          Text(
+            "🔥 $orderId",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w800,
+              color: textColor,
             ),
           ),
-          SizedBox(height: 15.h),
+
+          SizedBox(height: 14.h),
+
+          /// ================= CUSTOMER + PRICE =================
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Icon(
+                Icons.person,
+                size: 16.sp,
+                color: AppColor.themeGreenColor,
+              ),
+
+              SizedBox(width: 6.w),
+
               Expanded(
-                child: Row(
-                  children: [
-                    Icon(Icons.person, size: 16.sp, color: AppColor.themeGreenColor),
-                    SizedBox(width: 6.w),
-                    Flexible(
-                      child: Text(
-                        maskedName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w500, color: subTextColor),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  maskedName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: subTextColor,
+                  ),
                 ),
               ),
+
               SizedBox(width: 8.w),
+
               Text(
                 price,
-                style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800, color: textColor),
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
               ),
             ],
           ),
-          SizedBox(height: 10.h),
+
+          SizedBox(height: 14.h),
+
+          /// ================= STATUS =================
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (secondaryBadgeLabel != null)
-                orderStatusBadgeWidget(
-                  label: secondaryBadgeLabel,
-                  type: OrderBadgeType.success,
-                  icon: Icons.verified_outlined,
+                CommonStatusBadge(
+                  isCard: true,
+                  type: StatusBadgeType.payment,
+                  paymentStatus: secondaryBadgeLabel,
                 ),
-              Text(
-                date,
-                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w500, color: subTextColor),
-              ),
+
+              if (primaryBadgeLabel != null)
+                CommonStatusBadge(
+                  isCard: true,
+                  type: StatusBadgeType.order,
+                  orderStatus: primaryBadgeLabel,
+                ),
             ],
           ),
+
+          SizedBox(height: 14.h),
+
+          /// ================= DATE =================
+
+         Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                date,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w500,
+                  color: subTextColor,
+                ),
+              ),
+            ),
         ],
       ),
     ),
   );
 }
+
 enum OrderBadgeType { primary, success, danger }
 
 Widget orderStatusBadgeWidget({

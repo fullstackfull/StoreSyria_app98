@@ -65,7 +65,7 @@ simpleAppBar({
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30.r),
                   border: Border.all(
-                    color: accent,
+                    color: accent.withOpacity(0.4),
                     width: 1.3,
                   ),
                 ),

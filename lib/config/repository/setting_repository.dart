@@ -25,11 +25,4 @@ class SettingRepository {
     print("response====>$response");
     return response;
   }
-
-  deleteStoreData() async {
-    String endPoint = API.deleteStoreUrl + API.storeIdUrl + Prefs.getStoreID();
-    var response = await NetworkHttps.deleteRequest(endPoint);
-    print("response====>$response");
-    return response;
-  }
 }
