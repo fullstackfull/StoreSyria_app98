@@ -18,8 +18,6 @@ import 'cahe.dart';
 import 'store_change_service.dart';
 
 class CategoryController extends GetxController implements StoreAware {
-  // مفتاح الكاش الخاص بأول صفحة من الكاتيجوريز (Pagination العادي
-  // بيضل يشتغل بالخلفية زي ما هو، منكيش أول صفحة بس عشان الفتح الفوري)
   static const String _cacheCategoryKey = 'home_category_list_data';
 
   TextEditingController categoryName = TextEditingController();
@@ -46,14 +44,8 @@ class CategoryController extends GetxController implements StoreAware {
   void onInit() {
     super.onInit();
 
-    // نحمّل آخر بيانات محفوظة محلياً (صفحة ١) فوراً عشان الشاشة
-    // تفتح مباشرة بدون ما تنتظر السيرفر. الطلب الحقيقي (اللي
-    // بتستدعيه الشاشة عادة بـ initState) بيصير بعدها بالخلفية
-    // وبيحدّث نفس القائمة.
     _loadCachedCategories();
 
-    // نسجل هاد الكنترولر بالسيرفيس المركزي عشان ينعمله reset
-    // تلقائياً لما يتغير المتجر.
     StoreChangeService.instance.register(() => this);
   }
 
@@ -68,13 +60,10 @@ class CategoryController extends GetxController implements StoreAware {
       isScroll.value =
           categoriesModel?.data?.currentPage != categoriesModel?.data?.lastPage;
     } catch (_) {
-      // لو تغير شكل البيانات وصار الكاش القديم غير متوافق، نتجاهله
       categoriesModel = null;
     }
   }
 
-  /// بتنستدعى تلقائياً من StoreChangeService لما يتغير المتجر:
-  /// بتمسح القائمة + الكاش المحلي وترجع تجيب صفحة ١ من جديد.
   @override
   void resetForStoreChange() {
     categoriesModel = null;
@@ -117,7 +106,7 @@ class CategoryController extends GetxController implements StoreAware {
 
     final response = await categoryRepository.getCategoriesData(page);
 
-    // إخفاء اللودر بغض النظر عن النتيجة
+
     if (Get.isDialogOpen ?? false) Get.back();
     isLoading.value = false;
 
@@ -230,8 +219,6 @@ class CategoryController extends GetxController implements StoreAware {
   }
 
   deleteCategoriesData({required int categoryId}) async {
-    Loader.showLoader();
-
     final response = await categoryRepository.deleteCategoriesData(
       categoryId: categoryId,
     );

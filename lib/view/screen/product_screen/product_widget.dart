@@ -8,6 +8,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../utils/images.dart';
 import '../../new_widgets/network_image_widget.dart';
+import '../../new_widgets/pop_up_menu.dart';
 import '../../widget/icon_and_image.dart';
 
 Widget allProductsListItemWidget({
@@ -279,138 +280,19 @@ Widget allProductsListItemWidget({
                       ),
                     ),
 
-                  if (hasMenu)
+                  if (viewFun != null ||
+                      (showChangeAction && changeFun != null) ||
+                      deleteFun != null)
                     Positioned(
                       top: 6.h,
                       right: 6.w,
-                      child: PopupMenuButton<String>(
-                        padding: EdgeInsets.zero,
-                        tooltip: '',
-                        offset: Offset(0, 30.h),
-
-                        icon: Container(
-                          width: 26.w,
-                          height: 26.w,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                Colors.black.withOpacity(.15),
-                                blurRadius: 4,
-                                offset:
-                                const Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.more_vert_rounded,
-                            size: 15.sp,
-                            color: Colors.black,
-                          ),
-                        ),
-
-                        elevation: 3,
-
-                        color: cardColor,
-
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(9.r),
-                        ),
-
-                        onSelected: (value) {
-                          if (value == 'view') {
-                            viewFun?.call();
-                          } else if (value == 'change') {
-                            changeFun?.call();
-                          } else if (value == 'delete') {
-                            deleteFun?.call();
-                          }
-                        },
-
-                        itemBuilder: (_) => [
-
-                          if (viewFun != null)
-                            PopupMenuItem<String>(
-                              value: 'view',
-                              height: 36.h,
-                              child: Row(
-                                children: [
-
-                                  Icon(
-                                    Icons.visibility_outlined,
-                                    size: 15.sp,
-                                    color: subTextColor,
-                                  ),
-
-                                  SizedBox(width: 7.w),
-
-                                  Text(
-                                    'view'.tr,
-                                    style: TextStyle(
-                                      fontSize: 11.sp,
-                                      color: textColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                          if (showChangeAction &&
-                              changeFun != null)
-                            PopupMenuItem<String>(
-                              value: 'change',
-                              height: 36.h,
-                              child: Row(
-                                children: [
-
-                                  Icon(
-                                    Icons.edit_outlined,
-                                    size: 15.sp,
-                                    color: accentColor,
-                                  ),
-
-                                  SizedBox(width: 7.w),
-
-                                  Text(
-                                    'change'.tr,
-                                    style: TextStyle(
-                                      fontSize: 11.sp,
-                                      color: accentColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                          if (deleteFun != null)
-                            PopupMenuItem<String>(
-                              value: 'delete',
-                              height: 36.h,
-                              child: Row(
-                                children: [
-
-                                  Icon(
-                                    Icons.delete_outline_rounded,
-                                    size: 15.sp,
-                                    color: dangerColor,
-                                  ),
-
-                                  SizedBox(width: 7.w),
-
-                                  Text(
-                                    'delete'.tr,
-                                    style: TextStyle(
-                                      fontSize: 11.sp,
-                                      color: dangerColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
+                      child: AppPopupMenu(
+                        color: Colors.white,
+                        viewFun: viewFun,
+                        changeFun: showChangeAction
+                            ? changeFun
+                            : null,
+                        deleteFun: deleteFun,
                       ),
                     ),
                 ],

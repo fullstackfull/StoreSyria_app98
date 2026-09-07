@@ -3,7 +3,6 @@ import 'package:store_go_app/config/repository/customer_repository.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
-import '../../../utils/prefer.dart';
 import '../../model/customer_model.dart';
 
 
@@ -212,14 +211,9 @@ class CustomerController extends GetxController implements StoreAware {
     );
   }
 
-  // =========================
-  // DELETE CUSTOMER
-  // =========================
-
   Future<void> deleteCustomerData({
     required String customerId,
   }) async {
-
     final response =
     await customerRepository.deleteCustomerData(
       customerId: customerId,
@@ -227,7 +221,6 @@ class CustomerController extends GetxController implements StoreAware {
 
     response.fold(
       onSuccess: (data) async {
-
         commonToast(
           data['data']?['message'] ??
               data['message'] ??
@@ -235,13 +228,10 @@ class CustomerController extends GetxController implements StoreAware {
         );
 
         customerList.clear();
-
         currantPage.value = 1;
         isScroll.value = true;
 
-        CacheService.clear(
-          _cacheCustomerKey,
-        );
+        CacheService.clear(_cacheCustomerKey);
 
         await getCustomersData(1);
       },
@@ -251,9 +241,7 @@ class CustomerController extends GetxController implements StoreAware {
           message,
           validationErrors,
           ) {
-
         errorMessage.value = message;
-
         commonToast(message);
       },
     );

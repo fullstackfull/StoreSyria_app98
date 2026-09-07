@@ -383,7 +383,6 @@ class OrderController extends GetxController implements StoreAware {
       isLoadingOrderDetails.value = false;
     }
   }
-  // ==================== Update Order Status ====================
 
   // ==================== Update Order Status ====================
 

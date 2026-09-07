@@ -448,5 +448,5 @@ const Map<String, String> en = {
     'enter_email': 'Enter email address',
    'enter_password': 'Enter password',
     'password_min_8_characters': 'Password must be at least 8 characters',
-
+  'deleteCustomer' : "Are you sure you want to delete this customer?"
 };

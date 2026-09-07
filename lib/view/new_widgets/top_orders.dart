@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/images.dart';
+import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
 import '../../utils/colors.dart';
 import 'order_status_badge.dart';
 
@@ -163,24 +164,6 @@ Widget allOrdersListItemWidget({
   final textColor = isDark ? DarkThemeColor.cText : AppColor.cText;
   final subTextColor = isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
 
-  final bool canView = viewFun != null;
-  final bool canChange = showChangeAction && changeFun != null;
-  final bool canChange2 = showChangeAction2 && changeFun2 != null;
-  final bool canDelete = deleteFun != null;
-
-  PopupMenuEntry<String> divider() => PopupMenuItem<String>(
-    enabled: false,
-    height: 1.h,
-    padding: EdgeInsets.symmetric(horizontal: 12.w),
-    child: Divider(
-      height: 1.h,
-      thickness: 1,
-      color: isDark
-          ? Colors.white.withOpacity(0.12)
-          : Colors.black.withOpacity(0.08),
-    ),
-  );
-
   return GestureDetector(
     onTap: onTap,
     child: Container(
@@ -200,11 +183,17 @@ Widget allOrdersListItemWidget({
               Expanded(
                 child: Row(
                   children: [
-                    SvgPicture.asset(DefaultImages.ordersIcn,
-                        width: 20.h, color: AppColor.cGreenFont),
+                    SvgPicture.asset(
+                      DefaultImages.ordersIcn,
+                      width: 20.h,
+                      color: AppColor.cGreenFont,
+                    ),
+
+                    SizedBox(width: 6.w),
+
                     Flexible(
                       child: Text(
-                        " $orderId",
+                        orderId,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -217,170 +206,14 @@ Widget allOrdersListItemWidget({
                   ],
                 ),
               ),
-              PopupMenuButton<String>(
-                padding: EdgeInsets.zero,
-                splashRadius: 22.r,
-                offset: Offset(0, 35.h),
-                tooltip: 'more'.tr,
-                icon: Container(
-                  width: 34.w,
-                  height: 34.h,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.08)
-                        : Colors.black.withOpacity(0.04),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Icon(
-                    Icons.more_vert_rounded,
-                    size: 20.sp,
-                    color: subTextColor,
-                  ),
-                ),
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.r),
-                  side: BorderSide(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.12)
-                        : Colors.black.withOpacity(0.08),
-                    width: 1,
-                  ),
-                ),
-                shadowColor: Colors.black.withOpacity(0.4),
-                color: cardColor,
-                onSelected: (value) {
-                  switch (value) {
-                    case 'view':
-                      viewFun?.call();
-                      break;
-                    case 'change':
-                      changeFun?.call();
-                      break;
-                    case 'change2':
-                      changeFun2?.call();
-                      break;
-                    case 'delete':
-                      deleteFun?.call();
-                      break;
-                  }
-                },
-                itemBuilder: (context) {
-                  final items = <PopupMenuEntry<String>>[];
 
-                  if (canView) {
-                    items.add(
-                      PopupMenuItem(
-                        value: 'view',
-                        height: 42.h,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.visibility_outlined,
-                              size: 18.sp,
-                              color: subTextColor,
-                            ),
-                            SizedBox(width: 10.w),
-                            Text(
-                              'view'.tr,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: textColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (canChange) {
-                    if (items.isNotEmpty) items.add(divider());
-                    items.add(
-                      PopupMenuItem(
-                        value: 'change',
-                        height: 42.h,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.edit_outlined,
-                              size: 18.sp,
-                              color: AppColor.themeGreenColor,
-                            ),
-                            SizedBox(width: 10.w),
-                            Text(
-                              changeText ?? 'change'.tr,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: AppColor.themeGreenColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (canChange2) {
-                    if (items.isNotEmpty) items.add(divider());
-                    items.add(
-                      PopupMenuItem(
-                        value: 'change2',
-                        height: 42.h,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.edit_outlined,
-                              size: 18.sp,
-                              color: Colors.green,
-                            ),
-                            SizedBox(width: 10.w),
-                            Text(
-                              changeText2 ??'change2',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: Colors.green,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (canDelete) {
-                    if (items.isNotEmpty) items.add(divider());
-                    items.add(
-                      PopupMenuItem(
-                        value: 'delete',
-                        height: 42.h,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.delete_outline_rounded,
-                              size: 18.sp,
-                              color: Colors.redAccent,
-                            ),
-                            SizedBox(width: 10.w),
-                            Text(
-                              'delete'.tr,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: Colors.redAccent,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  return items;
-                },
+              AppPopupMenu(
+                viewFun: viewFun,
+                changeFun: changeFun,
+                changeFun2: changeFun2,
+                deleteFun: deleteFun,
+                changeText: changeText,
+                changeText2: changeText2,
               ),
             ],
           ),

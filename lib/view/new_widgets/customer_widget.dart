@@ -5,11 +5,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/model/customer_model.dart';
 import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
 
 Widget customerWidget({
   required BuildContext context,
   CustomerData? customer,
   VoidCallback? onTap,
+  VoidCallback? viewFun,
+  VoidCallback? changeFun,
+  VoidCallback? deleteFun,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -108,7 +112,24 @@ Widget customerWidget({
 
               SizedBox(width: 8.w),
 
+              // ==================================================
+              // STATUS PILL
+              // ==================================================
               _statusPill(label: statusLabel, isActive: isActive),
+
+              SizedBox(width: 8.w),
+
+              // ==================================================
+              // MENU (Using AppPopupMenu)
+              // ==================================================
+              AppPopupMenu(
+                viewFun: viewFun,
+                changeFun: changeFun,
+                deleteFun: deleteFun,
+                viewText: 'view'.tr,
+                changeText: 'change'.tr,
+                deleteText: 'delete'.tr,
+              ),
             ],
           ),
 
@@ -333,7 +354,8 @@ Widget _iconTextRow({
 // ==================================================
 
 Widget _statusPill({required String label, required bool isActive}) {
-  final Color color = isActive ? const Color(0xFF00B894) : const Color(0xFFFF5C5C);
+  final Color color =
+  isActive ? const Color(0xFF00B894) : const Color(0xFFFF5C5C);
 
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),

@@ -9,6 +9,7 @@ import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/controller/customers/customer_controller.dart';
 import '../../new_widgets/customer_bottom_sheet.dart';
 import '../../new_widgets/customer_widget.dart';
+import '../../widget/app_dialog.dart';
 import '../../widget/common_appbar_widget.dart';
 
 class CustomerScreen extends StatefulWidget {
@@ -265,6 +266,23 @@ class _CustomerScreenState extends State<CustomerScreen>
                               bottom: 12.h,
                             ),
                             child: customerWidget(
+                              changeFun: () {},
+                              deleteFun: () {
+                                AppDialog.showCustomDialog(
+                                  context: context,
+                                  title: 'delete'.tr,
+                                  message: 'deleteCustomer'.tr,
+                                  lottieAsset: 'assets/lottie/delete_icon.json',
+                                  confirmColor: Colors.red,
+                                  onConfirm: () async {
+                                    await customerController.deleteCustomerData(
+                                     customerId: customer.id.toString(),
+                                    );
+                                  },
+                                );
+                              },
+                              viewFun: (){},
+                              onTap: (){},
                               context: context,
                               customer: customer,
                             ),

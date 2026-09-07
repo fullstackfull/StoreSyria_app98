@@ -27,7 +27,7 @@ class CustomerRepository {
   Future<dynamic> deleteCustomerData({
     required String customerId,
   }) async {
-    String endPoint = '${API.deleteCustomerUrl}${API.storeIdUrl}${Prefs.getStoreID()}';
+    String endPoint = '${API.deleteCustomerUrl}${API.customerIdUrl}${customerId}&${API.andStoreIdUrl}${Prefs.getStoreID()}';
 
     var response = await NetworkHttps.deleteRequest(endPoint);
 

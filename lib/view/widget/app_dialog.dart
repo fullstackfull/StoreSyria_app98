@@ -173,10 +173,8 @@ class AppDialog {
                                 shape: BoxShape.circle,
 
                                 gradient: LinearGradient(
-                                  begin:
-                                  Alignment.topLeft,
-                                  end:
-                                  Alignment.bottomRight,
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                   colors: [
                                     accentColor
                                         .withOpacity(
@@ -299,9 +297,7 @@ class AppDialog {
                                   backgroundColor:
                                   confirmButtonColor,
 
-                                  isLoading:
-                                  isLoading &&
-                                      showConfirmLoading,
+                                  isLoading: isLoading && showConfirmLoading,
 
                                   onPressed: isLoading
                                       ? null

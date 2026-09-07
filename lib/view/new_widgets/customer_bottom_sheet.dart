@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
-
 import '../../core/controller/customers/customer_controller.dart';
+import 'app_snackbar.dart';
 
 class AddNewCustomerWidget extends StatefulWidget {
   final bool isUpdate;
@@ -189,10 +189,20 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
 
       if (mounted) {
         Get.back();
+
+        AppSnackBar.success(
+          title: 'نجاح',
+          message: widget.isUpdate
+              ? 'تم تحديث بيانات العميل بنجاح'
+              : 'تمت إضافة العميل بنجاح',
+        );
       }
     } catch (e) {
-      debugPrint(
-        'Add customer error: $e',
+      debugPrint('Add customer error: $e');
+
+      AppSnackBar.error(
+        title: 'فشل',
+        message: 'حدث خطأ أثناء حفظ بيانات العميل',
       );
     } finally {
       if (mounted) {
@@ -202,7 +212,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
       }
     }
   }
-
   // ============================================================
   // STATUS SWITCH
   // ============================================================
@@ -495,8 +504,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
                     const SizedBox(height: 16),
 
                     // ==================================================
-// EMAIL
-// ==================================================
 
                     AppTextField(
                       title: 'email'.tr,
@@ -513,10 +520,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
                     ),
 
                     const SizedBox(height: 16),
-
-       // ==================================================
-      // PASSWORD
-     // ==================================================
 
                     AppTextField(
                       title: 'password'.tr,

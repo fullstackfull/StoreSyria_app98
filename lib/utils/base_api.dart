@@ -8,6 +8,7 @@ class API {
 
   static String imageBaseUrl = '/base_url';
   static String storeIdUrl = '?store_id=';
+  static String andStoreIdUrl = '&store_id=';
   static const String andStatusUrl = "&delivered_status=";
   static const String andFromDateUrl = "&from_date=";
   static const String andToDateUrl = "&to_date=";
@@ -88,9 +89,11 @@ class API {
   static String fcmTokenUrl = '/store/fcm-token';
   static String notificationUrl = '/notification';
 
+
+  // new
   static String customersUrl = '/customerlist';
   static String addCustomerUrl = '/AddCustomer';
-  static String deleteCustomerUrl = '/destroyCustomer/';
-  static String customerIdUrl = '&customer_id=';
+  static String deleteCustomerUrl = '/destroyCustomer';
+  static String customerIdUrl = '?customer_id=';
 
 }

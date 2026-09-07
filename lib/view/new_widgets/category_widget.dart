@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/home_controller/category_controller.dart';
 import 'package:store_go_app/core/model/categories_model.dart';
 import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
 import '../screen/home_screen/add_category_bottomsheet.dart';
 import '../widget/app_dialog.dart';
 
@@ -355,175 +356,49 @@ Widget _categoryMenu({
   required Color accent,
   required Color danger,
 }) {
-  final Color menuColor =
-  isDark
-      ? const Color(0xFF242529)
-      : Colors.white;
-
-  return PopupMenuButton<String>(
-    padding: EdgeInsets.zero,
-    tooltip: '',
-    offset: Offset(0, 40.h),
-    elevation: 10,
-    color: menuColor,
-    shape: RoundedRectangleBorder(
-      borderRadius:
-      BorderRadius.circular(15.r),
-    ),
-
-    icon: Container(
-      width: 34.w,
-      height: 34.w,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.black.withOpacity(.06),
+  return AppPopupMenu(
+    color: Colors.white,
+    changeFun: () {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: isDark
+            ? DarkThemeColor.cCardBackground
+            : AppColor.cWhite,
+        barrierColor: Colors.black54,
+        isScrollControlled: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(25.r),
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color:
-            Colors.black.withOpacity(.18),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Icon(
-        Icons.more_vert,
-        size: 20.sp,
-        color: Colors.black87,
-      ),
-    ),
-
-    onSelected: (value) {
-
-      // EDIT
-      if (value == 'edit') {
-        showModalBottomSheet(
-          context: context,
-          backgroundColor: isDark
-              ? DarkThemeColor.cCardBackground
-              : AppColor.cWhite,
-          barrierColor: Colors.black54,
-          isScrollControlled: true,
-          shape: RoundedRectangleBorder(
-            borderRadius:
-            BorderRadius.vertical(
-              top: Radius.circular(25.r),
-            ),
-          ),
-          builder: (_) {
-            return AddNewCategoriesWidget(
-              isUpdate: true,
-              categoryId: category.id,
-              name: category.name,
-              image:
-              category.imagePathFullUrl,
-              icon:
-              category.iconPathFullUrl,
-              trending:
-              category.trending?.toString(),
-              status:
-              category.status?.toString(),
-            );
-          },
-        );
-      }
-
-      // DELETE
-      if (value == 'delete') {
-        AppDialog.showCustomDialog(
-          context: context,
-          title: 'delete'.tr,
-          message: 'deleteCategory'.tr,
-          lottieAsset:
-          'assets/lottie/delete_icon.json',
-          confirmColor: danger,
-          onConfirm: () =>
-              categoryController
-                  .deleteCategoriesData(
-                categoryId:
-                category.id ?? 0,
-              ),
-        );
-      }
+        builder: (_) {
+          return AddNewCategoriesWidget(
+            isUpdate: true,
+            categoryId: category.id,
+            name: category.name,
+            image: category.imagePathFullUrl,
+            icon: category.iconPathFullUrl,
+            trending: category.trending?.toString(),
+            status: category.status?.toString(),
+          );
+        },
+      );
     },
 
-    itemBuilder: (_) => [
-
-      PopupMenuItem<String>(
-        value: 'edit',
-        height: 50.h,
-        child: _menuItem(
-          icon: Icons.edit_outlined,
-          title: 'edit'.tr,
-          color: accent,
-          isDark: isDark,
-        ),
-      ),
-
-      PopupMenuItem<String>(
-        value: 'delete',
-        height: 50.h,
-        child: _menuItem(
-          icon:
-          Icons.delete_outline_rounded,
-          title: 'delete'.tr,
-          color: danger,
-          isDark: isDark,
-        ),
-      ),
-    ],
-  );
-}
-
-// =============================================================
-// MENU ITEM
-// =============================================================
-
-Widget _menuItem({
-  required IconData icon,
-  required String title,
-  required Color color,
-  required bool isDark,
-}) {
-  return Row(
-    children: [
-
-      Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: BoxDecoration(
-          color: color.withOpacity(.09),
-          borderRadius:
-          BorderRadius.circular(9.r),
-        ),
-        child: Icon(
-          icon,
-          size: 17.sp,
-          color: color,
-        ),
-      ),
-
-      SizedBox(width: 10.w),
-
-      // FULL MENU TEXT
-      Flexible(
-        child: Text(
-          title,
-          softWrap: true,
-          overflow: TextOverflow.visible,
-          style: TextStyle(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w600,
-            color: isDark
-                ? Colors.white
-                : const Color(0xFF202124),
-          ),
-        ),
-      ),
-    ],
+    deleteFun: () {
+      AppDialog.showCustomDialog(
+        context: context,
+        title: 'delete'.tr,
+        message: 'deleteCategory'.tr,
+        lottieAsset: 'assets/lottie/delete_icon.json',
+        confirmColor: danger,
+        onConfirm: () async {
+          categoryController.deleteCategoriesData(
+            categoryId: category.id ?? 0,
+          );
+        },
+      );
+    },
   );
 }
 
