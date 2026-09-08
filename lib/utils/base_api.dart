@@ -15,7 +15,6 @@ class API {
 
   static String categoryListUrl = '/categorylist';
   static String createProductUrl = '/createproduct';
-  static String createOrderUrl = '/createOrderViaApi';
   static String productListUrl = '/productlist';
   static String deleteProductListUrl = '/deleteproduct';
   static String searchProductListUrl = '/searchproduct';
@@ -99,6 +98,10 @@ class API {
   static String topOrdersUrl = '/Top_orders';
   static String languagesUrl = '/getAvailableLanguages';
   static String currenciesUrl = '/getCurrenciesApi';
+  static String createOrderUrl = '/createOrderViaApi';
+  static String changeLanguageUrl = '/updateStoreLanguage';
+  static String changeCurrencyUrl = '/updateCurrencyApi';
+  static String getStoreInfoUrl = '/getStoreInfo';
 
 
 }

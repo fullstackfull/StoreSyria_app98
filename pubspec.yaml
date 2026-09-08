@@ -104,6 +104,7 @@ flutter:
    - assets/svg/
    - assets/images/
    - assets/lottie/
+   - assets/icon/
    - assets/.env
 
   fonts:

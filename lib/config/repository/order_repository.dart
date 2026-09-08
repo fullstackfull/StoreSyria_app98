@@ -4,6 +4,7 @@ import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 
 import '../../core/model/create_order_model.dart';
+import '../../network_dio/result.dart';
 
 class OrderRepository {
   getOrderData(
@@ -29,17 +30,18 @@ class OrderRepository {
     return response;
   }
 
-getTopOrdersData()  async {
+  getTopOrdersData()  async {
     String endPoint = "${API.topOrdersUrl}${API.storeIdUrl}${Prefs.getStoreID()}";
     var response = await NetworkHttps.getRequest(endPoint);
     print("response==========>$response");
     return response;
   }
 
-  createOrder({
+  Future<Result<Map<String, dynamic>>> createOrder({
     required CreateOrderRequest request,
   }) async {
-    final String endPoint = API.createOrderUrl;
+    final String endPoint =
+        "${API.createOrderUrl}${API.storeIdUrl}${Prefs.getStoreID()}";
 
     final body = request.toJson();
 

@@ -449,4 +449,5 @@ const Map<String, String> ar = {
   'enter_password': 'أدخل كلمة المرور',
   'password_min_8_characters': 'كلمة المرور يجب ألا تقل عن 8 أحرف',
   'deleteCustomer' : "هل أنت متأكد من حذف هذا العميل؟",
+  "manage_your_store_details" : "أدر تفاصيل متجرك"
 };

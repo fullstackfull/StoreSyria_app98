@@ -14,7 +14,6 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import '../../../core/controller/auth/auth_controller.dart';
 import '../../new_widgets/settings_card.dart';
 
-
 class SettingScreen extends StatelessWidget {
   final bool isBack;
 

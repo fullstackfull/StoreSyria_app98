@@ -16,6 +16,7 @@ import '../../widget/common_appbar_widget.dart';
 import '../../widget/error_empty_state.dart';
 import '../../widget/loading_widget.dart';
 import '../../new_widgets/date_filter.dart';
+import 'create_order_screen.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen({super.key});
@@ -133,7 +134,9 @@ class _OrderScreenState extends State<OrderScreen>
           title: "orders".tr,
           isBold: true,
           label: "new_order".tr,
-          onNewLabelTap: () {},
+          onNewLabelTap: () {
+         Get.to(() => const CreateOrderScreen());
+      },
         ),
         backgroundColor: AppColor.cLight,
         body: Padding(

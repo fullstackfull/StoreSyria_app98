@@ -1,14 +1,125 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import '../../core/controller/setting_controller/store_setting_controller.dart';
 import '../../translations/translation_service.dart';
 import '../../utils/colors.dart';
 import '../../utils/text_style.dart';
 
+Widget languageOption({
+  required String title,
+  required Image flag,
+  required bool selected,
+  required bool isDark,
+  required VoidCallback onTap,
+  bool isLoading = false,
+}) {
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: isLoading ? null : onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColor.themeGreenColor.withOpacity(
+            isDark ? 0.12 : 0.08,
+          )
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected
+                ? AppColor.themeGreenColor.withOpacity(
+              isDark ? 0.35 : 0.30,
+            )
+                : Colors.transparent,
+          ),
+        ),
+        child: Row(
+          children: [
+            flag,
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Text(
+                title,
+                style: pRegular14.copyWith(
+                  color: selected
+                      ? AppColor.themeGreenColor
+                      : isDark
+                      ? DarkThemeColor.cText
+                      : AppColor.cText,
+                ),
+              ),
+            ),
+
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 23,
+              height: 23,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: (selected && !isLoading)
+                    ? AppColor.themeGreenColor
+                    : Colors.transparent,
+                border: Border.all(
+                  color: (selected && !isLoading)
+                      ? AppColor.themeGreenColor
+                      : isDark
+                      ? Colors.white.withOpacity(0.25)
+                      : AppColor.cFont.withOpacity(0.25),
+                  width: 1.5,
+                ),
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 150),
+                child: isLoading
+                    ? Padding(
+                  key: ValueKey('loading'),
+                  padding: EdgeInsets.all(3),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColor.themeGreenColor,
+                    ),
+                  ),
+                )
+                    : selected
+                    ? const Icon(
+                  Icons.check,
+                  key: ValueKey('checked'),
+                  size: 15,
+                  color: Colors.white,
+                )
+                    : const SizedBox.shrink(key: ValueKey('unchecked')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 Widget languageSelector({
   required bool isArabic,
   required bool isDark,
+  required bool isLocalLanguage,
+  required StoreSettingController controller,
   required VoidCallback onLanguageChanged,
 }) {
+  final bool isUpdatingEn =
+      !isLocalLanguage && controller.updatingLanguageCode.value == 'en';
+  final bool isUpdatingAr =
+      !isLocalLanguage && controller.updatingLanguageCode.value == 'ar';
+
   return Container(
     width: double.infinity,
     padding: const EdgeInsets.all(8),
@@ -37,13 +148,28 @@ Widget languageSelector({
       children: [
         languageOption(
           title: 'english'.tr,
-          flag: '🇬🇧',
+          flag: Image.asset("assets/images/en.png", width: 22.w),
           selected: !isArabic,
           isDark: isDark,
-          onTap: () {
+          isLoading: isUpdatingEn,
+          onTap: () async {
             if (isArabic) {
-              TranslationService.changeLocale('en');
-              onLanguageChanged();
+              if (isLocalLanguage) {
+                // لغة التطبيق (الجهاز) فقط - AppSettingsScreen
+                TranslationService.changeLocale('en');
+                onLanguageChanged();
+              } else {
+                // لغة المتجر على السيرفر فقط - LanguageCurrenciesScreen
+                if (controller.updatingLanguageCode.value != null) return;
+
+                controller.updatingLanguageCode.value = 'en';
+                await controller.changeStoreLanguage(
+                  data: {
+                    "default_language": "English",
+                  },
+                );
+                onLanguageChanged();
+              }
             }
           },
         ),
@@ -52,13 +178,26 @@ Widget languageSelector({
 
         languageOption(
           title: 'arabic'.tr,
-          flag: '🇸🇾',
+          flag: Image.asset("assets/images/sy.png", width: 20.w),
           selected: isArabic,
           isDark: isDark,
-          onTap: () {
+          isLoading: isUpdatingAr,
+          onTap: () async {
             if (!isArabic) {
-              TranslationService.changeLocale('ar');
-              onLanguageChanged();
+              if (isLocalLanguage) {
+                TranslationService.changeLocale('ar');
+                onLanguageChanged();
+              } else {
+                if (controller.updatingLanguageCode.value != null) return;
+
+                controller.updatingLanguageCode.value = 'ar';
+                await controller.changeStoreLanguage(
+                  data: {
+                    "default_language": "Arabic",
+                  },
+                );
+                onLanguageChanged();
+              }
             }
           },
         ),
@@ -68,17 +207,110 @@ Widget languageSelector({
 }
 
 
-Widget languageOption({
+Widget currencySelector({
+  required StoreSettingController controller,
+  required VoidCallback onCurrencyChanged,
+  required bool isDark,
+}) {
+  if (controller.currencies.isEmpty) {
+    return Padding(
+      padding: const EdgeInsets.all(30),
+      child: Center(
+        child: Text(
+          'no_currencies_found'.tr,
+          style: pRegular14.copyWith(
+            color: isDark
+                ? DarkThemeColor.cText.withOpacity(0.5)
+                : AppColor.cDarkGreyFont,
+          ),
+        ),
+      ),
+    );
+  }
+
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: isDark
+          ? DarkThemeColor.cCardBackground
+          : AppColor.cBackGround,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(
+        color: isDark
+            ? DarkThemeColor.cBorder.withOpacity(0.7)
+            : Colors.transparent,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: AppColor.themeGreenColor.withOpacity(
+            isDark ? 0.07 : 0.12,
+          ),
+          offset: const Offset(0, 2),
+          blurRadius: 8,
+          spreadRadius: 0,
+        ),
+      ],
+    ),
+    child: Column(
+      children: List.generate(controller.currencies.length, (index) {
+        final currency = controller.currencies[index];
+
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: index == controller.currencies.length - 1 ? 0 : 6,
+          ),
+          child: Obx(() {
+            final bool isSelected =
+                controller.currentCurrency.value?.code == currency.code;
+
+            final bool isUpdating =
+                controller.updatingCurrencyCode.value == currency.code;
+
+            return currencyOption(
+              title: currency.name,
+              code: currency.code,
+              symbol: currency.symbol,
+              selected: isSelected,
+              isLoading: isUpdating,
+              isDark: isDark,
+              onTap: () async {
+                // منع الضغط المتكرر أثناء وجود تحديث جارٍ
+                if (controller.updatingCurrencyCode.value != null) return;
+
+                controller.updatingCurrencyCode.value = currency.code;
+                controller.currentCurrency.value = currency;
+
+                await controller.changeStoreCurrency(
+                  data: {
+                    "defult_currancy": currency.code,
+                    "defult_currancy_symbol": currency.symbol,
+                    "site_currency_symbol_position": "pre",
+                  },
+                );
+                onCurrencyChanged();
+              },
+            );
+          }),
+        );
+      }),
+    ),
+  );
+}
+
+Widget currencyOption({
   required String title,
-  required String flag,
+  required String code,
+  required String symbol,
   required bool selected,
   required bool isDark,
   required VoidCallback onTap,
+  bool isLoading = false,
 }) {
   return Material(
     color: Colors.transparent,
     child: InkWell(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       borderRadius: BorderRadius.circular(14),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -104,27 +336,85 @@ Widget languageOption({
         ),
         child: Row(
           children: [
-            Text(
-              flag,
-              style: const TextStyle(
-                fontSize: 22,
-              ),
-            ),
-
-            const SizedBox(width: 12),
-
-            Expanded(
-              child: Text(
-                title,
-                style: pRegular14.copyWith(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 50,
+              height: 50,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: selected
+                    ? AppColor.themeGreenColor.withOpacity(
+                  isDark ? 0.16 : 0.10,
+                )
+                    : isDark
+                    ? DarkThemeColor.cBorder.withOpacity(0.3)
+                    : AppColor.cBackGround,
+                border: Border.all(
                   color: selected
-                      ? AppColor.themeGreenColor
+                      ? AppColor.themeGreenColor.withOpacity(
+                    isDark ? 0.40 : 0.30,
+                  )
                       : isDark
-                      ? DarkThemeColor.cText
-                      : AppColor.cText,
+                      ? DarkThemeColor.cBorder.withOpacity(0.5)
+                      : Colors.grey,
+                ),
+              ),
+              child: FittedBox(
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Center(
+                    child: Text(
+                      symbol,
+                      style: pMedium14.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: selected
+                            ? AppColor.themeGreenColor
+                            : isDark
+                            ? DarkThemeColor.cText
+                            : AppColor.cText,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
+
+            const SizedBox(width: 14),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: pRegular14.copyWith(
+                      color: selected
+                          ? AppColor.themeGreenColor
+                          : isDark
+                          ? DarkThemeColor.cText
+                          : AppColor.cText,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: 3),
+
+                  Text(
+                    code,
+                    style: pMedium10.copyWith(
+                      color: isDark
+                          ? DarkThemeColor.cText.withOpacity(0.5)
+                          : AppColor.cDarkGreyFont,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 10),
 
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
@@ -132,11 +422,11 @@ Widget languageOption({
               height: 23,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: selected
+                color: (selected && !isLoading)
                     ? AppColor.themeGreenColor
                     : Colors.transparent,
                 border: Border.all(
-                  color: selected
+                  color: (selected && !isLoading)
                       ? AppColor.themeGreenColor
                       : isDark
                       ? Colors.white.withOpacity(0.25)
@@ -144,13 +434,28 @@ Widget languageOption({
                   width: 1.5,
                 ),
               ),
-              child: selected
-                  ? const Icon(
-                Icons.check,
-                size: 15,
-                color: Colors.white,
-              )
-                  : null,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 150),
+                child: isLoading
+                    ? Padding(
+                  key: ValueKey('loading'),
+                  padding: EdgeInsets.all(3),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColor.themeGreenColor,
+                    ),
+                  ),
+                )
+                    : selected
+                    ? const Icon(
+                  Icons.check,
+                  key: ValueKey('checked'),
+                  size: 15,
+                  color: Colors.white,
+                )
+                    : const SizedBox.shrink(key: ValueKey('unchecked')),
+              ),
             ),
           ],
         ),
@@ -158,7 +463,6 @@ Widget languageOption({
     ),
   );
 }
-
 
 Widget mainCard({
   required IconData icon,

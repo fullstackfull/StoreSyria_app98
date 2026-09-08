@@ -9,44 +9,32 @@ class CurrencyResponse {
     required this.data,
   });
 
-  factory CurrencyResponse.fromJson(Map<String, dynamic> json) {
-    return CurrencyResponse(
-      status: json['status'] ?? 0,
-      message: json['message'] ?? '',
-      data: CurrencyData.fromJson(json['data'] ?? {}),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'status': status,
-      'message': message,
-      'data': data.toJson(),
-    };
-  }
+  factory CurrencyResponse.fromJson(Map<String, dynamic> json) =>
+      CurrencyResponse(
+        status: json['status'] ?? 0,
+        message: json['message'] ?? '',
+        data: CurrencyData.fromJson(json['data']),
+      );
 }
 
 class CurrencyData {
+  final int storeId;
+  final Currency currentCurrency;
   final List<Currency> currencies;
 
   CurrencyData({
+    required this.storeId,
+    required this.currentCurrency,
     required this.currencies,
   });
 
-  factory CurrencyData.fromJson(Map<String, dynamic> json) {
-    return CurrencyData(
-      currencies: (json['currencies'] as List?)
-          ?.map((e) => Currency.fromJson(e))
-          .toList() ??
-          [],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'currencies': currencies.map((e) => e.toJson()).toList(),
-    };
-  }
+  factory CurrencyData.fromJson(Map<String, dynamic> json) => CurrencyData(
+    storeId: json['store_id'] ?? 0,
+    currentCurrency: Currency.fromJson(json['current_currency'] ?? {}),
+    currencies: (json['currencies'] as List<dynamic>? ?? [])
+        .map((e) => Currency.fromJson(e))
+        .toList(),
+  );
 }
 
 class Currency {
@@ -54,25 +42,17 @@ class Currency {
   final String name;
   final String symbol;
 
-  Currency({
-    required this.code,
-    required this.name,
-    required this.symbol,
-  });
+  Currency({required this.code, required this.name, required this.symbol});
 
-  factory Currency.fromJson(Map<String, dynamic> json) {
-    return Currency(
-      code: json['code'] ?? '',
-      name: json['name'] ?? '',
-      symbol: json['symbol'] ?? '',
-    );
-  }
+  factory Currency.fromJson(Map<String, dynamic> json) => Currency(
+    code: json['code'],
+    name: json['name'],
+    symbol: json['symbol'],
+  );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'code': code,
-      'name': name,
-      'symbol': symbol,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'code': code,
+    'name': name,
+    'symbol': symbol,
+  };
 }

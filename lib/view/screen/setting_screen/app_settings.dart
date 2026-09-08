@@ -80,6 +80,8 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                   child: languageSelector(
                     isArabic: isArabic,
                     isDark: isDark,
+                    isLocalLanguage: true,
+                    controller: storeSettingController,
                     onLanguageChanged: () {
                       setState(() {
                         isLanguageExpanded = false;

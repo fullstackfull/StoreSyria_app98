@@ -9,7 +9,8 @@ import 'package:store_go_app/core/model/order_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
-
+import '../../model/create_order_model.dart';
+import '../../model/customer_model.dart';
 import '../../model/top_order_model.dart';
 
 class OrderController extends GetxController implements StoreAware {
@@ -67,6 +68,150 @@ class OrderController extends GetxController implements StoreAware {
 // Delete Order
   RxBool isDeletingOrder = false.obs;
 
+  RxBool isCreatingOrder = false.obs;
+
+// الزبون المختار
+  Rx<CustomerData?> selectedCustomer = Rx<CustomerData?>(null);
+
+// المنتجات المختارة مع الكمية: key = productId
+  RxMap<int, int> selectedProductsQty = <int, int>{}.obs;
+
+// بيانات الشحن/العنوان
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
+  final TextEditingController stateController = TextEditingController();
+  final TextEditingController countryController = TextEditingController();
+  final TextEditingController postcodeController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
+
+  RxDouble deliveryPrice = 0.0.obs;
+  RxDouble taxPrice = 0.0.obs;
+  RxString paymentType = 'cod'.obs;
+  RxString paymentStatus = 'Unpaid'.obs;
+
+  void toggleProductSelection(int productId, {int quantity = 1}) {
+    if (selectedProductsQty.containsKey(productId)) {
+      selectedProductsQty.remove(productId);
+    } else {
+      selectedProductsQty[productId] = quantity;
+    }
+  }
+
+  void updateProductQty(int productId, int quantity) {
+    if (quantity <= 0) {
+      selectedProductsQty.remove(productId);
+    } else {
+      selectedProductsQty[productId] = quantity;
+    }
+  }
+
+  double calculateProductsTotal(List<dynamic> productList) {
+    // productList: لائحة المنتجات من ProductController (فيها id, price)
+    double total = 0;
+    selectedProductsQty.forEach((productId, qty) {
+      final product = productList.firstWhereOrNull(
+            (p) => p.id == productId,
+      );
+      if (product != null) {
+        total += (double.tryParse(product.price.toString()) ?? 0) * qty;
+      }
+    });
+    return total;
+  }
+
+  void resetCreateOrderForm() {
+    selectedCustomer.value = null;
+    selectedProductsQty.clear();
+    addressController.clear();
+    cityController.clear();
+    stateController.clear();
+    countryController.clear();
+    postcodeController.clear();
+    noteController.clear();
+    deliveryPrice.value = 0;
+    taxPrice.value = 0;
+    paymentType.value = 'cod';
+    paymentStatus.value = 'Unpaid';
+  }
+
+  Future<bool> createOrderData({
+    required List<dynamic> productList, // من ProductController
+  }) async {
+    if (selectedCustomer.value == null) {
+      commonToast('please_select_customer'.tr);
+      return false;
+    }
+
+    if (selectedProductsQty.isEmpty) {
+      commonToast('please_select_products'.tr);
+      return false;
+    }
+
+    isCreatingOrder.value = true;
+
+    bool success = false;
+
+    try {
+      final products = selectedProductsQty.entries.map((entry) {
+        final product = productList.firstWhereOrNull(
+              (p) => p.id == entry.key,
+        );
+
+        return OrderProductRequest(
+          productId: entry.key,
+          quantity: entry.value,
+          price: double.tryParse(product?.price?.toString() ?? '0') ?? 0,
+        );
+      }).toList();
+
+      final request = CreateOrderRequest(
+        customerId: selectedCustomer.value!.id ?? 0,
+        products: products,
+        paymentType: paymentType.value,
+        paymentStatus: paymentStatus.value,
+        deliveryPrice: deliveryPrice.value,
+        taxPrice: taxPrice.value,
+        firstName:  't',
+        lastName: 't',
+        email: selectedCustomer.value!.email ?? '',
+        telephone: '245676879',
+        address: addressController.text.trim(),
+        city: cityController.text.trim(),
+        state: stateController.text.trim(),
+        country: countryController.text.trim(),
+        postcode: postcodeController.text.trim(),
+        additionalNote: noteController.text.trim(),
+      );
+
+      final result = await orderRepository.createOrder(request: request);
+
+      result.fold(
+        onSuccess: (data) {
+          success = true;
+
+          commonToast('order_created_successfully'.tr);
+
+          resetCreateOrderForm();
+          resetPagination();
+          getOrderData(1);
+        },
+        onFailure: (reason, message, validationErrors) {
+          success = false;
+          commonToast(
+            message.isNotEmpty ? message : 'failed_to_create_order'.tr,
+          );
+        },
+      );
+    } catch (e) {
+      success = false;
+      commonToast('failed_to_create_order'.tr);
+      print('❌ createOrderData Error: $e');
+    } finally {
+      isCreatingOrder.value = false;
+    }
+
+    return success;
+  }
   // ==================== Lifecycle ====================
 
   @override
