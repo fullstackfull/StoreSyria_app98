@@ -16,6 +16,7 @@ String dateFormatted({required String date, required String formatType}) =>
 
 enum FormatType {
   dateTime,
+  dateTime2,
   date,
   time,
   ddMMMYYYY,
@@ -26,11 +27,15 @@ String formatForDateTime(FormatType formatType) {
   switch (formatType) {
     case FormatType.date:
       {
-        return "MMM dd,yyyy";
+        return "dd MMM yyyy";
       }
     case FormatType.dateTime:
       {
         return "dd-MM-yyyy hh:mm a";
+      }
+    case FormatType.dateTime2:
+      {
+        return "dd MMM hh:mm a";
       }
     case FormatType.time:
       {

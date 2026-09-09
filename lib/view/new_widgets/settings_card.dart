@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../utils/colors.dart';
 import '../../utils/text_style.dart';
 import '../widget/common_space_divider_widget.dart';
@@ -54,8 +55,8 @@ Widget settingCard({
                   child: Center(
                     child: assetSvdImageWidget(
                       image: icon,
-                      width: 22,
-                      height: 22,
+                      width: 27.w,
+                      height: 27.h,
                       colorFilter: ColorFilter.mode(
                         isDark
                             ? AppColor.themeGreenColor.withOpacity(0.3)
@@ -136,8 +137,8 @@ Widget settingWidget({
               child: Center(
                 child: assetSvdImageWidget(
                   image: icon,
-                  width: 18,
-                  height: 18,
+                  width: 20.w,
+                  height: 20.h,
                   colorFilter: ColorFilter.mode(
                     AppColor.themeNavyBlueColor,
                     BlendMode.srcIn,

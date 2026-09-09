@@ -6,6 +6,7 @@ import 'package:store_go_app/view/screen/order_screen/create_order_screen.dart';
 import 'package:store_go_app/view/screen/setting_screen/app_settings.dart';
 import 'package:store_go_app/view/screen/setting_screen/language_screen.dart';
 import 'package:store_go_app/view/screen/setting_screen/store_info_screen.dart';
+import 'package:store_go_app/view/screen/wallet/wallet_screen.dart';
 import 'package:store_go_app/view/screen/welcome_screen.dart';
 import '../bindings/coupon_binding.dart';
 import '../bindings/dashboard_binding.dart';
@@ -48,6 +49,7 @@ class AppRoutes {
   static const appSettings = '/appSettings';
   static const shipping = '/shipping';
   static const tax = '/tax';
+  static const wallet = '/wallet';
   static const coupon = '/coupon';
   static const notifications = '/notifications';
   static const lang = '/lang';
@@ -80,6 +82,11 @@ class AppRoutes {
     GetPage(
         name: storeInfo,
         page: () => StoreInfoScreen()
+    ),
+
+    GetPage(
+        name: wallet,
+        page: () => WalletScreen()
     ),
 
     // Dashboard

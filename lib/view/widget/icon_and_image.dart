@@ -29,7 +29,7 @@ Widget assetSvdImageWidget({
     width: width,
     height: height,
     fit: fit ?? BoxFit.contain,
-    colorFilter: finalColorFilter,
+    //colorFilter: finalColorFilter,
   );
 }
 

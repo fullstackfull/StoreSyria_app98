@@ -30,7 +30,7 @@ class LanguageData {
   final int storeId;
   final String storeName;
   final List<Language> languages;
-  final String currentLanguage;
+  final Language currentLanguage;
 
   LanguageData({
     required this.storeId,
@@ -43,11 +43,21 @@ class LanguageData {
     return LanguageData(
       storeId: json['store_id'] ?? 0,
       storeName: json['store_name'] ?? '',
+
       languages: (json['languages'] as List?)
-          ?.map((e) => Language.fromJson(e))
+          ?.map(
+            (e) => Language.fromJson(
+          Map<String, dynamic>.from(e),
+        ),
+      )
           .toList() ??
           [],
-      currentLanguage: json['current_language'] ?? '',
+
+      currentLanguage: Language.fromJson(
+        Map<String, dynamic>.from(
+          json['current_language'] ?? {},
+        ),
+      ),
     );
   }
 
@@ -56,7 +66,7 @@ class LanguageData {
       'store_id': storeId,
       'store_name': storeName,
       'languages': languages.map((e) => e.toJson()).toList(),
-      'current_language': currentLanguage,
+      'current_language': currentLanguage.toJson(),
     };
   }
 }

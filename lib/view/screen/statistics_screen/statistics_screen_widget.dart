@@ -1,5 +1,3 @@
-// ignore_for_file: must_be_immutable, prefer_const_constructors, prefer_const_constructors_in_immutables, avoid_function_literals_in_foreach_calls
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
@@ -11,10 +9,6 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:store_go_app/core/model/static_model.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
-
-/// ------------------------------------------------------------
-/// COMMON CARD
-/// ------------------------------------------------------------
 
 class StatisticsCard extends StatelessWidget {
   final String title;
@@ -93,10 +87,6 @@ class StatisticsCard extends StatelessWidget {
     );
   }
 }
-
-/// ------------------------------------------------------------
-/// TOP URL CARD
-/// ------------------------------------------------------------
 
 Widget topUrlWidget({
   required String title,
@@ -191,9 +181,7 @@ Widget topUrlWidget({
   );
 }
 
-/// ------------------------------------------------------------
-/// VISITOR GRAPH
-/// ------------------------------------------------------------
+
 class StatisticsVisitorGraph extends StatefulWidget {
   final List<VisitorChartData> visitorChart;
 

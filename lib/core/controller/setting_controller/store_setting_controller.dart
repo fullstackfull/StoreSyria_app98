@@ -30,7 +30,7 @@ class StoreSettingController extends GetxController {
   RxnString updatingLanguageCode = RxnString();
   Rxn<Currency> currentCurrency = Rxn<Currency>();
 
-  RxString currentLanguage = ''.obs;
+  Rxn<Language> currentLanguage = Rxn<Language>();
 
   // ==================== Store Info (عدّل هذا) ====================
   Rxn<StoreInfoData> storeInfoData = Rxn<StoreInfoData>();
@@ -109,6 +109,7 @@ class StoreSettingController extends GetxController {
 // ==================== Social ====================
 
   final TextEditingController whatsappController = TextEditingController();
+  final TextEditingController telegramController = TextEditingController();
 
   @override
   void onInit() {
@@ -141,6 +142,7 @@ class StoreSettingController extends GetxController {
     timezoneController.dispose();
 
     whatsappController.dispose();
+    telegramController.dispose();
     super.onClose();
   }
 
@@ -211,54 +213,42 @@ class StoreSettingController extends GetxController {
     storeUrlController.text =
         d.store?.storeUrl ?? '';
 
-    ownerNameController.text =
-        d.owner?.name ?? '';
+    ownerNameController.text = d.owner?.name ?? '';
 
-    ownerEmailController.text =
-        d.owner?.email ?? '';
+    ownerEmailController.text = d.owner?.email ?? '';
 
-    mobileController.text =
-        d.owner?.mobile ?? '';
+    mobileController.text = d.owner?.mobile ?? '';
 
-    storeCreatedAtController.text =
-        d.store?.createdAt?.split(' ').first ?? '';
+    storeCreatedAtController.text = d.store?.createdAt?.split(' ').first ?? '';
 
 
     // =========================
     // Address
     // =========================
-    addressController.text =
-        d.address?.storeAddress ?? '';
+    addressController.text = d.address?.storeAddress ?? '';
 
-    cityController.text =
-        d.address?.storeCity ?? '';
+    cityController.text = d.address?.storeCity ?? '';
 
-    stateController.text =
-        d.address?.storeState ?? '';
+    stateController.text = d.address?.storeState ?? '';
 
-    zipcodeController.text =
-        d.address?.storeZipcode ?? '';
+    zipcodeController.text = d.address?.storeZipcode ?? '';
 
-    countryController.text =
-        d.address?.storeCountry ?? '';
+    countryController.text = d.address?.storeCountry ?? '';
 
-    fullAddressController.text =
-        d.address?.fullAddress ?? '';
+    fullAddressController.text = d.address?.fullAddress ?? '';
 
     // =========================
     // Social Media
     // =========================
-    facebookController.text =
-        d.socialMedia?.facebook?.link ?? '';
+    facebookController.text = d.socialMedia?.facebook?.link ?? '';
 
-    twitterController.text =
-        d.socialMedia?.twitter?.link ?? '';
+    twitterController.text = d.socialMedia?.twitter?.link ?? '';
 
-    instagramController.text =
-        d.socialMedia?.instagram?.link ?? '';
+    instagramController.text = d.socialMedia?.instagram?.link ?? '';
 
-    whatsappController.text =
-        d.socialMedia?.whatsapp?.link ?? '';
+    whatsappController.text = d.socialMedia?.whatsapp?.link ?? '';
+
+    telegramController.text = d.socialMedia?.telegram?.link ?? '';
 
     // =========================
     // Media
@@ -272,20 +262,15 @@ class StoreSettingController extends GetxController {
     // =========================
     // Settings
     // =========================
-    currencyNameController.text =
-        d.settings?.currencyName ?? '';
+    currencyNameController.text = d.settings?.currencyName ?? '';
 
-    currencyFormatController.text =
-        d.settings?.currencyFormat ?? '';
+    currencyFormatController.text = d.settings?.currencyFormat ?? '';
 
-    siteRtlController.text =
-        d.settings?.siteRtl ?? '';
+    siteRtlController.text = d.settings?.siteRtl ?? '';
 
-    dateFormatController.text =
-        d.settings?.dateFormat ?? '';
+    dateFormatController.text = d.settings?.dateFormat ?? '';
 
-    timezoneController.text =
-        d.settings?.timezone ?? '';
+    timezoneController.text = d.settings?.timezone ?? '';
   }
 
 
@@ -310,17 +295,20 @@ class StoreSettingController extends GetxController {
               data['message'] ?? 'Language changed successfully',
             );
 
-            if (data['data'] != null &&
-                data['data']['current_language'] != null) {
-              currentLanguage.value =
-                  data['data']['current_language'].toString();
-            } else if (data['lang'] != null) {
-              currentLanguage.value =
-                  data['lang'].toString();
+            final responseData = data['data'];
+
+            if (responseData != null &&
+                responseData['saved_language_code'] != null) {
+              currentLanguage.value = Language(
+                code: responseData['saved_language_code'],
+                name: responseData['saved_language_name'] ??
+                    responseData['saved_language_code'],
+                flag: currentLanguage.value?.flag ?? '',
+              );
             }
 
             print(
-              "Current Language =====> ${currentLanguage.value}",
+              "Current Language =====> ${currentLanguage.value?.code}",
             );
           } else {
             commonToast(
@@ -363,11 +351,33 @@ class StoreSettingController extends GetxController {
               data['message'] ?? 'Currency changed successfully',
             );
 
-            if (data['data'] != null &&
-                data['data']['current_currency'] != null) {
-              currentCurrency.value = Currency.fromJson(
-                data['data']['current_currency'],
-              );
+            final responseData = data['data'];
+
+            if (responseData != null &&
+                responseData['currency_name'] != null) {
+              final String updatedCode = responseData['currency_name'];
+              final String updatedSymbol =
+                  responseData['currency_symbol'] ?? '';
+
+              Currency? matched;
+              for (final c in currencies) {
+                if (c.code == updatedCode) {
+                  matched = c;
+                  break;
+                }
+              }
+
+              if (matched != null) {
+                currentCurrency.value = matched;
+              } else {
+                currentCurrency.value = Currency.fromJson({
+                  'code': updatedCode,
+                  'symbol': updatedSymbol,
+                  'name': updatedCode,
+                  'rate_per_usd': 1,
+                  'is_active': true,
+                });
+              }
             }
 
             print(
@@ -393,48 +403,44 @@ class StoreSettingController extends GetxController {
       updatingCurrencyCode.value = null;
     }
   }
-
-  Future<void> getLanguagesData() async {
+  Future<void> getStoreCurrencyLangData() async {
     isLoadingLanguages.value = true;
+    errorMessage.value = '';
 
     try {
-      final response =
-      await settingRepository.getLanguagesData();
+      final response = await settingRepository.getStoreCurrencyLang();
 
       response.fold(
         onSuccess: (data) {
-          print("Languages Response =====> $data");
+          print("Languages & Currency Response =====> $data");
 
           if (data['status'] == 1) {
-            final languageResponse =
-            LanguageResponse.fromJson(data);
+            final responseData = data['data'];
 
-            languages.assignAll(
-              languageResponse.data.languages,
-            );
+            if (responseData['current_language'] != null) {
+              currentLanguage.value = Language.fromJson(
+                responseData['current_language'],
+              );
+            }
+            if (responseData['current_currency'] != null) {
+              currentCurrency.value = Currency.fromJson(
+                responseData['current_currency'],
+              );
+            }
 
-            currentLanguage.value =
-                languageResponse.data.currentLanguage;
-
-            print(
-              "Languages Length =====> ${languages.length}",
-            );
-
-            print(
-              "Current Language =====> ${currentLanguage.value}",
-            );
           } else {
             commonToast(
-              data['message'] ?? 'Failed to get languages',
+              data['message'] ??
+                  'Failed to get languages and currency',
             );
           }
         },
         onFailure: (reason, message, errors) {
           errorMessage.value =
-              message ?? 'Error getting languages';
+              message ?? 'Error getting languages and currency';
 
           commonToast(
-            message ?? 'Error getting languages',
+            message ?? 'Error getting languages and currency',
           );
         },
       );

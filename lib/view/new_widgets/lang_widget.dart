@@ -115,10 +115,16 @@ Widget languageSelector({
   required StoreSettingController controller,
   required VoidCallback onLanguageChanged,
 }) {
+  final String? selectedLanguageCode =
+      controller.currentLanguage.value?.code;
+
   final bool isUpdatingEn =
-      !isLocalLanguage && controller.updatingLanguageCode.value == 'en';
+      !isLocalLanguage &&
+          controller.updatingLanguageCode.value == 'en';
+
   final bool isUpdatingAr =
-      !isLocalLanguage && controller.updatingLanguageCode.value == 'ar';
+      !isLocalLanguage &&
+          controller.updatingLanguageCode.value == 'ar';
 
   return Container(
     width: double.infinity,
@@ -146,59 +152,93 @@ Widget languageSelector({
     ),
     child: Column(
       children: [
+        // ================= ENGLISH =================
         languageOption(
           title: 'english'.tr,
-          flag: Image.asset("assets/images/en.png", width: 22.w),
-          selected: !isArabic,
+          flag: Image.asset(
+            "assets/images/en.png",
+            width: 22.w,
+          ),
+
+          // إذا Local Language نستخدم لغة التطبيق
+          // إذا Store Language نستخدم اللغة القادمة من API
+          selected: isLocalLanguage
+              ? !isArabic
+              : selectedLanguageCode == 'en',
+
           isDark: isDark,
           isLoading: isUpdatingEn,
+
           onTap: () async {
-            if (isArabic) {
-              if (isLocalLanguage) {
-                // لغة التطبيق (الجهاز) فقط - AppSettingsScreen
+            if (isLocalLanguage) {
+              if (isArabic) {
                 TranslationService.changeLocale('en');
                 onLanguageChanged();
-              } else {
-                // لغة المتجر على السيرفر فقط - LanguageCurrenciesScreen
-                if (controller.updatingLanguageCode.value != null) return;
-
-                controller.updatingLanguageCode.value = 'en';
-                await controller.changeStoreLanguage(
-                  data: {
-                    "default_language": "English",
-                  },
-                );
-                onLanguageChanged();
               }
+              return;
             }
+
+            // Store language
+            if (selectedLanguageCode == 'en') return;
+
+            if (controller.updatingLanguageCode.value != null) {
+              return;
+            }
+
+            controller.updatingLanguageCode.value = 'en';
+
+            await controller.changeStoreLanguage(
+              data: {
+                "default_language": "English",
+              },
+            );
+
+            onLanguageChanged();
           },
         ),
 
         const SizedBox(height: 6),
 
+        // ================= ARABIC =================
         languageOption(
           title: 'arabic'.tr,
-          flag: Image.asset("assets/images/sy.png", width: 20.w),
-          selected: isArabic,
+          flag: Image.asset(
+            "assets/images/sy.png",
+            width: 20.w,
+          ),
+
+          selected: isLocalLanguage
+              ? isArabic
+              : selectedLanguageCode == 'ar',
+
           isDark: isDark,
           isLoading: isUpdatingAr,
+
           onTap: () async {
-            if (!isArabic) {
-              if (isLocalLanguage) {
+            if (isLocalLanguage) {
+              if (!isArabic) {
                 TranslationService.changeLocale('ar');
                 onLanguageChanged();
-              } else {
-                if (controller.updatingLanguageCode.value != null) return;
-
-                controller.updatingLanguageCode.value = 'ar';
-                await controller.changeStoreLanguage(
-                  data: {
-                    "default_language": "Arabic",
-                  },
-                );
-                onLanguageChanged();
               }
+              return;
             }
+
+            // Store language
+            if (selectedLanguageCode == 'ar') return;
+
+            if (controller.updatingLanguageCode.value != null) {
+              return;
+            }
+
+            controller.updatingLanguageCode.value = 'ar';
+
+            await controller.changeStoreLanguage(
+              data: {
+                "default_language": "Arabic",
+              },
+            );
+
+            onLanguageChanged();
           },
         ),
       ],
@@ -275,11 +315,15 @@ Widget currencySelector({
               isLoading: isUpdating,
               isDark: isDark,
               onTap: () async {
-                // منع الضغط المتكرر أثناء وجود تحديث جارٍ
-                if (controller.updatingCurrencyCode.value != null) return;
+                if (controller.updatingCurrencyCode.value != null) {
+                  return;
+                }
+
+                if (controller.currentCurrency.value?.code == currency.code) {
+                  return;
+                }
 
                 controller.updatingCurrencyCode.value = currency.code;
-                controller.currentCurrency.value = currency;
 
                 await controller.changeStoreCurrency(
                   data: {
@@ -288,6 +332,7 @@ Widget currencySelector({
                     "site_currency_symbol_position": "pre",
                   },
                 );
+
                 onCurrencyChanged();
               },
             );

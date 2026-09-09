@@ -41,18 +41,34 @@ class Currency {
   final String code;
   final String name;
   final String symbol;
+  final double ratePerUsd;
+  final bool isActive;
 
-  Currency({required this.code, required this.name, required this.symbol});
+  Currency({
+    required this.code,
+    required this.name,
+    required this.symbol,
+    required this.ratePerUsd,
+    required this.isActive,
+  });
 
-  factory Currency.fromJson(Map<String, dynamic> json) => Currency(
-    code: json['code'],
-    name: json['name'],
-    symbol: json['symbol'],
-  );
+  factory Currency.fromJson(Map<String, dynamic> json) {
+    return Currency(
+      code: json['code'] ?? '',
+      name: json['name'] ?? '',
+      symbol: json['symbol'] ?? '',
+      ratePerUsd: (json['rate_per_usd'] ?? 1).toDouble(),
+      isActive: json['is_active'] ?? false,
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-    'code': code,
-    'name': name,
-    'symbol': symbol,
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      'code': code,
+      'name': name,
+      'symbol': symbol,
+      'rate_per_usd': ratePerUsd,
+      'is_active': isActive,
+    };
+  }
 }

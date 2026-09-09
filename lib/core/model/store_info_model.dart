@@ -228,10 +228,12 @@ class SocialMedia {
   final SocialLink? facebook;
   final SocialLink? twitter;
   final SocialLink? instagram;
+  final SocialLink? telegram;
   final SocialLink? whatsapp;
 
   SocialMedia({
     this.facebook,
+    this.telegram,
     this.whatsapp,
     this.twitter,
     this.instagram,
@@ -249,7 +251,10 @@ class SocialMedia {
           ? SocialLink.fromJson(json['instagram'])
           : null,
       whatsapp: json['whatsapp'] != null
-          ? SocialLink.fromJson(json['instagram'])
+          ? SocialLink.fromJson(json['whatsapp'])
+          : null,
+      telegram: json['telegram'] != null
+          ? SocialLink.fromJson(json['telegram'])
           : null,
     );
   }

@@ -102,6 +102,9 @@ class API {
   static String changeLanguageUrl = '/updateStoreLanguage';
   static String changeCurrencyUrl = '/updateCurrencyApi';
   static String getStoreInfoUrl = '/getStoreInfo';
-
+  static String getStoreCurrencyLangUrl = '/getCurrentLanguageAndCurrency';
+  static String walletUrl = '/wallet/transactions';
+  static String addBalanceUrl = '/wallet/add-balance';
+  static String deductBalanceUrl = '/wallet/deduct-balance';
 
 }

@@ -70,6 +70,8 @@ class DefaultImages {
   static String emptyNotification = "assets/svg/empty_notification.svg";
 
   static String welcomeImg = "assets/svg/welcome.svg";
+  static String groupImg = "assets/svg/group.svg";
+  static String walletImg = "assets/svg/wallet.svg";
   static String profileImg = "https://apps.rajodiya.com/ecommercego-saas/storage/uploads/profile/avatar.png";
   static String productImg = "https://apps.rajodiya.com/ecommercego-saas/themes/grocery/uploads/11_1684295865_1.png";
   static String codImg = "https://apps.rajodiya.com/ecommercego-flutter/storage/uploads/cod.png";

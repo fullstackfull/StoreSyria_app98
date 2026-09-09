@@ -449,5 +449,26 @@ const Map<String, String> en = {
   'enter_password': 'Enter password',
   'password_min_8_characters': 'Password must be at least 8 characters',
   'deleteCustomer' : "Are you sure you want to delete this customer?",
-  "manage_your_store_details" : "Manage your store details"
+  "manage_your_store_details" : "Manage your store details",
+  "wallet" : "Wallet",
+  'current_balance': 'Current Balance',
+  'add_funds': 'Add Funds',
+  'withdraw': 'Withdraw',
+
+  'add_amount_to_wallet': 'Add amount to wallet',
+  'withdraw_amount_from_wallet': 'Withdraw amount from wallet',
+
+  'amount': 'Amount',
+  'enter_amount': 'Enter amount',
+
+  'enter_description': 'Enter description',
+
+  'please_enter_valid_amount': 'Please enter a valid amount',
+  'please_enter_description': 'Please enter description',
+
+  'credit': 'Credit',
+  'debit': 'Debit',
+
+  'completed': 'Completed',
+
 };

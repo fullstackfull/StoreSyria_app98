@@ -79,7 +79,7 @@ class SettingScreen extends StatelessWidget {
 
                     settingCard(
                       isDark: isDark,
-                      icon: DefaultImages.taxIcn,
+                      icon: DefaultImages.groupImg,
                       title: 'customers'.tr,
                       subtitle: 'manage_customer'.tr,
                       function: () {
@@ -128,6 +128,16 @@ class SettingScreen extends StatelessWidget {
                           Get.to(() => StoreSettingScreen());
                         },
                       ),
+
+                      settingWidget(
+                        icon: DefaultImages.walletImg,
+                        title: 'wallet'.tr,
+                        isDark: isDark,
+                        function: () {
+                          Get.toNamed(AppRoutes.wallet);
+                        }
+                         ),
+
 
                       settingWidget(
                         icon: DefaultImages.settingIcn,

@@ -4,24 +4,26 @@ import '../../utils/prefer.dart';
 
 class StoreSettingRepository {
 
+  getStoreCurrencyLang() async {
+    String endPoint = API.getStoreCurrencyLangUrl + API.storeIdUrl + Prefs.getStoreID();
+    var response = await NetworkHttps.getRequest(endPoint);
+    return response;
+  }
   getStoreInfoData() async {
     String endPoint = API.getStoreInfoUrl + API.storeIdUrl + Prefs.getStoreID();
     var response = await NetworkHttps.getRequest(endPoint);
-    print("response====>$response");
     return response;
   }
 
   getLanguagesData() async {
     String endPoint = API.languagesUrl + API.storeIdUrl + Prefs.getStoreID();
     var response = await NetworkHttps.getRequest(endPoint);
-    print("response====>$response");
     return response;
   }
 
   getCurrenciesData() async {
     String endPoint = API.currenciesUrl + API.storeIdUrl + Prefs.getStoreID();
     var response = await NetworkHttps.getRequest(endPoint);
-    print("response====>$response");
     return response;
   }
 
@@ -30,7 +32,6 @@ class StoreSettingRepository {
     var response = await NetworkHttps.postRequest(
         endPoint,
         data);
-    print("response====>$response");
     return response;
   }
 
@@ -39,14 +40,12 @@ class StoreSettingRepository {
     var response = await NetworkHttps.postRequest(
         endPoint,
         data);
-    print("response====>$response");
     return response;
   }
 
   deleteStoreData() async {
     String endPoint = API.deleteStoreUrl + API.storeIdUrl + Prefs.getStoreID();
     var response = await NetworkHttps.deleteRequest(endPoint);
-    print("response====>$response");
     return response;
   }
 

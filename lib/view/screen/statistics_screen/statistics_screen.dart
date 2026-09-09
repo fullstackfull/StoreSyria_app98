@@ -42,7 +42,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       appBar: simpleAppBar(
           title: "analytics".tr,
           isBack: true,
-          label: null, onNewLabelTap: () {  }),
+          label: null, onNewLabelTap: () {}),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Obx(() {

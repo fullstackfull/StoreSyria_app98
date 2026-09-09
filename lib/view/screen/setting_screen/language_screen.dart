@@ -23,6 +23,7 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
   void initState() {
     super.initState();
     controller.getCurrenciesData();
+    controller.getStoreCurrencyLangData();
   }
 
   @override
@@ -50,20 +51,30 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 30),
             child: Column(
               children: [
-                mainCard(
-                  icon: Icons.language_rounded,
-                  title: 'languages'.tr,
-                  value: isArabic ? 'arabic'.tr : 'english'.tr,
-                  isExpanded: isLanguageExpanded,
-                  isDark: isDark,
-                  onTap: () {
-                    setState(() {
-                      isLanguageExpanded = !isLanguageExpanded;
-                      if (isLanguageExpanded) {
-                        isCurrencyExpanded = false;
+                Obx(
+                      () => mainCard(
+                    icon: Icons.language_rounded,
+                    title: 'languages'.tr,
+
+                    value: _getLocalizedLanguageName(),
+
+                    isExpanded: isLanguageExpanded,
+                    isDark: isDark,
+
+                    onTap: () {
+                      setState(() {
+                        isLanguageExpanded = !isLanguageExpanded;
+
+                        if (isLanguageExpanded) {
+                          isCurrencyExpanded = false;
+                        }
+                      });
+
+                      if (controller.currentLanguage.value == null) {
+                        controller.getStoreCurrencyLangData();
                       }
-                    });
-                  },
+                    },
+                  ),
                 ),
 
                 AnimatedSize(
@@ -136,8 +147,27 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
   }
 
   String _selectedCurrencyText() {
-    return controller.currentCurrency.value != null
-        ? '${controller.currentCurrency.value!.symbol} ${controller.currentCurrency.value!.code}'
-        : 'USD';
+    final currency = controller.currentCurrency.value;
+
+    if (currency == null) {
+      return '---';
+    }
+
+    return '${currency.symbol} ${currency.code}';
+  }
+
+  String _getLocalizedLanguageName() {
+    final code = controller.currentLanguage.value?.name;
+
+    if (code == null) return '---';
+
+    switch (code) {
+      case 'Arabic':
+        return 'arabic'.tr;
+      case 'English':
+        return 'english'.tr;
+      default:
+        return controller.currentLanguage.value?.name ?? '---';
+    }
   }
 }
