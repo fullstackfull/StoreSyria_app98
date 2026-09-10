@@ -32,7 +32,7 @@ Widget transactionCard({
     decoration: BoxDecoration(
       color: cardColor,
       borderRadius: BorderRadius.circular(16.r),
-      border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+      // border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
       boxShadow: isDark
           ? null
           : [

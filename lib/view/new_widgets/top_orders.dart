@@ -33,9 +33,9 @@ Widget topOrderCardWidget({
       ),
       margin: EdgeInsets.only(right: 12.w),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColor.themeNavyBlueColor.withOpacity(0.3),
-        ),
+        // border: Border.all(
+        //   color: AppColor.themeNavyBlueColor.withOpacity(0.3),
+        // ),
         color: cardColor,
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
@@ -218,7 +218,7 @@ Widget allOrdersListItemWidget({
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+        // border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
         color: cardColor,
         borderRadius: BorderRadius.circular(18.r),
       ),

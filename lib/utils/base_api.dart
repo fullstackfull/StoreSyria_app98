@@ -74,12 +74,12 @@ class API {
   static String getEmailSettingUrl = '/getemailsetting';
   static String getLoyaltySettingUrl = '/getloyalitysetting';
   static String loyaltySettingUrl = '/loyalitysetting';
-  static String getCodPaymentUrl = '/get-cod-payment';
-  static String codPaymentUrl = '/cod-payment';
-  static String getBankPaymentUrl = '/get-bank-payment';
-  static String bankPaymentUrl = '/bank-payment';
-  static String getStripePaymentUrl = '/get-stripe-payment';
-  static String stripePaymentUrl = '/stripe-payment';
+  // static String getCodPaymentUrl = '/get-cod-payment';
+  // static String codPaymentUrl = '/cod-payment';
+  // static String getBankPaymentUrl = '/get-bank-payment';
+  // static String bankPaymentUrl = '/bank-payment';
+  // static String getStripePaymentUrl = '/get-stripe-payment';
+  // static String stripePaymentUrl = '/stripe-payment';
   static String testMailUrl = '/testmail';
   static String changeStoreUrl = '/changestore';
   static String viewUsedCouponUrl = '/view-used-coupon';
@@ -103,8 +103,16 @@ class API {
   static String changeCurrencyUrl = '/updateCurrencyApi';
   static String getStoreInfoUrl = '/getStoreInfo';
   static String getStoreCurrencyLangUrl = '/getCurrentLanguageAndCurrency';
+
+  //wallet
   static String walletUrl = '/wallet/transactions';
   static String addBalanceUrl = '/wallet/add-balance';
   static String deductBalanceUrl = '/wallet/deduct-balance';
+
+  //plans
+  static String myPlanUrl = '/indexAllPlan';
+
+  //payments
+  static String paymentTypesUrl = '/getActivePaymentMethods';
 
 }

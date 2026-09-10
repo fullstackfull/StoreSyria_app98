@@ -53,21 +53,15 @@ class WalletController extends GetxController {
             final walletData =
             WalletData.fromJson(data['data']);
 
-            availableBalance.value =
-                walletData.availableBalance;
+            availableBalance.value = walletData.availableBalance;
 
-            currencyCode.value =
-                walletData.currencyCode;
+            currencyCode.value = walletData.currencyCode;
 
-            transactions.assignAll(
-              walletData.transactions,
-            );
+            transactions.assignAll(walletData.transactions);
 
-            pagination.value =
-                walletData.pagination;
+            pagination.value = walletData.pagination;
 
-            _currentPage =
-                walletData.pagination.currentPage;
+            _currentPage = walletData.pagination.currentPage;
           } else {
             commonToast(
               data['message'] ??
@@ -118,10 +112,6 @@ class WalletController extends GetxController {
           if (data['status'] == 1) {
             final balanceData = data['data'];
 
-            availableBalance.value = balanceData['new_available_balance'].toString();
-
-            currencyCode.value = balanceData['currency_code'].toString();
-
             commonToast(data['message'] ?? 'Balance added successfully.',
             );
             Get.back();
@@ -167,15 +157,6 @@ class WalletController extends GetxController {
           print("Deduct Balance Response =====> $data");
 
           if (data['status'] == 1) {
-            final balanceData = data['data'];
-
-            availableBalance.value =
-                balanceData['new_available_balance']
-                    .toString();
-
-            currencyCode.value =
-                balanceData['currency_code']
-                    .toString();
 
             commonToast(
               data['message'] ??

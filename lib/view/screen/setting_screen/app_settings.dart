@@ -2,9 +2,11 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/setting_controller/store_setting_controller.dart';
 import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import '../../../core/controller/setting_controller/theme_controller.dart';
@@ -54,7 +56,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               mainCard(
-                icon: Icons.language_rounded,
+                icon: DefaultImages.language2Icn,
                 title: 'languages'.tr,
                 value: isArabic
                     ? 'arabic'.tr
@@ -132,22 +134,12 @@ Widget _themeCard({
     ),
     child: Row(
       children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppColor.themeGreenColor.withOpacity(
-              isDark ? 0.12 : 0.08,
-            ),
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: Icon(
-            isDark
-                ? Icons.dark_mode_rounded
-                : Icons.light_mode_rounded,
-            size: 24,
-            color: AppColor.themeGreenColor,
-          ),
+        Icon(
+          isDark
+              ? Icons.dark_mode_rounded
+              : Icons.light_mode_rounded,
+          size: 30.w,
+          color: isDark ? AppColor.themeGreenColor : Colors.orange.shade700
         ),
 
         const SizedBox(width: 14),

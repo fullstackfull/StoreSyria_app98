@@ -80,9 +80,9 @@ Widget buildCategoryWidget({
   return Container(
     decoration: BoxDecoration(
       color: cardColor,
-      border: Border.all(
-        color: AppColor.themeNavyBlueColor.withOpacity(0.3),
-      ),
+      // border: Border.all(
+      //   color: AppColor.themeNavyBlueColor.withOpacity(0.3),
+      // ),
       borderRadius: BorderRadius.circular(22.r),
       boxShadow: isDark
           ? null

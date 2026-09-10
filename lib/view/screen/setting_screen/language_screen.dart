@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/utils/images.dart';
 import '../../../core/controller/setting_controller/store_setting_controller.dart';
 import '../../../translations/translation_service.dart';
 import '../../new_widgets/lang_widget.dart';
@@ -40,7 +41,7 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
       child: Scaffold(
         backgroundColor: AppColor.cBackGround,
         appBar: simpleAppBar(
-            title: 'language_and_currency'.tr,
+            title: 'store_language_and_currency'.tr,
             label: null,
             onNewLabelTap: () {  },
             isBack: true
@@ -53,7 +54,7 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
               children: [
                 Obx(
                       () => mainCard(
-                    icon: Icons.language_rounded,
+                    icon: DefaultImages.language2Icn,
                     title: 'languages'.tr,
 
                     value: _getLocalizedLanguageName(),
@@ -88,11 +89,7 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
                       isDark: isDark,
                       isLocalLanguage: false,
                       controller: controller,
-                      onLanguageChanged: () {
-                        setState(() {
-                          isLanguageExpanded = false;
-                        });
-                      },
+                      onLanguageChanged: () {},
                     )),
                   )
                       : const SizedBox.shrink(),
@@ -101,7 +98,7 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
 
                 Obx(() =>
                     mainCard(
-                      icon: Icons.payments_outlined,
+                      icon: DefaultImages.currencyIcn,
                       title: 'currencies'.tr,
                       value: _selectedCurrencyText(),
                       isExpanded: isCurrencyExpanded,
@@ -128,11 +125,7 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
                       ? Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: currencySelector(
-                      onCurrencyChanged: () {
-                        setState(() {
-                          isCurrencyExpanded = false;
-                        });
-                      },
+                      onCurrencyChanged: () {},
                       controller: controller,
                       isDark: isDark,
                     ))

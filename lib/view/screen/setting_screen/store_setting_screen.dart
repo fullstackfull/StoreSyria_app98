@@ -57,7 +57,7 @@ class StoreSettingScreen extends StatelessWidget {
                 children: [
                   settingCard(
                     isDark: isDark,
-                    icon: DefaultImages.languageIcn,
+                    icon: DefaultImages.language2Icn,
                     title: 'language_and_currencies'.tr,
                     subtitle: "manage_your_store_details".tr,
                     function: () => Get.toNamed(AppRoutes.lang),
@@ -95,9 +95,9 @@ class StoreSettingScreen extends StatelessWidget {
         
                   settingCard(
                     isDark: isDark,
-                    icon: DefaultImages.categoriesIcn,
-                    title: 'store_payment'.tr,
-                    subtitle: 'manage_payment_settings'.tr,
+                    icon: DefaultImages.paymentIcn,
+                    title: 'payment_methods'.tr,
+                    subtitle:'available_store_payment_methods'.tr,
                     function: () {
                       Get.to(() => PaymentSettingScreen());
                     },

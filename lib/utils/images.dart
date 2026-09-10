@@ -4,10 +4,13 @@ class DefaultImages {
   static String envelopeIcn = 'assets/svg/envelope.svg';
   static String googleIcn = 'assets/svg/google.svg';
   static String facebookIcn = 'assets/svg/fb.svg';
+  static String language2Icn = 'assets/svg/language.svg';
+  static String currencyIcn = 'assets/svg/currency.svg';
   static String appleIcn = 'assets/svg/apple.svg';
   static String lockIcn = 'assets/svg/lock.svg';
   static String userIcn = "assets/svg/user.svg";
   static String callIcn = "assets/svg/call.svg";
+  static String myPlanImg = "assets/svg/my_plan.svg";
   static String nextIcn = "assets/svg/next.svg";
   static String successIcn = "assets/svg/success.svg";
   static String ordersIcn = "assets/svg/orders.svg";
@@ -25,6 +28,7 @@ class DefaultImages {
   static String listIcn = "assets/svg/list_icn.svg";
   static String gridIcn = "assets/svg/grid_icn.svg";
   static String cartIcn = "assets/svg/cart_icn.svg";
+  static String paymentIcn = "assets/svg/payment_methods.svg";
   static String arrowDownIcn = "assets/svg/arrow_down.svg";
   static String arrowUpIcn = "assets/svg/arrow_up.svg";
   static String copyIcn = "assets/svg/copy.svg";

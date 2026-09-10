@@ -56,8 +56,8 @@ Widget productCouponWidget({
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: cardColor,
-        border: Border.all(
-            color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+        // border: Border.all(
+        //     color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
         borderRadius: BorderRadius.circular(18.r),
       ),
       child: Column(

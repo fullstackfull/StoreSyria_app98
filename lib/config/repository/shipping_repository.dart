@@ -12,7 +12,6 @@ class ShippingRepository {
     return response;
   }
 
-
   addShippingData({
     required bool isUpdate,
     required String shippingId,

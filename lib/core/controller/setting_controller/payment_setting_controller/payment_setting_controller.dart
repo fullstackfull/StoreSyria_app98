@@ -1,83 +1,67 @@
-// ignore_for_file: unnecessary_null_comparison
-
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/payment_setting_repository.dart';
+import 'package:store_go_app/core/model/payment_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 
 class PaymentSettingController extends GetxController {
   final PaymentSettingRepository paymentSettingRepository =
   PaymentSettingRepository();
 
-  final TextEditingController currencyController =
-  TextEditingController();
+  RxString errorMessage = ''.obs;
 
-  final TextEditingController currencySymbolController =
-  TextEditingController();
+  final RxList<PaymentMethod> paymentMethods = <PaymentMethod>[].obs;
 
-  RxString codDescription = ''.obs;
-  RxString codImage = ''.obs;
-  RxString isCodEnabled = 'on'.obs;
+  RxBool isLoading = false.obs;
 
-  Future<void> getCodPaymentData() async {
-    Loader.showLoader();
-
+  Future<void> getPaymentTypesData() async {
     try {
+      isLoading.value = true;
+
+      errorMessage.value = '';
+
       final response =
-      await paymentSettingRepository.getCodPaymentData();
+      await paymentSettingRepository.getPaymentTypesData();
 
-      if (response != null) {
-        // Success<T> يحتوي على البيانات
-        final data = response.data;
+      response.fold(
+        onSuccess: (data) {
+          if (data['status'] == 1) {
+            final responseData =
+            data['data'] as Map<String, dynamic>;
 
-        if (data != null && data['status'] == 1) {
-          final responseData =
-          data['data'] as Map<String, dynamic>?;
+            final activeMethods =
+                responseData['active_methods']
+                as List<dynamic>? ??
+                    [];
 
-          if (responseData != null) {
-            currencyController.text =
-                responseData['CURRENCY_NAME']?.toString() ?? '';
+            paymentMethods.value = activeMethods
+                .map(
+                  (item) => PaymentMethod.fromJson(
+                item as Map<String, dynamic>,
+              ),
+            )
+                .toList();
+          } else {
+            errorMessage.value =
+                data['message'] ?? 'Something went wrong';
 
-            currencySymbolController.text =
-                responseData['CURRENCY']?.toString() ?? '';
-
-            codDescription.value =
-                responseData['cod_info']?.toString() ?? '';
-
-            isCodEnabled.value =
-                responseData['is_cod_enabled']?.toString() ?? 'on';
-
-            codImage.value =
-                responseData['cod_image']?.toString() ?? '';
+            commonToast(errorMessage.value);
           }
-        } else {
-          commonToast(
-            data?['message']?.toString() ??
-                'Something went wrong',
-          );
-        }
-      }
+        },
+
+        onFailure: (
+            reason,
+            message,
+            validationErrors,
+            ) {
+          errorMessage.value = message;
+          commonToast(message);
+        },
+      );
     } catch (e) {
-      debugPrint(
-        'getCodPaymentData ERROR: $e',
-      );
-
-      commonToast(
-        'Something went wrong',
-      );
+      errorMessage.value = e.toString();
+      commonToast(errorMessage.value);
     } finally {
-      // إغلاق Loader دائماً حتى لو صار Exception
-      if (Get.isDialogOpen == true) {
-        Get.back();
-      }
+      isLoading.value = false;
     }
-  }
-
-  @override
-  void onClose() {
-    currencyController.dispose();
-    currencySymbolController.dispose();
-    super.onClose();
   }
 }

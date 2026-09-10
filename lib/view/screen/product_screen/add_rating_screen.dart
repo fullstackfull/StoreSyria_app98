@@ -245,12 +245,12 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
                                         .withOpacity(0.08),
                                     borderRadius:
                                     BorderRadius.circular(12.r),
-                                    border: Border.all(
-                                      color: (isVisible
-                                          ? AppColor.themeGreenColor
-                                          : Colors.grey)
-                                          .withOpacity(0.3),
-                                    ),
+                                    // border: Border.all(
+                                    //   color: (isVisible
+                                    //       ? AppColor.themeGreenColor
+                                    //       : Colors.grey)
+                                    //       .withOpacity(0.3),
+                                    // ),
                                   ),
                                   child: SwitchListTile(
                                     contentPadding: EdgeInsets.zero,
@@ -381,7 +381,7 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: borderColor),
+        // border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),

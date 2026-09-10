@@ -25,7 +25,7 @@ Widget settingCard({
             BoxShadow(
               color: isDark
                   ? Colors.black.withOpacity(0.18)
-                  : AppColor.themeGreenColor.withOpacity(0.2),
+                  : AppColor.cBlack.withOpacity(0.2),
               offset: const Offset(0, 2),
               blurRadius: 8,
             ),
@@ -139,10 +139,6 @@ Widget settingWidget({
                   image: icon,
                   width: 20.w,
                   height: 20.h,
-                  colorFilter: ColorFilter.mode(
-                    AppColor.themeNavyBlueColor,
-                    BlendMode.srcIn,
-                  ),
                 ),
               ),
             ),

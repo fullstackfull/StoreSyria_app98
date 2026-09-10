@@ -252,7 +252,7 @@ class _ProductDetailScreenState
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: borderColor),
+            // border: Border.all(color: borderColor),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(14.r),
@@ -846,9 +846,9 @@ class _ProductDetailScreenState
                   : Colors.white,
               borderRadius:
               BorderRadius.circular(16.r),
-              border: Border.all(
-                color: borderColor,
-              ),
+              // border: Border.all(
+              //   color: borderColor,
+              // ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(
@@ -1437,9 +1437,9 @@ class _ProductDetailScreenState
         color: backgroundColor,
         borderRadius:
         BorderRadius.circular(14.r),
-        border: Border.all(
-          color: borderColor,
-        ),
+        // border: Border.all(
+        //   color: borderColor,
+        // ),
       ),
       child: child,
     );

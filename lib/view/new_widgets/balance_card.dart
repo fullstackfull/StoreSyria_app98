@@ -12,6 +12,7 @@ Widget balanceCard({
   required WalletController controller,
   required BuildContext context,
 }) {
+  String balance =  controller.availableBalance.value;
   return Obx(() {
     return Container(
       width: double.infinity,
@@ -30,7 +31,7 @@ Widget balanceCard({
         borderRadius: BorderRadius.circular(22.r),
         boxShadow: [
           BoxShadow(
-            color: AppColor.themeNavyBlueColor.withOpacity(0.3),
+            color : AppColor.cBlack.withOpacity(0.2),
             offset: const Offset(0, 8),
             blurRadius: 20,
           ),
@@ -62,7 +63,9 @@ Widget balanceCard({
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: Text(
+                child: balance.isEmpty || balance == null ?
+                CircularProgressIndicator(color: Colors.grey,strokeWidth: 2.w,) :
+                Text(
                   controller.availableBalance.value,
                   style: const TextStyle(
                     color: Colors.white,

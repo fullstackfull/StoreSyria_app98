@@ -186,7 +186,7 @@ const Map<String, String> en = {
   'active': 'Active',
   'inactive': 'Inactive',
   "store_settings": "Store Settings",
-  "language_and_currencies": "Language & Currencies",
+  "store_language_and_currencies": "Store Language & Currencies",
   "store_information": "Store Information",
   "store_design": "Store Design",
   "danger_zone": "Danger Zone",
@@ -454,21 +454,38 @@ const Map<String, String> en = {
   'current_balance': 'Current Balance',
   'add_funds': 'Add Funds',
   'withdraw': 'Withdraw',
-
   'add_amount_to_wallet': 'Add amount to wallet',
   'withdraw_amount_from_wallet': 'Withdraw amount from wallet',
-
   'amount': 'Amount',
   'enter_amount': 'Enter amount',
-
   'enter_description': 'Enter description',
-
   'please_enter_valid_amount': 'Please enter a valid amount',
   'please_enter_description': 'Please enter description',
-
   'credit': 'Credit',
   'debit': 'Debit',
-
   'completed': 'Completed',
+  "my_plan" : "My Plan",
+  'MyPlan': 'My Plan',
+  'plan_usage': 'Plan Usage',
+  'stores': 'Stores',
+  'users': 'Users',
+  'remaining': 'Remaining',
+  'MyPlan_details': 'Plan Details',
+  'duration': 'Duration',
+  'expire_date': 'Expire Date',
+  'features': 'Features',
+  'custom_domain': 'Custom Domain',
+  'sub_domain': 'Sub Domain',
+  'chatgpt': 'ChatGPT',
+  'pwa': 'PWA',
+  'shipping_method': 'Shipping Method',
+  'enable_tax': 'Enable Tax',
+  'storage': 'Storage',
+  'expired': 'Expired',
+  'no_MyPlan_found': 'No plan found',
+  "store_payment_methods": "Store Payment Methods",
+  "payment_methods": "Payment Methods Available",
+  "no_payment_methods_available": "No payment methods available",
+  "available_store_payment_methods": "Available Payment Methods in Store"
 
 };

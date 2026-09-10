@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:store_go_app/view/widget/icon_and_image.dart';
 import '../../core/controller/setting_controller/store_setting_controller.dart';
 import '../../translations/translation_service.dart';
 import '../../utils/colors.dart';
@@ -381,50 +382,31 @@ Widget currencyOption({
         ),
         child: Row(
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 50,
-              height: 50,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: selected
-                    ? AppColor.themeGreenColor.withOpacity(
-                  isDark ? 0.16 : 0.10,
-                )
-                    : isDark
-                    ? DarkThemeColor.cBorder.withOpacity(0.3)
-                    : AppColor.cBackGround,
-                border: Border.all(
-                  color: selected
-                      ? AppColor.themeGreenColor.withOpacity(
-                    isDark ? 0.40 : 0.30,
-                  )
-                      : isDark
-                      ? DarkThemeColor.cBorder.withOpacity(0.5)
-                      : Colors.grey,
-                ),
-              ),
-              child: FittedBox(
-                child: Padding(
+               Padding(
                   padding: const EdgeInsets.all(6),
-                  child: Center(
-                    child: Text(
-                      symbol,
-                      style: pMedium14.copyWith(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: selected
-                            ? AppColor.themeGreenColor
-                            : isDark
-                            ? DarkThemeColor.cText
-                            : AppColor.cText,
+                  child: Container(
+                    width: 45.w,
+                    height: 25.h,
+                    decoration: BoxDecoration(
+                      color: AppColor.themeGreenColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(11.r)
+                    ),
+                    child: Center(
+                      child: Text(
+                        symbol,
+                        style: pMedium14.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: selected
+                              ? AppColor.themeGreenColor
+                              : isDark
+                              ? DarkThemeColor.cText
+                              : AppColor.cText,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
 
             const SizedBox(width: 14),
 
@@ -461,8 +443,7 @@ Widget currencyOption({
 
             const SizedBox(width: 10),
 
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+            Container(
               width: 23,
               height: 23,
               decoration: BoxDecoration(
@@ -510,7 +491,7 @@ Widget currencyOption({
 }
 
 Widget mainCard({
-  required IconData icon,
+  required String icon,
   required String title,
   required String value,
   required bool isExpanded,
@@ -550,9 +531,7 @@ Widget mainCard({
 
           boxShadow: [
             BoxShadow(
-              color: AppColor.themeGreenColor.withOpacity(
-                isDark ? 0.07 : 0.12,
-              ),
+              color : AppColor.cBlack.withOpacity(0.2),
               offset: const Offset(0, 2),
               blurRadius: 8,
               spreadRadius: 0,
@@ -561,22 +540,10 @@ Widget mainCard({
         ),
         child: Row(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColor.themeGreenColor.withOpacity(
-                  isDark ? 0.12 : 0.08,
-                ),
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: Center(
-                child: Icon(
-                  icon,
-                  size: 24,
-                  color: AppColor.themeGreenColor,
-                ),
-              ),
+            assetSvdImageWidget(
+              image: icon,
+              width: 30.w,
+              height: 30.h
             ),
 
             const SizedBox(width: 14),

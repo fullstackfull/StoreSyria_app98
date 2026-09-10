@@ -111,7 +111,7 @@ class SettingScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColor.themeGreenColor.withOpacity(0.2),
+                        color : AppColor.cBlack.withOpacity(0.2),
                         offset: const Offset(0, 2),
                         blurRadius: 8,
                         spreadRadius: 0,
@@ -138,6 +138,15 @@ class SettingScreen extends StatelessWidget {
                         }
                          ),
 
+                      settingWidget(
+                        icon: DefaultImages.myPlanImg,
+                        title: 'my_plan'.tr,
+                        isDark: isDark,
+                        function: () {
+                          Get.toNamed(AppRoutes.myPlan);
+                        }
+                         ),
+
 
                       settingWidget(
                         icon: DefaultImages.settingIcn,
@@ -161,7 +170,7 @@ class SettingScreen extends StatelessWidget {
                               popOnConfirm: false,
                               onConfirm: () async {
                                 Get.find<AuthController>().logout();
-                            }
+                              }
                           );
                         },
                       ),

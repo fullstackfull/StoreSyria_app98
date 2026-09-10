@@ -111,19 +111,14 @@ class _WalletScreenState extends State<WalletScreen> {
                     ),
                   ),
                   transactions.isEmpty
-                      ? SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.all(40.w),
-                      child: Center(
-                        child: Text(
-                          'no_transactions_found'.tr,
-                          style: TextStyle(
-                            color: isDark
-                                ? DarkThemeColor.cText.withOpacity(0.5)
-                                : AppColor.cDarkGreyFont,
-                          ),
-                        ),
-                      ),
+                      ? SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      message: 'no_transactions_found'.tr,
+                      icon: Icons.receipt_long_outlined,
+                      iconColor: isDark
+                          ? Colors.white38
+                          : Colors.grey.shade400,
                     ),
                   )
                       : SliverPadding(
@@ -370,7 +365,6 @@ class _WalletScreenState extends State<WalletScreen> {
                       ),
                       onPressed: () {
                         // TODO: لما تجهز فلترة الـ API، ابعت tempDirection/tempStatus
-                        // كـ query params مع controller.getWalletData(...)
                         setState(() {
                           _directionFilter = tempDirection;
                           _statusFilter = tempStatus;
@@ -408,31 +402,13 @@ class _WalletScreenState extends State<WalletScreen> {
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  AppColor.themeGreenColor,
+                  AppColor.themeNavyBlueColor,
                 ),
               ),
             ),
           ),
         );
       }
-
-      if (!controller.hasMore && controller.transactions.isNotEmpty) {
-        return Padding(
-          padding: EdgeInsets.symmetric(vertical: 20.h),
-          child: Center(
-            child: Text(
-              'no_more_transactions'.tr,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: isDark
-                    ? DarkThemeColor.cText.withOpacity(0.4)
-                    : AppColor.cDarkGreyFont,
-              ),
-            ),
-          ),
-        );
-      }
-
       return SizedBox(height: 30.h);
     });
   }

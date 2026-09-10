@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/wallet/wallet_controller.dart';
 import '../../utils/colors.dart';
-import '../widget/common_snak_bar_widget.dart';
 import 'app_txt_field.dart';
 
 void showBalanceSheet({
@@ -12,8 +11,7 @@ void showBalanceSheet({
   required WalletController controller,
   required bool isDark,
 }) {
-  const Color success = Color(0xFF16A34A);
-  const Color danger = Color(0xFFEF4444);
+
 
   final amountController = TextEditingController();
   final descriptionController = TextEditingController();

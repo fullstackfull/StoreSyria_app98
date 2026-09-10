@@ -19,6 +19,7 @@ import '../view/screen/coupon_screen/coupon_screen.dart';
 import '../view/screen/dashboard_manager/dashboard_manager.dart';
 import '../view/screen/home_screen/shipping_screen.dart';
 import '../view/screen/home_screen/tax_screen.dart';
+import '../view/screen/plans/my_plan_screen.dart';
 import '../view/screen/statistics_screen/statistics_screen.dart';
 import '../view/screen/onboarding_screen/onboarding_screen.dart';
 import '../view/screen/notification_screen/notification_screen.dart';
@@ -54,6 +55,7 @@ class AppRoutes {
   static const notifications = '/notifications';
   static const lang = '/lang';
   static const customers = '/customers';
+  static const myPlan = '/myPlan';
 
   // =========================
   // Pages
@@ -72,6 +74,11 @@ class AppRoutes {
     GetPage(
         name: login,
         page: () => NormalLoginWidget()
+    ),
+
+    GetPage(
+        name: myPlan,
+        page: () => const MyPlanScreen()
     ),
 
     GetPage(
