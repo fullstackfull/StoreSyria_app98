@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -32,6 +33,7 @@ class _ProductsScreenState extends State<ProductsScreen>
   final AddProductController addProductController = Get.put(AddProductController());
   final ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
+  Timer? _searchDebounce;
 
   bool _isFirstLoad = true;
 
@@ -66,30 +68,46 @@ class _ProductsScreenState extends State<ProductsScreen>
   }
 
   void _onScroll() {
+    if (productController.listMode.value != ProductListMode.normal) {
+      return;
+    }
+
     if (!productController.isScroll.value) return;
-    if (productController.filterCategoryId.value.isNotEmpty) return;
     if (productController.isLoading.value) return;
 
     if (scrollController.position.pixels >=
         scrollController.position.maxScrollExtent - 200) {
       productController.currantPage.value += 1;
-      productController.getProductData(productController.currantPage.value);
+
+      productController.getProductData(
+        productController.currantPage.value,
+      );
     }
   }
 
   Future<void> getData() async {
-    await productController.getProductData(productController.currantPage.value);
+    await productController.getProductData(1);
+
     if (addProductController.categoryTypeList.isEmpty) {
-      await addProductController.getCreateProductData(isUpdate: false);
+      await addProductController.getCreateProductData(
+        isUpdate: false,
+      );
     }
   }
 
   Future<void> _fetchInitialData() async {
+    productController.listMode.value = ProductListMode.normal;
+    productController.searchQuery.value = '';
+
     productController.currantPage.value = 1;
     productController.isScroll.value = true;
+
+    productController.errorMessage.value = '';
     productController.productList.clear();
-    await getData();
+
+    await productController.getProductData(1);
   }
+
 
   Future<void> _showCategoryFilterBottomSheet() async {
     if (addProductController.categoryTypeList.isEmpty) return;
@@ -182,23 +200,26 @@ class _ProductsScreenState extends State<ProductsScreen>
                           ),
               
                           TextButton(
-                            onPressed: () {
+                            onPressed: () async {
                               selectedCategoryId = '';
-              
+
                               addProductController.category.value = '';
                               addProductController.categoryId.value = '';
-              
+
                               productController.filterCategory.value = '';
                               productController.filterCategoryId.value = '';
-              
+
+                              productController.searchQuery.value = '';
+                              productController.listMode.value = ProductListMode.normal;
+
                               productController.currantPage.value = 1;
                               productController.isScroll.value = true;
-              
-                              setModalState(() {});
-              
+
+                              productController.productList.clear();
+
                               Navigator.pop(sheetContext);
-              
-                              _fetchInitialData();
+
+                              await _fetchInitialData();
                             },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.symmetric(
@@ -395,6 +416,8 @@ class _ProductsScreenState extends State<ProductsScreen>
 
       productController.isScroll.value = false;
       productController.currantPage.value = 1;
+      searchController.clear();
+      productController.searchQuery.value = '';
 
       // Clear old products before filtering
       productController.productList.clear();
@@ -415,17 +438,24 @@ class _ProductsScreenState extends State<ProductsScreen>
     }
   }
 
-  void _clearCategoryFilter() {
+  Future<void> _clearCategoryFilter() async {
     addProductController.category.value = '';
     addProductController.categoryId.value = '';
 
     productController.filterCategory.value = '';
     productController.filterCategoryId.value = '';
 
+    productController.searchQuery.value = '';
+    productController.listMode.value = ProductListMode.normal;
+    productController.searchTotal.value = 0;
+    searchController.clear();
+
     productController.currantPage.value = 1;
     productController.isScroll.value = true;
 
-    _fetchInitialData();
+    productController.productList.clear();
+
+    await _fetchInitialData();
   }
 
   @override
@@ -433,6 +463,7 @@ class _ProductsScreenState extends State<ProductsScreen>
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
     searchController.dispose();
+    _searchDebounce?.cancel();
     super.dispose();
   }
 
@@ -464,7 +495,26 @@ class _ProductsScreenState extends State<ProductsScreen>
                       controller: searchController,
                       hint: 'search'.tr,
                       onChanged: (value) {
-                        //ToDO :: api search product
+                        _searchDebounce?.cancel();
+
+                        final query = value.trim();
+
+                        if (query.length < 3) {
+                          if (query.isEmpty &&
+                              productController.listMode.value ==
+                                  ProductListMode.search) {
+                            productController.clearSearch();
+                          }
+
+                          return;
+                        }
+
+                        _searchDebounce = Timer(
+                          const Duration(milliseconds: 600),
+                              () {
+                            productController.searchProductName(query);
+                          },
+                        );
                       },
                     ),
                   ),
@@ -511,6 +561,12 @@ class _ProductsScreenState extends State<ProductsScreen>
 
               Expanded(
                 child: Obx(() {
+                  if (productController.isDataAvailable2.value) {
+                    return const Center(
+                      child: LoadingWidget(),
+                    );
+                  }
+
                   if (productController.isLoading.value &&
                       productController.currantPage.value == 1) {
                     return const Center(
@@ -574,7 +630,9 @@ class _ProductsScreenState extends State<ProductsScreen>
                             padding: EdgeInsets.only(bottom: 15.h),
                             child: sectionHeaderWithFilterWidget(
                               isFilter: false,
-                              num: productController.filterCategoryId.value.isNotEmpty
+                              num: productController.listMode.value == ProductListMode.search
+                                  ? productController.searchTotal.value
+                                  : productController.filterCategoryId.value.isNotEmpty
                                   ? productController.productList.length
                                   : (productController.productModel?.data?.total ?? 0),
                               context: context,
@@ -603,7 +661,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                                 return allProductsListItemWidget(
                                   productId: product.id.toString(),
                                   trackStock: product.trackStock == 1,
-                                  status: product.status!,
+                                  status: product.status ?? 0,
                                   context: context,
                                   imageUrl: product.coverImageUrl ?? '',
                                   categoryName: product.categoryName ?? '',

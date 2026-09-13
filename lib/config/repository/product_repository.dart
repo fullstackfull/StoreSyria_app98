@@ -12,6 +12,13 @@ class ProductRepository {
     return await NetworkHttps.getRequest(endPoint);
   }
 
+  Future<Result<Map<String, dynamic>>> searchProductByName(String name) async {
+    String endPoint =
+        "${API.searchProductUrl}${API.storeIdUrl}${Prefs.getStoreID()}";
+    final data = {"name" : name};
+    return await NetworkHttps.postRequest(endPoint,data);
+  }
+
   Future<Result<Map<String, dynamic>>> getCreateProductData() async {
     String endPoint =
         API.createProductUrl + API.storeIdUrl + Prefs.getStoreID();
@@ -40,7 +47,7 @@ class ProductRepository {
     return await NetworkHttps.deleteRequest(endPoint);
   }
 
-  Future<Result<Map<String, dynamic>>> searchProductData({
+  Future<Result<Map<String, dynamic>>> searchProductByCategory({
     required String categoryId,
   }) async {
     return await NetworkHttps.postRequest(

@@ -7,6 +7,12 @@ import 'package:store_go_app/config/repository/product_repository.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
 
+enum ProductListMode {
+  normal,
+  search,
+  category,
+}
+
 class ProductController extends GetxController implements StoreAware {
   static const String _cacheProductKey = 'home_product_list_data';
 
@@ -15,6 +21,10 @@ class ProductController extends GetxController implements StoreAware {
   ProductModel? productModel;
   RxString filterCategory = ''.obs;
   RxString filterCategoryId = ''.obs;
+  final RxInt searchTotal = 0.obs;
+
+  Rx<ProductListMode> listMode = ProductListMode.normal.obs;
+  RxString searchQuery = ''.obs;
 
   RxList<ProductData> productList = <ProductData>[].obs;
 
@@ -23,9 +33,11 @@ class ProductController extends GetxController implements StoreAware {
   RxInt currantPage = 1.obs;
   RxBool isScroll = true.obs;
   RxBool isDataAvailable = false.obs;
+  RxBool isDataAvailable2 = false.obs;
   RxBool isLoading = false.obs;
   RxString imageBaseUrl = ''.obs;
   RxString errorMessage = ''.obs;
+
 
   @override
   void onInit() {
@@ -49,12 +61,16 @@ class ProductController extends GetxController implements StoreAware {
     }
   }
 
-  /// بتنستدعى تلقائياً من StoreChangeService لما يتغير المتجر:
-  /// بتمسح القائمة + الكاش المحلي وترجع تجيب صفحة ١ من جديد.
   @override
   void resetForStoreChange() {
     productModel = null;
     productList.clear();
+
+    listMode.value = ProductListMode.normal;
+    searchQuery.value = '';
+
+    filterCategory.value = '';
+    filterCategoryId.value = '';
 
     currantPage.value = 1;
     isScroll.value = true;
@@ -65,7 +81,10 @@ class ProductController extends GetxController implements StoreAware {
   }
 
   Future<void> getProductData(int page) async {
-    // 1) حماية من التكرار: لو في طلب شغال حالياً، تجاهل أي طلب جديد
+    if (listMode.value != ProductListMode.normal) {
+      return;
+    }
+
     if (isLoading.value) return;
 
     isLoading.value = true;
@@ -74,7 +93,7 @@ class ProductController extends GetxController implements StoreAware {
     final response = await productRepository.getProductData(page);
 
     Loader.hideLoader();
-    isLoading.value = false; // 2) ننقلها هون فوق، تنفذ بكل الحالات (نجاح أو فشل)
+    isLoading.value = false;
 
     response.fold(
       onSuccess: (data) {
@@ -104,7 +123,6 @@ class ProductController extends GetxController implements StoreAware {
         errorMessage.value = message;
         commonToast(message);
 
-        // 4) فشل بالشبكة — رجع الصفحة للخلف حتى تقدر تعيد تحميلها
         if (currantPage.value == page) {
           currantPage.value -= 1;
         }
@@ -113,9 +131,17 @@ class ProductController extends GetxController implements StoreAware {
   }
 
   Future<void> searchProductData(String categoryId) async {
+    listMode.value = ProductListMode.category;
+
+    searchQuery.value = '';
+
+    isScroll.value = false;
+
+    productList.clear();
+
     isDataAvailable.value = true;
 
-    final response = await productRepository.searchProductData(
+    final response = await productRepository.searchProductByCategory(
       categoryId: categoryId,
     );
 
@@ -124,8 +150,6 @@ class ProductController extends GetxController implements StoreAware {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          productList.clear();
-
           final List products = data['data'] ?? [];
 
           productList.assignAll(
@@ -142,6 +166,58 @@ class ProductController extends GetxController implements StoreAware {
         }
       },
       onFailure: (reason, message, validationErrors) {
+        errorMessage.value = message;
+        commonToast(message);
+      },
+    );
+  }
+
+  Future<void> searchProductName(String name) async {
+    if (name.trim().length < 3) return;
+
+    listMode.value = ProductListMode.search;
+    searchQuery.value = name.trim();
+
+    filterCategory.value = '';
+    filterCategoryId.value = '';
+
+    isScroll.value = false;
+
+    productList.clear();
+    errorMessage.value = '';
+
+    isDataAvailable2.value = true;
+
+    final response = await productRepository.searchProductByName(
+      name.trim(),
+    );
+
+    isDataAvailable2.value = false;
+
+    response.fold(
+      onSuccess: (data) {
+        if (data['status'] == 1) {
+          searchTotal.value = data['data']?['total'] ?? 0;
+
+          final List products = data['data']?['data'] ?? [];
+
+          productList.assignAll(
+            products
+                .map((e) => ProductData.fromJson(e))
+                .toList(),
+          );
+        } else {
+          searchTotal.value = 0;
+
+          commonToast(
+            data['data']?['message'] ??
+                data['message'] ??
+                'Error',
+          );
+        }
+      },
+      onFailure: (reason, message, validationErrors) {
+        searchTotal.value = 0;
         errorMessage.value = message;
         commonToast(message);
       },
@@ -177,5 +253,25 @@ class ProductController extends GetxController implements StoreAware {
         commonToast(message);
       },
     );
+  }
+  Future<void> clearSearch() async {
+    searchQuery.value = '';
+
+    listMode.value = ProductListMode.normal;
+
+    filterCategory.value = '';
+    filterCategoryId.value = '';
+
+    searchTotal.value = 0;
+
+    currantPage.value = 1;
+    isScroll.value = true;
+
+    productList.clear();
+
+    errorMessage.value = '';
+    isDataAvailable2.value = false;
+
+    await getProductData(1);
   }
 }

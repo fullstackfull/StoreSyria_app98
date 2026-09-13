@@ -114,5 +114,6 @@ class API {
 
   //payments
   static String paymentTypesUrl = '/getActivePaymentMethods';
+  static String searchProductUrl = '/searchProductsByName';
 
 }
