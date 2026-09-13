@@ -16,7 +16,7 @@ Widget balanceCard({
   return Obx(() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
         gradient: LinearGradient(
@@ -92,6 +92,20 @@ Widget balanceCard({
             children: [
               Expanded(
                 child: cardButton(
+                  label: 'withdraw'.tr,
+                  filled: false,
+                  onTap: () {
+                    showBalanceSheet(
+                        isAdd: false,
+                        isDark: isDark,
+                        context: context,
+                        controller: controller);
+                  },
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: cardButton(
                   label: 'add_funds'.tr,
                   filled: true,
                   onTap: () {
@@ -101,20 +115,6 @@ Widget balanceCard({
                         context: context,
                         controller: controller
                     );
-                  },
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: cardButton(
-                  label: 'withdraw'.tr,
-                  filled: false,
-                  onTap: () {
-                    showBalanceSheet(
-                        isAdd: false,
-                        isDark: isDark,
-                        context: context,
-                        controller: controller);
                   },
                 ),
               ),
@@ -144,7 +144,7 @@ Widget cardButton({
               ? AppColor.themeGreenColor.withOpacity(0.7)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(14.r),
-          border: filled ? null : Border.all(color: AppColor.cBorder),
+          border: Border.all(color: filled ? AppColor.themeNavyBlueColor : AppColor.cBorder),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

@@ -6,6 +6,7 @@ class DefaultImages {
   static String facebookIcn = 'assets/svg/fb.svg';
   static String language2Icn = 'assets/svg/language.svg';
   static String currencyIcn = 'assets/svg/currency.svg';
+  static String currencyExIcn = 'assets/svg/currency_exchange.svg';
   static String appleIcn = 'assets/svg/apple.svg';
   static String lockIcn = 'assets/svg/lock.svg';
   static String userIcn = "assets/svg/user.svg";

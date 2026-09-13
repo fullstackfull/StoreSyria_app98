@@ -4,6 +4,7 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/images.dart';
 import '../../../core/controller/setting_controller/store_setting_controller.dart';
 import '../../../translations/translation_service.dart';
+import '../../new_widgets/exchange_currency_widget.dart';
 import '../../new_widgets/lang_widget.dart';
 import '../../widget/common_appbar_widget.dart';
 
@@ -19,12 +20,14 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
   final StoreSettingController controller = Get.find<StoreSettingController>();
   bool isLanguageExpanded = false;
   bool isCurrencyExpanded = false;
+  bool isExchangeRatesExpanded = true;
 
   @override
   void initState() {
     super.initState();
     controller.getCurrenciesData();
     controller.getStoreCurrencyLangData();
+    controller.getCurrencyRatesData();
   }
 
   @override
@@ -68,6 +71,7 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
 
                         if (isLanguageExpanded) {
                           isCurrencyExpanded = false;
+                          isExchangeRatesExpanded = false;
                         }
                       });
 
@@ -108,6 +112,7 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
                           isCurrencyExpanded = !isCurrencyExpanded;
                           if (isCurrencyExpanded) {
                             isLanguageExpanded = false;
+                            isExchangeRatesExpanded = false;
                           }
                         });
 
@@ -131,12 +136,63 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
                     ))
                       : const SizedBox.shrink(),
                 ),
+                const SizedBox(height: 18),
+
+                Obx(() =>
+                    mainCard(
+                      icon: DefaultImages.currencyExIcn,
+                      title: 'exchange_rates'.tr,
+                      value: _exchangeRatesSummaryText(),
+                      isExpanded: isExchangeRatesExpanded,
+                      isDark: isDark,
+                      onTap: () {
+                        setState(() {
+                          isExchangeRatesExpanded = !isExchangeRatesExpanded;
+                          if (isExchangeRatesExpanded) {
+                            isLanguageExpanded = false;
+                            isCurrencyExpanded = false;
+                          }
+                        });
+
+                        if (isExchangeRatesExpanded && controller.currencyRates.isEmpty) {
+                          controller.getCurrencyRatesData();
+                        }
+                      },
+                    ),
+                ),
+
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  child: isExchangeRatesExpanded
+                      ? Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Obx(() => exchangeRatesSection(
+                      controller: controller,
+                      isDark: isDark,
+                      context: context,
+                    )),
+                  )
+                      : const SizedBox.shrink(),
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  String _exchangeRatesSummaryText() {
+    if (controller.isLoadingCurrencyRates.value) {
+      return '...';
+    }
+    if (controller.currencyRates.isEmpty) {
+      return '---';
+    }
+    final active = controller.currencyRates.where((r) => r.isActive).length;
+    final total = controller.currencyRates.length;
+    return '$active / $total';
   }
 
   String _selectedCurrencyText() {

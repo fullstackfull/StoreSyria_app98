@@ -32,6 +32,13 @@ class StoreSettingController extends GetxController {
 
   Rxn<Language> currentLanguage = Rxn<Language>();
 
+  // ==================== Exchange Rates State ====================
+  RxBool isLoadingCurrencyRates = false.obs;
+  RxnString updatingRateCurrencyCode = RxnString();
+  RxnString togglingCurrencyCode = RxnString();
+  RxList<CurrencyRateItem> currencyRates = <CurrencyRateItem>[].obs;
+  RxString defaultRatesCurrency = ''.obs;
+
   // ==================== Store Info (عدّل هذا) ====================
   Rxn<StoreInfoData> storeInfoData = Rxn<StoreInfoData>();
 
@@ -383,6 +390,8 @@ class StoreSettingController extends GetxController {
             print(
               "Current Currency =====> ${currentCurrency.value?.code}",
             );
+
+            getCurrencyRatesData(forceRefresh: true);
           } else {
             commonToast(
               data['message'] ?? 'Failed to change currency',
@@ -582,5 +591,156 @@ class StoreSettingController extends GetxController {
         );
       },
     );
+  }
+
+  // ==================== Exchange Rates ====================
+
+  Future<void> getCurrencyRatesData({bool forceRefresh = false}) async {
+    isLoadingCurrencyRates.value = true;
+
+    try {
+      final response = await settingRepository.getCurrencyRatesData();
+
+      response.fold(
+        onSuccess: (data) {
+
+          if (data['status'] == 1) {
+            final currencyRatesResponse = CurrencyRatesResponse.fromJson(data);
+
+            if (currencyRatesResponse.data != null) {
+              currencyRates.assignAll(currencyRatesResponse.data!.currencyRates);
+              defaultRatesCurrency.value = currencyRatesResponse.data!.defaultCurrency;
+            }
+          } else {
+            commonToast(data['message'] ?? 'Failed to get currency rates');
+          }
+        },
+        onFailure: (reason, message, errors) {
+          commonToast(message ?? 'Error getting currency rates');
+        },
+      );
+    } finally {
+      isLoadingCurrencyRates.value = false;
+    }
+  }
+
+  Future<bool> toggleCurrencyStatus({
+    required String currencyCode,
+    required bool isActive,
+  }) async {
+    togglingCurrencyCode.value = currencyCode;
+
+    try {
+      final response = await settingRepository.toggleCurrencyStatus(
+        data: {
+          'currency_code': currencyCode,
+          'is_active': isActive,
+        },
+      );
+
+      bool success = false;
+
+      response.fold(
+        onSuccess: (data) {
+
+          if (data['status'] == 1) {
+            success = true;
+            commonToast(
+              data['message'] ?? 'Currency status updated successfully.',
+            );
+
+            final index = currencyRates.indexWhere((c) => c.currencyCode == currencyCode);
+            if (index != -1) {
+              currencyRates[index].isActive = isActive;
+              currencyRates.refresh();
+            }
+
+            final currIndex = currencies.indexWhere((c) => c.code == currencyCode);
+            if (currIndex != -1) {
+              currencies[currIndex] = Currency(
+                code: currencies[currIndex].code,
+                name: currencies[currIndex].name,
+                symbol: currencies[currIndex].symbol,
+                ratePerUsd: currencies[currIndex].ratePerUsd,
+                isActive: isActive,
+              );
+            }
+          } else {
+            commonToast(
+              data['message'] ?? 'Failed to update currency status',
+            );
+          }
+        },
+        onFailure: (reason, message, errors) {
+          commonToast(
+            message ?? 'Error updating currency status',
+          );
+        },
+      );
+
+      return success;
+    } finally {
+      togglingCurrencyCode.value = null;
+    }
+  }
+
+  Future<bool> updateCurrencyRate({
+    required String currencyCode,
+    required double ratePerUsd,
+  }) async {
+    updatingRateCurrencyCode.value = currencyCode;
+
+    try {
+      final response = await settingRepository.updateCurrencyRate(
+        data: {
+          'currency_code': currencyCode,
+          'rate_per_usd': ratePerUsd,
+        },
+      );
+
+      bool success = false;
+
+      response.fold(
+        onSuccess: (data) {
+
+          if (data['status'] == 1) {
+            success = true;
+            commonToast(
+              data['message'] ?? 'Currency rate updated successfully.',
+            );
+
+            final index = currencyRates.indexWhere((c) => c.currencyCode == currencyCode);
+            if (index != -1) {
+              currencyRates[index].ratePerUsd = ratePerUsd;
+              currencyRates.refresh();
+            }
+
+            final currIndex = currencies.indexWhere((c) => c.code == currencyCode);
+            if (currIndex != -1) {
+              currencies[currIndex] = Currency(
+                code: currencies[currIndex].code,
+                name: currencies[currIndex].name,
+                symbol: currencies[currIndex].symbol,
+                ratePerUsd: ratePerUsd,
+                isActive: currencies[currIndex].isActive,
+              );
+            }
+          } else {
+            commonToast(
+              data['message'] ?? 'Failed to update currency rate',
+            );
+          }
+        },
+        onFailure: (reason, message, errors) {
+          commonToast(
+            message ?? 'Error updating currency rate',
+          );
+        },
+      );
+
+      return success;
+    } finally {
+      updatingRateCurrencyCode.value = null;
+    }
   }
 }

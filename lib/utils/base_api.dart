@@ -103,6 +103,9 @@ class API {
   static String changeCurrencyUrl = '/updateCurrencyApi';
   static String getStoreInfoUrl = '/getStoreInfo';
   static String getStoreCurrencyLangUrl = '/getCurrentLanguageAndCurrency';
+  static String getCurrencyRatesUrl = '/get-currency-rates';
+  static String toggleCurrencyStatusUrl = '/toggle-currency-status';
+  static String updateCurrencyRateUrl = '/update-currency-rate';
 
   //wallet
   static String walletUrl = '/wallet/transactions';

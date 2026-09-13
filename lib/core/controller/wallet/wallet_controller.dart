@@ -107,11 +107,8 @@ class WalletController extends GetxController {
 
       response.fold(
         onSuccess: (data) async {
-          print("Add Balance Response =====> $data");
-
           if (data['status'] == 1) {
             final balanceData = data['data'];
-
             commonToast(data['message'] ?? 'Balance added successfully.',
             );
             Get.back();
@@ -152,10 +149,10 @@ class WalletController extends GetxController {
         amount,
       );
 
+      Get.back();
+
       response.fold(
         onSuccess: (data) async {
-          print("Deduct Balance Response =====> $data");
-
           if (data['status'] == 1) {
 
             commonToast(

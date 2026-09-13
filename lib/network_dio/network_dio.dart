@@ -553,6 +553,117 @@ $error
   }
 
   // ===========================================================================
+  // PUT
+  // ===========================================================================
+
+  static Future<Result<Map<String, dynamic>>> putRequest(
+      String endPoint,
+      Map data,
+      ) async {
+    final putUrl = API.baseUrl + endPoint;
+
+    try {
+      final headers = _getAuthHeaders();
+
+      _logRequest(
+        method: 'PUT',
+        url: putUrl,
+        headers: headers,
+        body: Map<String, dynamic>.from(data),
+      );
+
+      final response = await http.put(
+        Uri.parse(putUrl),
+        body: jsonEncode(data),
+        headers: headers,
+      );
+
+      _logResponse(
+        method: 'PUT',
+        url: putUrl,
+        response: response,
+      );
+
+      // -----------------------------------------------------------------------
+      // SUCCESS
+      // -----------------------------------------------------------------------
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 201) {
+        final decoded = jsonDecode(response.body);
+
+        return Success(
+          Map<String, dynamic>.from(decoded),
+        );
+      }
+
+      // -----------------------------------------------------------------------
+      // ERROR RESPONSE
+      // -----------------------------------------------------------------------
+
+      return _handleErrorResponse(response);
+    }
+
+    // -------------------------------------------------------------------------
+    // SOCKET EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on SocketException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'PUT',
+        url: putUrl,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'No Internet connection.',
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // HTTP CLIENT EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on http.ClientException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'PUT',
+        url: putUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // HTTP EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on HttpException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'PUT',
+        url: putUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // UNKNOWN
+    // -------------------------------------------------------------------------
+
+    catch (e, stackTrace) {
+      _logError(
+        method: 'PUT',
+        url: putUrl,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Failure(
+        FailureReason.unknown,
+        'Unexpected error: ${e.toString()}',
+      );
+    }
+  }
+
+  // ===========================================================================
   // MULTIPART
   // ===========================================================================
 

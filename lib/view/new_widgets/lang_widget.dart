@@ -1,11 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import '../../core/controller/setting_controller/store_setting_controller.dart';
+import '../../core/model/currency_model.dart';
 import '../../translations/translation_service.dart';
 import '../../utils/colors.dart';
 import '../../utils/text_style.dart';
+import '../widget/common_button.dart';
 
 Widget languageOption({
   required String title,
@@ -368,74 +371,79 @@ Widget currencyOption({
         decoration: BoxDecoration(
           color: selected
               ? AppColor.themeGreenColor.withOpacity(
-            isDark ? 0.12 : 0.08,
-          )
+                  isDark ? 0.12 : 0.08,
+                )
               : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected
                 ? AppColor.themeGreenColor.withOpacity(
-              isDark ? 0.35 : 0.30,
-            )
-                : Colors.transparent,
+                    isDark ? 0.45 : 0.35,
+                  )
+                : isDark
+                    ? DarkThemeColor.cBorder.withOpacity(0.3)
+                    : AppColor.cBorder.withOpacity(0.4),
+            width: selected ? 1.5 : 1.0,
           ),
         ),
         child: Row(
           children: [
-               Padding(
-                  padding: const EdgeInsets.all(6),
-                  child: Container(
-                    width: 45.w,
-                    height: 25.h,
-                    decoration: BoxDecoration(
-                      color: AppColor.themeGreenColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(11.r)
-                    ),
-                    child: Center(
-                      child: Text(
-                        symbol,
-                        style: pMedium14.copyWith(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: selected
-                              ? AppColor.themeGreenColor
-                              : isDark
+            Padding(
+              padding: const EdgeInsets.all(4),
+              child: Container(
+                width: 45.w,
+                height: 28.h,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? AppColor.themeGreenColor.withOpacity(0.12)
+                      : (isDark
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.black.withOpacity(0.04)),
+                  borderRadius: BorderRadius.circular(11.r),
+                ),
+                child: Center(
+                  child: Text(
+                    symbol.isNotEmpty ? symbol : code,
+                    style: pMedium14.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: selected
+                          ? AppColor.themeGreenColor
+                          : (isDark
                               ? DarkThemeColor.cText
-                              : AppColor.cText,
-                        ),
-                      ),
+                              : AppColor.cText),
                     ),
                   ),
                 ),
+              ),
+            ),
 
-            const SizedBox(width: 14),
+            const SizedBox(width: 10),
 
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
-                    style: pRegular14.copyWith(
+                    code,
+                    style: pSemiBold14.copyWith(
                       color: selected
                           ? AppColor.themeGreenColor
-                          : isDark
-                          ? DarkThemeColor.cText
-                          : AppColor.cText,
+                          : (isDark ? DarkThemeColor.cText : AppColor.cText),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
 
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
 
                   Text(
-                    code,
+                    title,
                     style: pMedium10.copyWith(
                       color: isDark
                           ? DarkThemeColor.cText.withOpacity(0.5)
                           : AppColor.cDarkGreyFont,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -455,8 +463,8 @@ Widget currencyOption({
                   color: (selected && !isLoading)
                       ? AppColor.themeGreenColor
                       : isDark
-                      ? Colors.white.withOpacity(0.25)
-                      : AppColor.cFont.withOpacity(0.25),
+                          ? Colors.white.withOpacity(0.25)
+                          : AppColor.cFont.withOpacity(0.25),
                   width: 1.5,
                 ),
               ),
@@ -464,23 +472,23 @@ Widget currencyOption({
                 duration: const Duration(milliseconds: 150),
                 child: isLoading
                     ? Padding(
-                  key: ValueKey('loading'),
-                  padding: EdgeInsets.all(3),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColor.themeGreenColor,
-                    ),
-                  ),
-                )
+                        key: const ValueKey('loading'),
+                        padding: const EdgeInsets.all(3),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColor.themeGreenColor,
+                          ),
+                        ),
+                      )
                     : selected
-                    ? const Icon(
-                  Icons.check,
-                  key: ValueKey('checked'),
-                  size: 15,
-                  color: Colors.white,
-                )
-                    : const SizedBox.shrink(key: ValueKey('unchecked')),
+                        ? const Icon(
+                            Icons.check,
+                            key: ValueKey('checked'),
+                            size: 15,
+                            color: Colors.white,
+                          )
+                        : const SizedBox.shrink(key: ValueKey('unchecked')),
               ),
             ),
           ],

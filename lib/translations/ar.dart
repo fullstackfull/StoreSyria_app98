@@ -208,6 +208,13 @@ const Map<String, String> ar = {
   "language_and_currency": "اللغة والعملة",
   "languages": "اللغات",
   "currencies": "العملات",
+  "exchange_rates": "أسعار الصرف",
+  "edit_exchange_rate": "تعديل سعر الصرف",
+  "rate": "سعر الصرف",
+  "enter_exchange_rate": "أدخل سعر الصرف",
+  "please_enter_valid_rate": "يرجى إدخال قيمة صحيحة",
+  "no_exchange_rates_found": "لا توجد أسعار صرف",
+  "save": "حفظ",
   "english": "الإنجليزية",
   "arabic": "العربية",
   "us_dollar": "الدولار الأمريكي",
@@ -486,5 +493,6 @@ const Map<String, String> ar = {
   "store_payment_methods": "طرق الدفع للمتجر",
   "payment_methods": "طرق دفع متاحة",
   "no_payment_methods_available": "لا توجد طرق دفع متاحة",
-  "available_store_payment_methods": "طرق الدفع المتاحة بالمتجر"
+  "available_store_payment_methods": "طرق الدفع المتاحة بالمتجر",
+  "store_language_and_currency" : "لغة المتجر والعملات",
 };

@@ -49,4 +49,22 @@ class StoreSettingRepository {
     return response;
   }
 
+  getCurrencyRatesData() async {
+    String endPoint = API.getCurrencyRatesUrl + API.storeIdUrl + Prefs.getStoreID();
+    var response = await NetworkHttps.getRequest(endPoint);
+    return response;
+  }
+
+  toggleCurrencyStatus({required Map<String, dynamic> data}) async {
+    String endPoint = API.toggleCurrencyStatusUrl + API.storeIdUrl + Prefs.getStoreID();
+    var response = await NetworkHttps.putRequest(endPoint, data);
+    return response;
+  }
+
+  updateCurrencyRate({required Map<String, dynamic> data}) async {
+    String endPoint = API.updateCurrencyRateUrl + API.storeIdUrl + Prefs.getStoreID();
+    var response = await NetworkHttps.putRequest(endPoint, data);
+    return response;
+  }
+
 }

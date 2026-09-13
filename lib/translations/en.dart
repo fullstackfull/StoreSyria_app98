@@ -207,6 +207,13 @@ const Map<String, String> en = {
   "language_and_currency": "Language & Currency",
   "languages": "Languages",
   "currencies": "Currencies",
+  "exchange_rates": "Exchange Rates",
+  "edit_exchange_rate": "Edit Exchange Rate",
+  "rate": "Rate",
+  "enter_exchange_rate": "Enter exchange rate",
+  "please_enter_valid_rate": "Please enter a valid rate",
+  "no_exchange_rates_found": "No exchange rates found",
+  "save": "Save",
   "english": "English",
   "arabic": "Arabic",
   "us_dollar": "US Dollar",
@@ -486,6 +493,7 @@ const Map<String, String> en = {
   "store_payment_methods": "Store Payment Methods",
   "payment_methods": "Payment Methods Available",
   "no_payment_methods_available": "No payment methods available",
-  "available_store_payment_methods": "Available Payment Methods in Store"
+  "available_store_payment_methods": "Available Payment Methods in Store",
+  "store_language_and_currency" : "Store language and currencies",
 
 };

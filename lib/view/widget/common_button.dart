@@ -44,7 +44,7 @@ class CommonButton extends StatelessWidget {
           width: width ?? Get.width,
           height: height ?? 42,
           decoration: BoxDecoration(
-            color: btnColor ?? AppColor.themeGreenColor,
+            color: btnColor ?? AppColor.themeNavyBlueColor,
             borderRadius: BorderRadius.circular(35),
             border: Border.all(color: bColor ?? AppColor.cTransparent),
           ),
