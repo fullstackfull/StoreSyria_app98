@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+
 import 'package:store_go_app/network_dio/result.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
@@ -34,12 +36,9 @@ class NetworkHttps {
   // ===========================================================================
 
   static final Map<String, String> baseHeaders = {
-    HttpHeaders.contentTypeHeader:
-    'application/json; charset=utf-8',
-    HttpHeaders.cacheControlHeader:
-    'no-cache',
-    'Accept':
-    'application/json',
+    HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+    HttpHeaders.cacheControlHeader: 'no-cache',
+    HttpHeaders.acceptHeader: 'application/json',
   };
 
   // ===========================================================================
@@ -52,7 +51,7 @@ class NetworkHttps {
     final headers = Map<String, String>.from(baseHeaders);
 
     if (token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
+      headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
     }
 
     return headers;
@@ -90,9 +89,13 @@ class NetworkHttps {
   }) {
     final buffer = StringBuffer();
 
-    buffer.writeln('══════════════════════════════════════════════════════');
+    buffer.writeln(
+      '══════════════════════════════════════════════════════',
+    );
     buffer.writeln('🚀 $method REQUEST');
-    buffer.writeln('══════════════════════════════════════════════════════');
+    buffer.writeln(
+      '══════════════════════════════════════════════════════',
+    );
 
     buffer.writeln('URL:');
     buffer.writeln(url);
@@ -120,9 +123,13 @@ class NetworkHttps {
   }) {
     final buffer = StringBuffer();
 
-    buffer.writeln('══════════════════════════════════════════════════════');
+    buffer.writeln(
+      '══════════════════════════════════════════════════════',
+    );
     buffer.writeln('📥 $method RESPONSE');
-    buffer.writeln('══════════════════════════════════════════════════════');
+    buffer.writeln(
+      '══════════════════════════════════════════════════════',
+    );
 
     buffer.writeln('URL:');
     buffer.writeln(url);
@@ -173,77 +180,137 @@ $error
   }
 
   // ===========================================================================
+  // NETWORK FAILURE
+  // ===========================================================================
+
+  static Failure<T> _networkFailure<T>({
+    required String method,
+    required String url,
+    required dynamic error,
+    required StackTrace stackTrace,
+    String message = 'Connection failed. Please try again.',
+  }) {
+    _logError(
+      method: method,
+      url: url,
+      error: error,
+      stackTrace: stackTrace,
+    );
+
+    return Failure<T>(
+      FailureReason.network,
+      message,
+    );
+  }
+
+  // ===========================================================================
   // ERROR RESPONSE
   // ===========================================================================
 
   static Failure<T> _handleErrorResponse<T>(
       http.Response response,
       ) {
-    String message = "An error occurred";
+    String message = 'An error occurred';
 
     Map<String, dynamic>? validationErrors;
 
     FailureReason reason = FailureReason.unknown;
 
+    // -------------------------------------------------------------------------
+    // READ RESPONSE BODY
+    // -------------------------------------------------------------------------
+
     try {
-      final body = json.decode(response.body);
+      if (response.body.isNotEmpty) {
+        final body = jsonDecode(response.body);
 
-      if (body is Map) {
-        message =
-            body['message'] ??
-                body['data']?['message'] ??
-                body['error'] ??
-                "Unknown error";
+        if (body is Map) {
+          final data = body['data'];
 
-        if (body['errors'] != null) {
-          validationErrors =
-          Map<String, dynamic>.from(body['errors']);
+          // Prefer:
+          // data.message
+          if (data is Map && data['message'] != null) {
+            message = data['message'].toString();
+          }
 
-          reason = FailureReason.validation;
+          // Then:
+          // message
+          else if (body['message'] != null) {
+            message = body['message'].toString();
+          }
+
+          // Then:
+          // error
+          else if (body['error'] != null) {
+            message = body['error'].toString();
+          }
+
+          // Validation errors
+          if (body['errors'] is Map) {
+            validationErrors = Map<String, dynamic>.from(
+              body['errors'],
+            );
+
+            reason = FailureReason.validation;
+          }
         }
       }
     } catch (_) {
-      message =
-      "Server error: ${response.statusCode}";
+      message = 'Server error: ${response.statusCode}';
     }
 
+    // -------------------------------------------------------------------------
+    // STATUS CODE
+    // -------------------------------------------------------------------------
+
     switch (response.statusCode) {
-      case 401:
-        reason = FailureReason.unauthorized;
-        _handleUnauthorized();
-        break;
+    // -----------------------------------------------------------------------
+    // 400
+    // -----------------------------------------------------------------------
 
       case 400:
         reason = FailureReason.validation;
         break;
 
+    // -----------------------------------------------------------------------
+    // 401
+    // -----------------------------------------------------------------------
+
+      case 401:
+        reason = FailureReason.unauthorized;
+        _handleUnauthorized();
+        break;
+
+    // -----------------------------------------------------------------------
+    // 404
+    // -----------------------------------------------------------------------
+
       case 404:
         reason = FailureReason.notFound;
 
-        try {
-          final body = json.decode(response.body);
-
-          if (body is Map &&
-              body['data'] is Map &&
-              body['data']['message'] != null) {
-            message = body['data']['message'].toString();
-          } else if (body['message'] != null) {
-            message = body['message'].toString();
-          } else {
-            message = "Resource not found";
-          }
-        } catch (_) {
-          message = "Resource not found";
+        if (message == 'An error occurred' ||
+            message == 'Unknown error') {
+          message = 'Resource not found';
         }
 
         break;
 
+    // -----------------------------------------------------------------------
+    // 500
+    // -----------------------------------------------------------------------
+
       case 500:
-        message = "Server internal error";
+        reason = FailureReason.unknown;
+        message = 'Server internal error';
         break;
+
+    // -----------------------------------------------------------------------
+    // OTHER
+    // -----------------------------------------------------------------------
 
       default:
         reason = FailureReason.unknown;
+        break;
     }
 
     return Failure<T>(
@@ -257,11 +324,13 @@ $error
   // UNAUTHORIZED
   // ===========================================================================
 
-  static void _handleUnauthorized() async {
+  static Future<void> _handleUnauthorized() async {
     await Prefs.clear();
 
     if (Get.currentRoute != '/login') {
-      Get.offAll(() => NormalLoginWidget());
+      Get.offAll(
+            () => NormalLoginWidget(),
+      );
     }
   }
 
@@ -294,6 +363,10 @@ $error
         response: response,
       );
 
+      // -----------------------------------------------------------------------
+      // SUCCESS
+      // -----------------------------------------------------------------------
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
@@ -302,32 +375,58 @@ $error
         );
       }
 
+      // -----------------------------------------------------------------------
+      // ERROR RESPONSE
+      // -----------------------------------------------------------------------
+
       return _handleErrorResponse(response);
-    } on SocketException catch (e, stackTrace) {
-      _logError(
+    }
+
+    // -------------------------------------------------------------------------
+    // SOCKET EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on SocketException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'GET',
+        url: getUrl,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'No Internet connection.',
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // HTTP CLIENT EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on http.ClientException catch (e, stackTrace) {
+      return _networkFailure(
         method: 'GET',
         url: getUrl,
         error: e,
         stackTrace: stackTrace,
       );
+    }
 
-      return Failure(
-        FailureReason.network,
-        "No Internet connection.",
-      );
-    } on HttpException catch (e, stackTrace) {
-      _logError(
+    // -------------------------------------------------------------------------
+    // HTTP EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on HttpException catch (e, stackTrace) {
+      return _networkFailure(
         method: 'GET',
         url: getUrl,
         error: e,
         stackTrace: stackTrace,
       );
+    }
 
-      return Failure(
-        FailureReason.network,
-        "Connection failed.",
-      );
-    } catch (e, stackTrace) {
+    // -------------------------------------------------------------------------
+    // UNKNOWN
+    // -------------------------------------------------------------------------
+
+    catch (e, stackTrace) {
       _logError(
         method: 'GET',
         url: getUrl,
@@ -337,7 +436,7 @@ $error
 
       return Failure(
         FailureReason.unknown,
-        "Unexpected error: ${e.toString()}",
+        'Unexpected error: ${e.toString()}',
       );
     }
   }
@@ -374,6 +473,10 @@ $error
         response: response,
       );
 
+      // -----------------------------------------------------------------------
+      // SUCCESS
+      // -----------------------------------------------------------------------
+
       if (response.statusCode == 200 ||
           response.statusCode == 201) {
         final decoded = jsonDecode(response.body);
@@ -383,20 +486,58 @@ $error
         );
       }
 
+      // -----------------------------------------------------------------------
+      // ERROR RESPONSE
+      // -----------------------------------------------------------------------
+
       return _handleErrorResponse(response);
-    } on SocketException catch (e, stackTrace) {
-      _logError(
+    }
+
+    // -------------------------------------------------------------------------
+    // SOCKET EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on SocketException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'POST',
+        url: postUrl,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'No Internet connection.',
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // HTTP CLIENT EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on http.ClientException catch (e, stackTrace) {
+      return _networkFailure(
         method: 'POST',
         url: postUrl,
         error: e,
         stackTrace: stackTrace,
       );
+    }
 
-      return Failure(
-        FailureReason.network,
-        "No Internet connection.",
+    // -------------------------------------------------------------------------
+    // HTTP EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on HttpException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'POST',
+        url: postUrl,
+        error: e,
+        stackTrace: stackTrace,
       );
-    } catch (e, stackTrace) {
+    }
+
+    // -------------------------------------------------------------------------
+    // UNKNOWN
+    // -------------------------------------------------------------------------
+
+    catch (e, stackTrace) {
       _logError(
         method: 'POST',
         url: postUrl,
@@ -406,7 +547,7 @@ $error
 
       return Failure(
         FailureReason.unknown,
-        "Unexpected error: ${e.toString()}",
+        'Unexpected error: ${e.toString()}',
       );
     }
   }
@@ -436,7 +577,7 @@ $error
       request.fields.addAll(fields);
 
       // -----------------------------------------------------------------------
-      // LOG MULTIPART REQUEST
+      // LOG REQUEST
       // -----------------------------------------------------------------------
 
       _logRequest(
@@ -488,8 +629,9 @@ $error
 
       final streamedResponse = await request.send();
 
-      final response =
-      await http.Response.fromStream(streamedResponse);
+      final response = await http.Response.fromStream(
+        streamedResponse,
+      );
 
       // -----------------------------------------------------------------------
       // LOG RESPONSE
@@ -501,6 +643,10 @@ $error
         response: response,
       );
 
+      // -----------------------------------------------------------------------
+      // SUCCESS
+      // -----------------------------------------------------------------------
+
       if (response.statusCode == 200 ||
           response.statusCode == 201) {
         final decoded = jsonDecode(response.body);
@@ -510,20 +656,58 @@ $error
         );
       }
 
+      // -----------------------------------------------------------------------
+      // ERROR RESPONSE
+      // -----------------------------------------------------------------------
+
       return _handleErrorResponse(response);
-    } on SocketException catch (e, stackTrace) {
-      _logError(
+    }
+
+    // -------------------------------------------------------------------------
+    // SOCKET EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on SocketException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'MULTIPART POST',
+        url: url,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'No Internet connection.',
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // HTTP CLIENT EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on http.ClientException catch (e, stackTrace) {
+      return _networkFailure(
         method: 'MULTIPART POST',
         url: url,
         error: e,
         stackTrace: stackTrace,
       );
+    }
 
-      return Failure(
-        FailureReason.network,
-        "No Internet connection.",
+    // -------------------------------------------------------------------------
+    // HTTP EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on HttpException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'MULTIPART POST',
+        url: url,
+        error: e,
+        stackTrace: stackTrace,
       );
-    } catch (e, stackTrace) {
+    }
+
+    // -------------------------------------------------------------------------
+    // UNKNOWN
+    // -------------------------------------------------------------------------
+
+    catch (e, stackTrace) {
       _logError(
         method: 'MULTIPART POST',
         url: url,
@@ -533,7 +717,7 @@ $error
 
       return Failure(
         FailureReason.unknown,
-        e.toString(),
+        'Unexpected error: ${e.toString()}',
       );
     }
   }
@@ -567,6 +751,10 @@ $error
         response: response,
       );
 
+      // -----------------------------------------------------------------------
+      // SUCCESS
+      // -----------------------------------------------------------------------
+
       if (response.statusCode == 200 ||
           response.statusCode == 204) {
         final body = response.body.isEmpty
@@ -578,20 +766,58 @@ $error
         return Success(body);
       }
 
+      // -----------------------------------------------------------------------
+      // ERROR RESPONSE
+      // -----------------------------------------------------------------------
+
       return _handleErrorResponse(response);
-    } on SocketException catch (e, stackTrace) {
-      _logError(
+    }
+
+    // -------------------------------------------------------------------------
+    // SOCKET EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on SocketException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'DELETE',
+        url: deleteUrl,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'No Internet connection.',
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // HTTP CLIENT EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on http.ClientException catch (e, stackTrace) {
+      return _networkFailure(
         method: 'DELETE',
         url: deleteUrl,
         error: e,
         stackTrace: stackTrace,
       );
+    }
 
-      return Failure(
-        FailureReason.network,
-        "No Internet connection.",
+    // -------------------------------------------------------------------------
+    // HTTP EXCEPTION
+    // -------------------------------------------------------------------------
+
+    on HttpException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'DELETE',
+        url: deleteUrl,
+        error: e,
+        stackTrace: stackTrace,
       );
-    } catch (e, stackTrace) {
+    }
+
+    // -------------------------------------------------------------------------
+    // UNKNOWN
+    // -------------------------------------------------------------------------
+
+    catch (e, stackTrace) {
       _logError(
         method: 'DELETE',
         url: deleteUrl,
@@ -601,7 +827,7 @@ $error
 
       return Failure(
         FailureReason.unknown,
-        "Unexpected error: ${e.toString()}",
+        'Unexpected error: ${e.toString()}',
       );
     }
   }
