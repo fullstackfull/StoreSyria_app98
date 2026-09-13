@@ -218,7 +218,24 @@ $error
         break;
 
       case 404:
-        message = "Resource not found";
+        reason = FailureReason.notFound;
+
+        try {
+          final body = json.decode(response.body);
+
+          if (body is Map &&
+              body['data'] is Map &&
+              body['data']['message'] != null) {
+            message = body['data']['message'].toString();
+          } else if (body['message'] != null) {
+            message = body['message'].toString();
+          } else {
+            message = "Resource not found";
+          }
+        } catch (_) {
+          message = "Resource not found";
+        }
+
         break;
 
       case 500:

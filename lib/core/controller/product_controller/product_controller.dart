@@ -7,6 +7,8 @@ import 'package:store_go_app/config/repository/product_repository.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
 
+import '../../../network_dio/result.dart';
+
 enum ProductListMode {
   normal,
   search,
@@ -177,20 +179,16 @@ class ProductController extends GetxController implements StoreAware {
 
     listMode.value = ProductListMode.search;
     searchQuery.value = name.trim();
-
     filterCategory.value = '';
     filterCategoryId.value = '';
-
     isScroll.value = false;
 
     productList.clear();
     errorMessage.value = '';
-
     isDataAvailable2.value = true;
 
-    final response = await productRepository.searchProductByName(
-      name.trim(),
-    );
+    final response =
+    await productRepository.searchProductByName(name.trim());
 
     isDataAvailable2.value = false;
 
@@ -202,28 +200,33 @@ class ProductController extends GetxController implements StoreAware {
           final List products = data['data']?['data'] ?? [];
 
           productList.assignAll(
-            products
-                .map((e) => ProductData.fromJson(e))
-                .toList(),
+            products.map((e) => ProductData.fromJson(e)).toList(),
           );
+
+          errorMessage.value = '';
         } else {
           searchTotal.value = 0;
-
-          commonToast(
-            data['data']?['message'] ??
-                data['message'] ??
-                'Error',
-          );
+          productList.clear();
+          errorMessage.value = '';
         }
       },
+
       onFailure: (reason, message, validationErrors) {
         searchTotal.value = 0;
+        productList.clear();
+        isScroll.value = false;
+
+        if (reason == FailureReason.notFound) {
+          // بحث بدون نتائج
+          errorMessage.value = '';
+          return;
+        }
+
         errorMessage.value = message;
         commonToast(message);
       },
     );
   }
-
   Future<void> deleteProductData({
     required String productId,
   }) async {
@@ -254,6 +257,7 @@ class ProductController extends GetxController implements StoreAware {
       },
     );
   }
+
   Future<void> clearSearch() async {
     searchQuery.value = '';
 

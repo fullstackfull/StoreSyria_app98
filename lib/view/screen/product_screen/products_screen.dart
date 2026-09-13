@@ -96,18 +96,36 @@ class _ProductsScreenState extends State<ProductsScreen>
   }
 
   Future<void> _fetchInitialData() async {
-    productController.listMode.value = ProductListMode.normal;
-    productController.searchQuery.value = '';
-
-    productController.currantPage.value = 1;
-    productController.isScroll.value = true;
+    final mode = productController.listMode.value;
+    final searchQuery = productController.searchQuery.value.trim();
+    final categoryId = productController.filterCategoryId.value;
 
     productController.errorMessage.value = '';
     productController.productList.clear();
+    productController.currantPage.value = 1;
+
+    if (mode == ProductListMode.search &&
+        searchQuery.isNotEmpty) {
+      productController.isScroll.value = false;
+
+      await productController.searchProductName(searchQuery);
+      return;
+    }
+
+    if (mode == ProductListMode.category &&
+        categoryId.isNotEmpty) {
+      productController.isScroll.value = false;
+
+      await productController.searchProductData(categoryId);
+      return;
+    }
+
+    productController.listMode.value = ProductListMode.normal;
+    productController.searchQuery.value = '';
+    productController.isScroll.value = true;
 
     await productController.getProductData(1);
   }
-
 
   Future<void> _showCategoryFilterBottomSheet() async {
     if (addProductController.categoryTypeList.isEmpty) return;
@@ -561,6 +579,7 @@ class _ProductsScreenState extends State<ProductsScreen>
 
               Expanded(
                 child: Obx(() {
+
                   if (productController.isDataAvailable2.value) {
                     return const Center(
                       child: LoadingWidget(),

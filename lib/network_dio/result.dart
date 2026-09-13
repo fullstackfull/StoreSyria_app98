@@ -5,6 +5,7 @@ enum FailureReason {
   timeout,
   unauthorized,
   validation,
+  notFound,
   unknown,
 }
 
