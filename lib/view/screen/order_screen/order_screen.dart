@@ -7,6 +7,7 @@ import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/order_screen/order_detail_screen.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
+import '../../../core/model/order_model.dart';
 import '../../new_widgets/filter_tabs.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/search_widget.dart';
@@ -492,50 +493,71 @@ class _OrderScreenState extends State<OrderScreen>
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: allOrdersListItemWidget(
+                            showChangeAction: true,
+                            showChangeAction2: true,
                             context: context,
+                            changeText: "change_payment_status".tr,
+                            changeText2: "change_order_status".tr,
+                            changeFun2: () {
+                              OrderStatusBottomSheet.show<OrderData>(
+                                context,
+                                order,
+
+                                getOrderStatus: (model) =>
+                                model.deliveredStatus ?? 0,
+
+                                getProductOrderId: (model) =>
+                                model.productOrderId ?? '',
+
+                                getPaymentStatus: (model) =>
+                                model.paymentStatus ?? 'Unpaid',
+
+                                setOrderStatus: (model, newStatus) {
+                                  model.deliveredStatus = newStatus;
+                                },
+
+                                setOrderStatusText: (model, newStatusText) {
+                                },
+
+                                onUpdated: () {
+                                  orderController.orderList.refresh();
+                                },
+                              );
+                            },
+                            changeFun: () {
+                              showPaymentStatusBottomSheet<OrderData>(
+                                context,
+                                order,
+                                getPaymentStatus: (model) => model.paymentStatus ?? '',
+                                getProductOrderId: (model) => model.productOrderId ?? '',
+                                getDeliveredStatus: (model) => model.deliveredStatus ?? 0,
+                                setPaymentStatus: (model, newStatus) {
+                                  model.paymentStatus = newStatus;
+                                },
+                                onUpdated: () {
+                                  orderController.orderList.refresh();
+                                },
+                              );
+                            },
                             orderId: order.productOrderId ?? '',
                             date: dateFormatted(
-                              date: order.orderDate ?? '',
-                              formatType: formatForDateTime(
-                                FormatType.date,
+                              date: order.orderDate!,
+                              formatType: formatForDateTime(FormatType.date),
+                            ),
+                            maskedName: (order.userName?.isEmpty ?? true) ? 'no_name'.tr : order.userName ?? "",
+                            price: "${order.finalPrice}",
+                            secondaryBadgeLabel:order.paymentStatus,
+                            primaryBadgeLabel: order.deliveredStatus,
+                            onTap: () => Get.to(
+                                  () => OrderDetailScreen(
+                                orderId: order.id.toString(),
                               ),
                             ),
-                            maskedName:
-                            (order.userName?.isEmpty ?? true)
-                                ? 'no_name'.tr
-                                : order.userName ?? '',
-                            price: '${order.finalPrice}',
-                            secondaryBadgeLabel: order.paymentStatus,
-                            primaryBadgeLabel: order.deliveredStatus,
-
-                            onTap: () {
-                              Get.to(
-                                    () => OrderDetailScreen(
-                                  orderId: order.id.toString(),
-                                ),
-                              );
-                            },
-
-                            changeText: "",
-
-                            changeFun: () {
-
-                            },
-
-                            changeFun2: () {
-
-                            },
-
-                            changeText2: "",
-
-                            viewFun: () {
-                              Get.to(
-                                    () => OrderDetailScreen(
-                                  orderId: order.id.toString(),
-                                ),
-                              );
-                            },
-
+                            viewFun: () => Get.to(
+                                  () => OrderDetailScreen(
+                                orderId: order.id.toString(),
+                              ),
+                            ),
                             deleteFun: () {
                               AppDialog.showCustomDialog(
                                 message: "deleteOrder",
@@ -543,10 +565,9 @@ class _OrderScreenState extends State<OrderScreen>
                                 iconColor: AppColor.cRedText,
                                 confirmColor: AppColor.cRedText,
                                 context: context,
-                                onConfirm: () =>
-                                    orderController.deleteOrderData(
-                                      orderId: order.id.toString(),
-                                    ),
+                                onConfirm: () => orderController.deleteOrderData(
+                                  orderId: order.id.toString(),
+                                ),
                               );
                             },
                           ),
