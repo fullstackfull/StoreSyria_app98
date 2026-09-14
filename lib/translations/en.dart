@@ -495,5 +495,8 @@ const Map<String, String> en = {
   "no_payment_methods_available": "No payment methods available",
   "available_store_payment_methods": "Available Payment Methods in Store",
   "store_language_and_currency" : "Store language and currencies",
-
+  "customer_details": "Customer Details",
+  "customer_name": "Customer Name",
+  "delete_order": "Delete Order",
+  "delete_Customer" : "Delete Customer"
 };

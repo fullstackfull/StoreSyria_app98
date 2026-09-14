@@ -4,6 +4,7 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
 import '../../model/customer_model.dart';
+import '../../model/customer_orders_model.dart';
 
 
 class CustomerController extends GetxController implements StoreAware {
@@ -22,6 +23,16 @@ class CustomerController extends GetxController implements StoreAware {
   RxBool isLoading = false.obs;
   RxBool isPageLoading = false.obs;
   RxString errorMessage = ''.obs;
+
+  CustomerOrdersModel? customerOrdersModel;
+  Rx<CustomerProfile?> customerProfile = Rx<CustomerProfile?>(null);
+  RxList<CustomerOrder> customerOrdersList = <CustomerOrder>[].obs;
+
+  RxInt customerOrdersCurrentPage = 1.obs;
+  RxBool isCustomerOrdersScroll = true.obs;
+  RxBool isCustomerOrdersLoading = false.obs;
+  RxBool isCustomerOrdersPageLoading = false.obs;
+  RxString customerOrdersErrorMessage = ''.obs;
 
   @override
   void onInit() {
@@ -111,6 +122,8 @@ class CustomerController extends GetxController implements StoreAware {
           customerList.addAll(
             customerModel?.data?.customers?? [],
           );
+
+          currantPage.value = page;
 
           isScroll.value =
               page != customerModel?.data?.pagination?.lastPage;
@@ -245,5 +258,114 @@ class CustomerController extends GetxController implements StoreAware {
         commonToast(message);
       },
     );
+  }
+
+  void clearCustomerOrders() {
+    customerOrdersModel = null;
+    customerProfile.value = null;
+    customerOrdersList.clear();
+    customerOrdersCurrentPage.value = 1;
+    isCustomerOrdersScroll.value = true;
+    isCustomerOrdersLoading.value = false;
+    isCustomerOrdersPageLoading.value = false;
+    customerOrdersErrorMessage.value = '';
+  }
+
+  Future<void> getCustomerOrdersData({
+    required String customerId,
+    required int page,
+  }) async {
+    if (page == 1) {
+      if (isCustomerOrdersLoading.value) return;
+
+      isCustomerOrdersLoading.value = true;
+      customerOrdersErrorMessage.value = '';
+    } else {
+      if (isCustomerOrdersPageLoading.value) return;
+      if (!isCustomerOrdersScroll.value) return;
+
+      isCustomerOrdersPageLoading.value = true;
+    }
+
+    try {
+      final response = await customerRepository.getCustomerOrdersData(
+        customerId: customerId,
+        page: page,
+      );
+
+      response.fold(
+        onSuccess: (data) {
+          if (data['status'] == 1) {
+            final model = CustomerOrdersModel.fromJson(data);
+
+            customerOrdersModel = model;
+
+            if (page == 1) {
+              customerOrdersList.clear();
+            }
+
+            if (model.data?.customer != null) {
+              customerProfile.value = model.data!.customer;
+            }
+
+            final orders = model.data?.orders ?? [];
+
+            if (orders.isNotEmpty) {
+              customerOrdersList.addAll(orders);
+            }
+
+            final pagination = model.data?.pagination;
+
+            customerOrdersCurrentPage.value =
+                pagination?.currentPage ?? page;
+
+            if (pagination != null) {
+              if (pagination.hasMore != null) {
+                isCustomerOrdersScroll.value = pagination.hasMore!;
+              } else if (
+              pagination.currentPage != null &&
+                  pagination.lastPage != null
+              ) {
+                isCustomerOrdersScroll.value =
+                    pagination.currentPage! < pagination.lastPage!;
+              } else {
+                isCustomerOrdersScroll.value = false;
+              }
+            } else {
+              isCustomerOrdersScroll.value = false;
+            }
+
+            customerOrdersErrorMessage.value = '';
+          } else {
+            final msg = data['data']?['message'] ??
+                data['message'] ??
+                'Error';
+
+            customerOrdersErrorMessage.value = msg.toString();
+            commonToast(msg.toString());
+          }
+        },
+        onFailure: (
+            reason,
+            message,
+            validationErrors,
+            ) {
+          if (page == 1) {
+            customerOrdersErrorMessage.value = message;
+          }
+
+          commonToast(message);
+        },
+      );
+    } catch (e) {
+      customerOrdersErrorMessage.value = e.toString();
+      commonToast(e.toString());
+    } finally {
+      if (page == 1) {
+        isCustomerOrdersLoading.value = false;
+      } else {
+        isCustomerOrdersPageLoading.value = false;
+      }
+    }
   }
 }

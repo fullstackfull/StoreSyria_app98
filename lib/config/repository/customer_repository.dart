@@ -27,10 +27,21 @@ class CustomerRepository {
   Future<dynamic> deleteCustomerData({
     required String customerId,
   }) async {
-    String endPoint = '${API.deleteCustomerUrl}${API.customerIdUrl}${customerId}&${API.andStoreIdUrl}${Prefs.getStoreID()}';
+    String endPoint = '${API.deleteCustomerUrl}${API.customerIdUrl}${customerId}${API.andStoreIdUrl}${Prefs.getStoreID()}';
 
     var response = await NetworkHttps.deleteRequest(endPoint);
 
+    return response;
+  }
+
+  Future<dynamic> getCustomerOrdersData({
+    required String customerId,
+    required int page,
+  }) async {
+    String endPoint =
+        '${API.customerOrdersUrl}?id=$customerId${API.andStoreIdUrl}${Prefs.getStoreID()}${API.andPageUrl}$page';
+
+    var response = await NetworkHttps.getRequest(endPoint);
     return response;
   }
 }

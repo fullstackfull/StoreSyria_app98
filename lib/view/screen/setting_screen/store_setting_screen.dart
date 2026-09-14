@@ -33,7 +33,7 @@ class StoreSettingScreen extends StatelessWidget {
         title: 'store_settings'.tr,
         label: null,
         isBack: true,
-        onNewLabelTap: () {  },
+        onNewLabelTap: () {},
       ),
       body: SafeArea(
         child: SingleChildScrollView(

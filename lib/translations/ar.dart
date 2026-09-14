@@ -495,4 +495,8 @@ const Map<String, String> ar = {
   "no_payment_methods_available": "لا توجد طرق دفع متاحة",
   "available_store_payment_methods": "طرق الدفع المتاحة بالمتجر",
   "store_language_and_currency" : "لغة المتجر والعملات",
+  "customer_details": "تفاصيل العميل",
+  "customer_name": "اسم العميل",
+  "delete_order": "حذف الطلب",
+  "delete_Customer" : "حذف الزبون"
 };

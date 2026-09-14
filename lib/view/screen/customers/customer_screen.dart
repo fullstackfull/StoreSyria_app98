@@ -11,6 +11,7 @@ import '../../new_widgets/customer_bottom_sheet.dart';
 import '../../new_widgets/customer_widget.dart';
 import '../../widget/app_dialog.dart';
 import '../../widget/common_appbar_widget.dart';
+import 'customers_details.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({super.key});
@@ -282,7 +283,13 @@ class _CustomerScreenState extends State<CustomerScreen>
                                 );
                               },
                               viewFun: (){},
-                              onTap: (){},
+                              onTap: (){
+                                  Get.to(
+                                        () => CustomerDetailsScreen(
+                                      customerId: customer.id.toString(),
+                                    ),
+                                  );
+                              },
                               context: context,
                               customer: customer,
                             ),

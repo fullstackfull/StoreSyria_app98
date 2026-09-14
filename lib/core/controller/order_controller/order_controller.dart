@@ -135,7 +135,7 @@ class OrderController extends GetxController implements StoreAware {
   }
 
   Future<bool> createOrderData({
-    required List<dynamic> productList, // من ProductController
+    required List<dynamic> productList,
   }) async {
     if (selectedCustomer.value == null) {
       commonToast('please_select_customer'.tr);
@@ -193,7 +193,6 @@ class OrderController extends GetxController implements StoreAware {
 
           resetCreateOrderForm();
           resetPagination();
-          getOrderData(1);
         },
         onFailure: (reason, message, validationErrors) {
           success = false;

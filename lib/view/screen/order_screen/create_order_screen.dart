@@ -23,10 +23,21 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   final CustomerController customerController = Get.put(CustomerController());
   final ProductController productController = Get.find<ProductController>();
 
+  int? initialCustomerId;
+  bool isFromCustomerDetails = false;
+
   @override
   void initState() {
     super.initState();
+
     orderController.resetCreateOrderForm();
+
+    final args = Get.arguments;
+
+    if (args is Map) {
+      initialCustomerId = args['customerId'] as int?;
+      isFromCustomerDetails = args['isFromCustomerDetails'] ?? false;
+    }
   }
 
   @override
@@ -37,7 +48,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         title: "new_order".tr,
         isBold: true,
         label: null,
-        onNewLabelTap: () {  },
+        onNewLabelTap: () {},
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -47,25 +58,52 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             _sectionTitle("select_customer".tr),
             verticalSpace(8.h),
             Obx(() {
+              final customers = customerController.customerList;
+
+              if (initialCustomerId != null &&
+                  orderController.selectedCustomer.value == null) {
+                final customer = customers.firstWhereOrNull(
+                      (c) => c.id == initialCustomerId,
+                );
+
+                if (customer != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted &&
+                        orderController.selectedCustomer.value == null) {
+                      orderController.selectedCustomer.value = customer;
+                    }
+                  });
+                }
+              }
+
               return Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 4.h,
+                ),
                 decoration: _boxDecoration(),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
                     isExpanded: true,
+
                     hint: Text("choose_customer".tr),
+
                     value: orderController.selectedCustomer.value?.id,
-                    items: customerController.customerList.map((c) {
+
+                    items: customers.map((c) {
                       return DropdownMenuItem<int>(
                         value: c.id,
                         child: Text(
-                          "${c.customerInfo!.name ?? ''} ",
+                          c.customerInfo?.name ?? '',
                         ),
                       );
                     }).toList(),
+
                     onChanged: (id) {
-                      final customer = customerController.customerList
-                          .firstWhereOrNull((c) => c.id == id);
+                      final customer = customers.firstWhereOrNull(
+                            (c) => c.id == id,
+                      );
+
                       orderController.selectedCustomer.value = customer;
                     },
                   ),
@@ -219,6 +257,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
                     if (success) {
                       Get.back();
+                      if (isFromCustomerDetails) {
+                        await customerController.getCustomerOrdersData(
+                          customerId: initialCustomerId.toString(),
+                          page: 1,
+                        );
+                      } else {
+                        await orderController.getOrderData(1);
+                      }
                     }
                   },
                   child: orderController.isCreatingOrder.value

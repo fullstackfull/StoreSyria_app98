@@ -20,7 +20,7 @@ class _LanguageCurrenciesScreenState extends State<LanguageCurrenciesScreen> {
   final StoreSettingController controller = Get.find<StoreSettingController>();
   bool isLanguageExpanded = false;
   bool isCurrencyExpanded = false;
-  bool isExchangeRatesExpanded = true;
+  bool isExchangeRatesExpanded = false;
 
   @override
   void initState() {
