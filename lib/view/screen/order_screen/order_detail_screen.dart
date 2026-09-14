@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
 import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/view/screen/order_screen/invoice_pdf_view.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
@@ -902,7 +903,12 @@ class _NoteCard extends StatelessWidget {
                     ),
                     verticalSpace(2.h),
                     Text(
-                      _formatDate(note.createdAt),
+                      dateFormatted(
+                        date: note.createdAt ?? '',
+                        formatType: formatForDateTime(
+                          FormatType.dateTime,
+                        ),
+                          ),
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: secondaryText,
@@ -951,17 +957,5 @@ class _NoteCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null) return '';
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.day}/${date.month}/${date.year} ${date.hour
-          .toString()
-          .padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateStr;
-    }
   }
 }

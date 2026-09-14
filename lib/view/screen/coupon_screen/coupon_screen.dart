@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -11,6 +9,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 
+import '../../../utils/helper.dart';
 import '../../new_widgets/coupon_widget.dart';
 import '../../widget/common_appbar_widget.dart';
 import 'coupon_detail_screen.dart';
@@ -83,7 +82,7 @@ class _CouponScreenState extends State<CouponScreen>
       backgroundColor: AppColor.cBackGround,
       barrierColor: AppColor.cGreyOpacity,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(30),
           topRight: Radius.circular(30),
@@ -94,7 +93,7 @@ class _CouponScreenState extends State<CouponScreen>
         minHeight: Get.height / 1.5,
       ),
       builder: (context) {
-        return AddNewCouponWidget(
+        return const AddNewCouponWidget(
           isUpdate: false,
         );
       },
@@ -107,7 +106,7 @@ class _CouponScreenState extends State<CouponScreen>
       backgroundColor: AppColor.cBackGround,
       barrierColor: AppColor.cGreyOpacity,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(30),
           topRight: Radius.circular(30),
@@ -309,7 +308,11 @@ class _CouponScreenState extends State<CouponScreen>
                                     discount: coupon.discountAmount.toString(),
                                     name: coupon.couponName,
                                     code: coupon.couponCode,
-                                    date: coupon.couponExpiryDate,
+                                    date: dateFormatted(
+                                        date: coupon.couponExpiryDate ?? '',
+                                        formatType: formatForDateTime(
+                                          FormatType.dateTime2,
+                                        )),
                                     couponType: coupon.couponType,
                                     status: coupon.status ?? 0,
                                     viewFun: () {

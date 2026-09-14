@@ -324,9 +324,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                               orderId: order.orderId.toString(),
         
                               date: dateFormatted(
-                                date: order.createdAt.toString(),
+                                date: order.createdAt ?? "",
                                 formatType: formatForDateTime(
-                                  FormatType.date,
+                                  FormatType.dateTime2,
                                 ),
                               ),
         

@@ -120,7 +120,7 @@ class _CustomerScreenState extends State<CustomerScreen>
                  );
             }
              );
-           },
+          },
         ),
         backgroundColor: isDark
             ? DarkThemeColor.cBackGround

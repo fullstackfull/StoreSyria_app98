@@ -378,7 +378,7 @@ class _OrderScreenState extends State<OrderScreen>
                                       date: dateFormatted(
                                         date: order.orderDate ?? '',
                                         formatType: formatForDateTime(
-                                          FormatType.date,
+                                          FormatType.dateTime2,
                                         ),
                                       ),
                                       maskedName:
@@ -542,7 +542,7 @@ class _OrderScreenState extends State<OrderScreen>
                             orderId: order.productOrderId ?? '',
                             date: dateFormatted(
                               date: order.orderDate!,
-                              formatType: formatForDateTime(FormatType.date),
+                              formatType: formatForDateTime(FormatType.dateTime2),
                             ),
                             maskedName: (order.userName?.isEmpty ?? true) ? 'no_name'.tr : order.userName ?? "",
                             price: "${order.finalPrice}",
