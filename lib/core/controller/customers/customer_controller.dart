@@ -164,12 +164,23 @@ class CustomerController extends GetxController implements StoreAware {
   // =========================
 
   Future<void> addCustomerData({
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String mobile,
-    required String password,
-    int status = 1,
+  required String firstName,
+  required String lastName,
+  required String email,
+  required String mobile,
+  required String password,
+  int status = 1,
+
+  // Address
+  required String address,
+  required String countryId,
+  required String stateId,
+  required String cityId,
+  required String postcode,
+  required String addressTitle,
+  int isDefault = 1,
+  String deliveryInstructions = '',
+  required String addressType,
   }) async {
     if (isDataAvailable.value) return;
 
@@ -183,6 +194,15 @@ class CustomerController extends GetxController implements StoreAware {
         'status': status,
         'mobile': mobile,
         'password': password,
+        'address': address,
+        'country_id': countryId,
+        'state_id': stateId,
+        'city_id': cityId,
+        'postcode': postcode,
+        'address_title': addressTitle,
+        'is_default': isDefault,
+        'delivery_instructions': deliveryInstructions,
+        'address_type': addressType,
       },
     );
 
