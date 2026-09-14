@@ -5,10 +5,8 @@ import 'package:store_go_app/core/controller/home_controller/new_coupon_controll
 import 'package:store_go_app/core/model/coupon_model.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
-import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
-
 import '../../../utils/helper.dart';
 import '../../new_widgets/coupon_widget.dart';
 import '../../widget/common_appbar_widget.dart';
@@ -62,7 +60,6 @@ class _CouponScreenState extends State<CouponScreen>
       couponController.loadNextPage();
     }
   }
-
 
   Future<void> _fetchInitialData() async {
     await couponController.refreshCoupons();
@@ -311,7 +308,7 @@ class _CouponScreenState extends State<CouponScreen>
                                     date: dateFormatted(
                                         date: coupon.couponExpiryDate ?? '',
                                         formatType: formatForDateTime(
-                                          FormatType.dateTime2,
+                                          FormatType.date,
                                         )),
                                     couponType: coupon.couponType,
                                     status: coupon.status ?? 0,
