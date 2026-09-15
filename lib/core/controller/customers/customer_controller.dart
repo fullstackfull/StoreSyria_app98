@@ -21,6 +21,7 @@ class CustomerController extends GetxController implements StoreAware {
   RxBool isScroll = true.obs;
   RxBool isDataAvailable = false.obs;
   RxBool isLoading = false.obs;
+  RxBool isLoading2 = false.obs;
   RxBool isPageLoading = false.obs;
   RxString errorMessage = ''.obs;
 
@@ -155,6 +156,42 @@ class CustomerController extends GetxController implements StoreAware {
         if (currantPage.value == page) {
           currantPage.value -= 1;
         }
+      },
+    );
+  }
+
+  Future<void> getCitiesData() async {
+
+    if (isLoading2.value) return;
+
+    isLoading2.value = true;
+
+    final response =
+    await customerRepository.getCitiesData();
+
+    isLoading2.value = false;
+
+    response.fold(
+      onSuccess: (data) {
+
+        if (data['status'] == 1) {
+          customerModel = CustomerModel.fromJson(data);
+
+        } else {
+          commonToast(
+            data['data']?['message'] ??
+                data['message'] ??
+                'Error',
+          );
+        }
+      },
+      onFailure: (
+          reason,
+          message,
+          validationErrors,
+          ) {
+        errorMessage.value = message;
+        commonToast(message);
       },
     );
   }

@@ -11,6 +11,13 @@ class CustomerRepository {
     return response;
   }
 
+  Future<dynamic> getCitiesData() async {
+    String endPoint = '${API.getCitiesUrl}?country_id=215';
+
+    var response = await NetworkHttps.getRequest(endPoint);
+    return response;
+  }
+
   Future<dynamic> addCustomerData({
     required Map<String, dynamic> data,
   }) async {

@@ -120,5 +120,6 @@ class API {
   static String paymentTypesUrl = '/getActivePaymentMethods';
   static String searchProductUrl = '/searchProductsByName';
   static String updateStoreInfoUrl = '/updateStoreOwnerInfo';
+  static String getCitiesUrl = '/getCitiesByState';
 
 }

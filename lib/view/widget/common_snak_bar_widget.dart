@@ -1,34 +1,44 @@
-import 'package:fluttertoast/fluttertoast.dart';
-import '../../utils/colors.dart';
-import '../new_widgets/app_snackbar.dart';
+import 'package:store_go_app/view/new_widgets/app_snackbar.dart';
 
-// Future<void> commonToast(String msg){
-//  return Fluttertoast.showToast(
-//       msg:msg,
-//       toastLength: Toast.LENGTH_SHORT,
-//       gravity: ToastGravity.CENTER,
-//       timeInSecForIosWeb: 1,
-//       backgroundColor: AppColor.themeNavyBlueColor,
-//       textColor: AppColor.cWhiteFont,
-//       fontSize: 16.0
-//   );
-// }
 
-Future<void> commonToast(String msg) async {
- AppSnackBar.success(
-  title: "success",
-  message: msg,
- );
+enum AppSnackBarType {
+ success,
+ error,
+ warning,
+ info,
 }
 
-//Future<void> commonToast(
-//   String msg, {
-//   AppSnackBarType type = AppSnackBarType.success,
-// }) async {
-//   AppSnackBar.show(
-//     type: type,
-//     title: msg,
-//     message: '',
-//     duration: const Duration(seconds: 3),
-//   );
-// }
+void commonToast(
+    String msg, {
+     AppSnackBarType type = AppSnackBarType.success,
+    }) {
+ switch (type) {
+  case AppSnackBarType.success:
+   AppSnackBar.success(
+    title: msg,
+    message: '',
+   );
+   break;
+
+  case AppSnackBarType.error:
+   AppSnackBar.error(
+    title: msg,
+    message: '',
+   );
+   break;
+
+  case AppSnackBarType.warning:
+   AppSnackBar.warning(
+    title: msg,
+    message: '',
+   );
+   break;
+
+  case AppSnackBarType.info:
+   AppSnackBar.info(
+    title: msg,
+    message: '',
+   );
+   break;
+ }
+}
