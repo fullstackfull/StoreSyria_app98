@@ -120,7 +120,7 @@ const Map<String, String> ar = {
   'pending': 'قيد الانتظار',
   'delivered': 'تم التوصيل',
   'cancelled': 'ملغى',
-  'returned': 'مرتجع',
+  'return': 'مرتجع',
   'confirmed': 'مؤكد',
   'picked_up': 'تم الاستلام',
   'shipped': 'تم الشحن',
@@ -524,4 +524,5 @@ const Map<String, String> ar = {
   "default_address_inactive": "غير مُفعّل كعنوان افتراضي",
   "delivery_instructions": "تعليمات التوصيل",
   "enter_delivery_instructions": "أدخل ملاحظات للتوصيل (اختياري)",
+  "deleted_customer" : "عميل محذوف"
 };

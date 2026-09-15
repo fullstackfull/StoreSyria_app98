@@ -415,8 +415,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           SizedBox(width: 30.w, child: Text(index.toString(), style: TextStyle(fontSize: 12.sp, color: secondaryText))),
           Expanded(flex: 3, child: Text(name, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500, color: primaryText), maxLines: 2, overflow: TextOverflow.ellipsis)),
           Expanded(flex: 1, child: Text(quantity, style: TextStyle(fontSize: 12.sp, color: secondaryText), textAlign: TextAlign.center)),
-          Expanded(flex: 2, child: Text('\$$price', style: TextStyle(fontSize: 12.sp, color: secondaryText), textAlign: TextAlign.right)),
-          Expanded(flex: 2, child: Text('\$$totals', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: accentColor), textAlign: TextAlign.right)),
+          Expanded(flex: 2, child: Text(price, style: TextStyle(fontSize: 12.sp, color: secondaryText), textAlign: TextAlign.right)),
+          Expanded(flex: 2, child: Text(totals, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: accentColor), textAlign: TextAlign.right)),
         ],
       ),
     );
@@ -439,16 +439,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       ),
       child: Column(
         children: [
-          _totalRow("sub_total".tr, "\$ $subTotal"),
-          _totalRow("shipping".tr, "\$ $shippingPrice"),
-          _totalRow("tax".tr, "\$ $extTax"),
-          _totalRow("coupon".tr, "- \$ $applyCoupon", color: accentColor),
+          _totalRow("sub_total".tr, subTotal),
+          _totalRow("shipping".tr,shippingPrice),
+          _totalRow("tax".tr, extTax),
+          _totalRow("coupon".tr, "- $applyCoupon", color: accentColor),
           Divider(color: Colors.white.withOpacity(0.2), height: 30.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("grand_total".tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white)),
-              Text("\$ $grandTotal", style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text(grandTotal, style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.bold, color: Colors.white)),
             ],
           ),
           verticalSpace(15.h),

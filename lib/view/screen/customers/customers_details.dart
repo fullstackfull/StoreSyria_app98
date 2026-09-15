@@ -10,12 +10,10 @@ import '../../../core/controller/customers/customer_controller.dart';
 import '../../../core/controller/order_controller/order_controller.dart';
 import '../../../core/model/customer_orders_model.dart';
 import '../../../utils/helper.dart';
-import '../../../utils/images.dart';
 import '../../new_widgets/app_snackbar.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/top_orders.dart';
 import '../../widget/app_dialog.dart';
-import '../../widget/common_button.dart';
 import '../order_screen/order_detail_screen.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
@@ -105,7 +103,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         title: 'customer_details'.tr,
         label: "new_order".tr,
         onNewLabelTap: () {
-          AppSnackBar.success(
+          AppSnackBar.info(
             title: 'success',
             message: "Standardize Dates");
           Get.toNamed(

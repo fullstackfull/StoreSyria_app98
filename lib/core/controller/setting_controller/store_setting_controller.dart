@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../config/repository/store_settings_repository.dart';
+import '../../../utils/pick_file.dart';
 import '../../model/currency_model.dart';
 import '../../model/language_model.dart';
 import '../../model/store_info_model.dart';
@@ -12,26 +14,23 @@ import '../../model/store_info_model.dart';
 class StoreSettingController extends GetxController {
   StoreSettingRepository settingRepository = StoreSettingRepository();
   final GetStorage _box = GetStorage();
-
   static const String _currenciesCacheKey = 'cached_currencies';
   static const String _currentCurrencyCacheKey = 'cached_current_currency';
   static const String _currenciesCacheTimeKey = 'cached_currencies_time';
   static const Duration _cacheDuration = Duration(hours: 24);
-
   RxBool isLoading = false.obs;
   RxBool isLoadingLanguages = false.obs;
+  RxBool isUpLoading = false.obs;
   RxBool isLoadingCurrencies = false.obs;
-
   RxString errorMessage = ''.obs;
-
+  RxString selectedInvoiceLogo = ''.obs;
+  RxString selectedStoreImage = ''.obs;
   RxList<Currency> currencies = <Currency>[].obs;
   RxList<Language> languages = <Language>[].obs;
   RxnString updatingCurrencyCode = RxnString();
   RxnString updatingLanguageCode = RxnString();
   Rxn<Currency> currentCurrency = Rxn<Currency>();
-
   Rxn<Language> currentLanguage = Rxn<Language>();
-
   // ==================== Exchange Rates State ====================
   RxBool isLoadingCurrencyRates = false.obs;
   RxnString updatingRateCurrencyCode = RxnString();
@@ -39,82 +38,34 @@ class StoreSettingController extends GetxController {
   RxList<CurrencyRateItem> currencyRates = <CurrencyRateItem>[].obs;
   RxString defaultRatesCurrency = ''.obs;
 
-  // ==================== Store Info (عدّل هذا) ====================
   Rxn<StoreInfoData> storeInfoData = Rxn<StoreInfoData>();
 
-// ==================== Store Controllers ====================
-
   final TextEditingController storeNameController = TextEditingController();
-
   final TextEditingController storeUrlController = TextEditingController();
-
   final TextEditingController storeEmailController = TextEditingController();
-
   final TextEditingController mobileController = TextEditingController();
-
   final TextEditingController addressController = TextEditingController();
-
   final TextEditingController cityController = TextEditingController();
-
   final TextEditingController stateController = TextEditingController();
-
   final TextEditingController zipcodeController = TextEditingController();
-
   final TextEditingController countryController = TextEditingController();
-
   final TextEditingController facebookController = TextEditingController();
-
   final TextEditingController twitterController = TextEditingController();
-
   final TextEditingController instagramController = TextEditingController();
-
-
-// ==================== Owner ====================
-
   final TextEditingController ownerNameController = TextEditingController();
-
   final TextEditingController ownerEmailController = TextEditingController();
-
-
-
-// ==================== Store Extra ====================
-
   final TextEditingController storeIdController = TextEditingController();
-
   final TextEditingController slugController = TextEditingController();
-
   final TextEditingController defaultLanguageController = TextEditingController();
-
   final TextEditingController storeCreatedAtController = TextEditingController();
-
-
-// ==================== Address Extra ====================
-
   final TextEditingController fullAddressController = TextEditingController();
-
-
-// ==================== Media ====================
-
   final TextEditingController invoiceLogoController = TextEditingController();
-
   final TextEditingController storeImageController = TextEditingController();
-
-
-// ==================== Settings ====================
-
   final TextEditingController currencyNameController = TextEditingController();
-
   final TextEditingController currencyFormatController = TextEditingController();
-
   final TextEditingController siteRtlController = TextEditingController();
-
   final TextEditingController dateFormatController = TextEditingController();
-
   final TextEditingController timezoneController = TextEditingController();
-
-
-// ==================== Social ====================
-
   final TextEditingController whatsappController = TextEditingController();
   final TextEditingController telegramController = TextEditingController();
 
@@ -139,9 +90,6 @@ class StoreSettingController extends GetxController {
 
     fullAddressController.dispose();
 
-    invoiceLogoController.dispose();
-    storeImageController.dispose();
-
     currencyNameController.dispose();
     currencyFormatController.dispose();
     siteRtlController.dispose();
@@ -151,6 +99,22 @@ class StoreSettingController extends GetxController {
     whatsappController.dispose();
     telegramController.dispose();
     super.onClose();
+  }
+
+  Future<void> pickInvoiceLogo() async {
+    final path = await FileHelper.pickImage();
+
+    if (path != null) {
+      selectedInvoiceLogo.value = path;
+    }
+  }
+
+  Future<void> pickStoreImage() async {
+    final path = await FileHelper.pickImage();
+
+    if (path != null) {
+      selectedStoreImage.value = path;
+    }
   }
 
   // ==================== Get Store Info ====================
@@ -280,6 +244,116 @@ class StoreSettingController extends GetxController {
     timezoneController.text = d.settings?.timezone ?? '';
   }
 
+
+  Future<void> updateStoreInfo() async {
+    isUpLoading.value = true;
+    errorMessage.value = '';
+
+    try {
+      final request = UpdateStoreRequest(
+        storeName: storeNameController.text.trim(),
+        storeEmail: storeEmailController.text.trim(),
+        ownerName: ownerNameController.text.trim(),
+        storeSlug: slugController.text.trim(),
+        ownerMobile: mobileController.text.trim(),
+        storeAddress: addressController.text.trim(),
+        storeCity: cityController.text.trim(),
+        storeState: stateController.text.trim(),
+        storeZipcode: zipcodeController.text.trim(),
+        storeCountry: countryController.text.trim(),
+        customStoreUrl: storeUrlController.text.trim(),
+
+        invoiceLogo: selectedInvoiceLogo.value,
+        storeImage: selectedStoreImage.value,
+
+        socialMedia: [
+          if (facebookController.text.trim().isNotEmpty)
+            SocialMediaRequest(
+              platform: 'facebook',
+              link: facebookController.text.trim(),
+              icon: 'fab fa-facebook-f',
+            ),
+
+          if (twitterController.text.trim().isNotEmpty)
+            SocialMediaRequest(
+              platform: 'twitter',
+              link: twitterController.text.trim(),
+              icon: 'fab fa-x-twitter',
+            ),
+
+          if (instagramController.text.trim().isNotEmpty)
+            SocialMediaRequest(
+              platform: 'instagram',
+              link: instagramController.text.trim(),
+              icon: 'fab fa-instagram',
+            ),
+
+          if (whatsappController.text.trim().isNotEmpty)
+            SocialMediaRequest(
+              platform: 'whatsapp',
+              link: whatsappController.text.trim(),
+              icon: 'fab fa-whatsapp',
+            ),
+
+          if (telegramController.text.trim().isNotEmpty)
+            SocialMediaRequest(
+              platform: 'telegram',
+              link: telegramController.text.trim(),
+              icon: 'fab fa-telegram',
+            ),
+        ],
+      );
+
+      final response =
+      await settingRepository.updateStoreInfoData(
+        request: request,
+      );
+
+      response.fold(
+        onSuccess: (data) async {
+          print("Update Store Response =====> $data");
+
+          if (data['status'] == 1 ||
+              data['status'] == '1' ||
+              data['status'] == 'success') {
+
+            commonToast(
+              data['message'] ??
+                  'Store information updated successfully',
+            );
+
+            selectedInvoiceLogo.value = '';
+            selectedStoreImage.value = '';
+
+            await getStoreInfoData();
+          } else {
+            commonToast(
+              data['message'] ??
+                  'Failed to update store information',
+            );
+          }
+        },
+        onFailure: (reason, message, errors) {
+          errorMessage.value =
+              message ?? 'Error updating store information';
+
+          commonToast(
+            message ?? 'Error updating store information',
+          );
+        },
+      );
+    } catch (e) {
+      errorMessage.value = e.toString();
+
+      print("Update Store Error =====> $e");
+
+      commonToast(
+        'Error updating store information',
+      );
+    } finally {
+      isUpLoading.value = false;
+    }
+  }
 
   Future<void> changeStoreLanguage({
     required Map<String, dynamic> data,

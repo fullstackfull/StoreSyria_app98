@@ -176,7 +176,7 @@ Widget customerWidget({
                   child: _statItem(
                     icon: Icons.payments_rounded,
                     label: 'total_spend'.tr,
-                    value: '\$$totalSpend',
+                    value: totalSpend,
                     color: const Color(0xFF00B894),
                     textColor: textColor,
                     subTextColor: subTextColor,
@@ -187,7 +187,7 @@ Widget customerWidget({
                   child: _statItem(
                     icon: Icons.trending_up_rounded,
                     label: 'aov'.tr,
-                    value: '\$$aov',
+                    value: aov,
                     color: const Color(0xFFFF9F43),
                     textColor: textColor,
                     subTextColor: subTextColor,

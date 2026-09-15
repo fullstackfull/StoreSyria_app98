@@ -119,7 +119,7 @@ const Map<String, String> en = {
   'pending': 'Pending',
   'delivered': 'Delivered',
   'cancelled': 'Cancelled',
-  'returned': 'Returned',
+  'return': 'Return',
   'confirmed': 'Confirmed',
   'picked_up': 'Picked Up',
   'shipped': 'Shipped',
@@ -524,4 +524,5 @@ const Map<String, String> en = {
   "default_address_inactive": "Not set as default",
   "delivery_instructions": "Delivery Instructions",
   "enter_delivery_instructions": "Enter delivery notes (optional)",
+  "deleted_customer" : "Deleted Customer"
 };

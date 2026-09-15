@@ -367,7 +367,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         verticalSpace(8.h),
         GestureDetector(
           onTap: () async {
-            final path = await addProductController.pickFile();
+            final path = await addProductController.pickImage();
             if (path != null) addProductController.coverImage.value = path;
           },
           child: Container(

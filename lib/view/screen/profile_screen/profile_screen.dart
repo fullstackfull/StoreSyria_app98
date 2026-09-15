@@ -21,7 +21,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/core/controller/profile_controller/profile_controller.dart';
 
-
 class ProfileScreen extends StatefulWidget {
   final String name;
   final String profileImg;
@@ -56,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
       child: Scaffold(
         backgroundColor: isDark ? AppColor.cBackGround : AppColor.cLight,
-        appBar: simpleAppBar(title: "My Account", label: '', onNewLabelTap: () {  }),
+        appBar: simpleAppBar(title: "My Account", label: null, onNewLabelTap: () {  }),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -107,36 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
-                                  builder: (context) {
-                                    return Container(
-                                      height: 250,
-                                      decoration: BoxDecoration(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          cameraIconWidget(
-                                            image: DefaultImages.cameraIcn,
-                                            title: "Camera",
-                                            function: () {
-                                              profileController.pickImage(ImageSource.camera);
-                                            },
-                                          ),
-                                          horizontalSpace(35),
-                                          cameraIconWidget(
-                                            image: DefaultImages.galleryIcn,
-                                            title: "Gallery",
-                                            function: () {
-                                              profileController.pickImage(ImageSource.gallery);
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
+                                profileController.pickImage();
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -146,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     horizontalSpace(6),
                                     Text(
                                       "Change Profile Photo",
-                                      style: pRegular10,
+                                      style: pRegular14,
                                     ),
                                   ],
                                 ),

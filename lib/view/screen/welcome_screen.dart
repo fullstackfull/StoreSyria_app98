@@ -30,7 +30,6 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
 
     _animationController.forward();
 
-    // ✅ التحقق من OnBoarding والتنقل المناسب
     _checkAndNavigate();
 
     Future.delayed(const Duration(milliseconds: 500), () {

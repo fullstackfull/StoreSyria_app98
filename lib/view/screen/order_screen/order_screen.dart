@@ -221,11 +221,6 @@ class _OrderScreenState extends State<OrderScreen>
                   final isLoadingOrders =
                       orderController.isLoadingOrders.value;
 
-                  final isLoadingTopOrders =
-                      orderController
-                          .isLoadingTopOrders
-                          .value;
-
                   final hasTopOrders =
                       topOrders.isNotEmpty;
 
@@ -382,7 +377,9 @@ class _OrderScreenState extends State<OrderScreen>
                                         ),
                                       ),
                                       maskedName:
-                                      (order.userName?.isEmpty ?? true)
+                                      order.userName == 'Deleted Customer'
+                                          ? 'deleted_customer'.tr
+                                          : (order.userName?.isEmpty ?? true)
                                           ? 'no_name'.tr
                                           : order.userName ?? '',
                                       price: '${order.finalPrice}',
@@ -404,10 +401,6 @@ class _OrderScreenState extends State<OrderScreen>
                             ],
                           );
                         }
-
-                        // ==================================================
-                        // ALL ORDERS HEADER
-                        // ==================================================
 
                         final headerIndex = hasTopOrders ? 1 : 0;
 
@@ -479,14 +472,9 @@ class _OrderScreenState extends State<OrderScreen>
                           );
                         }
 
-                        // حماية إضافية من RangeError
                         if (listIndex < 0 || listIndex >= orderList.length) {
                           return const SizedBox.shrink();
                         }
-
-                        // ==================================================
-                        // ORDER ITEM
-                        // ==================================================
 
                         final order = orderList[listIndex];
 
@@ -544,7 +532,12 @@ class _OrderScreenState extends State<OrderScreen>
                               date: order.orderDate!,
                               formatType: formatForDateTime(FormatType.dateTime2),
                             ),
-                            maskedName: (order.userName?.isEmpty ?? true) ? 'no_name'.tr : order.userName ?? "",
+                            maskedName:
+                            order.userName == 'Deleted Customer'
+                                ? 'deleted_customer'.tr
+                                : (order.userName?.isEmpty ?? true)
+                                ? 'no_name'.tr
+                                : order.userName ?? '',
                             price: "${order.finalPrice}",
                             secondaryBadgeLabel:order.paymentStatus,
                             primaryBadgeLabel: order.deliveredStatus,

@@ -16,9 +16,11 @@ import '../new_widgets/app_snackbar.dart';
 
 Future<void> commonToast(String msg) async {
  AppSnackBar.success(
-  title: msg,
+  title: "success",
+  message: msg,
  );
 }
+
 //Future<void> commonToast(
 //   String msg, {
 //   AppSnackBarType type = AppSnackBarType.success,

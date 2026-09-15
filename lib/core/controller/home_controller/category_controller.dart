@@ -1,10 +1,7 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
-import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/config/repository/search_repository.dart';
 import 'package:store_go_app/config/repository/category_repository.dart';
@@ -13,31 +10,42 @@ import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/core/model/categories_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-
+import '../../../utils/pick_file.dart';
 import 'cahe.dart';
 import 'store_change_service.dart';
 
-class CategoryController extends GetxController implements StoreAware {
+class CategoryController extends GetxController
+    implements StoreAware {
   static const String _cacheCategoryKey = 'home_category_list_data';
 
   TextEditingController categoryName = TextEditingController();
+
   TextEditingController searchController = TextEditingController();
+
   RxString filePath = ''.obs;
   RxString imagePath = ''.obs;
   RxString iconPath = ''.obs;
+
   RxString trending = '1'.obs;
+
   RxBool isTrending = true.obs;
   RxBool isActive = true.obs;
+
   RxInt currantPage = 1.obs;
+
   RxBool isScroll = true.obs;
   RxBool isLoading = false.obs;
+
   RxString errorMessage = ''.obs;
 
   CategoryRepository categoryRepository = CategoryRepository();
+
   SearchRepository searchRepository = SearchRepository();
 
   CategoriesModel? categoriesModel;
+
   CategoryData? categoryData;
+
   RxList<CategoryData> categoriesList = <CategoryData>[].obs;
 
   @override
@@ -50,15 +58,25 @@ class CategoryController extends GetxController implements StoreAware {
   }
 
   void _loadCachedCategories() {
-    final cached = CacheService.get<Map<String, dynamic>>(_cacheCategoryKey);
+    final cached =
+    CacheService.get<Map<String, dynamic>>(
+      _cacheCategoryKey,
+    );
+
     if (cached == null) return;
+
     try {
-      categoriesModel = CategoriesModel.fromJson(cached);
-      categoriesList.value = categoriesModel?.data?.data ?? [];
+      categoriesModel =
+          CategoriesModel.fromJson(cached);
+
+      categoriesList.value =
+          categoriesModel?.data?.data ?? [];
+
       categoriesList.refresh();
 
       isScroll.value =
-          categoriesModel?.data?.currentPage != categoriesModel?.data?.lastPage;
+          categoriesModel?.data?.currentPage !=
+              categoriesModel?.data?.lastPage;
     } catch (_) {
       categoriesModel = null;
     }
@@ -67,6 +85,7 @@ class CategoryController extends GetxController implements StoreAware {
   @override
   void resetForStoreChange() {
     categoriesModel = null;
+
     categoriesList.clear();
     categoriesList.refresh();
 
@@ -78,22 +97,13 @@ class CategoryController extends GetxController implements StoreAware {
     getCategoryData(1);
   }
 
-  pickFile() async {
-    FilePickerResult? result = await FilePicker.pickFiles();
-    if (result != null) {
-      File file = File(result.files.single.path!);
-      print(file.path);
-      return file.path;
-    } else {
-      commonToast('File not pick');
-    }
+  Future<String?> pickFile() async {
+    return await FileHelper.pickImage();
   }
 
-  getCategoryData(page) async {
-    // منع التكرار إذا كان يحمل بالفعل أو وصل للنهاية
+  Future<void> getCategoryData(int page) async {
     if (isLoading.value) return;
 
-    // التحقق من وجود صفحات أخرى قبل البدء (إلا إذا كانت الصفحة الأولى)
     if (page > 1 && categoriesModel != null) {
       if (page > (categoriesModel?.data?.lastPage ?? 1)) {
         isScroll.value = false;
@@ -102,74 +112,109 @@ class CategoryController extends GetxController implements StoreAware {
     }
 
     isLoading.value = true;
+
     Loader.showLoader();
 
     final response = await categoryRepository.getCategoriesData(page);
 
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
 
-    if (Get.isDialogOpen ?? false) Get.back();
     isLoading.value = false;
 
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          categoriesModel = CategoriesModel.fromJson(data);
+          categoriesModel =
+              CategoriesModel.fromJson(data);
 
-          // إضافة البيانات الجديدة للقائمة الحالية (للـ Pagination)
-          final newItems = categoriesModel?.data?.data ?? [];
+          final newItems =
+              categoriesModel?.data?.data ?? [];
 
           if (page == 1) {
             categoriesList.value = newItems;
 
-            // نخزن آخر رد ناجح لصفحة ١ محلياً عشان يستخدم كبيانات
-            // فورية بالمرة الجاية اللي المستخدم يفتح فيها الشاشة.
-            CacheService.save(_cacheCategoryKey, data);
+            CacheService.save(
+              _cacheCategoryKey,
+              data,
+            );
           } else {
             categoriesList.addAll(newItems);
           }
 
           categoriesList.refresh();
 
-          // منطق إيقاف السكرول عند الوصول لآخر صفحة
-          if (categoriesModel?.data?.currentPage == categoriesModel?.data?.lastPage) {
+          if (categoriesModel?.data?.currentPage ==
+              categoriesModel?.data?.lastPage) {
             isScroll.value = false;
           } else {
             isScroll.value = true;
           }
         } else {
-          commonToast(data['data']['message'] ?? '');
+          commonToast(
+            data['data']['message'] ?? '',
+          );
         }
       },
-      onFailure: (reason, message, errors) {
+      onFailure: (reason,
+          message,
+          errors,) {
         errorMessage.value = message;
+
         commonToast(message);
       },
     );
   }
 
-  searchCategoryData({required String name}) async {
+  Future<void> searchCategoryData({
+    required String name,
+  }) async {
     Loader.showLoader();
-    final response = await searchRepository.getSearchData(type: "category", name: name);
+
+    final response =
+    await searchRepository.getSearchData(
+      type: "category",
+      name: name,
+    );
+
     response.fold(
       onSuccess: (data) {
         categoriesList.clear();
+
         if (data['status'] == 1) {
-          for (int i = 0; i < data['data'].length; i++) {
-            categoriesList.add(CategoryData.fromJson(data['data'][i]));
+          for (
+          int i = 0;
+          i < data['data'].length;
+          i++
+          ) {
+            categoriesList.add(
+              CategoryData.fromJson(
+                data['data'][i],
+              ),
+            );
           }
+
           categoriesList.refresh();
         } else {
-          commonToast(data['data']['message'] ?? '');
+          commonToast(
+            data['data']['message'] ?? '',
+          );
         }
       },
-      onFailure: (reason, message, errors) {
+      onFailure: (reason,
+          message,
+          errors,) {
         commonToast(message);
       },
     );
-    if (Get.isDialogOpen ?? false) Get.back();
+
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
   }
 
-  addCategoriesData({
+  Future<void> addCategoriesData({
     required bool isUpdate,
     required int categoryId,
     required String name,
@@ -179,47 +224,80 @@ class CategoryController extends GetxController implements StoreAware {
     required String? iconImagePath,
   }) async {
     Loader.showLoader();
-    String url = isUpdate ? API.baseUrl + API.updateCategoryUrl : API.baseUrl + API.addCategoryUrl;
-    var data = isUpdate
+
+    final String url = isUpdate
+        ? API.baseUrl + API.updateCategoryUrl
+        : API.baseUrl + API.addCategoryUrl;
+
+    final Map<String, String> data = isUpdate
         ? {
       'store_id': Prefs.getStoreID(),
       'category_id': categoryId.toString(),
       'name': name,
       'trending': trending,
-      'status': status
+      'status': status,
     }
         : {
       'store_id': Prefs.getStoreID(),
       'name': name,
       'trending': trending,
-      'status': status
+      'status': status,
     };
-    var request = http.MultipartRequest('POST', Uri.parse(url));
+
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse(url),
+    );
+
     request.fields.addAll(data);
-    if (imagePath != null && imagePath.isNotEmpty) {
-      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+
+    if (imagePath != null &&
+        imagePath.isNotEmpty) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'image',
+          imagePath,
+        ),
+      );
     }
-    if (iconImagePath != null && iconImagePath.isNotEmpty) {
-      request.files.add(await http.MultipartFile.fromPath('icon_image', iconImagePath));
+
+    if (iconImagePath != null &&
+        iconImagePath.isNotEmpty) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'icon_image',
+          iconImagePath,
+        ),
+      );
     }
+
     request.headers.addAll({
-      "Authorization": 'Bearer ${Prefs.getToken()}',
-      HttpHeaders.cacheControlHeader: "no-cache",
+      "Authorization":
+      'Bearer ${Prefs.getToken()}',
+      'Cache-Control': 'no-cache',
     });
-    http.StreamedResponse response = await request.send();
+
+    final http.StreamedResponse response =
+    await request.send();
+
     Loader.hideLoader();
+
     if (response.statusCode == 200) {
-      //var responseData = await response.stream.bytesToString();
-      //var decodedData = jsonDecode(responseData);
-      //commonToast(decodedData['data']['message']);
-      getCategoryData(currantPage.value);
+      getCategoryData(
+        currantPage.value,
+      );
     } else {
-      commonToast(response.reasonPhrase ?? '');
+      commonToast(
+        response.reasonPhrase ?? '',
+      );
     }
   }
 
-  deleteCategoriesData({required int categoryId}) async {
-    final response = await categoryRepository.deleteCategoriesData(
+  Future<void> deleteCategoriesData({
+    required int categoryId,
+  }) async {
+    final response =
+    await categoryRepository.deleteCategoriesData(
       categoryId: categoryId,
     );
 
@@ -231,7 +309,8 @@ class CategoryController extends GetxController implements StoreAware {
       onSuccess: (data) {
         if (data['status'] == 1) {
           categoriesList.removeWhere(
-                (category) => category.id == categoryId,
+                (category) =>
+            category.id == categoryId,
           );
 
           if (categoriesModel?.data?.total != null &&
@@ -240,14 +319,30 @@ class CategoryController extends GetxController implements StoreAware {
                 categoriesModel!.data!.total! - 1;
           }
 
-          commonToast(data['data']['message'] ?? '');
+          commonToast(
+            data['data']['message'] ?? '',
+          );
         } else {
-          commonToast(data['data']['message'] ?? 'Delete failed');
+          commonToast(
+            data['data']['message'] ??
+                'Delete failed',
+          );
         }
       },
-      onFailure: (reason, message, errors) {
+      onFailure: (reason,
+          message,
+          errors,) {
         commonToast(message);
       },
     );
   }
+
+  @override
+  void onClose() {
+    categoryName.dispose();
+    searchController.dispose();
+
+    super.onClose();
+  }
 }
+

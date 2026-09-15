@@ -1,4 +1,6 @@
+import '../../core/model/store_info_model.dart';
 import '../../network_dio/network_dio.dart';
+import '../../network_dio/result.dart';
 import '../../utils/base_api.dart';
 import '../../utils/prefer.dart';
 
@@ -9,11 +11,30 @@ class StoreSettingRepository {
     var response = await NetworkHttps.getRequest(endPoint);
     return response;
   }
+
   getStoreInfoData() async {
     String endPoint = API.getStoreInfoUrl + API.storeIdUrl + Prefs.getStoreID();
     var response = await NetworkHttps.getRequest(endPoint);
     return response;
   }
+
+  Future<Result<Map<String, dynamic>>> updateStoreInfoData({
+    required UpdateStoreRequest request,
+  }) async {
+    final String endPoint =
+        API.updateStoreInfoUrl +
+            API.storeIdUrl +
+            Prefs.getStoreID();
+
+    return await NetworkHttps.multipartRequest(
+      endPoint: endPoint,
+      fields: request.fields,
+      files: request.files,
+      multiFiles: const [],
+      multiFileKey: '',
+    );
+  }
+
 
   getLanguagesData() async {
     String endPoint = API.languagesUrl + API.storeIdUrl + Prefs.getStoreID();

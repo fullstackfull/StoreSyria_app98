@@ -68,8 +68,9 @@ class Validator {
     RegExp regex = RegExp(pattern);
 
     if (value.trim().isEmpty) {
-      return 'name_required'
-          .trParams({'name': string});
+      return 'name_required'.trParams({
+        'name': string,
+      });
     } else if (!regex.hasMatch(value)) {
       return 'enter_valid_name'.tr;
     }
@@ -89,5 +90,38 @@ class Validator {
     }
 
     return null;
+  }
+
+  /// Required URL
+  static String? validateUrl(String value) {
+    final url = value.trim();
+
+    if (url.isEmpty) {
+      return 'field_required'.tr;
+    }
+
+    final uri = Uri.tryParse(url);
+
+    if (uri == null ||
+        !uri.hasScheme ||
+        (uri.scheme != 'http' && uri.scheme != 'https') ||
+        uri.host.isEmpty) {
+      return 'invalid_url'.tr;
+    }
+
+    return null;
+  }
+
+  /// Optional URL
+  /// Empty value is allowed.
+  /// If a value exists, it must be a valid HTTP/HTTPS URL.
+  static String? validateOptionalUrl(String value) {
+    final url = value.trim();
+
+    if (url.isEmpty) {
+      return null;
+    }
+
+    return validateUrl(value);
   }
 }

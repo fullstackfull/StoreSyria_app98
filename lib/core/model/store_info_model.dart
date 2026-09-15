@@ -328,3 +328,94 @@ class StoreSettings {
     };
   }
 }
+
+class UpdateStoreRequest {
+  final String storeName;
+  final String storeEmail;
+  final String ownerName;
+  final String storeSlug;
+  final String ownerMobile;
+  final String storeAddress;
+  final String storeCity;
+  final String storeState;
+  final String storeZipcode;
+  final String storeCountry;
+  final String customStoreUrl;
+
+  /// Local file paths
+  final String invoiceLogo;
+  final String storeImage;
+
+  final List<SocialMediaRequest> socialMedia;
+
+  UpdateStoreRequest({
+    required this.storeName,
+    required this.storeEmail,
+    required this.ownerName,
+    required this.storeSlug,
+    required this.ownerMobile,
+    required this.storeAddress,
+    required this.storeCity,
+    required this.storeState,
+    required this.storeZipcode,
+    required this.storeCountry,
+    required this.customStoreUrl,
+    this.invoiceLogo = '',
+    this.storeImage = '',
+    this.socialMedia = const [],
+  });
+
+  /// Normal form-data fields
+  Map<String, String> get fields {
+    final data = <String, String>{
+      'store_name': storeName,
+      'store_email': storeEmail,
+      'owner_name': ownerName,
+      'store_slug': storeSlug,
+      'owner_mobile': ownerMobile,
+      'store_address': storeAddress,
+      'store_city': storeCity,
+      'store_state': storeState,
+      'store_zipcode': storeZipcode,
+      'store_country': storeCountry,
+      'custom_store_url': customStoreUrl,
+    };
+
+    for (int i = 0; i < socialMedia.length; i++) {
+      final social = socialMedia[i];
+
+      data['social_media[$i][platform]'] = social.platform;
+      data['social_media[$i][link]'] = social.link;
+      data['social_media[$i][icon]'] = social.icon;
+    }
+
+    return data;
+  }
+
+  /// Multipart files
+  Map<String, String> get files {
+    final data = <String, String>{};
+
+    if (invoiceLogo.isNotEmpty) {
+      data['invoice_logo'] = invoiceLogo;
+    }
+
+    if (storeImage.isNotEmpty) {
+      data['store_image'] = storeImage;
+    }
+
+    return data;
+  }
+}
+
+class SocialMediaRequest {
+  final String platform;
+  final String link;
+  final String icon;
+
+  SocialMediaRequest({
+    required this.platform,
+    required this.link,
+    required this.icon,
+  });
+}
