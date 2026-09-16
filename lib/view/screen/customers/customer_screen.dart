@@ -6,7 +6,7 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/controller/customers/customer_controller.dart';
-import '../../new_widgets/customer_bottom_sheet.dart';
+import 'customer_bottom_sheet.dart';
 import '../../new_widgets/customer_widget.dart';
 import '../../widget/app_dialog.dart';
 import '../../widget/common_appbar_widget.dart';

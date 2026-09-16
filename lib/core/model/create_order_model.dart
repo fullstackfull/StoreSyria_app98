@@ -3,8 +3,8 @@
 class CreateOrderRequest {
   final int customerId;
   final List<OrderProductRequest> products;
-  final String paymentType; // "cod" ...
-  final String paymentStatus; // "Unpaid" ...
+  final String paymentType;
+  final String paymentStatus;
   final double deliveryPrice;
   final double taxPrice;
   final String firstName;
@@ -12,9 +12,8 @@ class CreateOrderRequest {
   final String email;
   final String telephone;
   final String address;
-  final String city;
-  final String state;
-  final String country;
+  final String stateId;
+  final int countryId;
   final String postcode;
   final String? additionalNote;
 
@@ -30,9 +29,8 @@ class CreateOrderRequest {
     required this.email,
     required this.telephone,
     required this.address,
-    required this.city,
-    required this.state,
-    required this.country,
+    required this.stateId,
+    required this.countryId,
     required this.postcode,
     this.additionalNote,
   });
@@ -49,9 +47,8 @@ class CreateOrderRequest {
     'email': email,
     'telephone': telephone,
     'address': address,
-    'city': city,
-    'state': state,
-    'country': country,
+    'state_id': stateId,
+    'country_id': countryId,
     'postcode': postcode,
     'additional_note': additionalNote,
   };

@@ -5,12 +5,10 @@ import 'package:get/get.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
-import '../../core/controller/customers/customer_controller.dart';
-import 'app_snackbar.dart';
+import '../../../core/controller/customers/customer_controller.dart';
 
 class AddNewCustomerWidget extends StatefulWidget {
   final bool isUpdate;
-
   final String? customerId;
   final String? firstName;
   final String? lastName;
@@ -220,9 +218,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     );
   }
 
-  Widget _buildStatusSwitch()
-
-  {
+  Widget _buildStatusSwitch() {
     final bool isActive = _isActive;
 
     return Container(

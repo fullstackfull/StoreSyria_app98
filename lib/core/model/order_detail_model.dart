@@ -49,12 +49,14 @@ class OrderDetailData {
   CouponInfo? couponInfo;
   List<Tax>? tax;
   String? subTotal;
+  String? taxPrice;
   String? finalPrice;
   List<Note>? notes;
 
   OrderDetailData(
       {this.id,
       this.isGuest,
+      this.taxPrice,
       this.orderId,
       this.deliveryDate,
       this.orderRewardPoint,
@@ -133,6 +135,7 @@ class OrderDetailData {
         tax!.add(Tax.fromJson(v));
       });
     }
+    taxPrice = json ['tax_price'] ?? "";
     subTotal = json['sub_total'];
     finalPrice = json['final_price'];
     if (json['notes'] != null && json['notes'] is List) {
@@ -178,6 +181,7 @@ class OrderDetailData {
       data['tax'] = this.tax!.map((v) => v.toJson()).toList();
     }
     data['sub_total'] = this.subTotal;
+    data['tax_price'] = this.taxPrice;
     data['final_price'] = this.finalPrice;
     if (this.notes != null) {
       data['notes'] = this.notes!.map((v) => v.toJson()).toList();

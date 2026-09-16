@@ -525,5 +525,8 @@ const Map<String, String> en = {
   "delivery_instructions": "Delivery Instructions",
   "enter_delivery_instructions": "Enter delivery notes (optional)",
   "deleted_customer" : "Deleted Customer",
-  "city" : "City"
+  "city" : "City",
+  'select_city': 'Select city',
+  'loading': 'Loading...',
+  'back': 'Back',
 };

@@ -283,7 +283,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 verticalSpace(15.h),
                 grandTotalsWidget(
                   grandTotal: detail.finalPrice!,
-                  extTax: orderController.extTax.value.toString(),
+                  extTax: detail.taxPrice ?? "",
                   applyCoupon: detail.couponInfo?.discountAmount ?? "0",
                   shippingPrice: detail.deliveredCharge!,
                   subTotal: detail.subTotal!,

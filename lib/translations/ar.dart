@@ -525,5 +525,8 @@ const Map<String, String> ar = {
   "delivery_instructions": "تعليمات التوصيل",
   "enter_delivery_instructions": "أدخل ملاحظات للتوصيل (اختياري)",
   "deleted_customer" : "عميل محذوف",
-  "city" : "المدينة"
+  "city" : "المدينة",
+  'select_city': 'اختر المدينة',
+  'loading': 'جاري التحميل...',
+  'back': 'رجوع',
 };

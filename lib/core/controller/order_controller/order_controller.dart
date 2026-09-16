@@ -6,12 +6,28 @@ import 'package:store_go_app/config/repository/order_repository.dart';
 import 'package:store_go_app/config/repository/search_repository.dart';
 import 'package:store_go_app/core/model/order_detail_model.dart';
 import 'package:store_go_app/core/model/order_model.dart';
+import 'package:store_go_app/core/model/product_model.dart';
+import 'package:store_go_app/core/model/payment_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
 import '../../model/create_order_model.dart';
 import '../../model/customer_model.dart';
 import '../../model/top_order_model.dart';
+
+/// سطر منتج واحد داخل الطلب (التاب التاني)
+/// كل سطر عنده دروب داون لاختيار المنتج + حقل كمية + حقل سعر قابلين للتعديل اليدوي
+class OrderLineItem {
+  final Rx<ProductData?> product = Rx<ProductData?>(null);
+  final TextEditingController qtyController =
+  TextEditingController(text: '1');
+  final TextEditingController priceController = TextEditingController();
+
+  void dispose() {
+    qtyController.dispose();
+    priceController.dispose();
+  }
+}
 
 class OrderController extends GetxController implements StoreAware {
   static const String _cacheOrderKey = 'home_order_list_data';
@@ -45,122 +61,148 @@ class OrderController extends GetxController implements StoreAware {
   RxBool isLoadingTopOrders = false.obs;
 
   // ==================== Loading States ====================
-
-// Orders
   RxBool isLoadingOrders = false.obs;
   RxBool isLoadingMoreOrders = false.obs;
-
-// Search
   RxBool isSearchingOrders = false.obs;
-
-// Order Details
   RxBool isLoadingOrderDetails = false.obs;
-
-// Update Order Status
   RxBool isUpdatingOrderStatus = false.obs;
-
-// Create Note
   RxBool isCreatingOrderNote = false.obs;
-
-// Delete Note
   RxBool isDeletingOrderNote = false.obs;
-
-// Delete Order
   RxBool isDeletingOrder = false.obs;
-
   RxBool isCreatingOrder = false.obs;
 
-// الزبون المختار
+  // ==================== Create Order (Tab 1) : الزبون + الدفع ====================
   Rx<CustomerData?> selectedCustomer = Rx<CustomerData?>(null);
 
-// المنتجات المختارة مع الكمية: key = productId
-  RxMap<int, int> selectedProductsQty = <int, int>{}.obs;
+  /// العنصر المختار من دروب داون طرق الدفع (يستخدم فقط لعرض/تحديد القيمة بالدروب داون)
+  Rx<PaymentMethod?> selectedPaymentMethod = Rx<PaymentMethod?>(null);
 
-// بيانات الشحن/العنوان
+  /// القيمة الحقيقية يلي بترسل للباك اند (مثلاً "cod")
+  RxString paymentType = ''.obs;
+
+  /// نص حالة الدفع يلي بيترسل كـ String: "Paid" أو "Unpaid"
+  RxString paymentStatus = 'Unpaid'.obs;
+
+  final TextEditingController noteController = TextEditingController();
+
+  // ==================== Create Order (Tab 2) : المنتجات ====================
+  RxList<OrderLineItem> orderLineItems = <OrderLineItem>[].obs;
+
+  void addLineItem() {
+    orderLineItems.add(OrderLineItem());
+  }
+
+  void removeLineItem(int index) {
+    if (index < 0 || index >= orderLineItems.length) return;
+    if (orderLineItems.length == 1) return; // خلي سطر واحد ع الأقل
+    orderLineItems[index].dispose();
+    orderLineItems.removeAt(index);
+  }
+
+  /// عند اختيار منتج من الدروب داون: بيعبي السعر تلقائياً من موديل المنتج،
+  /// والمستخدم قادر يعدله بعدين لأنه TextField عادي.
+  void onProductSelected(int index, ProductData product) {
+    if (index < 0 || index >= orderLineItems.length) return;
+    final line = orderLineItems[index];
+    line.product.value = product;
+    line.priceController.text = product.price?.toString() ?? '0';
+    if (line.qtyController.text.trim().isEmpty) {
+      line.qtyController.text = '1';
+    }
+  }
+
+  double get productsTotal {
+    double total = 0;
+    for (final line in orderLineItems) {
+      final qty = int.tryParse(line.qtyController.text.trim()) ?? 0;
+      final price = double.tryParse(line.priceController.text.trim()) ?? 0;
+      total += qty * price;
+    }
+    return total;
+  }
+
+  // ==================== Create Order (Tab 3) : الشحن ====================
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
+
+  /// المدينة المختارة من الدروب داون (API)
+  RxString selectedCityId = ''.obs;
+  RxString selectedCityName = ''.obs;
+
+  final TextEditingController deliveryPriceController = TextEditingController();
+  final TextEditingController taxPriceController = TextEditingController();
+
+  // حقول موجودة بالباك اند لكن ما ظاهرة بالتصميم الجديد -> بترسل فاضية
   final TextEditingController cityController = TextEditingController();
   final TextEditingController stateController = TextEditingController();
   final TextEditingController countryController = TextEditingController();
   final TextEditingController postcodeController = TextEditingController();
-  final TextEditingController noteController = TextEditingController();
 
-  RxDouble deliveryPrice = 0.0.obs;
-  RxDouble taxPrice = 0.0.obs;
-  RxString paymentType = 'cod'.obs;
-  RxString paymentStatus = 'Unpaid'.obs;
-
-  void toggleProductSelection(int productId, {int quantity = 1}) {
-    if (selectedProductsQty.containsKey(productId)) {
-      selectedProductsQty.remove(productId);
-    } else {
-      selectedProductsQty[productId] = quantity;
+  /// يعبي بيانات الشحن تلقائياً من الزبون المختار (بس المستخدم قادر يعدلها)
+  void fillShippingFromCustomer(CustomerData customer) {
+    final fullName = customer.customerInfo?.name?.trim() ?? '';
+    if (fullName.isNotEmpty) {
+      final parts = fullName.split(RegExp(r'\s+'));
+      firstNameController.text = parts.first;
+      lastNameController.text =
+      parts.length > 1 ? parts.sublist(1).join(' ') : '';
     }
-  }
 
-  void updateProductQty(int productId, int quantity) {
-    if (quantity <= 0) {
-      selectedProductsQty.remove(productId);
-    } else {
-      selectedProductsQty[productId] = quantity;
-    }
-  }
+    emailController.text = customer.email ?? '';
+    phoneController.text = customer.customerInfo?.mobile ?? '';
 
-  double calculateProductsTotal(List<dynamic> productList) {
-    // productList: لائحة المنتجات من ProductController (فيها id, price)
-    double total = 0;
-    selectedProductsQty.forEach((productId, qty) {
-      final product = productList.firstWhereOrNull(
-            (p) => p.id == productId,
-      );
-      if (product != null) {
-        total += (double.tryParse(product.price.toString()) ?? 0) * qty;
-      }
-    });
-    return total;
+    // ملاحظة: موديل CustomerData ما فيه address/city، فبتبقى فاضية
+    // والمستخدم لازم يدخلهم يدوياً بالخطوة الثالثة.
+    addressController.clear();
+    selectedCityId.value = '';
+    selectedCityName.value = '';
   }
 
   void resetCreateOrderForm() {
     selectedCustomer.value = null;
-    selectedProductsQty.clear();
+    selectedPaymentMethod.value = null;
+    paymentType.value = '';
+    paymentStatus.value = 'Unpaid';
+    noteController.clear();
+
+    for (final line in orderLineItems) {
+      line.dispose();
+    }
+    orderLineItems.clear();
+    orderLineItems.add(OrderLineItem());
+
+    firstNameController.clear();
+    lastNameController.clear();
+    emailController.clear();
+    phoneController.clear();
     addressController.clear();
+    selectedCityId.value = '';
+    selectedCityName.value = '';
+    deliveryPriceController.clear();
+    taxPriceController.clear();
+
     cityController.clear();
     stateController.clear();
     countryController.clear();
     postcodeController.clear();
-    noteController.clear();
-    deliveryPrice.value = 0;
-    taxPrice.value = 0;
-    paymentType.value = 'cod';
-    paymentStatus.value = 'Unpaid';
   }
 
   Future<bool> createOrderData({
     required List<dynamic> productList,
   }) async {
-    if (selectedCustomer.value == null) {
-      commonToast('please_select_customer'.tr);
-      return false;
-    }
-
-    if (selectedProductsQty.isEmpty) {
-      commonToast('please_select_products'.tr);
-      return false;
-    }
-
     isCreatingOrder.value = true;
 
     bool success = false;
 
     try {
-      final products = selectedProductsQty.entries.map((entry) {
-        final product = productList.firstWhereOrNull(
-              (p) => p.id == entry.key,
-        );
-
+      final products = orderLineItems.map((line) {
         return OrderProductRequest(
-          productId: entry.key,
-          quantity: entry.value,
-          price: double.tryParse(product?.price?.toString() ?? '0') ?? 0,
+          productId: line.product.value?.id ?? 0,
+          quantity: int.tryParse(line.qtyController.text.trim()) ?? 1,
+          price: double.tryParse(line.priceController.text.trim()) ?? 0,
         );
       }).toList();
 
@@ -169,16 +211,15 @@ class OrderController extends GetxController implements StoreAware {
         products: products,
         paymentType: paymentType.value,
         paymentStatus: paymentStatus.value,
-        deliveryPrice: deliveryPrice.value,
-        taxPrice: taxPrice.value,
-        firstName:  't',
-        lastName: 't',
-        email: selectedCustomer.value!.email ?? '',
-        telephone: '245676879',
+        deliveryPrice: double.tryParse(deliveryPriceController.text.trim()) ?? 0,
+        taxPrice: double.tryParse(taxPriceController.text.trim()) ?? 0,
+        firstName: firstNameController.text.trim(),
+        lastName: lastNameController.text.trim(),
+        email: emailController.text.trim(),
+        telephone: phoneController.text.trim(),
         address: addressController.text.trim(),
-        city: cityController.text.trim(),
-        state: stateController.text.trim(),
-        country: countryController.text.trim(),
+        stateId: selectedCityId.value,
+        countryId: 215,
         postcode: postcodeController.text.trim(),
         additionalNote: noteController.text.trim(),
       );
@@ -188,9 +229,7 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           success = true;
-
           commonToast('order_created_successfully'.tr);
-
           resetCreateOrderForm();
           resetPagination();
         },
@@ -211,39 +250,31 @@ class OrderController extends GetxController implements StoreAware {
 
     return success;
   }
+
   // ==================== Lifecycle ====================
 
   @override
   void onInit() {
     super.onInit();
-
     resetPagination();
-
     _loadCachedOrders();
-
     getTopOrderData();
+
+    if (orderLineItems.isEmpty) {
+      orderLineItems.add(OrderLineItem());
+    }
 
     StoreChangeService.instance.register(() => this);
   }
 
   void _loadCachedOrders() {
-    final cached =
-    CacheService.get<Map<String, dynamic>>(_cacheOrderKey);
-
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheOrderKey);
     if (cached == null) return;
-
     try {
       orderModel = OrderModel.fromJson(cached);
-
       orderList.value = orderModel?.data?.data ?? [];
-
-      currantPage.value =
-          orderModel?.data?.currentPage ?? 1;
-
-      isScroll.value =
-          currantPage.value <
-              (orderModel?.data?.lastPage ?? 1);
-
+      currantPage.value = orderModel?.data?.currentPage ?? 1;
+      isScroll.value = currantPage.value < (orderModel?.data?.lastPage ?? 1);
       isDataAvailable.value = orderList.isNotEmpty;
     } catch (_) {
       orderModel = null;
@@ -253,21 +284,31 @@ class OrderController extends GetxController implements StoreAware {
   @override
   void resetForStoreChange() {
     orderModel = null;
-
     orderList.clear();
-
     CacheService.clear(_cacheOrderKey);
-
     selectedStatus.value = 0;
-
     resetPagination();
-
     getOrderData(1);
   }
 
   @override
   void onClose() {
     searchController.dispose();
+    noteController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
+    deliveryPriceController.dispose();
+    taxPriceController.dispose();
+    cityController.dispose();
+    stateController.dispose();
+    countryController.dispose();
+    postcodeController.dispose();
+    for (final line in orderLineItems) {
+      line.dispose();
+    }
     super.onClose();
   }
 
@@ -283,25 +324,18 @@ class OrderController extends GetxController implements StoreAware {
     switch (status) {
       case 0:
         return 'pending'.tr;
-
       case 1:
         return 'delivered'.tr;
-
       case 2:
         return 'cancel'.tr;
-
       case 3:
         return 'return'.tr;
-
       case 4:
         return 'confirmed'.tr;
-
       case 5:
         return 'picked_up'.tr;
-
       case 6:
         return 'shipped'.tr;
-
       default:
         return 'unknown'.tr;
     }
@@ -316,16 +350,12 @@ class OrderController extends GetxController implements StoreAware {
         DateTime? toDate,
       }) async {
     if (page > 1 && isLoadingMoreOrders.value) return;
-
     if (page > 1 && !isScroll.value) return;
-
     if (isSearching.value && page > 1) return;
 
     if (page == 1) {
       isLoadingOrders.value = true;
-
       orderList.clear();
-
       currantPage.value = 1;
     } else {
       isLoadingMoreOrders.value = true;
@@ -342,11 +372,8 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           orderModel = OrderModel.fromJson(data);
-
           final newItems = orderModel?.data?.data ?? [];
-
-          final existingIds =
-          orderList.map((e) => e.id).toSet();
+          final existingIds = orderList.map((e) => e.id).toSet();
 
           for (final item in newItems) {
             if (!existingIds.contains(item.id)) {
@@ -355,42 +382,25 @@ class OrderController extends GetxController implements StoreAware {
           }
 
           currantPage.value = page;
-
-          final lastPage =
-              orderModel?.data?.lastPage ?? page;
-
+          final lastPage = orderModel?.data?.lastPage ?? page;
           isScroll.value = page < lastPage;
-
-          isDataAvailable.value =
-              orderList.isNotEmpty;
+          isDataAvailable.value = orderList.isNotEmpty;
 
           if (page == 1 &&
               deliveredStatus == null &&
               fromDate == null &&
               toDate == null) {
-            CacheService.save(
-              _cacheOrderKey,
-              data,
-            );
+            CacheService.save(_cacheOrderKey, data);
           }
         },
         onFailure: (reason, message, validationErrors) {
-          errorMessage.value =
-              'failed_to_load_orders'.tr;
-
-          commonToast(
-            'failed_to_load_orders'.tr,
-          );
+          errorMessage.value = 'failed_to_load_orders'.tr;
+          commonToast('failed_to_load_orders'.tr);
         },
       );
     } catch (e) {
-      errorMessage.value =
-          'unexpected_error_loading_orders'.tr;
-
-      commonToast(
-        'unexpected_error_loading_orders'.tr,
-      );
-
+      errorMessage.value = 'unexpected_error_loading_orders'.tr;
+      commonToast('unexpected_error_loading_orders'.tr);
       print('❌ getOrderData Error: $e');
     } finally {
       if (page == 1) {
@@ -403,18 +413,13 @@ class OrderController extends GetxController implements StoreAware {
 
   Future<void> getTopOrderData() async {
     isLoadingTopOrders.value = true;
-
     try {
       final result = await orderRepository.getTopOrdersData();
-
       result.fold(
         onSuccess: (data) {
           final model = TopOrderModel.fromJson(data);
-
           final items = model.data?.topOrders ?? [];
-
-          topOrderList.value =
-              items.map((e) => e.toOrderData()).toList();
+          topOrderList.value = items.map((e) => e.toOrderData()).toList();
         },
         onFailure: (reason, message, validationErrors) {
           commonToast('failed_to_load_orders'.tr);
@@ -428,19 +433,13 @@ class OrderController extends GetxController implements StoreAware {
     }
   }
 
-
   // ==================== Search ====================
 
-  Future<void> searchOrderData({
-    required String name,
-  }) async {
+  Future<void> searchOrderData({required String name}) async {
     if (name.trim().isEmpty) {
       isSearching.value = false;
-
       resetPagination();
-
       await getOrderData(1);
-
       return;
     }
 
@@ -448,8 +447,7 @@ class OrderController extends GetxController implements StoreAware {
     isSearchingOrders.value = true;
 
     try {
-      final result =
-      await searchRepository.getSearchData(
+      final result = await searchRepository.getSearchData(
         type: "order",
         name: name,
       );
@@ -457,16 +455,12 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           orderList.clear();
-
           final responseData = data['data'];
 
           if (responseData is List) {
             for (final item in responseData) {
-              orderList.add(
-                OrderData.fromJson(item),
-              );
+              orderList.add(OrderData.fromJson(item));
             }
-
             isDataAvailable.value = true;
           } else {
             isDataAvailable.value = false;
@@ -475,87 +469,52 @@ class OrderController extends GetxController implements StoreAware {
           isScroll.value = false;
         },
         onFailure: (reason, message, validationErrors) {
-          errorMessage.value =
-              'failed_to_search_orders'.tr;
-
-          commonToast(
-            'failed_to_search_orders'.tr,
-          );
+          errorMessage.value = 'failed_to_search_orders'.tr;
+          commonToast('failed_to_search_orders'.tr);
         },
       );
     } catch (e) {
-      errorMessage.value =
-          'failed_to_search_orders'.tr;
-
-      commonToast(
-        'failed_to_search_orders'.tr,
-      );
-
+      errorMessage.value = 'failed_to_search_orders'.tr;
+      commonToast('failed_to_search_orders'.tr);
       print('❌ searchOrderData Error: $e');
     } finally {
       isSearchingOrders.value = false;
     }
   }
-// ==================== Order Details ====================
 
-  Future<void> getOrderDetailData(
-      String orderId,
-      ) async {
+  // ==================== Order Details ====================
+
+  Future<void> getOrderDetailData(String orderId) async {
     isLoadingOrderDetails.value = true;
-
     orderDetail = null;
-
     extTax.value = 0.0;
-
     errorMessage.value = '';
 
     try {
-      final result =
-      await orderDetailRepository
-          .getOrderDetailData(orderId);
+      final result = await orderDetailRepository.getOrderDetailData(orderId);
 
       result.fold(
         onSuccess: (data) {
-          orderDetailModel =
-              OrderDetailModel.fromJson(data);
+          orderDetailModel = OrderDetailModel.fromJson(data);
+          orderDetail = orderDetailModel?.data;
 
-          orderDetail =
-              orderDetailModel?.data;
-
-          if (orderDetail?.tax != null) {
-            double totalTax = 0;
-
-            for (final tax in orderDetail!.tax!) {
-              totalTax +=
-                  double.tryParse(
-                    tax.amountstring ?? "0",
-                  ) ??
-                      0;
-            }
-
-            extTax.value = totalTax;
-          }
+          // if (orderDetail?.tax != null) {
+          //   double totalTax = 0;
+          //   for (final tax in orderDetail!.tax!) {
+          //     totalTax += double.tryParse(tax.amountstring ?? "0") ?? 0;
+          //   }
+          //   extTax.value = totalTax;
+          // }
         },
         onFailure: (reason, message, validationErrors) {
-          errorMessage.value =
-              'failed_to_load_order_details'.tr;
-
-          commonToast(
-            'failed_to_load_order_details'.tr,
-          );
+          errorMessage.value = 'failed_to_load_order_details'.tr;
+          commonToast('failed_to_load_order_details'.tr);
         },
       );
     } catch (e) {
-      errorMessage.value =
-          'failed_to_process_order_details'.tr;
-
-      commonToast(
-        'failed_to_process_order_details'.tr,
-      );
-
-      print(
-        '❌ getOrderDetailData Error: $e',
-      );
+      errorMessage.value = 'failed_to_process_order_details'.tr;
+      commonToast('failed_to_process_order_details'.tr);
+      print('❌ getOrderDetailData Error: $e');
     } finally {
       isLoadingOrderDetails.value = false;
     }
@@ -570,7 +529,6 @@ class OrderController extends GetxController implements StoreAware {
     String? note,
   }) async {
     isUpdatingOrderStatus.value = true;
-
     final cleanId = productOrderId.startsWith('#')
         ? productOrderId.substring(1)
         : productOrderId;
@@ -591,38 +549,22 @@ class OrderController extends GetxController implements StoreAware {
 
           if (orderDetail != null) {
             orderDetail!.orderStatus = deliveredStatus;
-
-            orderDetail!.orderStatusText =
-                _getStatusText(deliveredStatus);
+            orderDetail!.orderStatusText = _getStatusText(deliveredStatus);
           }
 
           resetPagination();
-
           await getOrderData(1);
-
-          commonToast(
-            'order_status_updated_successfully'.tr,
-          );
+          commonToast('order_status_updated_successfully'.tr);
         },
-
         onFailure: (reason, message, validationErrors) async {
           success = false;
-
-          commonToast(
-            'failed_to_update_order_status'.tr,
-          );
+          commonToast('failed_to_update_order_status'.tr);
         },
       );
     } catch (e) {
       success = false;
-
-      commonToast(
-        'failed_to_update_order_status'.tr,
-      );
-
-      print(
-        '❌ updateOrderStatus Error: $e',
-      );
+      commonToast('failed_to_update_order_status'.tr);
+      print('❌ updateOrderStatus Error: $e');
     } finally {
       isUpdatingOrderStatus.value = false;
     }
@@ -638,12 +580,10 @@ class OrderController extends GetxController implements StoreAware {
     required String note,
   }) async {
     isCreatingOrderNote.value = true;
-
     bool success = false;
 
     try {
-      final result =
-      await orderRepository.createNote(
+      final result = await orderRepository.createNote(
         orderId: orderId,
         noteType: noteType,
         note: note,
@@ -652,29 +592,17 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           success = true;
-
-          commonToast(
-            'order_note_added_successfully'.tr,
-          );
+          commonToast('order_note_added_successfully'.tr);
         },
         onFailure: (reason, message, validationErrors) {
           success = false;
-
-          commonToast(
-            'failed_to_add_order_note'.tr,
-          );
+          commonToast('failed_to_add_order_note'.tr);
         },
       );
     } catch (e) {
       success = false;
-
-      commonToast(
-        'failed_to_add_order_note'.tr,
-      );
-
-      print(
-        '❌ createOrderNote Error: $e',
-      );
+      commonToast('failed_to_add_order_note'.tr);
+      print('❌ createOrderNote Error: $e');
     } finally {
       isCreatingOrderNote.value = false;
     }
@@ -689,12 +617,10 @@ class OrderController extends GetxController implements StoreAware {
     required int noteId,
   }) async {
     isDeletingOrderNote.value = true;
-
     bool success = false;
 
     try {
-      final result =
-      await orderRepository.deleteNote(
+      final result = await orderRepository.deleteNote(
         orderId: orderId,
         noteId: noteId,
       );
@@ -702,79 +628,47 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           success = true;
-
-          commonToast(
-            'order_note_deleted_successfully'.tr,
-          );
+          commonToast('order_note_deleted_successfully'.tr);
         },
         onFailure: (reason, message, validationErrors) {
           success = false;
-
-          commonToast(
-            'failed_to_delete_order_note'.tr,
-          );
+          commonToast('failed_to_delete_order_note'.tr);
         },
       );
     } catch (e) {
       success = false;
-
-      commonToast(
-        'failed_to_delete_order_note'.tr,
-      );
-
-      print(
-        '❌ deleteOrderNote Error: $e',
-      );
+      commonToast('failed_to_delete_order_note'.tr);
+      print('❌ deleteOrderNote Error: $e');
     } finally {
       isDeletingOrderNote.value = false;
     }
 
     return success;
   }
-// ==================== Delete Order ====================
 
-  Future<void> deleteOrderData({
-    required String orderId,
-  }) async {
+  // ==================== Delete Order ====================
+
+  Future<void> deleteOrderData({required String orderId}) async {
     isDeletingOrder.value = true;
 
     try {
-      final result =
-      await orderRepository
-          .deleteOrderData(orderId);
+      final result = await orderRepository.deleteOrderData(orderId);
 
       result.fold(
         onSuccess: (data) {
-          commonToast(
-            'order_deleted_successfully'.tr,
-          );
-
-          orderList.removeWhere(
-                (element) =>
-            element.id.toString() == orderId,
-          );
-
-          isDataAvailable.value =
-              orderList.isNotEmpty;
-
+          commonToast('order_deleted_successfully'.tr);
+          orderList.removeWhere((element) => element.id.toString() == orderId);
+          isDataAvailable.value = orderList.isNotEmpty;
           resetPagination();
-
           getOrderData(1);
         },
         onFailure: (reason, message, validationErrors) {
-          commonToast(
-            'failed_to_delete_order'.tr,
-          );
+          commonToast('failed_to_delete_order'.tr);
         },
       );
     } catch (e) {
-      commonToast(
-        'failed_to_delete_order'.tr,
-      );
-
-      print(
-        '❌ deleteOrderData Error: $e',
-      );
+      commonToast('failed_to_delete_order'.tr);
+      print('❌ deleteOrderData Error: $e');
     } finally {
       isDeletingOrder.value = false;
     }

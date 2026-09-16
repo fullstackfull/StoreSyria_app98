@@ -1,15 +1,16 @@
 // view/screen/order_screen/create_order_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/core/controller/setting_controller/payment_setting_controller/payment_setting_controller.dart';
+import 'package:store_go_app/core/model/payment_model.dart';
+import 'package:store_go_app/core/model/product_model.dart';
+import 'package:store_go_app/utils/validator.dart';
+import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
-import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
 import 'package:store_go_app/core/controller/product_controller/product_controller.dart';
-
 import '../../../core/controller/customers/customer_controller.dart';
+import '../../../core/model/customer_model.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
@@ -21,19 +22,43 @@ class CreateOrderScreen extends StatefulWidget {
 class _CreateOrderScreenState extends State<CreateOrderScreen> {
   final OrderController orderController = Get.find<OrderController>();
   final CustomerController customerController = Get.put(CustomerController());
+  final PaymentSettingController paymentSettingsController =
+  Get.put(PaymentSettingController());
   final ProductController productController = Get.find<ProductController>();
 
   int? initialCustomerId;
   bool isFromCustomerDetails = false;
+
+  int currentStep = 0;
+
+  final GlobalKey<FormState> _formKeyStep1 = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyStep2 = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyStep3 = GlobalKey<FormState>();
+
+  // ==================== نفس ألوان صفحة إضافة الزبون ====================
+  static const Color navyBlue = Color(0xFF172C4E);
+  static const Color darkBg = Color(0xFF101820);
+  static const Color darkCard = Color(0xFF182331);
+  static const Color lightBg = Color(0xFFF7F8FA);
+  static const Color secondaryText = Color(0xFF687386);
+  static const Color lightBorder = Color(0xFFE2E6EC);
+
+  bool get isDark => Theme.of(context).brightness == Brightness.dark;
+  Color get backgroundColor => isDark ? darkBg : lightBg;
+  Color get cardColor => isDark ? darkCard : Colors.white;
+  Color get textColor => isDark ? Colors.white : navyBlue;
+  Color get secondaryTextColor => isDark ? Colors.white70 : secondaryText;
+  Color get borderColor => isDark ? Colors.white12 : lightBorder;
 
   @override
   void initState() {
     super.initState();
 
     orderController.resetCreateOrderForm();
+    paymentSettingsController.getPaymentTypesData();
+    customerController.getStatesData();
 
     final args = Get.arguments;
-
     if (args is Map) {
       initialCustomerId = args['customerId'] as int?;
       isFromCustomerDetails = args['isFromCustomerDetails'] ?? false;
@@ -43,20 +68,84 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.cLight,
+      resizeToAvoidBottomInset: false,
+      backgroundColor: backgroundColor,
       appBar: simpleAppBar(
         title: "new_order".tr,
         isBold: true,
         label: null,
         onNewLabelTap: () {},
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-        child: ListView(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildStepIndicator(),
+              const SizedBox(height: 16),
+              Expanded(
+                child: IndexedStack(
+                  index: currentStep,
+                  children: [
+                    _buildStepOne(),
+                    _buildStepTwo(),
+                    _buildStepThree(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildFooterButtons(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==================== Step Indicator (نفس ستايل صفحة الزبون) ====================
+
+  Widget _buildStepIndicator() {
+    return Row(
+      children: [
+        Expanded(child: _stepBar(active: currentStep >= 0)),
+        const SizedBox(width: 6),
+        Expanded(child: _stepBar(active: currentStep >= 1)),
+        const SizedBox(width: 6),
+        Expanded(child: _stepBar(active: currentStep >= 2)),
+        const SizedBox(width: 10),
+        Text(
+          '${currentStep + 1}/3',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: secondaryTextColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _stepBar({required bool active}) {
+    return Container(
+      height: 4,
+      decoration: BoxDecoration(
+        color: active ? navyBlue : borderColor,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
+  }
+
+  // ==================== STEP 1: Customer + Payment ====================
+
+  Widget _buildStepOne() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Form(
+        key: _formKeyStep1,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ================= CUSTOMER =================
-            _sectionTitle("select_customer".tr),
-            verticalSpace(8.h),
             Obx(() {
               final customers = customerController.customerList;
 
@@ -65,150 +154,216 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 final customer = customers.firstWhereOrNull(
                       (c) => c.id == initialCustomerId,
                 );
-
                 if (customer != null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (mounted &&
                         orderController.selectedCustomer.value == null) {
                       orderController.selectedCustomer.value = customer;
+                      orderController.fillShippingFromCustomer(customer);
                     }
                   });
                 }
               }
 
-              return Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 12.w,
-                  vertical: 4.h,
-                ),
-                decoration: _boxDecoration(),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<int>(
-                    isExpanded: true,
-
-                    hint: Text("choose_customer".tr),
-
-                    value: orderController.selectedCustomer.value?.id,
-
-                    items: customers.map((c) {
-                      return DropdownMenuItem<int>(
-                        value: c.id,
-                        child: Text(
-                          c.customerInfo?.name ?? '',
-                        ),
-                      );
-                    }).toList(),
-
-                    onChanged: (id) {
-                      final customer = customers.firstWhereOrNull(
-                            (c) => c.id == id,
-                      );
-
-                      orderController.selectedCustomer.value = customer;
-                    },
-                  ),
-                ),
+              return _buildDropdownField<int>(
+                label: 'select_customer'.tr,
+                hint: 'choose_customer'.tr,
+                icon: Icons.person_outline,
+                value: orderController.selectedCustomer.value?.id,
+                items: customers.map((c) {
+                  return DropdownMenuItem<int>(
+                    value: c.id,
+                    child: Text(
+                      c.customerInfo?.name ?? '',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (id) {
+                  final customer =
+                  customers.firstWhereOrNull((c) => c.id == id);
+                  orderController.selectedCustomer.value = customer;
+                  if (customer != null) {
+                    orderController.fillShippingFromCustomer(customer);
+                  }
+                },
+                validator: (value) {
+                  if (value == null) return 'please_select_customer'.tr;
+                  return null;
+                },
               );
             }),
 
-            verticalSpace(20.h),
-
-            // ================= PRODUCTS =================
-            _sectionTitle("select_products".tr),
-            verticalSpace(8.h),
+            const SizedBox(height: 16),
 
             Obx(() {
-              final products = productController.productList;
+              final methods = paymentSettingsController.paymentMethods;
 
-              if (products.isEmpty) {
-                return Center(child: Text("no_products_found".tr));
-              }
+              return _buildDropdownField<PaymentMethod>(
+                label: 'payment_method'.tr,
+                hint: 'choose_payment_method'.tr,
+                icon: Icons.payments_outlined,
+                value: orderController.selectedPaymentMethod.value,
+                items: methods.map((m) {
+                  return DropdownMenuItem<PaymentMethod>(
+                    value: m,
+                    child: Text(m.name, overflow: TextOverflow.ellipsis),
+                  );
+                }).toList(),
+                onChanged: (method) {
+                  orderController.selectedPaymentMethod.value = method;
+                  orderController.paymentType.value = method?.key ?? '';
+                },
+                validator: (value) {
+                  if (value == null) return 'please_select_payment_method'.tr;
+                  return null;
+                },
+              );
+            }),
+
+            const SizedBox(height: 16),
+
+            Obx(() {
+              return _buildDropdownField<String>(
+                label: 'payment_status'.tr,
+                hint: 'payment_status'.tr,
+                icon: Icons.receipt_long_outlined,
+                value: orderController.paymentStatus.value,
+                items: [
+                  DropdownMenuItem(value: 'Paid', child: Text('paid'.tr)),
+                  DropdownMenuItem(value: 'Unpaid', child: Text('unpaid'.tr)),
+                ],
+                onChanged: (val) {
+                  if (val != null) orderController.paymentStatus.value = val;
+                },
+              );
+            }),
+
+            const SizedBox(height: 16),
+
+            AppTextField(
+              title: 'additional_note'.tr,
+              hint: 'enter_additional_note'.tr,
+              controller: orderController.noteController,
+              icon: Icons.note_alt_outlined,
+              maxLines: 3,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
+            ),
+
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================== STEP 2: Products ====================
+
+  Widget _buildStepTwo() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Form(
+        key: _formKeyStep2,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('select_products'.tr,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                )),
+            const SizedBox(height: 10),
+
+            Obx(() {
+              final availableProducts = productController.productList;
 
               return Column(
-                children: products.map((product) {
-                  final qty =
-                      orderController.selectedProductsQty[product.id] ?? 0;
-                  final isSelected = qty > 0;
+                children:
+                orderController.orderLineItems.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final line = entry.value;
 
                   return Container(
-                    margin: EdgeInsets.only(bottom: 10.h),
-                    padding: EdgeInsets.all(12.w),
-                    decoration: _boxDecoration(
-                      highlighted: isSelected,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: line.product.value != null
+                            ? navyBlue
+                            : borderColor,
+                      ),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10.r),
-                          child: Image.network(
-                            product.coverImageUrl ?? '',
-                            width: 45.w,
-                            height: 45.w,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
-                                Container(width: 45.w, height: 45.w, color: AppColor.cLight),
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                product.name ?? '',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                '${product.price}',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: AppColor.cFont,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (!isSelected)
-                          IconButton(
-                            icon: Icon(Icons.add_circle,
-                                color: AppColor.themeNavyBlueColor),
-                            onPressed: () {
-                              orderController.toggleProductSelection(
-                                product.id ?? 0,
-                              );
-                            },
-                          )
-                        else
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove_circle_outline),
-                                onPressed: () {
-                                  orderController.updateProductQty(
-                                    product.id ?? 0,
-                                    qty - 1,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildDropdownField<ProductData>(
+                                label: 'product'.tr,
+                                hint: 'select_product'.tr,
+                                icon: Icons.inventory_2_outlined,
+                                value: line.product.value,
+                                items: availableProducts.map((p) {
+                                  return DropdownMenuItem<ProductData>(
+                                    value: p,
+                                    child: Text(
+                                      p.name ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   );
+                                }).toList(),
+                                onChanged: (p) {
+                                  if (p != null) {
+                                    orderController.onProductSelected(index, p);
+                                  }
                                 },
+                                validator: (value) {
+                                  if (value == null) return 'please_select_product'.tr;
+                                  return null;
+                                },
+                                dense: true,
                               ),
-                              Text('$qty',
-                                  style: TextStyle(fontSize: 14.sp)),
+                            ),
+                            if (orderController.orderLineItems.length > 1)
                               IconButton(
-                                icon: Icon(Icons.add_circle,
-                                    color: AppColor.themeNavyBlueColor),
-                                onPressed: () {
-                                  orderController.updateProductQty(
-                                    product.id ?? 0,
-                                    qty + 1,
-                                  );
-                                },
+                                icon: const Icon(Icons.delete_outline,
+                                    color: Colors.redAccent),
+                                onPressed: () =>
+                                    orderController.removeLineItem(index),
                               ),
-                            ],
-                          ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppTextField(
+                                title: 'quantity'.tr,
+                                hint: '1',
+                                controller: line.qtyController,
+                                icon: Icons.confirmation_number_outlined,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: AppTextField(
+                                title: 'price'.tr,
+                                hint: '0.00',
+                                controller: line.priceController,
+                                icon: Icons.attach_money_outlined,
+                                keyboardType:
+                                const TextInputType.numberWithOptions(
+                                    decimal: true),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   );
@@ -216,114 +371,458 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               );
             }),
 
-            verticalSpace(20.h),
+            const SizedBox(height: 4),
 
-            // ================= SHIPPING INFO =================
-            _sectionTitle("shipping_info".tr),
-            verticalSpace(8.h),
-            _buildTextField(orderController.addressController, "address".tr),
-            verticalSpace(10.h),
-            _buildTextField(orderController.cityController, "city".tr),
-            verticalSpace(10.h),
-            _buildTextField(orderController.stateController, "state".tr),
-            verticalSpace(10.h),
-            _buildTextField(orderController.countryController, "country".tr),
-            verticalSpace(10.h),
-            _buildTextField(orderController.postcodeController, "postcode".tr),
-            verticalSpace(10.h),
-            _buildTextField(orderController.noteController, "additional_note".tr,
-                maxLines: 3),
-
-            verticalSpace(24.h),
-
-            // ================= SUBMIT =================
-            Obx(() {
-              return SizedBox(
-                width: double.infinity,
-                height: 50.h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColor.themeNavyBlueColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                  ),
-                  onPressed: orderController.isCreatingOrder.value
-                      ? null
-                      : () async {
-                    final success = await orderController.createOrderData(
-                      productList: productController.productList,
-                    );
-
-                    if (success) {
-                      Get.back();
-                      if (isFromCustomerDetails) {
-                        await customerController.getCustomerOrdersData(
-                          customerId: initialCustomerId.toString(),
-                          page: 1,
-                        );
-                      } else {
-                        await orderController.getOrderData(1);
-                      }
-                    }
-                  },
-                  child: orderController.isCreatingOrder.value
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                    "create_order".tr,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
+            InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () => orderController.addLineItem(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  border: Border.all(color: navyBlue.withOpacity(0.4)),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-              );
-            }),
-
-            verticalSpace(30.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.add_circle_outline, color: navyBlue),
+                    const SizedBox(width: 6),
+                    Text(
+                      "add_another_product".tr,
+                      style: const TextStyle(
+                        color: navyBlue,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
     );
   }
 
-  Widget _sectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-    );
-  }
+  // ==================== STEP 3: Shipping ====================
 
-  BoxDecoration _boxDecoration({bool highlighted = false}) {
-    return BoxDecoration(
-      color: AppColor.cWhite,
-      border: Border.all(
-        color: highlighted
-            ? AppColor.themeNavyBlueColor
-            : AppColor.themeNavyBlueColor.withOpacity(0.3),
-      ),
-      borderRadius: BorderRadius.circular(14.r),
-    );
-  }
+  Widget _buildStepThree() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Form(
+        key: _formKeyStep3,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppTextField(
+              title: 'first_name'.tr,
+              hint: 'enter_first_name'.tr,
+              controller: orderController.firstNameController,
+              icon: Icons.person_outline,
+              validator: (value) =>
+                  Validator.validateRequired(value.toString()),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 16),
+            AppTextField(
+              title: 'last_name'.tr,
+              hint: 'enter_last_name'.tr,
+              controller: orderController.lastNameController,
+              icon: Icons.person_outline,
+              validator: (value) =>
+                  Validator.validateRequired(value.toString()),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 16),
+            AppTextField(
+              title: 'email'.tr,
+              hint: 'enter_email'.tr,
+              controller: orderController.emailController,
+              icon: Icons.email_outlined,
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) => Validator.validateEmail(value ?? ''),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 16),
+            AppTextField(
+              title: 'phone_number'.tr,
+              hint: 'enter_phone_number'.tr,
+              controller: orderController.phoneController,
+              icon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+              validator: (value) => Validator.validateMobile(value ?? ''),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 16),
 
-  Widget _buildTextField(TextEditingController controller, String hint,
-      {int maxLines = 1}) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: AppColor.cWhite,
-        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14.r),
-          borderSide: BorderSide(
-            color: AppColor.themeNavyBlueColor.withOpacity(0.3),
-          ),
+            Obx(() {
+              final cities = customerController.customerCityModel?.cities ?? [];
+
+              return _buildDropdownField<String>(
+                label: 'city'.tr,
+                hint: 'select_city'.tr,
+                icon: Icons.location_city_outlined,
+                value: orderController.selectedCityId.value.isEmpty
+                    ? null
+                    : orderController.selectedCityId.value,
+                items: cities.map<DropdownMenuItem<String>>((CityModel city) {
+                  return DropdownMenuItem<String>(
+                    value: city.id.toString(),
+                    child: Text(city.name),
+                  );
+                }).toList(),
+                onChanged: (id) {
+                  if (id == null) return;
+                  final city = cities.firstWhereOrNull(
+                        (CityModel c) => c.id.toString() == id,
+                  );
+                  orderController.selectedCityId.value = id;
+                  orderController.selectedCityName.value = city?.name ?? '';
+                },
+                validator: (value) {
+                  if (value == null) return 'select_city'.tr;
+                  return null;
+                },
+              );
+            }),
+
+            const SizedBox(height: 16),
+            AppTextField(
+              title: 'address'.tr,
+              hint: 'enter_address'.tr,
+              controller: orderController.addressController,
+              icon: Icons.location_on_outlined,
+              validator: (value) =>
+                  Validator.validateRequired(value.toString()),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppTextField(
+                    title: 'delivery_price'.tr,
+                    hint: '0.00',
+                    controller: orderController.deliveryPriceController,
+                    icon: Icons.local_shipping_outlined,
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true),
+                    validator: (value) => Validator.validateRequired(value.toString())
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: AppTextField(
+                    title: 'tax_price'.tr,
+                    hint: '0.00',
+                    controller: orderController.taxPriceController,
+                    icon: Icons.price_change_outlined,
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true),
+                    validator: (value) => Validator.validateRequired(value.toString())
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _buildFinalTotalCard(),
+          ],
         ),
       ),
+    );
+  }
+
+
+  Widget _buildFooterButtons() {
+    return Obx(() {
+      final isLoading = orderController.isCreatingOrder.value;
+      final isLast = currentStep == 2;
+
+      return Row(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: 48,
+              child: OutlinedButton(
+                onPressed: isLoading ? null : _goBack,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: borderColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: currentStep == 0
+                    ? Text(
+                  'cancel'.tr,
+                  style: TextStyle(
+                    color: secondaryTextColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                )
+                    : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.arrow_back_rounded,
+                        size: 18, color: secondaryTextColor),
+                    const SizedBox(width: 6),
+                    Text(
+                      'back'.tr,
+                      style: TextStyle(
+                        color: secondaryTextColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 2,
+            child: SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : (isLast ? _submitOrder : _goNext),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: navyBlue,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: isLoading
+                    ? const SizedBox(
+                  width: 21,
+                  height: 21,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+                    : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      isLast ? 'create_order'.tr : 'next'.tr,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      isLast
+                          ? Icons.check_circle_outline
+                          : Icons.arrow_forward_rounded,
+                      size: 19,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  // ==================== Navigation Logic ====================
+
+  void _goNext() {
+    FocusScope.of(context).unfocus();
+
+    if (currentStep == 0) {
+      if (!(_formKeyStep1.currentState?.validate() ?? false)) return;
+    } else if (currentStep == 1) {
+      if (!(_formKeyStep2.currentState?.validate() ?? false)) return;
+    }
+
+    setState(() => currentStep++);
+  }
+
+  void _goBack() {
+    FocusScope.of(context).unfocus();
+
+    if (currentStep == 0) {
+      Get.back();
+    } else {
+      setState(() => currentStep--);
+    }
+  }
+
+  Future<void> _submitOrder() async {
+    FocusScope.of(context).unfocus();
+
+    if (!(_formKeyStep3.currentState?.validate() ?? false)) return;
+
+    final success = await orderController.createOrderData(
+      productList: productController.productList,
+    );
+
+    if (success) {
+      if (isFromCustomerDetails) {
+        customerController.getCustomerOrdersData(
+          customerId: initialCustomerId.toString(),
+          page: 1,
+        );
+      } else {
+        orderController.getOrderData(1);
+      }
+
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
+  Widget _buildFinalTotalCard() {
+    return Obx(() {
+      final listenables = <Listenable>[
+        orderController.deliveryPriceController,
+        orderController.taxPriceController,
+        ...orderController.orderLineItems
+            .expand((line) => [line.qtyController, line.priceController]),
+      ];
+
+      return AnimatedBuilder(
+        animation: Listenable.merge(listenables),
+        builder: (context, _) {
+          final subtotal = orderController.productsTotal;
+          final delivery =
+              double.tryParse(orderController.deliveryPriceController.text.trim()) ?? 0;
+          final tax =
+              double.tryParse(orderController.taxPriceController.text.trim()) ?? 0;
+          final finalTotal = subtotal + delivery + tax;
+
+          return Container(
+            margin: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: navyBlue.withOpacity(0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _summaryRow('subtotal'.tr, subtotal),
+                _summaryRow('delivery_price'.tr, delivery),
+                _summaryRow('tax_price'.tr, tax),
+                const Divider(height: 20),
+                _summaryRow('total'.tr, finalTotal, bold: true),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  Widget _summaryRow(String label, double value, {bool bold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: bold ? 14 : 13,
+              fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+              color: bold ? textColor : secondaryTextColor,
+            ),
+          ),
+          Text(
+            value.toStringAsFixed(2),
+            style: TextStyle(
+              fontSize: bold ? 15 : 13,
+              fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+              color: bold ? navyBlue : textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildDropdownField<T>({
+    required String label,
+    required String hint,
+    required IconData icon,
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required void Function(T?) onChanged,
+    String? Function(T?)? validator,
+    bool dense = false,
+  }) {
+    return DropdownButtonFormField<T>(
+      value: value,
+      isExpanded: true,
+      icon: Icon(
+        Icons.keyboard_arrow_down_rounded,
+        color: secondaryTextColor,
+        size: 24,
+      ),
+      dropdownColor: cardColor,
+      borderRadius: BorderRadius.circular(16),
+      menuMaxHeight: 280,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Container(
+          margin: const EdgeInsets.all(9),
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: navyBlue, size: 20),
+        ),
+        filled: true,
+        fillColor: cardColor,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: dense ? 8 : 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: navyBlue, width: 1.4),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor.withOpacity(0.6)),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        errorStyle: const TextStyle(color: Colors.red),
+        labelStyle: TextStyle(color: secondaryTextColor, fontSize: 13),
+        hintStyle: TextStyle(
+          color: secondaryTextColor.withOpacity(0.75),
+          fontSize: 13,
+        ),
+      ),
+      items: items,
+      onChanged: onChanged,
+      validator: validator,
     );
   }
 }
