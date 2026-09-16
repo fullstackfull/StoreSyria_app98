@@ -524,5 +524,6 @@ const Map<String, String> en = {
   "default_address_inactive": "Not set as default",
   "delivery_instructions": "Delivery Instructions",
   "enter_delivery_instructions": "Enter delivery notes (optional)",
-  "deleted_customer" : "Deleted Customer"
+  "deleted_customer" : "Deleted Customer",
+  "city" : "City"
 };

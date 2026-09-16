@@ -124,7 +124,6 @@ class _SnackBarContent extends StatelessWidget {
           child: IntrinsicHeight(
             child: Row(
               children: [
-// خط الحالة
                 Container(
                   width: 4,
                   color: color,
@@ -132,7 +131,6 @@ class _SnackBarContent extends StatelessWidget {
 
                 const SizedBox(width: 14),
 
-// الأيقونة
                 Container(
                   width: 38,
                   height: 38,
@@ -149,7 +147,6 @@ class _SnackBarContent extends StatelessWidget {
 
                 const SizedBox(width: 12),
 
-// النص
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -187,7 +184,6 @@ class _SnackBarContent extends StatelessWidget {
                   ),
                 ),
 
-// زر الإغلاق
                 IconButton(
                   onPressed: Get.closeCurrentSnackbar,
                   splashRadius: 20,

@@ -524,5 +524,6 @@ const Map<String, String> ar = {
   "default_address_inactive": "غير مُفعّل كعنوان افتراضي",
   "delivery_instructions": "تعليمات التوصيل",
   "enter_delivery_instructions": "أدخل ملاحظات للتوصيل (اختياري)",
-  "deleted_customer" : "عميل محذوف"
+  "deleted_customer" : "عميل محذوف",
+  "city" : "المدينة"
 };

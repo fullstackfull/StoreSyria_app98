@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
 import '../../core/controller/customers/customer_controller.dart';
@@ -35,15 +37,12 @@ class AddNewCustomerWidget extends StatefulWidget {
 
 class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     with SingleTickerProviderStateMixin {
-  // Separate form keys so validation only fires for the visible step.
+  dynamic _selectedState;
   final GlobalKey<FormState> _formKeyStep1 = GlobalKey<FormState>();
   final GlobalKey<FormState> _formKeyStep2 = GlobalKey<FormState>();
-
   late CustomerController customerController;
-
   final PageController _pageController = PageController();
-  int _currentStep = 0; // 0 = customer info, 1 = address info
-
+  int _currentStep = 0;
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _emailController;
@@ -52,16 +51,13 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
   late TextEditingController _addressController;
   late TextEditingController _countryIdController;
   late TextEditingController _stateIdController;
-  late TextEditingController _cityIdController;
   late TextEditingController _postcodeController;
   late TextEditingController _addressTitleController;
   late TextEditingController _deliveryInstructionsController;
   String _addressType = '1';
-
   bool _isActive = true;
   bool _isLoading = false;
   bool _isDefault = true;
-
   static const Color navyBlue = Color(0xFF172C4E);
   static const Color darkBg = Color(0xFF101820);
   static const Color darkCard = Color(0xFF182331);
@@ -69,12 +65,12 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
   static const Color secondaryText = Color(0xFF687386);
   static const Color lightBorder = Color(0xFFE2E6EC);
 
+
   @override
   void initState() {
     super.initState();
 
     customerController = Get.find<CustomerController>();
-
     _firstNameController = TextEditingController(text: widget.firstName ?? '');
     _lastNameController = TextEditingController(text: widget.lastName ?? '');
     _emailController = TextEditingController(text: widget.email ?? '');
@@ -83,12 +79,11 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     _addressController = TextEditingController();
     _countryIdController = TextEditingController();
     _stateIdController = TextEditingController();
-    _cityIdController = TextEditingController();
     _postcodeController = TextEditingController();
     _addressTitleController = TextEditingController();
     _deliveryInstructionsController = TextEditingController();
-
     _isActive = widget.status == null || widget.status == '1';
+    customerController.getStatesData();
   }
 
   @override
@@ -101,46 +96,25 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     _addressController.dispose();
     _countryIdController.dispose();
     _stateIdController.dispose();
-    _cityIdController.dispose();
     _postcodeController.dispose();
     _addressTitleController.dispose();
     _deliveryInstructionsController.dispose();
-
     _pageController.dispose();
-
     super.dispose();
   }
 
-  // ============================================================
-  // THEME
-  // ============================================================
-
   bool get isDark => Theme.of(context).brightness == Brightness.dark;
-
   Color get backgroundColor => isDark ? darkBg : lightBg;
-
   Color get cardColor => isDark ? darkCard : Colors.white;
-
   Color get textColor => isDark ? Colors.white : navyBlue;
-
   Color get secondaryTextColor => isDark ? Colors.white70 : secondaryText;
-
   Color get borderColor => isDark ? Colors.white12 : lightBorder;
-
-  // ============================================================
-  // CLOSE
-  // ============================================================
 
   void _close() {
     if (_isLoading) return;
-
     FocusScope.of(context).unfocus();
     Get.back();
   }
-
-  // ============================================================
-  // STEP NAVIGATION
-  // ============================================================
 
   void _goToStep2() {
     FocusScope.of(context).unfocus();
@@ -170,14 +144,14 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     );
   }
 
-  // ============================================================
-  // SUBMIT
-  // ============================================================
-
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
 
     if (!(_formKeyStep2.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    if (_selectedState == null) {
       return;
     }
 
@@ -188,18 +162,15 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     });
 
     try {
-      await customerController.addCustomerData(
+      final success = await customerController.addCustomerData(
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         email: _emailController.text.trim(),
         mobile: _mobileController.text.trim(),
         password: _passwordController.text,
         status: _isActive ? 1 : 0,
-        // Address
         address: _addressController.text.trim(),
-        countryId: _countryIdController.text.trim(),
-        stateId: _stateIdController.text.trim(),
-        cityId: _cityIdController.text.trim(),
+        stateId: _selectedState.id.toString(),
         postcode: "0000",
         addressTitle: _addressTitleController.text.trim(),
         isDefault: _isDefault ? 1 : 0,
@@ -207,23 +178,10 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
         addressType: _addressType,
       );
 
-      if (mounted) {
-        Get.back();
-
-        AppSnackBar.success(
-          title: 'success',
-          message: widget.isUpdate
-              ? 'تم تحديث بيانات العميل بنجاح'
-              : 'تمت إضافة العميل بنجاح',
-        );
+      if (success && mounted) {
+        Navigator.of(context).pop();
       }
     } catch (e) {
-      debugPrint('Add customer error: $e');
-
-      AppSnackBar.error(
-        title: 'failed',
-        message: 'حدث خطأ أثناء حفظ بيانات العميل',
-      );
     } finally {
       if (mounted) {
         setState(() {
@@ -232,10 +190,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
       }
     }
   }
-
-  // ============================================================
-  // STEP INDICATOR
-  // ============================================================
 
   Widget _buildStepIndicator() {
     return Row(
@@ -266,43 +220,9 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     );
   }
 
-  Widget _buildStepLabel() {
-    final title = _currentStep == 0
-        ? 'customer_info'.tr
-        : 'address_info'.tr;
+  Widget _buildStatusSwitch()
 
-    final subtitle = _currentStep == 0
-        ? 'customer_info_subtitle'.tr
-        : 'address_info_subtitle'.tr;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: textColor,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          subtitle,
-          style: TextStyle(
-            fontSize: 12,
-            color: secondaryTextColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // STATUS SWITCH
-  // ============================================================
-
-  Widget _buildStatusSwitch() {
+  {
     final bool isActive = _isActive;
 
     return Container(
@@ -369,10 +289,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
       ),
     );
   }
-
-  // ============================================================
-  // DEFAULT ADDRESS SWITCH
-  // ============================================================
 
   Widget _buildDefaultAddressSwitch() {
     final bool isDefault = _isDefault;
@@ -442,52 +358,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     );
   }
 
-  // ============================================================
-  // ADDRESS TYPE DROPDOWN
-  // ============================================================
-
-  Widget _buildAddressTypeDropdown() {
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
-      ),
-      padding: const EdgeInsets.only(right: 10),
-      child: DropdownButtonFormField<String>(
-        value: _addressType,
-        decoration: InputDecoration(
-          labelText: 'address_type'.tr,
-          border: InputBorder.none,
-          prefixIcon: Icon(Icons.home_work_outlined, color: navyBlue),
-        ),
-        items: [
-          DropdownMenuItem(value: '0', child: Text('home'.tr)),
-          DropdownMenuItem(value: '1', child: Text('work'.tr)),
-          DropdownMenuItem(value: '2', child: Text('other'.tr)),
-        ],
-        onChanged: _isLoading
-            ? null
-            : (value) {
-          if (value == null) return;
-          setState(() {
-            _addressType = value;
-          });
-        },
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'address_type_required'.tr;
-          }
-          return null;
-        },
-      ),
-    );
-  }
-
-  // ============================================================
-  // HEADER
-  // ============================================================
-
   Widget _buildHeader() {
     return Row(
       children: [
@@ -532,10 +402,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     );
   }
 
-  // ============================================================
-  // STEP 1: CUSTOMER INFO
-  // ============================================================
-
   Widget _buildStep1() {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -554,7 +420,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
               controller: _firstNameController,
               icon: Icons.person_outline,
               validator: (value) {
-                return Validator.validateName(value ?? '', 'first_name'.tr);
+                return Validator.validateRequired(value.toString());
               },
               textInputAction: TextInputAction.next,
             ),
@@ -565,7 +431,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
               controller: _lastNameController,
               icon: Icons.person_outline,
               validator: (value) {
-                return Validator.validateName(value ?? '', 'last_name'.tr);
+                return Validator.validateRequired(value.toString());
               },
               textInputAction: TextInputAction.next,
             ),
@@ -626,10 +492,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     );
   }
 
-  // ============================================================
-  // STEP 2: ADDRESS INFO
-  // ============================================================
-
   Widget _buildStep2() {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -642,79 +504,15 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppTextField(
-              title: 'country_id'.tr,
-              hint: 'enter_country_id'.tr,
-              controller: _countryIdController,
-              icon: Icons.public_outlined,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              validator: (value) {
-                if ((value ?? '').trim().isEmpty) {
-                  return 'country_required'.tr;
-                }
-                return null;
-              },
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-            AppTextField(
-              title: 'city_id'.tr,
-              hint: 'enter_city_id'.tr,
-              controller: _cityIdController,
-              icon: Icons.location_city_outlined,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              validator: (value) {
-                if ((value ?? '').trim().isEmpty) {
-                  return 'city_required'.tr;
-                }
-                return null;
-              },
-              textInputAction: TextInputAction.next,
-            ),
+            Text("city".tr,style: pSemiBold14),
+            SizedBox(height: 10.h),
+            _buildCityDropdown(),
             const SizedBox(height: 16),
             AppTextField(
               title: 'address'.tr,
               hint: 'enter_address'.tr,
               controller: _addressController,
               icon: Icons.location_on_outlined,
-              validator: (value) {
-                if ((value ?? '').trim().isEmpty) {
-                  return 'address_required'.tr;
-                }
-                return null;
-              },
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-            AppTextField(
-              title: 'address_title'.tr,
-              hint: 'enter_address_title'.tr,
-              controller: _addressTitleController,
-              icon: Icons.label_outline_rounded,
-              validator: (value) {
-                if ((value ?? '').trim().isEmpty) {
-                  return 'address_title_required'.tr;
-                }
-                return null;
-              },
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-            AppTextField(
-              title: 'state_id'.tr,
-              hint: 'enter_state_id'.tr,
-              controller: _stateIdController,
-              icon: Icons.map_outlined,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              validator: (value) {
-                if ((value ?? '').trim().isEmpty) {
-                  return 'state_required'.tr;
-                }
-                return null;
-              },
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
@@ -736,10 +534,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
       ),
     );
   }
-
-  // ============================================================
-  // FOOTER BUTTONS
-  // ============================================================
 
   Widget _buildFooterButtons() {
     if (_currentStep == 0) {
@@ -885,9 +679,251 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     );
   }
 
-  // ============================================================
-  // BUILD
-  // ============================================================
+  Widget _buildCityDropdown() {
+    return Obx(() {
+      final isLoading = customerController.isLoading2.value;
+      final cities = customerController.customerCityModel?.cities ?? [];
+
+      return DropdownButtonFormField<dynamic>(
+        value: _selectedState,
+        isExpanded: true,
+        icon: Icon(
+          Icons.keyboard_arrow_down_rounded,
+          color: secondaryTextColor,
+          size: 24,
+        ),
+        dropdownColor: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        menuMaxHeight: 280.h,
+
+        decoration: InputDecoration(
+          labelText: 'city'.tr,
+          hintText: isLoading ? 'loading'.tr : 'select_city'.tr,
+
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(9),
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.location_city_outlined,
+              color: navyBlue,
+              size: 20,
+            ),
+          ),
+
+          filled: true,
+          fillColor: cardColor,
+
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 16,
+          ),
+
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: borderColor),
+          ),
+
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: borderColor),
+          ),
+
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(
+              color: navyBlue,
+              width: 1.4,
+            ),
+          ),
+
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(
+              color: borderColor.withOpacity(0.6),
+            ),
+          ),
+
+          labelStyle: TextStyle(
+            color: secondaryTextColor,
+            fontSize: 13,
+          ),
+
+          hintStyle: TextStyle(
+            color: secondaryTextColor.withOpacity(0.75),
+            fontSize: 13,
+          ),
+        ),
+
+        items: cities.map<DropdownMenuItem<dynamic>>((city) {
+          return DropdownMenuItem<dynamic>(
+            value: city,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                city.name.toString() ?? '',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+
+        onChanged: (_isLoading || isLoading)
+            ? null
+            : (value) {
+          if (value == null) return;
+
+          setState(() {
+            _selectedState = value;
+          });
+        },
+
+        validator: (value) {
+          if (value == null) {
+            return 'select_city'.tr;
+          }
+          return null;
+        },
+      );
+    });
+  }
+
+  Widget _buildAddressTypeDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _addressType,
+      isExpanded: true,
+
+      icon: Icon(
+        Icons.keyboard_arrow_down_rounded,
+        color: secondaryTextColor,
+        size: 24,
+      ),
+
+      dropdownColor: cardColor,
+      borderRadius: BorderRadius.circular(16),
+      menuMaxHeight: 220.h,
+
+      decoration: InputDecoration(
+        labelText: 'address_type'.tr,
+
+        prefixIcon: Container(
+          margin: const EdgeInsets.all(9),
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(
+            Icons.home_work_outlined,
+            color: navyBlue,
+            size: 20,
+          ),
+        ),
+
+        filled: true,
+        fillColor: cardColor,
+
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 16,
+        ),
+
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
+        ),
+
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: navyBlue,
+            width: 1.4,
+          ),
+        ),
+
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: borderColor.withOpacity(0.6),
+          ),
+        ),
+
+        labelStyle: TextStyle(
+          color: secondaryTextColor,
+          fontSize: 13,
+        ),
+      ),
+
+      items: [
+        DropdownMenuItem(
+          value: '0',
+          child: Text(
+            'home'.tr,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        DropdownMenuItem(
+          value: '1',
+          child: Text(
+            'work'.tr,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        DropdownMenuItem(
+          value: '2',
+          child: Text(
+            'other'.tr,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+
+      onChanged: _isLoading
+          ? null
+          : (value) {
+        if (value == null) return;
+
+        setState(() {
+          _addressType = value;
+        });
+      },
+
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'address_type_required'.tr;
+        }
+
+        return null;
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -909,9 +945,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ==================================================
-              // HANDLE
-              // ==================================================
               Center(
                 child: Container(
                   width: 42,
@@ -922,30 +955,11 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
                   ),
                 ),
               ),
-
               const SizedBox(height: 22),
-
-              // ==================================================
-              // HEADER
-              // ==================================================
               _buildHeader(),
-
               const SizedBox(height: 18),
-
-              // ==================================================
-              // STEP INDICATOR + LABEL
-              // ==================================================
               _buildStepIndicator(),
-
               const SizedBox(height: 14),
-
-              _buildStepLabel(),
-
-              const SizedBox(height: 18),
-
-              // ==================================================
-              // STEP CONTENT (PageView)
-              // ==================================================
               Flexible(
                 child: PageView(
                   controller: _pageController,
@@ -956,14 +970,8 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // ==================================================
-              // FOOTER BUTTONS
-              // ==================================================
               _buildFooterButtons(),
-
               const SizedBox(height: 4),
             ],
           ),

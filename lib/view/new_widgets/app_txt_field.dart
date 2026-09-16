@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:store_go_app/utils/text_style.dart';
 
 class AppTextField extends StatelessWidget {
   final String title;
@@ -65,11 +66,7 @@ class AppTextField extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: textColor,
-          ),
+          style: pSemiBold14
         ),
 
         const SizedBox(height: 8),

@@ -176,3 +176,36 @@ class CustomerPagination {
     };
   }
 }
+
+  class CustomerCityModel {
+  final List<CityModel> cities;
+
+  CustomerCityModel({
+  required this.cities,
+  });
+
+  factory CustomerCityModel.fromJson(Map<String, dynamic> json) {
+  return CustomerCityModel(
+  cities: (json['data'] as List? ?? [])
+      .map((e) => CityModel.fromJson(e))
+      .toList(),
+  );
+  }
+}
+
+  class CityModel {
+  final int id;
+  final String name;
+
+  CityModel({
+  required this.id,
+  required this.name,
+  });
+
+  factory CityModel.fromJson(Map<String, dynamic> json) {
+  return CityModel(
+  id: json['id'],
+  name: json['name'] ?? '',
+  );
+  }
+}

@@ -6,7 +6,6 @@ import 'package:store_go_app/core/controller/home_controller/store_change_servic
 import '../../model/customer_model.dart';
 import '../../model/customer_orders_model.dart';
 
-
 class CustomerController extends GetxController implements StoreAware {
 
   static const String _cacheCustomerKey = 'home_customer_list_data';
@@ -14,6 +13,8 @@ class CustomerController extends GetxController implements StoreAware {
   CustomerRepository customerRepository = CustomerRepository();
 
   CustomerModel? customerModel;
+
+  CustomerCityModel? customerCityModel;
 
   RxList<CustomerData> customerList = <CustomerData>[].obs;
 
@@ -160,14 +161,15 @@ class CustomerController extends GetxController implements StoreAware {
     );
   }
 
-  Future<void> getCitiesData() async {
+
+  Future<void> getStatesData() async {
 
     if (isLoading2.value) return;
 
     isLoading2.value = true;
 
     final response =
-    await customerRepository.getCitiesData();
+    await customerRepository.getStatesData();
 
     isLoading2.value = false;
 
@@ -175,7 +177,7 @@ class CustomerController extends GetxController implements StoreAware {
       onSuccess: (data) {
 
         if (data['status'] == 1) {
-          customerModel = CustomerModel.fromJson(data);
+          customerCityModel = CustomerCityModel.fromJson(data);
 
         } else {
           commonToast(
@@ -200,85 +202,102 @@ class CustomerController extends GetxController implements StoreAware {
   // ADD CUSTOMER
   // =========================
 
-  Future<void> addCustomerData({
-  required String firstName,
-  required String lastName,
-  required String email,
-  required String mobile,
-  required String password,
-  int status = 1,
+  Future<bool> addCustomerData({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String mobile,
+    required String password,
+    int status = 1,
 
-  // Address
-  required String address,
-  required String countryId,
-  required String stateId,
-  required String cityId,
-  required String postcode,
-  required String addressTitle,
-  int isDefault = 1,
-  String deliveryInstructions = '',
-  required String addressType,
+    // Address
+    required String address,
+    required String stateId,
+    required String postcode,
+    required String addressTitle,
+    int isDefault = 1,
+    String deliveryInstructions = '',
+    required String addressType,
   }) async {
-    if (isDataAvailable.value) return;
+    if (isDataAvailable.value) return false;
 
     isDataAvailable.value = true;
 
-    final response = await customerRepository.addCustomerData(
-      data: {
-        'first_name': firstName,
-        'last_name': lastName,
-        'email': email,
-        'status': status,
-        'mobile': mobile,
-        'password': password,
-        'address': address,
-        'country_id': countryId,
-        'state_id': stateId,
-        'city_id': cityId,
-        'postcode': postcode,
-        'address_title': addressTitle,
-        'is_default': isDefault,
-        'delivery_instructions': deliveryInstructions,
-        'address_type': addressType,
-      },
-    );
+    try {
+      final response = await customerRepository.addCustomerData(
+        data: {
+          'first_name': firstName,
+          'last_name': lastName,
+          'email': email,
+          'status': status,
+          'mobile': mobile,
+          'password': password,
+          'address': address,
+          'country_id': 215,
+          'state_id': stateId,
+          'postcode': postcode,
+          'address_title': addressTitle,
+          'is_default': isDefault,
+          'delivery_instructions': deliveryInstructions,
+          'address_type': addressType,
+        },
+      );
 
-    isDataAvailable.value = false;
+      bool success = false;
 
-    response.fold(
-      onSuccess: (data) async {
-        if (data['status'] == 1) {
-          commonToast(
-            data['data']?['message'] ??
-                data['message'] ??
-                'Customer added successfully',
-          );
+      await response.fold(
+        onSuccess: (data) async {
+          if (data['status'] == 1) {
+            success = true;
 
-          customerList.clear();
-          currantPage.value = 1;
-          isScroll.value = true;
-          errorMessage.value = '';
+            commonToast(
+              data['data']?['message'] ??
+                  data['message'] ??
+                  'Customer added successfully',
+            );
 
-          CacheService.clear(_cacheCustomerKey);
+            customerList.clear();
+            currantPage.value = 1;
+            isScroll.value = true;
+            errorMessage.value = '';
 
-          await getCustomersData(1);
-        } else {
-          commonToast(
-            data['data']?['message'] ??
-                data['message'] ??
-                'Error',
-          );
-        }
-      },
-      onFailure: (
-          reason,
-          message,
-          validationErrors,
-          ) {
-        errorMessage.value = message;
-        commonToast(message);
-      },
-    );
+            CacheService.clear(_cacheCustomerKey);
+
+            await getCustomersData(1);
+          } else {
+            commonToast(
+              type: AppSnackBarType.error,
+              data['data']?['message'] ??
+                  data['message'] ??
+                  'Error',
+            );
+          }
+        },
+
+        onFailure: (
+            reason,
+            message,
+            validationErrors,
+            ) {
+          errorMessage.value = message;
+
+          commonToast(type: AppSnackBarType.error,message);
+        },
+      );
+
+      return success;
+    } catch (e) {
+      errorMessage.value = e.toString();
+
+      commonToast(
+        type: AppSnackBarType.error,
+        "error"
+      );
+
+      return false;
+    } finally {
+      isDataAvailable.value = false;
+    }
   }
 
   Future<void> deleteCustomerData({

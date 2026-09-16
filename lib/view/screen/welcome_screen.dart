@@ -46,13 +46,10 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
       print('   Logged In: $isLoggedIn');
 
       if (!isOnboardingCompleted) {
-        // عرض OnBoarding
         Get.offAllNamed('/onboarding');
       } else if (isLoggedIn) {
-        // تسجيل الدخول موجود - اذهب للـ Dashboard
         Get.offAllNamed('/dashboard');
       } else {
-        // لا يوجد تسجيل دخول - اذهب لصفحة الدخول
         Get.offAllNamed('/login');
       }
     });
