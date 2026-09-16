@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../utils/images.dart';
 import '../../new_widgets/network_image_widget.dart';
 import '../../new_widgets/pop_up_menu.dart';

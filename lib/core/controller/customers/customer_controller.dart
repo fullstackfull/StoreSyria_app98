@@ -3,12 +3,15 @@ import 'package:store_go_app/config/repository/customer_repository.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
+import '../../../config/repository/search_repository.dart';
 import '../../model/customer_model.dart';
 import '../../model/customer_orders_model.dart';
 
 class CustomerController extends GetxController implements StoreAware {
 
-  static const String _cacheCustomerKey = 'home_customer_list_data';
+static const String _cacheCustomerKey = 'home_customer_list_data';
+
+final SearchRepository searchRepository = SearchRepository();
 
   CustomerRepository customerRepository = CustomerRepository();
 
@@ -44,6 +47,54 @@ class CustomerController extends GetxController implements StoreAware {
 
     StoreChangeService.instance.register(() => this);
   }
+
+  // ==================== Search (جديد) ===================
+  RxList<CustomerData> searchResults = <CustomerData>[].obs;
+  RxBool isSearchingCustomers = false.obs;
+  RxBool isCustomerSearchActive = false.obs;
+
+  Future<void> searchCustomerData({required String name}) async {
+    if (name.trim().isEmpty) {
+      isCustomerSearchActive.value = false;
+      searchResults.clear();
+      return;
+    }
+
+    isCustomerSearchActive.value = true;
+    isSearchingCustomers.value = true;
+
+    try {
+      final result = await searchRepository.getSearchData(
+        type: "customer",
+        name: name,
+      );
+
+      result.fold(
+        onSuccess: (data) {
+          searchResults.clear();
+          final responseData = data['data'];
+          if (responseData is List) {
+            for (final item in responseData) {
+              searchResults.add(CustomerData.fromJson(item));
+            }
+          }
+        },
+        onFailure: (reason, message, validationErrors) {
+          commonToast(message.isNotEmpty ? message : 'search_failed'.tr);
+        },
+      );
+    } catch (e) {
+      commonToast('search_failed'.tr);
+    } finally {
+      isSearchingCustomers.value = false;
+    }
+  }
+
+void clearCustomerSearch() {
+  isCustomerSearchActive.value = false;
+  searchResults.clear();
+}
+
 
   // =========================
   // CACHE

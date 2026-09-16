@@ -11,6 +11,9 @@ import 'package:store_go_app/core/controller/order_controller/order_controller.d
 import 'package:store_go_app/core/controller/product_controller/product_controller.dart';
 import '../../../core/controller/customers/customer_controller.dart';
 import '../../../core/model/customer_model.dart';
+import '../../new_widgets/customer_picker_bottom_sheet.dart';
+import '../../new_widgets/product_picker_bottom_sheet.dart';
+import '../../widget/common_snak_bar_widget.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
@@ -147,50 +150,71 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Obx(() {
-              final customers = customerController.customerList;
+              final customer = orderController.selectedCustomer.value;
 
+              // تعبية أولية لو جاي من صفحة تفاصيل الزبون
               if (initialCustomerId != null &&
-                  orderController.selectedCustomer.value == null) {
-                final customer = customers.firstWhereOrNull(
-                      (c) => c.id == initialCustomerId,
-                );
-                if (customer != null) {
+                  customer == null &&
+                  customerController.customerList.isNotEmpty) {
+                final matched = customerController.customerList
+                    .firstWhereOrNull((c) => c.id == initialCustomerId);
+                if (matched != null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted &&
-                        orderController.selectedCustomer.value == null) {
-                      orderController.selectedCustomer.value = customer;
-                      orderController.fillShippingFromCustomer(customer);
+                    if (mounted && orderController.selectedCustomer.value == null) {
+                      orderController.selectedCustomer.value = matched;
+                      orderController.fillShippingFromCustomer(matched);
                     }
                   });
                 }
               }
 
-              return _buildDropdownField<int>(
-                label: 'select_customer'.tr,
-                hint: 'choose_customer'.tr,
-                icon: Icons.person_outline,
-                value: orderController.selectedCustomer.value?.id,
-                items: customers.map((c) {
-                  return DropdownMenuItem<int>(
-                    value: c.id,
-                    child: Text(
-                      c.customerInfo?.name ?? '',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }).toList(),
-                onChanged: (id) {
-                  final customer =
-                  customers.firstWhereOrNull((c) => c.id == id);
-                  orderController.selectedCustomer.value = customer;
-                  if (customer != null) {
-                    orderController.fillShippingFromCustomer(customer);
+              return InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () async {
+                  final picked = await CustomerPickerBottomSheet.show(context);
+                  if (picked != null) {
+                    orderController.selectedCustomer.value = picked;
+                    orderController.fillShippingFromCustomer(picked);
                   }
                 },
-                validator: (value) {
-                  if (value == null) return 'please_select_customer'.tr;
-                  return null;
-                },
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'select_customer'.tr,
+                    hintText: 'choose_customer'.tr,
+                    prefixIcon: Container(
+                      margin: const EdgeInsets.all(9),
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.person_outline, color: navyBlue, size: 20),
+                    ),
+                    suffixIcon: Icon(Icons.keyboard_arrow_down_rounded,
+                        color: secondaryTextColor),
+                    filled: true,
+                    fillColor: cardColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    errorText: (currentStep == 0 && customer == null)
+                        ? null // الفاليديشن الحقيقي عند الضغط "التالي"
+                        : null,
+                  ),
+                  child: Text(
+                    customer?.customerInfo?.name ?? 'choose_customer'.tr,
+                    style: TextStyle(
+                      color: customer == null ? secondaryTextColor : textColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
               );
             }),
 
@@ -258,7 +282,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
   }
 
-  // ==================== STEP 2: Products ====================
+
+// ==================== STEP 2: Products ====================
+
 
   Widget _buildStepTwo() {
     return SingleChildScrollView(
@@ -268,106 +294,137 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('select_products'.tr,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                )),
+            Text(
+              'select_products'.tr,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+              ),
+            ),
             const SizedBox(height: 10),
 
             Obx(() {
               final availableProducts = productController.productList;
 
               return Column(
-                children:
-                orderController.orderLineItems.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final line = entry.value;
+                children: List.generate(
+                  orderController.orderLineItems.length,
+                      (index) {
+                    final line = orderController.orderLineItems[index];
 
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: line.product.value != null
-                            ? navyBlue
-                            : borderColor,
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: line.product.value != null
+                              ? navyBlue
+                              : borderColor,
+                        ),
                       ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildDropdownField<ProductData>(
-                                label: 'product'.tr,
-                                hint: 'select_product'.tr,
-                                icon: Icons.inventory_2_outlined,
-                                value: line.product.value,
-                                items: availableProducts.map((p) {
-                                  return DropdownMenuItem<ProductData>(
-                                    value: p,
-                                    child: Text(
-                                      p.name ?? '',
-                                      overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(14),
+                                  onTap: () async {
+                                    final picked = await ProductPickerBottomSheet.show(context);
+                                    if (picked != null) {
+                                      orderController.onProductSelected(index, picked);
+                                    }
+                                  },
+                                  child: InputDecorator(
+                                    decoration: InputDecoration(
+                                      labelText: 'product'.tr,
+                                      hintText: 'select_product'.tr,
+                                      prefixIcon: Container(
+                                        margin: const EdgeInsets.all(6),
+                                        width: 30,
+                                        height: 30,
+                                        decoration: BoxDecoration(
+                                          color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Icon(Icons.inventory_2_outlined,
+                                            color: navyBlue, size: 18),
+                                      ),
+                                      suffixIcon: Icon(Icons.keyboard_arrow_down_rounded,
+                                          color: secondaryTextColor),
+                                      filled: true,
+                                      fillColor: cardColor,
+                                      contentPadding:
+                                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        borderSide: BorderSide(color: borderColor),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        borderSide: BorderSide(color: borderColor),
+                                      ),
                                     ),
-                                  );
-                                }).toList(),
-                                onChanged: (p) {
-                                  if (p != null) {
-                                    orderController.onProductSelected(index, p);
-                                  }
-                                },
-                                validator: (value) {
-                                  if (value == null) return 'please_select_product'.tr;
-                                  return null;
-                                },
-                                dense: true,
+                                    child: Text(
+                                      line.product.value?.name ?? 'select_product'.tr,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: line.product.value == null
+                                            ? secondaryTextColor
+                                            : textColor,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                            if (orderController.orderLineItems.length > 1)
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline,
-                                    color: Colors.redAccent),
-                                onPressed: () =>
-                                    orderController.removeLineItem(index),
+                              if (orderController.orderLineItems.length > 1)
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                                  onPressed: () => orderController.removeLineItem(index),
+                                ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: AppTextField(
+                                  title: 'quantity'.tr,
+                                  hint: '1',
+                                  controller: line.qtyController,
+                                  icon: Icons.confirmation_number_outlined,
+                                  keyboardType: TextInputType.number,
+                                ),
                               ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppTextField(
-                                title: 'quantity'.tr,
-                                hint: '1',
-                                controller: line.qtyController,
-                                icon: Icons.confirmation_number_outlined,
-                                keyboardType: TextInputType.number,
+
+                              const SizedBox(width: 10),
+
+                              Expanded(
+                                child: AppTextField(
+                                  title: 'price'.tr,
+                                  hint: '0.00',
+                                  controller: line.priceController,
+                                  icon: Icons.attach_money_outlined,
+                                  keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: AppTextField(
-                                title: 'price'.tr,
-                                hint: '0.00',
-                                controller: line.priceController,
-                                icon: Icons.attach_money_outlined,
-                                keyboardType:
-                                const TextInputType.numberWithOptions(
-                                    decimal: true),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               );
             }),
 
@@ -375,18 +432,25 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
             InkWell(
               borderRadius: BorderRadius.circular(14),
-              onTap: () => orderController.addLineItem(),
+              onTap: () {
+                orderController.addLineItem();
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   color: cardColor,
-                  border: Border.all(color: navyBlue.withOpacity(0.4)),
+                  border: Border.all(
+                    color: navyBlue.withOpacity(0.4),
+                  ),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.add_circle_outline, color: navyBlue),
+                    const Icon(
+                      Icons.add_circle_outline,
+                      color: navyBlue,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       "add_another_product".tr,
@@ -400,6 +464,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 ),
               ),
             ),
+
             const SizedBox(height: 8),
           ],
         ),
@@ -639,8 +704,18 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     FocusScope.of(context).unfocus();
 
     if (currentStep == 0) {
+      if (orderController.selectedCustomer.value == null) {
+        commonToast(type: AppSnackBarType.info,'please_select_customer'.tr);
+        return;
+      }
       if (!(_formKeyStep1.currentState?.validate() ?? false)) return;
     } else if (currentStep == 1) {
+      final hasEmptyLine = orderController.orderLineItems
+          .any((line) => line.product.value == null);
+      if (hasEmptyLine) {
+        commonToast(type: AppSnackBarType.info, 'please_select_product'.tr);
+        return;
+      }
       if (!(_formKeyStep2.currentState?.validate() ?? false)) return;
     }
 

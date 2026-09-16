@@ -90,46 +90,62 @@ class ProductController extends GetxController implements StoreAware {
     if (isLoading.value) return;
 
     isLoading.value = true;
-    Loader.showLoader();
 
-    final response = await productRepository.getProductData(page);
+    if (page == 1) {
+      Loader.showLoader();
+    }
 
-    Loader.hideLoader();
-    isLoading.value = false;
+    try {
+      final response = await productRepository.getProductData(page);
 
-    response.fold(
-      onSuccess: (data) {
-        if (data['status'] == 1) {
-          productModel = ProductModel.fromJson(data);
+      response.fold(
+        onSuccess: (data) {
+          if (data['status'] == 1) {
+            productModel = ProductModel.fromJson(data);
 
-          if (page == 1) {
-            productList.clear();
-            CacheService.save(_cacheProductKey, data);
+            final newProducts =
+                productModel?.data?.data ?? <ProductData>[];
+
+            if (page == 1) {
+              productList.clear();
+              CacheService.save(_cacheProductKey, data);
+            }
+
+            productList.addAll(newProducts);
+
+            currantPage.value = page;
+
+            final lastPage = productModel?.data?.lastPage ?? page;
+
+            isScroll.value = page < lastPage;
+          } else {
+            commonToast(
+              data['data']?['message'] ??
+                  data['message'] ??
+                  'Error',
+            );
+
+            if (page > 1 && currantPage.value == page) {
+              currantPage.value = page - 1;
+            }
           }
+        },
+        onFailure: (reason, message, validationErrors) {
+          errorMessage.value = message;
 
-          productList.addAll(productModel?.data?.data ?? []);
+          commonToast(message);
 
-          isScroll.value = page != productModel?.data?.lastPage;
-        } else {
-          commonToast(
-            data['data']?['message'] ??
-                data['message'] ??
-                'Error',
-          );
-          if (currantPage.value == page) {
-            currantPage.value -= 1;
+          if (page > 1 && currantPage.value == page) {
+            currantPage.value = page - 1;
           }
-        }
-      },
-      onFailure: (reason, message, validationErrors) {
-        errorMessage.value = message;
-        commonToast(message);
+        },
+      );
+    } finally {
+      if (page == 1) {
+      }
 
-        if (currantPage.value == page) {
-          currantPage.value -= 1;
-        }
-      },
-    );
+      isLoading.value = false;
+    }
   }
 
   Future<void> searchProductData(String categoryId) async {
@@ -257,6 +273,25 @@ class ProductController extends GetxController implements StoreAware {
       },
     );
   }
+
+  void resetProductPickerState() {
+    if (isClosed) return;
+
+    searchQuery.value = '';
+    listMode.value = ProductListMode.normal;
+
+    filterCategory.value = '';
+    filterCategoryId.value = '';
+
+    searchTotal.value = 0;
+
+    errorMessage.value = '';
+    isDataAvailable2.value = false;
+
+    currantPage.value = 1;
+    isScroll.value = true;
+  }
+
 
   Future<void> clearSearch() async {
     searchQuery.value = '';
