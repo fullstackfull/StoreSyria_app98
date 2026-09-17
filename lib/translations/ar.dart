@@ -560,5 +560,6 @@ const Map<String, String> ar = {
   "phone": "الهاتف",
   "call": "اتصال",
   "whatsapp": "واتساب",
-  'view_all_orders' : "عرض جميع الطلبات"
+  'view_all_orders' : "عرض جميع الطلبات",
+  "tap_again_to_close" : "اضغط مرة أخرى للخروج"
 };

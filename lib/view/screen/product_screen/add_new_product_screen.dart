@@ -287,7 +287,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     );
   }
 
-  // --- Description Section ---
   Widget _buildDescriptionSection(
       Color textColor, Color hintColor, Color borderColor, Color cardColor, Color softBg, bool isDark) {
 
@@ -297,7 +296,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. عرض الوصف الحالي (HTML) فقط في حالة التعديل
         if (hasCurrentDescription) ...[
           Text(
             "current_description_readonly".tr,

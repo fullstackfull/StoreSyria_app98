@@ -560,5 +560,6 @@ const Map<String, String> en = {
   "phone": "Phone",
   "call": "Call",
   "whatsapp": "WhatsApp",
-  'view_all_orders' : "View all orders"
+  'view_all_orders' : "View all orders",
+  "tap_again_to_close" : "Tap again to close"
 };
