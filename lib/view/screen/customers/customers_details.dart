@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:store_go_app/routes/routes.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
@@ -9,7 +10,6 @@ import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/controller/customers/customer_controller.dart';
 import '../../../core/controller/order_controller/order_controller.dart';
 import '../../../core/model/customer_orders_model.dart';
-import '../../../utils/helper.dart';
 import '../../new_widgets/app_snackbar.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/top_orders.dart';
@@ -18,76 +18,174 @@ import '../order_screen/order_detail_screen.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
   final String customerId;
-
-  const CustomerDetailsScreen({
-    super.key,
-    required this.customerId,
-  });
-
+  const CustomerDetailsScreen({super.key, required this.customerId});
   @override
-  State<CustomerDetailsScreen> createState() =>
-      _CustomerDetailsScreenState();
+  State<CustomerDetailsScreen> createState() => _CustomerDetailsScreenState();
 }
 
 class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   final CustomerController customerController = Get.find<CustomerController>();
   final OrderController orderController = Get.find<OrderController>();
-  final order = CustomerOrder();
-  bool _isOrdersExpanded = false;
   late final ScrollController scrollController;
+  bool _isOrdersExpanded = false;
+  final GlobalKey _firstOrderKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-
     scrollController = ScrollController();
     scrollController.addListener(_onScroll);
-
     customerController.clearCustomerOrders();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
-      customerController.getCustomerOrdersData(
-        customerId: widget.customerId,
-        page: 1,
-      );
+      customerController.getCustomerOrdersData(customerId: widget.customerId, page: 1);
     });
   }
+
   void _onScroll() {
     if (!scrollController.hasClients) return;
-
-    if (!customerController.isCustomerOrdersScroll.value) {
-      return;
-    }
-
-    if (customerController.isCustomerOrdersPageLoading.value) {
-      return;
-    }
-
-    if (scrollController.position.pixels >=
-        scrollController.position.maxScrollExtent - 200) {
-      customerController.getCustomerOrdersData(
-        customerId: widget.customerId,
-        page: customerController.customerOrdersCurrentPage.value + 1,
-      );
+    if (!_isOrdersExpanded) return;
+    if (!customerController.isCustomerOrdersScroll.value) return;
+    if (customerController.isCustomerOrdersPageLoading.value) return;
+    final position = scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 250) {
+      final nextPage = customerController.customerOrdersCurrentPage.value + 1;
+      customerController.getCustomerOrdersData(customerId: widget.customerId, page: nextPage);
     }
   }
 
   Future<void> _refresh() async {
     customerController.clearCustomerOrders();
+    await customerController.getCustomerOrdersData(customerId: widget.customerId, page: 1);
+  }
 
-    await customerController.getCustomerOrdersData(
-      customerId: widget.customerId,
-      page: 1,
+  void _openAllOrders() {
+    setState(() {
+      _isOrdersExpanded = true;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final anchorContext = _firstOrderKey.currentContext;
+      if (anchorContext != null) {
+        Scrollable.ensureVisible(anchorContext, duration: const Duration(milliseconds: 300), curve: Curves.easeOut, alignment: 0.05);
+      }
+      if (customerController.isCustomerOrdersScroll.value && !customerController.isCustomerOrdersPageLoading.value && scrollController.hasClients && scrollController.position.maxScrollExtent - scrollController.position.pixels < 400) {
+        final nextPage = customerController.customerOrdersCurrentPage.value + 1;
+        customerController.getCustomerOrdersData(customerId: widget.customerId, page: nextPage);
+      }
+    });
+  }
+
+  void _closeAllOrders() {
+    setState(() {
+      _isOrdersExpanded = false;
+    });
+  }
+
+  Widget _orderItem(CustomerOrder order, CustomerProfile? customer) {
+    return allOrdersListItemWidget(
+      showChangeAction: true,
+      showChangeAction2: true,
+      context: context,
+      changeText: "change_payment_status".tr,
+      changeText2: "change_order_status".tr,
+      changeFun2: () {
+        OrderStatusBottomSheet.show<CustomerOrder>(
+          context,
+          order,
+          getOrderStatus: (model) => model.orderStatus ?? 0,
+          getProductOrderId: (model) => model.orderId.toString(),
+          getPaymentStatus: (model) => model.paymentStatus ?? 'unpaid'.tr,
+          setOrderStatus: (model, newStatus) {
+            model.orderStatus = newStatus;
+          },
+          setOrderStatusText: (model, newStatusText) {},
+          onUpdated: () {
+            orderController.orderList.refresh();
+            customerController.customerOrdersList.refresh();
+          },
+        );
+      },
+      changeFun: () {
+        showPaymentStatusBottomSheet<CustomerOrder>(
+          context,
+          order,
+          getPaymentStatus: (model) => model.paymentStatus ?? 'unpaid'.tr,
+          getProductOrderId: (model) => model.orderId.toString(),
+          getDeliveredStatus: (model) => model.orderStatus ?? 0,
+          setPaymentStatus: (model, newStatus) {
+            model.paymentStatus = newStatus;
+          },
+          onUpdated: () {
+            orderController.orderList.refresh();
+            customerController.customerOrdersList.refresh();
+          },
+        );
+      },
+      orderId: order.orderId.toString(),
+      date: "",
+      maskedName: customer?.name ?? "",
+      price: "${order.finalPrice}",
+      secondaryBadgeLabel: order.paymentStatus,
+      primaryBadgeLabel: 0,
+      onTap: () {
+        Get.to(() => OrderDetailScreen(orderId: order.id.toString()));
+      },
+      viewFun: () {
+        Get.to(() => OrderDetailScreen(orderId: order.id.toString()));
+      },
+      deleteFun: () {
+        AppDialog.showCustomDialog(
+          message: "delete_order".tr,
+          lottieAsset: 'assets/lottie/delete_icon.json',
+          iconColor: AppColor.cRedText,
+          confirmColor: AppColor.cRedText,
+          context: context,
+          onConfirm: () async {
+            await orderController.deleteOrderData(orderId: order.id.toString());
+            customerController.customerOrdersList.removeWhere((item) => item.id == order.id);
+            customerController.customerOrdersList.refresh();
+          },
+        );
+      },
     );
+  }
+
+  bool _hasValue(String? value) {
+    return value != null && value.trim().isNotEmpty;
+  }
+
+  Future<void> _launch(Uri uri) async {
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok) {
+        AppSnackBar.info(title: 'error', message: 'could_not_open'.tr);
+      }
+    } catch (_) {
+      AppSnackBar.info(title: 'error', message: 'could_not_open'.tr);
+    }
+  }
+
+  void _callCustomer(String? mobile) {
+    if (!_hasValue(mobile)) return;
+    _launch(Uri(scheme: 'tel', path: mobile));
+  }
+
+  void _whatsappCustomer(String? mobile) {
+    if (!_hasValue(mobile)) return;
+    final cleaned = mobile!.replaceAll(RegExp(r'[^0-9+]'), '');
+    _launch(Uri.parse('https://wa.me/$cleaned'));
+  }
+
+  void _emailCustomer(String? email) {
+    if (!_hasValue(email)) return;
+    _launch(Uri(scheme: 'mailto', path: email));
   }
 
   @override
   void dispose() {
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
-
     super.dispose();
   }
 
@@ -95,7 +193,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? DarkThemeColor.cBackGround : const Color(0xFFF5F6F8);
-
     return Scaffold(
       appBar: simpleAppBar(
         isBack: true,
@@ -103,30 +200,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         title: 'customer_details'.tr,
         label: "new_order".tr,
         onNewLabelTap: () {
-          AppSnackBar.info(
-            title: 'success',
-            message: "Standardize Dates");
-          Get.toNamed(
-            AppRoutes.addOrder,
-            arguments: {
-              'customerId': int.tryParse(widget.customerId),
-              'isFromCustomerDetails': true,
-            },
-          );
+          Get.toNamed(AppRoutes.addOrder, arguments: {
+            'customerId': int.tryParse(widget.customerId),
+            'isFromCustomerDetails': true,
+          });
         },
       ),
       backgroundColor: bgColor,
       body: SafeArea(
         child: Obx(() {
-          if (customerController.isCustomerOrdersLoading.value &&
-              customerController.customerOrdersList.isEmpty) {
-            return const Center(
-              child: LoadingWidget(),
-            );
+          if (customerController.isCustomerOrdersLoading.value && customerController.customerOrdersList.isEmpty) {
+            return const Center(child: LoadingWidget());
           }
-        
-          if (customerController.customerOrdersErrorMessage.isNotEmpty &&
-              customerController.customerOrdersList.isEmpty) {
+          if (customerController.customerOrdersErrorMessage.isNotEmpty && customerController.customerOrdersList.isEmpty) {
             return RefreshIndicator(
               onRefresh: _refresh,
               child: ListView(
@@ -145,251 +231,65 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
               ),
             );
           }
-        
+
           final customer = customerController.customerProfile.value;
-        
-          if (customerController.customerOrdersList.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: _refresh,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  if (customer != null)
-                    _customerHeader(
-                      customer: customer,
-                      isDark: isDark,
-                    ),
-        
-                  SizedBox(height: 20.h),
-        
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * .4,
-                    child: Center(
-                      child: EmptyState(
-                        message: 'no_orders_found'.tr,
-                        icon: Icons.shopping_bag_outlined,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
+          final hasOrders = customerController.customerOrdersList.isNotEmpty;
+
+          if (customer == null) {
+            return const Center(child: LoadingWidget());
           }
-        
+
           return RefreshIndicator(
             onRefresh: _refresh,
             child: CustomScrollView(
               controller: scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                if (customer != null)
-                  SliverToBoxAdapter(
-                    child: _customerHeader(
-                      customer: customer,
-                      isDark: isDark,
-                    ),
-                  ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 12.h),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12.r),
-                      onTap: () {
-                        setState(() {
-                          _isOrdersExpanded = !_isOrdersExpanded;
-                        });
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4.h),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 10.w,
-                                      vertical: 4.h,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColor.themeNavyBlueColor.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(20.r),
-                                    ),
-                                    child: Text(
-                                      '${customerController.customerOrdersModel?.data?.pagination?.total ?? customerController.customerOrdersList.length}',
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColor.themeNavyBlueColor,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 8.w),
-                                  Text(
-                                    'orders'.tr,
-                                    style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark
-                                          ? Colors.white
-                                          : AppColor.cDarkGreyFont,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Icon(
-                              _isOrdersExpanded
-                                  ? Icons.keyboard_arrow_up_rounded
-                                  : Icons.keyboard_arrow_down_rounded,
-                              size: 28.sp,
-                              color: isDark
-                                  ? Colors.white
-                                  : AppColor.cDarkGreyFont,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-        
-                if (_isOrdersExpanded)
+                SliverToBoxAdapter(child: _customerHeader(customer: customer, isDark: isDark, showOrdersSection: hasOrders)),
+
+                if (_isOrdersExpanded && hasOrders)
                   SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 0),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                             (context, index) {
-                          final order =
-                          customerController.customerOrdersList[index];
-        
+                          final currentOrder = customerController.customerOrdersList[index];
                           return Padding(
+                            key: index == 0 ? _firstOrderKey : null,
                             padding: EdgeInsets.only(bottom: 12.h),
-                            child: allOrdersListItemWidget(
-                              showChangeAction: true,
-                              showChangeAction2: true,
-                              context: context,
-        
-                              changeText: "change_payment_status".tr,
-                              changeText2: "change_order_status".tr,
-        
-                              changeFun2: () {
-                                OrderStatusBottomSheet.show<CustomerOrder>(
-                                  context,
-                                  order,
-        
-                                  getOrderStatus: (model) =>
-                                  model.orderStatus as int,
-        
-                                  getProductOrderId: (model) =>
-                                      model.orderId.toString(),
-        
-                                  getPaymentStatus: (model) =>
-                                  model.paymentStatus ?? 'unpaid'.tr,
-        
-                                  setOrderStatus: (model, newStatus) {
-                                    model.orderStatus = newStatus.toString();
-                                  },
-        
-                                  setOrderStatusText: (model, newStatusText) {},
-        
-                                  onUpdated: () {
-                                    orderController.orderList.refresh();
-                                  },
-                                );
-                              },
-        
-                              changeFun: () {
-                                showPaymentStatusBottomSheet<CustomerOrder>(
-                                  context,
-                                  order,
-        
-                                  getPaymentStatus: (model) =>
-                                  model.paymentStatus ?? 'unpaid'.tr,
-        
-                                  getProductOrderId: (model) =>
-                                      model.orderId.toString(),
-        
-                                  getDeliveredStatus: (model) =>
-                                  model.orderStatus as int,
-        
-                                  setPaymentStatus: (model, newStatus) {
-                                    model.paymentStatus = newStatus;
-                                  },
-        
-                                  onUpdated: () {
-                                    orderController.orderList.refresh();
-                                  },
-                                );
-                              },
-        
-                              orderId: order.orderId.toString(),
-        
-                              date: dateFormatted(
-                                date: order.createdAt ?? "",
-                                formatType: formatForDateTime(
-                                  FormatType.dateTime2,
-                                ),
-                              ),
-        
-                              maskedName: order.customerName.toString(),
-        
-                              price: "${order.total}",
-        
-                              secondaryBadgeLabel: order.paymentStatus,
-        
-                              primaryBadgeLabel: 0,
-        
-                              onTap: () => Get.to(
-                                    () => OrderDetailScreen(
-                                  orderId: order.id.toString(),
-                                ),
-                              ),
-        
-                              viewFun: () => Get.to(
-                                    () => OrderDetailScreen(
-                                  orderId: order.id.toString(),
-                                ),
-                              ),
-        
-                              deleteFun: () {
-                                AppDialog.showCustomDialog(
-                                  message: "delete_order".tr,
-                                  lottieAsset:
-                                  'assets/lottie/delete_icon.json',
-                                  iconColor: AppColor.cRedText,
-                                  confirmColor: AppColor.cRedText,
-                                  context: context,
-                                  onConfirm: () =>
-                                      orderController.deleteOrderData(
-                                        orderId: order.id.toString(),
-                                      ),
-                                );
-                              },
-                            ),
+                            child: _orderItem(currentOrder, customer),
                           );
                         },
-                        childCount:
-                        customerController.customerOrdersList.length,
+                        childCount: customerController.customerOrdersList.length,
                       ),
                     ),
                   ),
-        
-                if (customerController.isCustomerOrdersScroll.value)
+
+                if (_isOrdersExpanded && hasOrders && customerController.isCustomerOrdersScroll.value && customerController.isCustomerOrdersPageLoading.value)
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 20.h),
                       child: Center(
-                        child: customerController.isCustomerOrdersPageLoading.value
-                            ? CircularProgressIndicator(
-                          color: AppColor.themeNavyBlueColor,
-                          strokeWidth: 2.w,
-                        )
-                            : const SizedBox.shrink(),
+                        child: SizedBox(width: 24.w, height: 24.w, child: CircularProgressIndicator(color: AppColor.themeNavyBlueColor, strokeWidth: 2.w)),
                       ),
                     ),
                   ),
-        
+
+                if (!hasOrders)
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 150.h,
+                      child: Center(
+                        child: EmptyState(
+                            message: 'no_orders_found'.tr,
+                            iconSize: 50.w,
+                            icon: Icons.shopping_bag_outlined),
+                      ),
+                    ),
+                  ),
+
+                SliverToBoxAdapter(child: _personalDataSection(customer: customer, isDark: isDark)),
+
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(20.w),
@@ -397,19 +297,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                       backgroundColor: AppColor.cRedText,
                       text: 'delete_Customer'.tr,
                       radius: 20.r,
-                      onPressed: () => AppDialog.showCustomDialog(
-                        context: context,
-                        title: 'delete'.tr,
-                        message: 'deleteCustomer'.tr,
-                        lottieAsset: 'assets/lottie/delete_icon.json',
-                        confirmColor: Colors.red,
-                        onConfirm: () async {
-                          await customerController.deleteCustomerData(
-                            customerId: widget.customerId.toString(),
-                          );
-                          Get.back();
-                        },
-                      ),
+                      onPressed: () {
+                        AppDialog.showCustomDialog(
+                          context: context,
+                          title: 'delete'.tr,
+                          message: 'deleteCustomer'.tr,
+                          lottieAsset: 'assets/lottie/delete_icon.json',
+                          confirmColor: Colors.red,
+                          onConfirm: () async {
+                            await customerController.deleteCustomerData(customerId: widget.customerId.toString());
+                            Get.back();
+                          },
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -421,80 +321,190 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
     );
   }
 
-  Widget _customerHeader({
-    required CustomerProfile customer,
-    required bool isDark,
-  }) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0.h),
+  Widget _customerHeader({required CustomerProfile customer, required bool isDark, required bool showOrdersSection}) {
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subColor = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+    final latestOrder = customerController.customerOrdersList.isNotEmpty ? customerController.customerOrdersList.first : null;
+    return Column(
+      children: [
+        _card(
+          isDark: isDark,
+          margin: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(customer.name ?? 'no_name'.tr, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
+              SizedBox(height: 14.h),
+              Row(
+                children: [
+                  Icon(Icons.trending_up_rounded, size: 16.sp, color: subColor),
+                  SizedBox(width: 6.w),
+                  Text('total_payments'.tr, style: TextStyle(fontSize: 13.sp, color: subColor)),
+                ],
+              ),
+              SizedBox(height: 4.h),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Flexible(child: Text(customer.totalSpend ?? '0', style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w800, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  SizedBox(width: 4.w),
+                  Text('العملة', style: TextStyle(fontSize: 12.sp, color: subColor)),
+                ],
+              ),
+              SizedBox(height: 18.h),
+              Row(
+                children: [
+                  Expanded(child: _summaryStat(icon: Icons.shopping_bag_outlined, label: 'orders'.tr, value: '${customer.orders ?? customerController.customerOrdersList.length}', textColor: textColor, subColor: subColor)),
+                  Expanded(flex: 2,child: _summaryStat(icon: Icons.bar_chart_rounded, label: 'order_cost_avg'.tr, value: customer.aov ?? '0', suffix: 'العملة', textColor: textColor, subColor: subColor)),
+                ],
+              ),
+            ],
+          ),
+        ),
+        if (latestOrder != null && showOrdersSection) ...[
+          Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 8.h),
+            child: Align(alignment: Alignment.centerRight, child: Text('latest_order'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
+          ),
+          if (!_isOrdersExpanded) Padding(padding: EdgeInsets.symmetric(horizontal: 20.w), child: _orderItem(latestOrder, customer)),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            child: Center(
+              child: GestureDetector(
+                onTap: _isOrdersExpanded ? _closeAllOrders : _openAllOrders,
+                child: Text(
+                    _isOrdersExpanded ?
+                    'hide_orders'.tr :
+                    '${'view_all_orders'.tr} (${customerController.customerOrdersModel?.data?.pagination?.total ?? customerController.customerOrdersList.length})',
+                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColor.themeNavyBlueColor)
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _personalDataSection({required CustomerProfile customer, required bool isDark}) {
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subColor = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 8.h),
+          child: Align(alignment: Alignment.centerRight, child: Text('personal_data'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
+        ),
+        _card(
+          isDark: isDark,
+          margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (_hasValue(customer.name)) _dataRow(label: 'name'.tr, value: customer.name!, textColor: textColor, subColor: subColor),
+              _dataRow(label: 'city'.tr, value: "city", textColor: textColor, subColor: subColor),
+              if (_hasValue(customer.defaultAddress?.address)) _dataRow(label: 'address'.tr, value: customer.defaultAddress!.address!, textColor: textColor, subColor: subColor),
+              if (_hasValue(customer.mobile)) _dataRow(label: 'phone'.tr, value: customer.mobile!, textColor: textColor, subColor: subColor),
+              if (_hasValue(customer.email)) _dataRow(label: 'email'.tr, value: customer.email!, textColor: textColor, subColor: subColor),
+              if (_hasValue(customer.mobile) || _hasValue(customer.email)) ...[
+                SizedBox(height: 14.h),
+                Row(
+                  children: [
+                    if (_hasValue(customer.mobile)) Expanded(child: _contactAction(icon: Icons.call_outlined, label: 'call'.tr, onTap: () => _callCustomer(customer.mobile), isDark: isDark)),
+                    if (_hasValue(customer.mobile)) SizedBox(width: 10.w),
+                    if (_hasValue(customer.mobile)) Expanded(child: _contactAction(icon: Icons.chat_outlined, label: 'whatsapp'.tr, onTap: () => _whatsappCustomer(customer.mobile), isDark: isDark)),
+                    if (_hasValue(customer.email)) ...[
+                      if (_hasValue(customer.mobile)) SizedBox(width: 10.w),
+                      Expanded(child: _contactAction(icon: Icons.mail_outline_rounded, label: 'email2'.tr, onTap: () => _emailCustomer(customer.email), isDark: isDark)),
+                    ],
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+        SizedBox(height: 8.h),
+      ],
+    );
+  }
+
+  Widget _card({required bool isDark, required Widget child, EdgeInsetsGeometry? margin, VoidCallback? onTap}) {
+    final content = Container(
+      margin: margin ?? EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: isDark ? DarkThemeColor.cCardBackground : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.05), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: child,
+    );
+    if (onTap == null) return content;
+    return InkWell(borderRadius: BorderRadius.circular(16.r), onTap: onTap, child: content);
+  }
+
+  Widget _summaryStat({required IconData icon, required String label, required String value, required Color textColor, required Color subColor, String? suffix}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 32.w,
+          height: 32.w,
+          margin: EdgeInsets.only(top: 2.h),
+          decoration: BoxDecoration(color: AppColor.themeNavyBlueColor.withOpacity(.1), borderRadius: BorderRadius.circular(8.r)),
+          child: Icon(icon, size: 16.sp, color: AppColor.themeNavyBlueColor),
+        ),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label,style: TextStyle(fontSize: 12.sp ,color: subColor), maxLines: 1, overflow: TextOverflow.ellipsis),
+              SizedBox(height: 2.h),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Flexible(child: Text(value, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  if (suffix != null) ...[SizedBox(width: 3.w), Text(suffix, style: TextStyle(fontSize: 11.sp, color: subColor))],
+                ],
+              ),
+            ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _dataRow({required String label, required String value, required Color textColor, required Color subColor}) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 100.w, child: Text(label, style: TextStyle(fontSize: 13.sp, color: subColor))),
+          Expanded(child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textColor))),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 50.w,
-            height: 50.w,
-            decoration: BoxDecoration(
-              color: AppColor.themeNavyBlueColor.withOpacity(.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.person_outline_rounded,
-              size: 26.sp,
-              color: AppColor.themeNavyBlueColor,
-            ),
-          ),
-          SizedBox(width: 14.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  customer.name ?? 'customer_name'.tr,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (customer.email != null && customer.email!.isNotEmpty) ...[
-                  SizedBox(height: 4.h),
-                  Text(
-                    customer.email!,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-                if (customer.mobile != null && customer.mobile!.isNotEmpty) ...[
-                  SizedBox(height: 2.h),
-                  Text(
-                    customer.mobile!,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
+    );
+  }
+
+  Widget _contactAction({required IconData icon, required String label, required VoidCallback onTap, required bool isDark}) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14.r),
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 10.h),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14.r), border: Border.all(color: isDark ? Colors.white.withOpacity(.15) : Colors.grey.shade300)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: isDark ? Colors.white : AppColor.themeNavyBlueColor)),
+            SizedBox(width: 10.w),
+            Icon(icon, size: 14.sp, color: AppColor.themeNavyBlueColor),
+          ],
+        ),
       ),
     );
   }

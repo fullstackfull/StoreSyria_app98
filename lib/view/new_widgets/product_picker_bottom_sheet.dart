@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/product_controller/product_controller.dart';
 import 'package:store_go_app/core/model/product_model.dart';
-
 import '../widget/common_snak_bar_widget.dart';
 import 'network_image_widget.dart';
 

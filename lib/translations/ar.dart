@@ -548,5 +548,17 @@ const Map<String, String> ar = {
   "subtotal": "المجموع الفرعي",
   "create_order": "إنشاء الطلب",
   "please_select_customer": "يرجى اختيار الزبون",
-  "please_select_product": "يرجى اختيار المنتج"
+  "please_select_product": "يرجى اختيار المنتج",
+  "email2" : "الإيميل",
+  "error": "خطأ",
+  "could_not_open": "تعذر فتح الرابط",
+  "total_payments": "إجمالي المدفوعات",
+  "order_cost_avg": "متوسط تكلفة الطلب",
+  "latest_order": "آخر طلب",
+  "hide_orders": "إخفاء الطلبات",
+  "personal_data": "البيانات الشخصية",
+  "phone": "الهاتف",
+  "call": "اتصال",
+  "whatsapp": "واتساب",
+  'view_all_orders' : "عرض جميع الطلبات"
 };

@@ -88,7 +88,6 @@ class API {
   static String fcmTokenUrl = '/store/fcm-token';
   static String notificationUrl = '/notification';
 
-
   // new
   static String customersUrl = '/customerlist';
   static String addCustomerUrl = '/AddCustomer';

@@ -548,6 +548,17 @@ const Map<String, String> en = {
   "subtotal": "Subtotal",
   "create_order": "Create Order",
   "please_select_customer": "Please select a customer",
-  "please_select_product": "Please select a product"
-
+  "please_select_product": "Please select a product",
+  "email2" : "Email",
+  "error": "Error",
+  "could_not_open": "Could not open link",
+  "total_payments": "Total Payments",
+  "order_cost_avg": "Avg. Order Cost",
+  "latest_order": "Latest Order",
+  "hide_orders": "Hide Orders",
+  "personal_data": "Personal Data",
+  "phone": "Phone",
+  "call": "Call",
+  "whatsapp": "WhatsApp",
+  'view_all_orders' : "View all orders"
 };

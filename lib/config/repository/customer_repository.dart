@@ -46,7 +46,7 @@ class CustomerRepository {
     required int page,
   }) async {
     String endPoint =
-        '${API.customerOrdersUrl}?id=$customerId${API.andStoreIdUrl}${Prefs.getStoreID()}${API.andPageUrl}$page';
+        '${API.customerOrdersUrl}?id=$customerId${API.andStoreIdUrl}${Prefs.getStoreID()}${API.andPageUrl}$page&per_page=10';
 
     var response = await NetworkHttps.getRequest(endPoint);
     return response;
