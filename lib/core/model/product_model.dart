@@ -76,7 +76,6 @@ class ProductModelData {
 }
 
 class ProductData {
-  // --- معرفات وحالات ---
   int? id, categoryId, subcategoryId, brandId, labelId, taxId, shippingId;
   int? productStock, variantProduct, trending, averageRating, status;
   int? storeId, createdBy, isActive, maincategoryId, isReview;
@@ -84,13 +83,11 @@ class ProductData {
   int? customFieldStatus;
   double? productWeight;
 
-  // --- أسعار وكميات ---
-  double? price, salePrice;
+  double? price, salePrice,costPrice;
   String? finalPrice;
   int? discountAmount;
   String? discountType;
 
-  // --- نصوص ومعلومات أساسية ---
   String? name, slug, productCode, tag, tagApi;
   String? description, detail, specification;
   String? otherDescription, otherDescriptionApi;
@@ -100,16 +97,13 @@ class ProductData {
   String? taxStatus, previewType, previewVideo, previewContent, videoUrl;
   String? downloadableProduct, customField;
 
-  // --- صور وروابط ---
   String? coverImagePath, coverImageUrl;
   String? createdAt, updatedAt;
 
-  // --- خيارات ومتغيرات ---
   String? variantId, variantAttribute, productOption, productOptionApi;
   List<dynamic>? productOptionArray;
   List<OtherDescriptionArray>? otherDescriptionArray;
 
-  // --- حالات المستخدم ---
   bool? inCart, inWhishlist;
   String? stockStatus;
 
@@ -120,7 +114,7 @@ class ProductData {
     this.trending, this.averageRating, this.status, this.storeId, this.createdBy,
     this.isActive, this.maincategoryId, this.isReview, this.trackStock,
     this.minimumQuantity, this.maximumQuantity, this.lowStockThreshold,
-    this.customFieldStatus, this.price, this.salePrice, this.finalPrice,
+    this.customFieldStatus, this.price, this.salePrice,this.costPrice, this.finalPrice,
     this.discountAmount, this.discountType,
     this.name, this.slug, this.productCode, this.tag, this.tagApi,
     this.description, this.detail, this.specification, this.otherDescription,
@@ -136,7 +130,6 @@ class ProductData {
   });
 
   ProductData.fromJson(Map<String, dynamic> json) {
-    // المعرفات
     id = json['id'] as int?;
     categoryId = json['category_id'] as int?;
     subcategoryId = json['subcategory_id'] as int?;
@@ -154,7 +147,6 @@ class ProductData {
     } catch (_) {
       productWeight = null;
     }
-    // الحالات والأرقام الصحيحة
     productStock = json['product_stock'] as int?;
     variantProduct = json['variant_product'] as int?;
     trending = json['trending'] as int?;
@@ -169,7 +161,6 @@ class ProductData {
     customFieldStatus = json['custom_field_status'] as int?;
     discountAmount = json['discount_amount'] as int?;
 
-    // النصوص والمعرفات النصية
     name = json['name'] as String?;
     slug = json['slug'] as String?;
     productCode = json['product_code'] as String?;
@@ -192,22 +183,18 @@ class ProductData {
     retuenText = json['retuen_text'] as String?;
     stockStatus = json['stock_status'] as String?;
 
-    // الوصف والتفاصيل
     description = json['description'] as String?;
     detail = json['detail'] as String?;
     specification = json['specification'] as String?;
     otherDescription = json['other_description'] as String?;
     otherDescriptionApi = json['other_description_api'] as String?;
 
-    // الصور
     coverImagePath = json['cover_image_path'] as String?;
     coverImageUrl = json['cover_image_url'] as String?;
 
-    // التواريخ
     createdAt = json['created_at'] as String?;
     updatedAt = json['updated_at'] as String?;
 
-    // الخيارات والمتغيرات
     variantId = json['variant_id'] as String?;
     variantAttribute = json['variant_attribute'] as String?;
     productOption = json['product_option'] as String?;
@@ -215,7 +202,6 @@ class ProductData {
     defaultVariantName = json['default_variant_name'] as String?;
     defaultVariantPrice = json['default_variant_price'] as String?;
 
-    // حالة المستخدم
     inCart = json['in_cart'] as bool?;
     inWhishlist = json['in_whishlist'] as bool?;
 
@@ -227,10 +213,13 @@ class ProductData {
       salePrice = json['sale_price'] != null ? double.tryParse(json['sale_price'].toString()) : null;
     } catch (_) { salePrice = null; }
 
+    try {
+      costPrice = json['cost_price'] != null ? double.tryParse(json['cost_price'].toString()) : null;
+    } catch (_) { costPrice = null; }
+
     finalPrice = json['final_price'] as String?;
     discountType = json['discount_type'] as String?;
 
-    // المصفوفات والكائنات الفرعية
     if (json['other_description_array'] != null && json['other_description_array'] is List) {
       otherDescriptionArray = <OtherDescriptionArray>[];
       for (var v in json['other_description_array']) {
@@ -283,8 +272,11 @@ class ProductData {
     data['variant_id'] = variantId; data['variant_attribute'] = variantAttribute;
     data['product_option'] = productOption; data['product_option_api'] = productOptionApi;
     data['default_variant_name'] = defaultVariantName; data['default_variant_price'] = defaultVariantPrice;
-    data['in_cart'] = inCart; data['in_whishlist'] = inWhishlist;
-    data['price'] = price; data['sale_price'] = salePrice;
+    data['in_cart'] = inCart;
+    data['in_whishlist'] = inWhishlist;
+    data['price'] = price;
+    data['sale_price'] = salePrice;
+    data['cost_price'] = costPrice;
     data['final_price'] = finalPrice;
     data['discount_type'] = discountType;
 

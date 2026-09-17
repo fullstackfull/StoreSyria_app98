@@ -653,6 +653,16 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             keyboardType: TextInputType.number
         ),
         verticalSpace(12.h),
+        AddProductTextField(
+            controller: addProductController.costPriceController.value,
+            labelText: 'costPrice'.tr,
+            hintText: 'enter_cost_price'.tr,
+            validator: (value) {
+              return Validator.validateRequired(value!);
+            },
+            keyboardType: TextInputType.number
+        ),
+        verticalSpace(12.h),
         commonDropdownButtonWidget(
           labelText: 'discount_type'.tr,
           hint: 'select_option'.tr,
@@ -736,6 +746,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
 
   void _submitProductData() {
     addProductController.addProductData(
+      costPrice: addProductController.costPriceController.value.text.trim(),
       status: widget.status.toString(),
       isUpdate: widget.isUpdate,
       tag: addProductController.groupValue.value,

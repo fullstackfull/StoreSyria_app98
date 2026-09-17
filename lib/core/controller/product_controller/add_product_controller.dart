@@ -25,6 +25,7 @@ class AddProductController extends GetxController {
   var otherDescriptionController = TextEditingController().obs;
   var moreInfoController = TextEditingController().obs;
   var priceController = TextEditingController().obs;
+  var costPriceController = TextEditingController().obs;
   var salePriceController = TextEditingController().obs;
 
   RxString lastPrice = ''.obs;
@@ -185,6 +186,7 @@ class AddProductController extends GetxController {
     required String productId,
     required String description,
     required String price,
+    required String costPrice,
     required String salePrice,
     required String tag,
     required String discountType,
@@ -209,6 +211,7 @@ class AddProductController extends GetxController {
       'discount_amount': discountAmount,
       'product_stock': productStock,
       'trending': trending,
+      "cost_price" : costPrice,
 
 // TODO :: variant_product
       'variant_product': '0',
@@ -369,6 +372,7 @@ class AddProductController extends GetxController {
     otherDescriptionController.value.clear();
     moreInfoController.value.clear();
     priceController.value.clear();
+    costPriceController.value.clear();
     salePriceController.value.clear();
 
     selectedSubImages.clear();
