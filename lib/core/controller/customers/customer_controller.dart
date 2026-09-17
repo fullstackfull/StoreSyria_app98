@@ -351,6 +351,106 @@ void clearCustomerSearch() {
     }
   }
 
+Future<bool> updateCustomerData({
+  required String customerId,
+  required String firstName,
+  required String lastName,
+  required String email,
+  required String mobile,
+  String password = '',
+  int status = 1,
+
+  required String address,
+  required String cityId,
+  String deliveryInstructions = '',
+  int type = 1,
+}) async {
+  if (isDataAvailable.value) return false;
+
+  isDataAvailable.value = true;
+
+  try {
+    final Map<String, dynamic> data = {
+      'customer_id': customerId,
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': email,
+      'mobile': mobile,
+      'status': status,
+      'address': address,
+      'city_id': cityId,
+      'delivery_instructions': deliveryInstructions,
+      'type': type,
+    };
+
+    if (password.trim().isNotEmpty) {
+      data['password'] = password.trim();
+    }
+
+    final response = await customerRepository.updateCustomerData(
+      customerId: customerId,
+      data: data,
+    );
+
+    bool success = false;
+
+    await response.fold(
+      onSuccess: (data) async {
+        if (data['status'] == 1) {
+          success = true;
+
+          commonToast(
+            data['data']?['message'] ??
+                data['message'] ??
+                'Customer updated successfully',
+          );
+
+          CacheService.clear(_cacheCustomerKey);
+
+          customerList.clear();
+          currantPage.value = 1;
+          isScroll.value = true;
+          errorMessage.value = '';
+
+          await getCustomersData(1);
+        } else {
+          commonToast(
+            type: AppSnackBarType.error,
+            data['data']?['message'] ??
+                data['message'] ??
+                'Error',
+          );
+        }
+      },
+      onFailure: (
+          reason,
+          message,
+          validationErrors,
+          ) {
+        errorMessage.value = message;
+
+        commonToast(
+          type: AppSnackBarType.error,
+          message,
+        );
+      },
+    );
+
+    return success;
+  } catch (e) {
+    errorMessage.value = e.toString();
+
+    commonToast(
+      type: AppSnackBarType.error,
+      'error',
+    );
+
+    return false;
+  } finally {
+    isDataAvailable.value = false;
+  }
+}
+
   Future<void> deleteCustomerData({
     required String customerId,
   }) async {

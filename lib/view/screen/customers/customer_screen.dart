@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -46,10 +45,6 @@ class _CustomerScreenState extends State<CustomerScreen>
     });
   }
 
-  // ==================================================
-  // PAGINATION
-  // ==================================================
-
   void _onScroll() {
     if (!scrollController.hasClients) return;
 
@@ -65,10 +60,6 @@ class _CustomerScreenState extends State<CustomerScreen>
       );
     }
   }
-
-  // ==================================================
-  // REFRESH
-  // ==================================================
 
   Future<void> _fetchInitialData() async {
     customerController.currantPage.value = 1;
@@ -88,9 +79,7 @@ class _CustomerScreenState extends State<CustomerScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    final isDark =
-        Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () {
@@ -114,7 +103,7 @@ class _CustomerScreenState extends State<CustomerScreen>
                  duration: const Duration(milliseconds: 700),
                  ),
                  builder: (context) {
-                 return AddNewCustomerWidget(
+                 return const AddNewCustomerWidget(
                  isUpdate: false,
                  );
             }
@@ -137,11 +126,6 @@ class _CustomerScreenState extends State<CustomerScreen>
                 child: LoadingWidget(),
               );
             }
-
-            // ==================================================
-            // ERROR
-            // ==================================================
-
             if (customerController.errorMessage.isNotEmpty &&
                 customerController.customerList.isEmpty) {
 
@@ -167,11 +151,6 @@ class _CustomerScreenState extends State<CustomerScreen>
                 ),
               );
             }
-
-            // ==================================================
-            // EMPTY
-            // ==================================================
-
             if (customerController.customerList.isEmpty) {
 
               return RefreshIndicator(
@@ -199,11 +178,6 @@ class _CustomerScreenState extends State<CustomerScreen>
                 ),
               );
             }
-
-            // ==================================================
-            // LIST
-            // ==================================================
-
             return RefreshIndicator(
               backgroundColor: isDark
                   ? DarkThemeColor.cCardBackground
@@ -214,10 +188,6 @@ class _CustomerScreenState extends State<CustomerScreen>
                 physics:
                 const AlwaysScrollableScrollPhysics(),
                 slivers: [
-
-                  // ==================================================
-                  // TOTAL
-                  // ==================================================
 
                   SliverToBoxAdapter(
                     child: Padding(
@@ -244,10 +214,6 @@ class _CustomerScreenState extends State<CustomerScreen>
                     ),
                   ),
 
-                  // ==================================================
-                  // CUSTOMER LIST
-                  // ==================================================
-
                   SliverPadding(
                     padding: EdgeInsets.only(
                       bottom: 20.h,
@@ -256,17 +222,36 @@ class _CustomerScreenState extends State<CustomerScreen>
                       delegate:
                       SliverChildBuilderDelegate(
                             (context, index) {
-
-                          final customer =
-                          customerController
-                              .customerList[index];
+                          final customer = customerController.customerList[index];
+                          final fullName = customer.customerInfo?.name?.trim() ?? '';
+                          final parts = fullName.split(RegExp(r'\s+'));
 
                           return Padding(
                             padding: EdgeInsets.only(
                               bottom: 12.h,
                             ),
                             child: customerWidget(
-                              changeFun: () {},
+                              changeFun: () {
+                                Get.bottomSheet(
+                                  AddNewCustomerWidget(
+                                    isUpdate: true,
+                                    customerId: customer.id.toString(),
+                                    firstName: parts.isNotEmpty ? parts.first : '',
+                                    lastName: parts.length > 1
+                                        ? parts.sublist(1).join(' ')
+                                        : '',
+                                    email: customer.email,
+                                    mobile: customer.customerInfo?.mobile,
+                                    status: customer.status.toString(),
+                                    //TODO :: configuration this parameters
+                                    // address: customer.address,
+                                    // cityId: customer.cityId?.toString(),
+                                    // deliveryInstructions: customer.deliveryInstructions,
+                                    // addressType: customer.type?.toString(),
+                                  ),
+                                  isScrollControlled: true,
+                                );
+                              },
                               deleteFun: () {
                                 AppDialog.showCustomDialog(
                                   context: context,
@@ -299,10 +284,6 @@ class _CustomerScreenState extends State<CustomerScreen>
                       ),
                     ),
                   ),
-
-                  // ==================================================
-                  // PAGINATION LOADER
-                  // ==================================================
 
                   if (customerController.isScroll.value)
                     SliverToBoxAdapter(

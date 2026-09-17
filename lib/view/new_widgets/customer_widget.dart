@@ -36,9 +36,6 @@ Widget customerWidget({
   final city =
       customer?.email?.replaceAll('"', '').trim() ?? '';
 
-  final lastActive =
-      customer?.lastActive?.replaceAll('"', '').trim() ?? '';
-
   final bool isActive = customer?.status == 1;
 
   final statusLabel = customer?.statusText?.isNotEmpty == true
@@ -108,7 +105,7 @@ Widget customerWidget({
           ),
           _customerInfoRow(
             context: context,
-            icon: Icons.location_on_outlined,
+            icon: Icons.email_outlined,
             text: city.isNotEmpty ? city : '--',
             textColor: subTextColor,
             iconColor: AppColor.themeNavyBlueColor,

@@ -16,6 +16,10 @@ class AddNewCustomerWidget extends StatefulWidget {
   final String? mobile;
   final String? password;
   final String? status;
+  final String? address;
+  final String? cityId;
+  final String? deliveryInstructions;
+  final String? addressType;
 
   const AddNewCustomerWidget({
     super.key,
@@ -27,6 +31,10 @@ class AddNewCustomerWidget extends StatefulWidget {
     this.mobile,
     this.password,
     this.status,
+    this.address,
+    this.cityId,
+    this.deliveryInstructions,
+    this.addressType,
   });
 
   @override
@@ -55,7 +63,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
   String _addressType = '1';
   bool _isActive = true;
   bool _isLoading = false;
-  bool _isDefault = true;
   static const Color navyBlue = Color(0xFF172C4E);
   static const Color darkBg = Color(0xFF101820);
   static const Color darkCard = Color(0xFF182331);
@@ -74,12 +81,13 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
     _emailController = TextEditingController(text: widget.email ?? '');
     _mobileController = TextEditingController(text: widget.mobile ?? '');
     _passwordController = TextEditingController(text: widget.password ?? '');
-    _addressController = TextEditingController();
+    _addressController = TextEditingController(text: widget.address ?? '',);
     _countryIdController = TextEditingController();
-    _stateIdController = TextEditingController();
+    _stateIdController = TextEditingController(text: widget.cityId ?? '',);
     _postcodeController = TextEditingController();
     _addressTitleController = TextEditingController();
-    _deliveryInstructionsController = TextEditingController();
+    _deliveryInstructionsController = TextEditingController(text: widget.deliveryInstructions ?? '',);
+    _addressType = widget.addressType ?? '1';
     _isActive = widget.status == null || widget.status == '1';
     customerController.getStatesData();
   }
@@ -144,42 +152,55 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
-
     if (!(_formKeyStep2.currentState?.validate() ?? false)) {
       return;
     }
-
     if (_selectedState == null) {
       return;
     }
-
     if (_isLoading) return;
-
     setState(() {
       _isLoading = true;
     });
-
     try {
-      final success = await customerController.addCustomerData(
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        email: _emailController.text.trim(),
-        mobile: _mobileController.text.trim(),
-        password: _passwordController.text,
-        status: _isActive ? 1 : 0,
-        address: _addressController.text.trim(),
-        stateId: _selectedState.id.toString(),
-        postcode: "0000",
-        addressTitle: _addressTitleController.text.trim(),
-        isDefault: _isDefault ? 1 : 0,
-        deliveryInstructions: _deliveryInstructionsController.text.trim(),
-        addressType: _addressType,
-      );
-
+      bool success;
+      if (widget.isUpdate) {
+        success = await customerController.updateCustomerData(
+          customerId: widget.customerId!,
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          email: _emailController.text.trim(),
+          mobile: _mobileController.text.trim(),
+          password: _passwordController.text.trim(),
+          status: _isActive ? 1 : 0,
+          address: _addressController.text.trim(),
+          cityId: _selectedState.id.toString(),
+          deliveryInstructions:
+          _deliveryInstructionsController.text.trim(),
+          type: int.tryParse(_addressType) ?? 1,
+        );
+      } else {
+        success = await customerController.addCustomerData(
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          email: _emailController.text.trim(),
+          mobile: _mobileController.text.trim(),
+          password: _passwordController.text,
+          status: _isActive ? 1 : 0,
+          address: _addressController.text.trim(),
+          stateId: _selectedState.id.toString(),
+          postcode: "0000",
+          addressTitle: _addressTitleController.text.trim(),
+          deliveryInstructions:
+          _deliveryInstructionsController.text.trim(),
+          addressType: _addressType,
+        );
+      }
       if (success && mounted) {
         Navigator.of(context).pop();
       }
     } catch (e) {
+      debugPrint('Customer submit error: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -278,74 +299,6 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
                 : (value) {
               setState(() {
                 _isActive = value;
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDefaultAddressSwitch() {
-    final bool isDefault = _isDefault;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: navyBlue.withOpacity(isDark ? 0.22 : 0.07),
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: Icon(
-              isDefault ? Icons.star_rounded : Icons.star_border_rounded,
-              color: navyBlue,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'default_address'.tr,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  isDefault
-                      ? 'default_address_active'.tr
-                      : 'default_address_inactive'.tr,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDefault ? navyBlue : secondaryTextColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch.adaptive(
-            value: isDefault,
-            activeColor: navyBlue,
-            onChanged: _isLoading
-                ? null
-                : (value) {
-              setState(() {
-                _isDefault = value;
               });
             },
           ),
@@ -458,14 +411,20 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
               },
               textInputAction: TextInputAction.next,
             ),
+            if(!widget.isUpdate) ...[
             const SizedBox(height: 16),
             AppTextField(
               title: 'password'.tr,
-              hint: 'enter_password'.tr,
+              hint: widget.isUpdate
+                  ? 'leave_empty_to_keep_current_password'.tr
+                  : 'enter_password'.tr,
               controller: _passwordController,
               icon: Icons.lock_outline_rounded,
               validator: (value) {
                 final password = value ?? '';
+                if (widget.isUpdate && password.trim().isEmpty) {
+                  return null;
+                }
 
                 if (password.trim().isEmpty) {
                   return 'password_required'.tr;
@@ -482,7 +441,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
             const SizedBox(height: 16),
             _buildStatusSwitch(),
             const SizedBox(height: 8),
-          ],
+          ]],
         ),
       ),
     );
@@ -514,14 +473,13 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
             const SizedBox(height: 16),
             _buildAddressTypeDropdown(),
             const SizedBox(height: 16),
-            _buildDefaultAddressSwitch(),
-            const SizedBox(height: 16),
             AppTextField(
               title: 'delivery_instructions'.tr,
               hint: 'enter_delivery_instructions'.tr,
               controller: _deliveryInstructionsController,
               icon: Icons.delivery_dining_outlined,
-              maxLines: 1,
+              maxLines: 3,
+              keyboardType: TextInputType.multiline,
               textInputAction: TextInputAction.newline,
             ),
             const SizedBox(height: 8),
@@ -680,21 +638,39 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
       final isLoading = customerController.isLoading2.value;
       final cities = customerController.customerCityModel?.cities ?? [];
 
+      // تحديد المدينة عند التعديل
+      if (_selectedState == null &&
+          widget.isUpdate &&
+          widget.cityId != null &&
+          cities.isNotEmpty) {
+        try {
+          _selectedState = cities.firstWhere(
+                (city) => city.id.toString() == widget.cityId.toString(),
+          );
+        } catch (_) {
+          _selectedState = null;
+        }
+      }
+
       return DropdownButtonFormField<dynamic>(
         value: _selectedState,
         isExpanded: true,
+
         icon: Icon(
           Icons.keyboard_arrow_down_rounded,
           color: secondaryTextColor,
           size: 24,
         ),
+
         dropdownColor: cardColor,
         borderRadius: BorderRadius.circular(16),
         menuMaxHeight: 280.h,
 
         decoration: InputDecoration(
           labelText: 'city'.tr,
-          hintText: isLoading ? 'loading'.tr : 'select_city'.tr,
+          hintText: isLoading
+              ? 'loading'.tr
+              : 'select_city'.tr,
 
           prefixIcon: Container(
             margin: const EdgeInsets.all(9),
@@ -761,7 +737,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                city.name.toString() ?? '',
+                city.name.toString(),
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: textColor,
@@ -787,6 +763,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
           if (value == null) {
             return 'select_city'.tr;
           }
+
           return null;
         },
       );

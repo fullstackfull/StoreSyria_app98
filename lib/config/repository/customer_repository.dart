@@ -31,6 +31,20 @@ class CustomerRepository {
     return response;
   }
 
+  Future<dynamic> updateCustomerData({
+    required Map<String, dynamic> data,
+    required String customerId,
+  }) async {
+    String endPoint = '${API.updateCustomerUrl}${API.storeIdUrl}${Prefs.getStoreID()}&customer_id=$customerId';
+
+    var response = await NetworkHttps.postRequest(
+      endPoint,
+      data,
+    );
+
+    return response;
+  }
+
   Future<dynamic> deleteCustomerData({
     required String customerId,
   }) async {
