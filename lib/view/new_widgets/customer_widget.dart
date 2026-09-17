@@ -16,17 +16,25 @@ Widget customerWidget({
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
   final cardColor =
-  isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-  final textColor = isDark ? DarkThemeColor.cText : AppColor.cText;
+  isDark ? DarkThemeColor.cCardBackground : Colors.white;
+
+  final textColor =
+  isDark ? DarkThemeColor.cText : const Color(0xFF171717);
+
   final subTextColor =
-  isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
+  isDark ? DarkThemeColor.cSecondaryText : const Color(0xFF777777);
 
   final name =
       customer?.customerInfo?.name?.replaceAll('"', '').trim() ?? '';
+
   final mobile =
       customer?.customerInfo?.mobile?.replaceAll('"', '').trim() ?? '';
 
   final orders = customer?.orders ?? 0;
+
+  // TODO: replace with real city when available
+  final city =
+      customer?.email?.replaceAll('"', '').trim() ?? '';
 
   final lastActive =
       customer?.lastActive?.replaceAll('"', '').trim() ?? '';
@@ -46,81 +54,48 @@ Widget customerWidget({
     onTap: onTap,
     child: Container(
       width: double.infinity,
-      margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.symmetric(
-        horizontal: 14.w,
-        vertical: 13.h,
+      margin: EdgeInsets.only(bottom: 1.h),
+      padding: EdgeInsets.fromLTRB(
+        18.w,
+        6.h,
+        18.w,
+        8.h,
       ),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withOpacity(.06)
-              : Colors.grey.withOpacity(.10),
-        ),
+        borderRadius: BorderRadius.circular(18.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(
+              isDark ? .10 : .035,
+            ),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         children: [
-// Header
           Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              _avatar(displayName),
-
-              SizedBox(width: 11.w),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                        color: textColor,
-                      ),
-                    ),
-
-                    if (mobile.isNotEmpty) ...[
-                      SizedBox(height: 4.h),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.phone_outlined,
-                            size: 12.sp,
-                            color: subTextColor,
-                          ),
-                          SizedBox(width: 4.w),
-                          Expanded(
-                            child: Text(
-                              mobile,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                color: subTextColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
+              Text(
+                displayName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
                 ),
               ),
-
-              SizedBox(width: 6.w),
-
+              const Spacer(),
               _statusPill(
                 label: statusLabel,
                 isActive: isActive,
               ),
-
-              SizedBox(width: 2.w),
-
+              SizedBox(width: 8.w),
               AppPopupMenu(
                 viewFun: viewFun,
                 changeFun: changeFun,
@@ -131,84 +106,77 @@ Widget customerWidget({
               ),
             ],
           ),
-
-          SizedBox(height: 12.h),
-
-// Bottom information
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 10.w,
-              vertical: 9.h,
-            ),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withOpacity(.035)
-                  : Colors.grey.withOpacity(.045),
-              borderRadius: BorderRadius.circular(11.r),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _smallInfo(
-                    icon: Icons.shopping_bag_outlined,
-                    label: 'orders'.tr,
-                    value: orders.toString(),
-                    textColor: textColor,
-                    subTextColor: subTextColor,
-                  ),
-                ),
-
-                Container(
-                  width: 1,
-                  height: 28.h,
-                  color: isDark
-                      ? Colors.white.withOpacity(.08)
-                      : Colors.grey.withOpacity(.15),
-                ),
-
-                if (lastActive.isNotEmpty)
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 10.w),
-                      child: _smallInfo(
-                        icon: Icons.schedule_outlined,
-                        label: 'last_active'.tr,
-                        value: lastActive,
-                        textColor: textColor,
-                        subTextColor: subTextColor,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+          _customerInfoRow(
+            context: context,
+            icon: Icons.location_on_outlined,
+            text: city.isNotEmpty ? city : '--',
+            textColor: subTextColor,
+            iconColor: AppColor.themeNavyBlueColor,
           ),
+
+          SizedBox(height: 5.h),
+
+          _customerInfoRow(
+            context: context,
+            icon: Icons.shopping_bag_outlined,
+            text: '${'orders'.tr} ${orders.toString()}',
+            textColor: subTextColor,
+            iconColor: AppColor.themeNavyBlueColor,
+          ),
+
+          if (mobile.isNotEmpty) ...[
+            SizedBox(height: 5.h),
+            _customerInfoRow(
+              context: context,
+              icon: Icons.phone_outlined,
+              text: mobile,
+              textColor: subTextColor,
+              iconColor: AppColor.themeNavyBlueColor,
+            ),
+          ],
         ],
       ),
     ),
   );
 }
-
-Widget _avatar(String name) {
-  return Container(
-    width: 44.w,
-    height: 44.w,
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: _avatarGradient(name),
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+Widget _customerInfoRow({
+  required BuildContext context,
+  required IconData icon,
+  required String text,
+  required Color textColor,
+  required Color iconColor,
+}) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.start,
+    children: [
+      Container(
+        width: 22.w,
+        height: 22.w,
+        decoration: BoxDecoration(
+          color: iconColor.withOpacity(.07),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          size: 15.sp,
+          color: iconColor,
+        ),
       ),
-      borderRadius: BorderRadius.circular(13.r),
-    ),
-    alignment: Alignment.center,
-    child: Text(
-      _getInitials(name),
-      style: TextStyle(
-        fontSize: 15.sp,
-        fontWeight: FontWeight.w800,
-        color: Colors.white,
+      SizedBox(width: 8.w),
+      Flexible(
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontSize: 13.5.sp,
+            fontWeight: FontWeight.w500,
+            color: textColor,
+          ),
+        ),
       ),
-    ),
+    ],
   );
 }
 
@@ -229,71 +197,6 @@ String _getInitials(String name) {
       parts[0].substring(0, 1) +
           parts[1].substring(0, 1)
   ).toUpperCase();
-}
-
-List<Color> _avatarGradient(String seed) {
-  const gradients = <List<Color>>[
-    [Color(0xFF6C5CE7), Color(0xFFA29BFE)],
-    [Color(0xFF00B894), Color(0xFF55EFC4)],
-    [Color(0xFFFF9F43), Color(0xFFFFC069)],
-    [Color(0xFF0984E3), Color(0xFF74B9FF)],
-    [Color(0xFFE17055), Color(0xFFFAB1A0)],
-  ];
-
-  final index =
-  seed.isEmpty ? 0 : seed.codeUnitAt(0) % gradients.length;
-
-  return gradients[index];
-}
-
-Widget _smallInfo({
-  required IconData icon,
-  required String label,
-  required String value,
-  required Color textColor,
-  required Color subTextColor,
-}) {
-  return Row(
-    children: [
-      Icon(
-        icon,
-        size: 14.sp,
-        color: AppColor.themeNavyBlueColor,
-      ),
-
-      SizedBox(width: 6.w),
-
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 9.5.sp,
-                color: subTextColor,
-              ),
-            ),
-
-            SizedBox(height: 1.h),
-
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w700,
-                color: textColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
 }
 
 Widget _statusPill({
