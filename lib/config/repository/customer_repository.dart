@@ -18,6 +18,14 @@ class CustomerRepository {
     return response;
   }
 
+  Future<dynamic> searchCustomerData(String name) async {
+    String endPoint = '${API.searchCustomerUrl}${API.storeIdUrl}${Prefs.getStoreID()}';
+
+    var response = await NetworkHttps.postRequest(endPoint, {"name": name},
+    );
+    return response;
+  }
+
   Future<dynamic> addCustomerData({
     required Map<String, dynamic> data,
   }) async {

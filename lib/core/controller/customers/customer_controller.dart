@@ -48,15 +48,19 @@ final SearchRepository searchRepository = SearchRepository();
     StoreChangeService.instance.register(() => this);
   }
 
-  // ==================== Search (جديد) ===================
-  RxList<CustomerData> searchResults = <CustomerData>[].obs;
-  RxBool isSearchingCustomers = false.obs;
-  RxBool isCustomerSearchActive = false.obs;
+// ==================== CUSTOMER SEARCH ====================
 
-  Future<void> searchCustomerData({required String name}) async {
-    if (name.trim().isEmpty) {
-      isCustomerSearchActive.value = false;
-      searchResults.clear();
+RxList<CustomerData> searchResults = <CustomerData>[].obs;
+RxBool isSearchingCustomers = false.obs;
+RxBool isCustomerSearchActive = false.obs;
+
+  Future<void> searchCustomerData({
+    required String name,
+  }) async {
+    final searchText = name.trim();
+
+    if (searchText.isEmpty) {
+      clearCustomerSearch();
       return;
     }
 
@@ -64,27 +68,54 @@ final SearchRepository searchRepository = SearchRepository();
     isSearchingCustomers.value = true;
 
     try {
-      final result = await searchRepository.getSearchData(
-        type: "customer",
-        name: name,
-      );
+      final response =
+      await customerRepository.searchCustomerData(searchText);
 
-      result.fold(
+      response.fold(
         onSuccess: (data) {
           searchResults.clear();
-          final responseData = data['data'];
-          if (responseData is List) {
-            for (final item in responseData) {
-              searchResults.add(CustomerData.fromJson(item));
+
+          if (data['status'] == 1) {
+            final responseData = data['data'];
+
+            if (responseData is Map) {
+              final customers = responseData['customers'];
+
+              if (customers is List) {
+                searchResults.assignAll(
+                  customers
+                      .map(
+                        (item) => CustomerData.fromJson(
+                      Map<String, dynamic>.from(item),
+                    ),
+                  )
+                      .toList(),
+                );
+              }
             }
+          } else {
+            commonToast(
+              data['data']?['message'] ??
+                  data['message'] ??
+                  'Error',
+            );
           }
         },
-        onFailure: (reason, message, validationErrors) {
-          commonToast(message.isNotEmpty ? message : 'search_failed'.tr);
+        onFailure: (
+            reason,
+            message,
+            validationErrors,
+            ) {
+          searchResults.clear();
+
+          commonToast(
+            message.isNotEmpty ? message : 'search_failed'.tr,
+          );
         },
       );
     } catch (e) {
-      commonToast('search_failed'.tr);
+      searchResults.clear();
+      commonToast(e.toString());
     } finally {
       isSearchingCustomers.value = false;
     }
@@ -92,9 +123,9 @@ final SearchRepository searchRepository = SearchRepository();
 
 void clearCustomerSearch() {
   isCustomerSearchActive.value = false;
+  isSearchingCustomers.value = false;
   searchResults.clear();
 }
-
 
   // =========================
   // CACHE

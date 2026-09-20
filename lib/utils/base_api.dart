@@ -120,5 +120,6 @@ class API {
   static String updateStoreInfoUrl = '/updateStoreOwnerInfo';
   static String getStatesUrl = '/getStatesByCountry';
   static String updateCustomerUrl = '/update-customer';
+  static String searchCustomerUrl = '/searchCustomerByName';
 
 }
