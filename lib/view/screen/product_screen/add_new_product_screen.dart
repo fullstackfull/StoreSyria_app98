@@ -84,6 +84,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (widget.isUpdate) {
         _initializeData();
+        await addProductController.fetchProductDetailForUpdate(widget.productId ?? '');
       } else {
         addProductController.clear();
       }
@@ -133,7 +134,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
   static const _taxOptions = ['none', 'taxable', 'shipping'];
   static const _stockStatusOptions = ['in_stock', 'out_of_stock', 'on_backorder'];
 
-  /// يحوّل أي قيمة قديمة ('1' / '0' / null) لقيمة يقبلها الـ backend
   String _normalizeStockStatus(String? v) {
     if (v == null || v.isEmpty) return 'in_stock';
     if (_stockStatusOptions.contains(v)) return v;
@@ -230,9 +230,9 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                       borderColor: borderColor,
                       softBg: softBg,
                       textColor: textColor,
-                      title: "inventory".tr,
+                      title: "stock".tr,
                       subtitle: null,
-                      icon: Icons.warehouse_outlined,
+                      icon: Icons.other_houses_outlined,
                       child: _buildInventorySection(
                           textColor, softBg, borderColor),
                     ),
@@ -812,8 +812,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             onChanged: (v) => c.trackStock.value = v ? '1' : '0',
           ),
         ),
-        // الكمية بتظهر فقط إذا تتبع المخزون شغّال
-        if (c.trackStock.value == '1') ...[
           verticalSpace(16.h),
           _requiredLabel('stock'.tr, textColor),
           AddProductTextField(
@@ -826,7 +824,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
               return Validator.validateRequired(value ?? '');
             },
           ),
-        ],
         verticalSpace(16.h),
         _label('stock_status'.tr),
         Wrap(
@@ -842,8 +839,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             );
           }).toList(),
         ),
-      ],
-    );
+   ] );
   }
 
   // --- Shipping & tax ---
@@ -1112,7 +1108,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           ? '0'
           : c.stockQtyController.value.text.trim(),
       trending: c.trending.value,
-
       // Images
       coverImage: c.coverImage.value,
       selectedSubImages: c.selectedSubImages,

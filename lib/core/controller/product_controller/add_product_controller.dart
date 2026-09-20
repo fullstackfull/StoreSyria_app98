@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:store_go_app/config/repository/product_repository.dart';
 import 'package:store_go_app/core/controller/product_controller/product_controller.dart';
+import 'package:store_go_app/core/controller/product_controller/product_detail_controller.dart';
 import 'package:store_go_app/core/model/create_product_model.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
@@ -15,11 +16,15 @@ class AddProductController extends GetxController {
   ProductController productController = Get.find();
   ProductRepository productRepository = ProductRepository();
 
+  static const _taxOptions = ['none', 'taxable', 'shipping'];
+  static const _stockStatusOptions = ['in_stock', 'out_of_stock', 'on_backorder'];
+
   RxBool isTrending = true.obs;
   RxBool isStatus = true.obs;
   RxBool isStock = true.obs;
   RxBool isVariant = false.obs;
   RxBool isAddLoading = false.obs;
+  RxBool isDetailLoading = false.obs;
 
   var productName = TextEditingController().obs;
   var stockQtyController = TextEditingController().obs;
@@ -94,6 +99,50 @@ class AddProductController extends GetxController {
     return await FileHelper.pickImage();
   }
 
+  Future<void> fetchProductDetailForUpdate(String productId) async {
+    if (productId.isEmpty) return;
+
+    isDetailLoading.value = true;
+
+    try {
+      final detailController = Get.put(ProductDetailController());
+      await detailController.getProductDetail(productId);
+
+      final product = detailController.productDetailModel?.data?.product;
+      final subImages = detailController.productDetailModel?.data?.subImages ?? [];
+
+      // الصور الفرعية
+      final urls = subImages
+          .map((img) {
+        final fullUrl = img.imagePathFullUrl?.trim() ?? '';
+        if (fullUrl.isNotEmpty) return fullUrl;
+        return img.imagePath?.trim() ?? '';
+      })
+          .where((url) => url.isNotEmpty)
+          .toList();
+      existingSubImages.assignAll(urls);
+
+      // الوزن
+      productWeightController.value.text =
+          product?.productWeight?.toString() ?? '';
+
+      // حالة الضريبة والحقول المرتبطة بيها
+      final fetchedTaxStatus = product?.taxStatus;
+      taxStatus.value = (fetchedTaxStatus != null &&
+          _taxOptions.contains(fetchedTaxStatus))
+          ? fetchedTaxStatus
+          : 'none';
+      taxIdController.value.text = product?.taxId?.toString() ?? '';
+      shippingIdController.value.text = product?.shippingId?.toString() ?? '';
+
+      trackStock.value = product?.trackStock?.toString() ?? '1';
+      stockStatus.value = product?.stockStatus.toString() ?? 'in_stock';
+
+    } finally {
+      isDetailLoading.value = false;
+    }
+  }
+
   Future<void> getCreateProductData({required bool isUpdate}) async {
     final response = await productRepository.getCreateProductData();
 
@@ -146,7 +195,6 @@ class AddProductController extends GetxController {
     );
   }
 
-  /// تحميل صورة موجودة على السيرفر كملف مؤقت عشان نقدر نبعتها مع الفورم
   Future<String?> _downloadToTemp(String url, String name) async {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 15);
@@ -230,6 +278,7 @@ class AddProductController extends GetxController {
       if (coverImage.isNotEmpty) {
         files['cover_image'] = coverImage;
       } else if (existingCoverImageUrl.isNotEmpty) {
+        // ما اختار صورة جديدة → نبعت القديمة كملف
         final path = await _downloadToTemp(
           existingCoverImageUrl,
           'cover_${DateTime.now().millisecondsSinceEpoch}',
@@ -269,6 +318,7 @@ class AddProductController extends GetxController {
 
       if (success) {
         productController.getProductData(1);
+
 
         if (Get.isSnackbarOpen) {
           await Get.closeCurrentSnackbar();
@@ -331,5 +381,6 @@ class AddProductController extends GetxController {
     isVariant.value = false;
 
     isAddLoading.value = false;
+    isDetailLoading.value = false;
   }
 }

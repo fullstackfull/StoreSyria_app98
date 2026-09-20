@@ -14,6 +14,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/controller/product_controller/product_detail_controller.dart';
 import 'package:store_go_app/core/controller/product_controller/add_review_controller.dart';
 import '../../../core/model/product_model.dart';
+import '../../../utils/helper.dart';
 import '../../new_widgets/convert_to_ago.dart';
 import '../../widget/app_dialog.dart';
 
@@ -436,19 +437,6 @@ class _ProductDetailScreenState
           _thinDivider(borderColor),
 
           _infoRow(
-              label: 'discount_amount'.tr,
-              value: discount,
-              primaryTextColor:
-              primaryTextColor,
-              secondaryTextColor:
-              secondaryTextColor,
-              leadingIcon:
-              Icons.price_check,
-          ),
-
-          _thinDivider(borderColor),
-
-          _infoRow(
             label: 'product_stock'.tr,
             value: productStock,
             primaryTextColor:
@@ -462,15 +450,17 @@ class _ProductDetailScreenState
           _thinDivider(borderColor),
 
           _infoRow(
-            label: 'sku'.tr,
-            value:
-            sku.trim().isEmpty ? '-' : sku,
+            label: 'created_at'.tr,
+            value: dateFormatted(
+               date: product.createdAt ?? '',
+               formatType: formatForDateTime(
+               FormatType.dateTime2)),
             primaryTextColor:
             primaryTextColor,
             secondaryTextColor:
             secondaryTextColor,
             leadingIcon:
-            Icons.qr_code_rounded,
+            Icons.date_range,
           ),
       ]),
     );

@@ -69,21 +69,10 @@ Widget allProductsListItemWidget({
   final isBackorder = stockValue == 'on_backorder';
 
   final isOutOfStock =
-      stockValue == 'out_of_stock' ||
-          stockValue == '0';
+      stockValue == 'out_of_stock' || stockValue == '0';
 
   final finalPrice = double.tryParse(price) ?? 0;
-
-  final sale = double.tryParse(salePrice ?? '') ?? 0;
-
-  final hasDiscount =
-      !variant &&
-          sale > 0 &&
-          finalPrice > 0 &&
-          sale != finalPrice;
-
-  final displayPrice =
-  hasDiscount ? sale : finalPrice;
+  final displayPrice = finalPrice;
 
 
   final isValidImageUrl =
@@ -499,28 +488,6 @@ Widget allProductsListItemWidget({
                             color: textColor,
                           ),
                         ),
-
-                        if (hasDiscount) ...[
-                          SizedBox(width: 6.w),
-
-                          Flexible(
-                            child: Text(
-                              '${finalPrice.toStringAsFixed(2)}',
-                              maxLines: 1,
-                              overflow:
-                              TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 9.sp,
-                                fontWeight:
-                                FontWeight.w500,
-                                color: subTextColor,
-                                decoration:
-                                TextDecoration
-                                    .lineThrough,
-                              ),
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ],
