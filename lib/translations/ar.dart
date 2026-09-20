@@ -561,5 +561,15 @@ const Map<String, String> ar = {
   "call": "اتصال",
   "whatsapp": "واتساب",
   'view_all_orders' : "عرض جميع الطلبات",
-  "tap_again_to_close" : "اضغط مرة أخرى للخروج"
+  "tap_again_to_close" : "اضغط مرة أخرى للخروج",
+  'basic_information': 'المعلومات الأساسية',
+  'product_images': 'صور المنتج',
+  'price_and_stock': 'السعر والمخزون',
+  'enter_product_name': 'أدخل اسم المنتج',
+  'enter_product_description': 'أدخل وصف المنتج',
+  'choose_files': 'اختر الملفات',
+  'variant_type': 'نوع المتغير',
+  'enter_sale_price': 'أدخل سعر البيع',
+  'costPrice': 'سعر التكلفة',
+  'enter_cost_price': 'أدخل سعر التكلفة',
 };

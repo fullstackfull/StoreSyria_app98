@@ -1,20 +1,16 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_print, invalid_use_of_protected_member
-
 import 'dart:io';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../core/model/create_product_model.dart';
+import '../../widget/app_dialog.dart';
 import 'product_widget.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:store_go_app/utils/colors.dart';
-import 'package:store_go_app/utils/images.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_drop_down_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
@@ -26,18 +22,25 @@ class AddNewProductScreen extends StatefulWidget {
   final int? status;
   final String? productName;
   final double? price;
-  final String? discount;
+  final double? costPrice;
   final double? salePrice;
   final String? qty;
   final String? productCategories;
   final String? productTax;
   final String? variantName;
+  final String? variantProduct;
   final String? productDescription;
   final String? trending;
   final String? categoryId;
   final String? discountType;
   final String? coverImageUrl;
   final List<String>? subImageUrls;
+  final String? taxId;
+  final String? taxStatus;
+  final String? shippingId;
+  final double? productWeight;
+  final String? trackStock;
+  final String? stockStatus;
 
   const AddNewProductScreen({
     super.key,
@@ -53,11 +56,18 @@ class AddNewProductScreen extends StatefulWidget {
     this.subImageUrls,
     this.productTax,
     this.variantName,
+    this.variantProduct,
     this.productDescription,
     this.trending,
     this.status,
-    this.discount,
     this.salePrice,
+    this.costPrice,
+    this.taxId,
+    this.taxStatus,
+    this.shippingId,
+    this.productWeight,
+    this.trackStock,
+    this.stockStatus,
   });
 
   @override
@@ -71,50 +81,78 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeData();
-      getData();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.isUpdate) {
+        _initializeData();
+      } else {
+        addProductController.clear();
+      }
+      await addProductController.getCreateProductData(
+          isUpdate: widget.isUpdate);
     });
   }
 
   void _initializeData() {
-    if (widget.isUpdate) {
-      addProductController.productName.value.text = widget.productName ?? '';
-      addProductController.stockQtyController.value.text = widget.qty ?? '';
-      addProductController.priceController.value.text = widget.price.toString() ?? '';
-      addProductController.salePriceController.value.text = widget.salePrice.toString() ?? '';
-      addProductController.categoryId.value = widget.categoryId ?? '';
-      addProductController.category.value = widget.productCategories ?? '';
+    final c = addProductController;
 
-      addProductController.discountType.value = widget.discountType ?? 'Flat';
+    c.productName.value.text = widget.productName ?? '';
+    c.costPriceController.value.text = widget.costPrice?.toString() ?? '';
+    c.stockQtyController.value.text = widget.qty ?? '';
+    c.priceController.value.text = widget.price?.toString() ?? '';
+    c.salePriceController.value.text = widget.salePrice?.toString() ?? '';
+    c.productDescriptionController.value.text =
+        widget.productDescription ?? '';
+    c.categoryId.value = widget.categoryId ?? '';
+    c.category.value = widget.productCategories ?? '';
 
-      addProductController.isTrending.value = widget.trending == '1';
-      addProductController.trending.value = widget.trending ?? '1';
-      addProductController.isStatus.value = widget.status == 1;
-      addProductController.status.value = widget.status?.toString() ?? '1';
+    c.isTrending.value = widget.trending == '1';
+    c.trending.value = widget.trending ?? '1';
 
-      addProductController.existingCoverImageUrl.value = widget.coverImageUrl ?? '';
-      addProductController.existingSubImages.assignAll(widget.subImageUrls ?? []);
-    } else {
-      addProductController.clear();
-    }
+    c.isStatus.value = widget.status == 1;
+    c.status.value = widget.status?.toString() ?? '1';
+
+    c.isVariant.value = widget.variantProduct == '1';
+    c.variantType.value = widget.variantProduct ?? '0';
+
+    c.taxIdController.value.text = widget.taxId ?? '';
+    c.taxStatus.value = _taxOptions.contains(widget.taxStatus)
+        ? widget.taxStatus!
+        : 'none';
+    c.shippingIdController.value.text = widget.shippingId ?? '';
+    c.productWeightController.value.text =
+        widget.productWeight?.toString() ?? '';
+    c.trackStock.value = widget.trackStock ?? '1';
+    c.stockStatus.value = _normalizeStockStatus(widget.stockStatus);
+
+    c.coverImage.value = '';
+    c.selectedSubImages.clear();
+    c.existingCoverImageUrl.value = widget.coverImageUrl ?? '';
+    c.existingSubImages.assignAll(widget.subImageUrls ?? []);
   }
 
-  void getData() async {
-   // await addProductController.getCreateProductData(isUpdate: false);
+  static const _taxOptions = ['none', 'taxable', 'shipping'];
+  static const _stockStatusOptions = ['in_stock', 'out_of_stock', 'on_backorder'];
+
+  /// يحوّل أي قيمة قديمة ('1' / '0' / null) لقيمة يقبلها الـ backend
+  String _normalizeStockStatus(String? v) {
+    if (v == null || v.isEmpty) return 'in_stock';
+    if (_stockStatusOptions.contains(v)) return v;
+    if (v == '0') return 'out_of_stock';
+    return 'in_stock';
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? Color(0xFF14181F) : Color(0xFFF6F7F9);
-    final cardColor = isDark ? Color(0xFF1E2530) : Colors.white;
+    final bgColor = isDark ? const Color(0xFF10141B) : const Color(0xFFF4F6F9);
+    final cardColor = isDark ? const Color(0xFF1B222C) : Colors.white;
     final textColor = isDark ? Colors.white : AppColor.cText;
     final hintColor = isDark ? Colors.grey.shade400 : AppColor.cFont;
-    final borderColor = AppColor.cBorder;
+    final borderColor =
+    isDark ? Colors.white.withOpacity(0.08) : AppColor.cBorder;
     final softBg = isDark
-        ? AppColor.themeNavyBlueColor.withOpacity(0.18)
-        : AppColor.themeNavyBlueColor.withOpacity(0.06);
+        ? AppColor.themeNavyBlueColor.withOpacity(0.16)
+        : AppColor.themeNavyBlueColor.withOpacity(0.07);
 
     return GestureDetector(
       onTap: () {
@@ -126,13 +164,13 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           isBack: true,
           title: widget.isUpdate ? "update_product".tr : "new_product".tr,
           label: null,
-          onNewLabelTap: () { },
+          onNewLabelTap: () {},
         ),
         body: SafeArea(
           child: Obx(() {
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.all(16.w),
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
               child: Form(
                 key: formKey,
                 child: Column(
@@ -145,40 +183,84 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                       softBg: softBg,
                       textColor: textColor,
                       title: "basic_information".tr,
+                      subtitle: null,
                       icon: Icons.inventory_2_outlined,
-                      child: _buildBasicInfoSection(textColor, hintColor, borderColor, cardColor, softBg, isDark),
+                      child: _buildBasicInfoSection(textColor, hintColor,
+                          borderColor, cardColor, softBg, isDark),
                     ),
-                    verticalSpace(14.h),
+                    verticalSpace(16.h),
                     _sectionCard(
                       cardColor: cardColor,
                       borderColor: borderColor,
                       softBg: softBg,
                       textColor: textColor,
                       title: "description".tr,
+                      subtitle: null,
                       icon: Icons.description_outlined,
-                      child: _buildDescriptionSection(textColor, hintColor, borderColor, cardColor, softBg, isDark),
+                      child: _buildDescriptionSection(textColor, hintColor,
+                          borderColor, cardColor, softBg, isDark),
                     ),
-                    verticalSpace(14.h),
+                    verticalSpace(16.h),
                     _sectionCard(
                       cardColor: cardColor,
                       borderColor: borderColor,
                       softBg: softBg,
                       textColor: textColor,
                       title: "product_images".tr,
+                      subtitle: null,
                       icon: Icons.image_outlined,
-                      child: _buildImagesSection(textColor, hintColor, borderColor, softBg),
+                      child: _buildImagesSection(
+                          textColor, hintColor, borderColor, softBg),
                     ),
-                    verticalSpace(14.h),
+                    verticalSpace(16.h),
                     _sectionCard(
                       cardColor: cardColor,
                       borderColor: borderColor,
                       softBg: softBg,
                       textColor: textColor,
-                      title: "price_and_stock".tr,
+                      title: "pricing".tr,
+                      subtitle: null,
                       icon: Icons.payments_outlined,
-                      child: _buildPricingSection(textColor, hintColor, borderColor, cardColor, softBg, isDark),
+                      child: _buildPricingSection(textColor, hintColor,
+                          borderColor, cardColor, softBg, isDark),
                     ),
-                    verticalSpace(24.h),
+                    verticalSpace(16.h),
+                    _sectionCard(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      softBg: softBg,
+                      textColor: textColor,
+                      title: "inventory".tr,
+                      subtitle: null,
+                      icon: Icons.warehouse_outlined,
+                      child: _buildInventorySection(
+                          textColor, softBg, borderColor),
+                    ),
+                    verticalSpace(16.h),
+                    _sectionCard(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      softBg: softBg,
+                      textColor: textColor,
+                      title: "shipping_and_tax".tr,
+                      subtitle: null,
+                      icon: Icons.local_shipping_outlined,
+                      child: _buildShippingTaxSection(
+                          textColor, softBg, borderColor),
+                    ),
+                    verticalSpace(16.h),
+                    _sectionCard(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      softBg: softBg,
+                      textColor: textColor,
+                      title: "product_settings".tr,
+                      subtitle: null,
+                      icon: Icons.settings_outlined,
+                      child: _buildSettingsSection(
+                          textColor, softBg, borderColor),
+                    ),
+                    verticalSpace(26.h),
                     _buildActionButtons(),
                     verticalSpace(10.h),
                   ],
@@ -198,21 +280,22 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     required Color softBg,
     required Color textColor,
     required String title,
+    String? subtitle,
     required IconData icon,
     required Widget child,
   }) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -222,48 +305,65 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(6.w),
+                padding: EdgeInsets.all(9.w),
                 decoration: BoxDecoration(
                   color: softBg,
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(icon, size: 16.sp, color: AppColor.themeNavyBlueColor),
+                child: Icon(icon,
+                    size: 18.sp, color: AppColor.themeNavyBlueColor),
               ),
-              horizontalSpace(8.w),
-              Text(
-                title,
-                style: pSemiBold12.copyWith(fontSize: 14.sp, color: textColor),
+              horizontalSpace(10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: pSemiBold12.copyWith(
+                          fontSize: 15.sp, color: textColor),
+                    ),
+                    if (subtitle != null) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        subtitle,
+                        style: pRegular12.copyWith(
+                            fontSize: 11.sp, color: AppColor.cDarkGreyFont),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ],
           ),
-          verticalSpace(14.h),
+          verticalSpace(16.h),
+          Divider(color: borderColor, height: 1),
+          verticalSpace(16.h),
           child,
         ],
       ),
     );
   }
 
-  // --- Extracted Widgets ---
-
-  Widget _buildBasicInfoSection(
-      Color textColor, Color hintColor, Color borderColor, Color cardColor, Color softBg, bool isDark) {
+  // --- Basic info ---
+  Widget _buildBasicInfoSection(Color textColor, Color hintColor,
+      Color borderColor, Color cardColor, Color softBg, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _requiredLabel("product_name_required".tr, textColor),
         AddProductTextField(
           controller: addProductController.productName.value,
-          labelText: "product_name_required".tr,
+          labelText: null,
           hintText: 'enter_product_name'.tr,
-          onChanged: (value) {
-            Validator.validateRequired(value);
-          },
           validator: (value) {
-            return Validator.validateRequired(value!);
+            return Validator.validateRequired(value ?? '');
           },
         ),
-        verticalSpace(14.h),
+        verticalSpace(16.h),
+        _requiredLabel('category'.tr, textColor),
         commonDropdownButtonWidget<Category>(
-          labelText: 'category'.tr,
+          labelText: '',
           hint: 'select_category'.tr,
           value: addProductController.categoryTypeList.firstWhereOrNull(
                 (c) => c.id.toString() == addProductController.categoryId.value,
@@ -287,65 +387,18 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     );
   }
 
-  Widget _buildDescriptionSection(
-      Color textColor, Color hintColor, Color borderColor, Color cardColor, Color softBg, bool isDark) {
-
-    final bool hasCurrentDescription = widget.isUpdate &&
-        (widget.productDescription?.trim().isNotEmpty ?? false);
-
+  // --- Description ---
+  Widget _buildDescriptionSection(Color textColor, Color hintColor,
+      Color borderColor, Color cardColor, Color softBg, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (hasCurrentDescription) ...[
-          Text(
-            "current_description_readonly".tr,
-            style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
-          ),
-          verticalSpace(8.h),
-          Container(
-            width: double.infinity,
-            constraints: BoxConstraints(minHeight: 80.h, maxHeight: 200.h),
-            padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(
-              color: softBg,
-              borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(color: borderColor.withOpacity(0.5)),
-            ),
-            child: SingleChildScrollView(
-              child: Html(
-                data: widget.productDescription ?? '',
-                style: {
-                  "body": Style(
-                    fontSize: FontSize(13.sp),
-                    color: textColor,
-                    margin: Margins.zero,
-                    padding: HtmlPaddings.zero,
-                  ),
-                  "p": Style(
-                    margin: Margins.zero,
-                    padding: HtmlPaddings.zero,
-                  ),
-                },
-              ),
-            ),
-          ),
-          verticalSpace(16.h),
-          Divider(color: borderColor),
-          verticalSpace(16.h),
-
-          Text(
-            "new_description_optional".tr,
-            style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
-          ),
-          verticalSpace(8.h),
-        ],
+        _label('product_description'.tr),
         AddProductTextField(
           controller: addProductController.productDescriptionController.value,
-          labelText: hasCurrentDescription ? null : 'product_description'.tr,
-          hintText: hasCurrentDescription
-              ? 'enter_new_description_replace'.tr
-              : 'product_description'.tr,
-          maxLines: 5,
+          labelText: null,
+          hintText: 'enter_product_description'.tr,
+          maxLines: 6,
           validator: (value) {
             return null;
           },
@@ -354,193 +407,213 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     );
   }
 
-  Widget _buildImagesSection(Color textColor, Color hintColor, Color borderColor, Color softBg) {
+  // --- Images ---
+  Widget _buildImagesSection(
+      Color textColor, Color hintColor, Color borderColor, Color softBg) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "cover_image".tr,
-          style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
-        ),
-        verticalSpace(8.h),
+        _requiredLabel("cover_image".tr, textColor),
         GestureDetector(
           onTap: () async {
             final path = await addProductController.pickImage();
-            if (path != null) addProductController.coverImage.value = path;
+            if (path != null) {
+              addProductController.coverImage.value = path;
+            }
           },
           child: Container(
             decoration: BoxDecoration(
               color: softBg,
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(18.r),
             ),
             child: DottedBorder(
               options: RoundedRectDottedBorderOptions(
-                dashPattern: [4, 4],
-                strokeWidth: 1.2,
-                radius: Radius.circular(16.r),
-                color: AppColor.themeNavyBlueColor,
+                dashPattern: [5, 5],
+                strokeWidth: 1.3,
+                radius: Radius.circular(18.r),
+                color: AppColor.themeNavyBlueColor.withOpacity(0.6),
               ),
               child: Padding(
                 padding: EdgeInsets.all(15.w),
                 child: SizedBox(
-                  height: 99.h,
+                  height: 110.h,
                   width: double.infinity,
-                  child: Builder(
-                    builder: (_) {
-                      if (addProductController.coverImage.value.isNotEmpty) {
-                        return Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(14.r),
-                              child: Image.file(
-                                File(addProductController.coverImage.value),
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                              ),
+                  child: Obx(() {
+                    // صورة جديدة اختارها المستخدم من الجهاز
+                    if (addProductController.coverImage.value.isNotEmpty) {
+                      return Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(14.r),
+                            child: Image.file(
+                              File(addProductController.coverImage.value),
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
                             ),
-                            Positioned(
-                              top: 4,
-                              right: 4,
-                              child: _removeImageButton(
-                                onTap: () => addProductController.coverImage.value = '',
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-                      if (addProductController.existingCoverImageUrl.value.isNotEmpty) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(14.r),
-                          child: Image.network(
-                            addProductController.existingCoverImageUrl.value,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            errorBuilder: (_, __, ___) => _uploadPlaceholder(textColor),
                           ),
-                        );
-                      }
-                      return _uploadPlaceholder(textColor);
-                    },
-                  ),
+                          Positioned(
+                            top: 6,
+                            right: 6,
+                            child: _removeImageButton(
+                              onTap: () {
+                                addProductController.coverImage.value = '';
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    // صورة قديمة موجودة على السيرفر
+                    if (addProductController
+                        .existingCoverImageUrl.value.isNotEmpty) {
+                      return Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(14.r),
+                            child: Image.network(
+                              addProductController.existingCoverImageUrl.value,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (_, __, ___) =>
+                                  _uploadPlaceholder(textColor),
+                            ),
+                          ),
+                          Positioned(
+                            top: 6,
+                            right: 6,
+                            child: _removeImageButton(
+                              onTap: () {
+                                addProductController
+                                    .existingCoverImageUrl.value = '';
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return _uploadPlaceholder(textColor);
+                  }),
                 ),
               ),
             ),
           ),
         ),
-        verticalSpace(18.h),
-        Text(
-          "sub_images".tr,
-          style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
-        ),
-        verticalSpace(8.h),
+        verticalSpace(20.h),
+        _requiredLabel("sub_images".tr, textColor),
         GestureDetector(
-          onTap: () {
-            addProductController.getImages();
+          onTap: () async {
+            await addProductController.getImages();
           },
           child: Container(
             decoration: BoxDecoration(
               color: softBg,
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(18.r),
             ),
             child: DottedBorder(
               options: RoundedRectDottedBorderOptions(
-                dashPattern: [4, 4],
-                strokeWidth: 1.2,
-                radius: Radius.circular(16.r),
-                color: AppColor.themeNavyBlueColor,
+                dashPattern: [5, 5],
+                strokeWidth: 1.3,
+                radius: Radius.circular(18.r),
+                color: AppColor.themeNavyBlueColor.withOpacity(0.6),
               ),
               child: Padding(
                 padding: EdgeInsets.all(15.w),
                 child: SizedBox(
-                  height: 100.h,
+                  height: 110.h,
                   width: double.infinity,
-                  child: Builder(
-                    builder: (_) {
-                      final hasExisting = addProductController.existingSubImages.isNotEmpty;
-                      final hasNew = addProductController.selectedSubImages.isNotEmpty;
+                  child: Obx(() {
+                    final existing = addProductController.existingSubImages;
+                    final selected = addProductController.selectedSubImages;
 
-                      if (!hasExisting && !hasNew) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_photo_alternate_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
-                            verticalSpace(6.h),
-                            Text(
-                              "choose_files".tr,
-                              style: pSemiBold12.copyWith(color: textColor),
-                            ),
-                          ],
-                        );
-                      }
-
-                      return ListView(
-                        scrollDirection: Axis.horizontal,
+                    if (existing.isEmpty && selected.isEmpty) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ...List.generate(
-                            addProductController.existingSubImages.length,
-                                (index) {
-                              final url = addProductController.existingSubImages[index];
-                              return Padding(
-                                padding: EdgeInsets.only(right: 8.w),
-                                child: Stack(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12.r),
-                                      child: Image.network(
-                                        url,
-                                        fit: BoxFit.cover,
-                                        width: 90.w,
-                                        height: 100.h,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 2,
-                                      right: 2,
-                                      child: _removeImageButton(
-                                        onTap: () => addProductController.existingSubImages.removeAt(index),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                          // الصور الجديدة (محلية)
-                          ...List.generate(
-                            addProductController.selectedSubImages.length,
-                                (index) {
-                              final path = addProductController.selectedSubImages[index];
-                              return Padding(
-                                padding: EdgeInsets.only(right: 8.w),
-                                child: Stack(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12.r),
-                                      child: Image.file(
-                                        File(path),
-                                        fit: BoxFit.cover,
-                                        width: 90.w,
-                                        height: 100.h,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 2,
-                                      right: 2,
-                                      child: _removeImageButton(
-                                        onTap: () => addProductController.selectedSubImages.removeAt(index),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                          Icon(Icons.add_photo_alternate_outlined,
+                              size: 30.sp,
+                              color: AppColor.themeNavyBlueColor),
+                          verticalSpace(6.h),
+                          Text(
+                            "choose_files".tr,
+                            style: pSemiBold12.copyWith(color: textColor),
                           ),
                         ],
                       );
-                    },
-                  ),
+                    }
+
+                    return ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        ...List.generate(existing.length, (index) {
+                          final url = existing[index];
+                          return Padding(
+                            padding: EdgeInsets.only(right: 10.w),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14.r),
+                                  child: Image.network(
+                                    url,
+                                    fit: BoxFit.cover,
+                                    width: 92.w,
+                                    height: 108.h,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      width: 92.w,
+                                      height: 108.h,
+                                      color: Colors.black12,
+                                      child: const Icon(
+                                          Icons.broken_image_outlined),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: _removeImageButton(
+                                    onTap: () => addProductController
+                                        .existingSubImages
+                                        .removeAt(index),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        ...List.generate(selected.length, (index) {
+                          final path = selected[index];
+                          return Padding(
+                            padding: EdgeInsets.only(right: 10.w),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14.r),
+                                  child: Image.file(
+                                    File(path),
+                                    fit: BoxFit.cover,
+                                    width: 92.w,
+                                    height: 108.h,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: _removeImageButton(
+                                    onTap: () => addProductController
+                                        .selectedSubImages
+                                        .removeAt(index),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    );
+                  }),
                 ),
               ),
             ),
@@ -550,11 +623,46 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     );
   }
 
+  // --- Labels ---
+  Widget _requiredLabel(String label, Color textColor) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: RichText(
+        text: TextSpan(
+          style: pMedium12.copyWith(
+              color: AppColor.cDarkGreyFont, fontSize: 14.sp),
+          children: [
+            TextSpan(text: label),
+            TextSpan(
+              text: ' *',
+              style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.sp),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _label(String label) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Text(
+        label,
+        style: pMedium12.copyWith(
+            color: AppColor.cDarkGreyFont, fontSize: 14.sp),
+      ),
+    );
+  }
+
   Widget _uploadPlaceholder(Color textColor) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.cloud_upload_outlined, size: 28.sp, color: AppColor.themeNavyBlueColor),
+        Icon(Icons.cloud_upload_outlined,
+            size: 30.sp, color: AppColor.themeNavyBlueColor),
         verticalSpace(6.h),
         Text(
           "drop_files_upload".tr,
@@ -569,132 +677,371 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(3.w),
-        decoration: const BoxDecoration(
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
           color: Colors.black54,
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4),
+          ],
         ),
         child: Icon(Icons.close, size: 14.sp, color: Colors.white),
       ),
     );
   }
-  Widget _buildPricingSection(
-      Color textColor, Color hintColor, Color borderColor, Color cardColor, Color softBg, bool isDark) {
+
+  // --- Pricing ---
+  Widget _buildPricingSection(Color textColor, Color hintColor,
+      Color borderColor, Color cardColor, Color softBg, bool isDark) {
+    final c = addProductController;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _requiredLabel('price'.tr, textColor),
+                  AddProductTextField(
+                    controller: c.priceController.value,
+                    labelText: null,
+                    hintText: 'enter_price'.tr,
+                    validator: (value) {
+                      final requiredError =
+                      Validator.validateRequired(value ?? '');
+                      if (requiredError != null) return requiredError;
+                      if (double.tryParse((value ?? '').trim()) == null) {
+                        return 'invalid_price'.tr;
+                      }
+                      return null;
+                    },
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true),
+                  ),
+                ],
+              ),
+            ),
+            horizontalSpace(12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _label('sale_price'.tr),
+                  AddProductTextField(
+                    controller: c.salePriceController.value,
+                    labelText: null,
+                    hintText: 'enter_sale_price'.tr,
+                    validator: (value) {
+                      // سعر الخصم اختياري
+                      if (value == null || value.trim().isEmpty) return null;
+
+                      final salePrice = double.tryParse(value.trim());
+                      if (salePrice == null) return 'invalid_price'.tr;
+
+                      final regularPrice =
+                      double.tryParse(c.priceController.value.text.trim());
+                      if (regularPrice != null && salePrice >= regularPrice) {
+                        return 'Must be less than price.';
+                      }
+                      return null;
+                    },
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        verticalSpace(16.h),
+        _requiredLabel('costPrice'.tr, textColor),
+        AddProductTextField(
+          controller: c.costPriceController.value,
+          labelText: null,
+          hintText: 'enter_cost_price'.tr,
+          validator: (value) {
+            final requiredError = Validator.validateRequired(value ?? '');
+            if (requiredError != null) return requiredError;
+
+            final costPrice = double.tryParse((value ?? '').trim());
+            if (costPrice == null) {
+              return 'invalid_price'.tr;
+            }
+
+            final price = double.tryParse(
+              c.priceController.value.text.trim(),
+            );
+
+            if (price != null && costPrice > price) {
+              return 'Cost price must be less than or equal to price.';
+            }
+
+            return null;
+          },
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: true,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- Inventory ---
+  Widget _buildInventorySection(
+      Color textColor, Color softBg, Color borderColor) {
+    final c = addProductController;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
           decoration: BoxDecoration(
             color: softBg,
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(14.r),
           ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: _toggleRow(
+            icon: Icons.inventory_2_outlined,
+            label: 'track_stock'.tr,
+            textColor: textColor,
+            value: c.trackStock.value == '1',
+            onChanged: (v) => c.trackStock.value = v ? '1' : '0',
+          ),
+        ),
+        // الكمية بتظهر فقط إذا تتبع المخزون شغّال
+        if (c.trackStock.value == '1') ...[
+          verticalSpace(16.h),
+          _requiredLabel('stock'.tr, textColor),
+          AddProductTextField(
+            controller: c.stockQtyController.value,
+            labelText: null,
+            hintText: 'enter_stock'.tr,
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (c.trackStock.value != '1') return null;
+              return Validator.validateRequired(value ?? '');
+            },
+          ),
+        ],
+        verticalSpace(16.h),
+        _label('stock_status'.tr),
+        Wrap(
+          spacing: 8.w,
+          runSpacing: 4.h,
+          children: _stockStatusOptions.map((opt) {
+            return _choiceChip(
+              label: opt.tr,
+              selected: c.stockStatus.value == opt,
+              textColor: textColor,
+              borderColor: borderColor,
+              onTap: () => c.stockStatus.value = opt,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  // --- Shipping & tax ---
+  Widget _buildShippingTaxSection(
+      Color textColor, Color softBg, Color borderColor) {
+    final c = addProductController;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "trending".tr,
-                    style: pRegular12.copyWith(color: textColor),
-                  ),
-                  CupertinoSwitch(
-                    value: addProductController.isTrending.value,
-                    onChanged: (value) {
-                      addProductController.isTrending.value = value;
-                      if (value == true) {
-                        addProductController.trending.value = '1';
-                      } else {
-                        addProductController.trending.value = '0';
+                  _label('product_weight'.tr),
+                  AddProductTextField(
+                    controller: c.productWeightController.value,
+                    labelText: null,
+                    hintText: 'enter_product_weight'.tr,
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return null;
+                      final w = double.tryParse(value.trim());
+                      if (w == null || w < 0) {
+                        return 'invalid_product_weight'.tr;
                       }
+                      return null;
                     },
-                    activeColor: AppColor.themeNavyBlueColor,
-                    thumbColor: AppColor.cWhite,
-                    trackColor: AppColor.cFont,
                   ),
                 ],
               ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
+            horizontalSpace(12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "status".tr,
-                    style: pRegular12.copyWith(color: textColor),
-                  ),
-                  CupertinoSwitch(
-                    value: addProductController.isStatus.value,
-                    onChanged: (value) {
-                      addProductController.isStatus.value = value;
-
-                      if (value == true) {
-                        addProductController.status.value = 1.toString();
-                      } else {
-                        addProductController.status.value = 0.toString();
-                      }
-                    },
-                    activeColor: AppColor.themeNavyBlueColor,
-                    thumbColor: AppColor.cWhite,
-                    trackColor: AppColor.cFont,
+                  _label('shipping_id'.tr),
+                  AddProductTextField(
+                    controller: c.shippingIdController.value,
+                    labelText: null,
+                    hintText: 'enter_shipping_id'.tr,
+                    keyboardType: TextInputType.text,
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+        verticalSpace(16.h),
+        _label('tax_status'.tr),
+        Wrap(
+          spacing: 8.w,
+          runSpacing: 4.h,
+          children: _taxOptions.map((opt) {
+            return _choiceChip(
+              label: opt.tr,
+              selected: c.taxStatus.value == opt,
+              textColor: textColor,
+              borderColor: borderColor,
+              onTap: () {
+                c.taxStatus.value = opt;
+                if (opt == 'none') c.taxIdController.value.clear();
+              },
+            );
+          }).toList(),
+        ),
+        if (c.taxStatus.value != 'none') ...[
+          verticalSpace(16.h),
+          _label('tax_id'.tr),
+          AddProductTextField(
+            controller: c.taxIdController.value,
+            labelText: null,
+            hintText: 'enter_tax_id'.tr,
+            keyboardType: TextInputType.text,
+          ),
+        ],
+      ],
+    );
+  }
+
+  // --- Choice chip (مخصص بالكامل، ما بيتأثر بألوان ثيم التطبيق) ---
+  Widget _choiceChip({
+    required String label,
+    required bool selected,
+    required Color textColor,
+    required Color borderColor,
+    required VoidCallback onTap,
+  }) {
+    final navy = AppColor.themeNavyBlueColor;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: selected ? navy.withOpacity(0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: selected ? navy : borderColor),
+        ),
+        child: Text(
+          label,
+          style: pMedium12.copyWith(
+            fontSize: 12.sp,
+            color: selected ? navy : textColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --- Settings (trending / variant / status) ---
+  Widget _buildSettingsSection(
+      Color textColor, Color softBg, Color borderColor) {
+    final c = addProductController;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: softBg,
+        borderRadius: BorderRadius.circular(14.r),
+      ),
+      child: Column(
+        children: [
+          _toggleRow(
+            icon: Icons.check_circle_outline_rounded,
+            label: "status".tr,
+            textColor: textColor,
+            value: c.isStatus.value,
+            onChanged: (value) {
+              c.isStatus.value = value;
+              c.status.value = value ? '1' : '0';
+            },
+          ),
+          Divider(color: borderColor, height: 1),
+          _toggleRow(
+            icon: Icons.trending_up_rounded,
+            label: "trending".tr,
+            textColor: textColor,
+            value: c.isTrending.value,
+            onChanged: (value) {
+              c.isTrending.value = value;
+              c.trending.value = value ? '1' : '0';
+            },
+          ),
+          Divider(color: borderColor, height: 1),
+          _toggleRow(
+            icon: Icons.tune_rounded,
+            label: "variant_type".tr,
+            textColor: textColor,
+            value: c.isVariant.value,
+            onChanged: (value) {
+              c.isVariant.value = value;
+              c.variantType.value = value ? '1' : '0';
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _toggleRow({
+    required IconData icon,
+    required String label,
+    required Color textColor,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16.sp, color: AppColor.themeNavyBlueColor),
+              horizontalSpace(8.w),
+              Text(
+                label,
+                style: pRegular12.copyWith(color: textColor, fontSize: 13.sp),
               ),
             ],
           ),
-        ),
-        verticalSpace(16.h),
-        AddProductTextField(
-            controller: addProductController.priceController.value,
-            labelText: 'price'.tr,
-            hintText: 'enter_price'.tr,
-            validator: (value) {
-              return Validator.validateRequired(value!);
-            },
-            keyboardType: TextInputType.number
-        ),
-        verticalSpace(12.h),
-        AddProductTextField(
-            controller: addProductController.costPriceController.value,
-            labelText: 'costPrice'.tr,
-            hintText: 'enter_cost_price'.tr,
-            validator: (value) {
-              return Validator.validateRequired(value!);
-            },
-            keyboardType: TextInputType.number
-        ),
-        verticalSpace(12.h),
-        commonDropdownButtonWidget(
-          labelText: 'discount_type'.tr,
-          hint: 'select_option'.tr,
-          value: addProductController.discountType.value,
-          list: addProductController.discountTypeList,
-          validator: (value) {
-            return Validator.validateRequired(value!);
-          },
-          onChanged: (value) {
-            addProductController.discountType.value = value;
-          },
-        ),
-        verticalSpace(12.h),
-        AddProductTextField(
-            controller: addProductController.salePriceController.value,
-            labelText: 'discount_amount'.tr,
-            hintText: 'enter_discount'.tr,
-            validator: (value) {
-              return Validator.validateRequired(value!);
-            },
-            keyboardType: TextInputType.number),
-        verticalSpace(12.h),
-        AddProductTextField(
-          controller: addProductController.stockQtyController.value,
-          labelText: 'stock'.tr,
-          hintText: 'enter_stock'.tr,
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            return Validator.validateRequired(value!);
-          },
-        ),
-      ],
+          CupertinoSwitch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppColor.themeNavyBlueColor,
+            thumbColor: AppColor.cWhite,
+            trackColor: AppColor.cFont,
+          ),
+        ],
+      ),
     );
   }
 
@@ -702,33 +1049,35 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        CommonIconButton(
-            title: 'close'.tr,
-            iconData: DefaultImages.closeIcn,
-            onPressed: () {
-              Get.back();
-            },
-            width: 90.w,
-            height: 42.h,
-            btnColor: AppColor.cButton,
-            textColor: AppColor.cDarkGreyFont),
-        CommonIconButton(
-          title: widget.isUpdate ? "update".tr : 'create'.tr,
-          iconData: DefaultImages.whiteDoneIcn,
+        AppButton(
+          text: 'close'.tr,
           onPressed: () {
-            final isFormValid = formKey.currentState!.validate();
+            Get.back();
+          },
+          width: 90.w,
+          height: 44.h,
+          backgroundColor: AppColor.cBorder,
+          textColor: AppColor.cDarkGreyFont,
+        ),
+        AppButton(
+          isLoading: addProductController.isAddLoading.value,
+          text: widget.isUpdate ? "update".tr : 'create'.tr,
+          onPressed: () {
+            final isFormValid = formKey.currentState?.validate() ?? false;
             if (!isFormValid) return;
 
-            final hasCover = addProductController.coverImage.value.isNotEmpty ||
-                addProductController.existingCoverImageUrl.value.isNotEmpty;
+            final hasCover =
+                addProductController.coverImage.value.isNotEmpty ||
+                    addProductController.existingCoverImageUrl.value.isNotEmpty;
 
             if (!hasCover) {
               commonToast("please_add_cover_image".tr);
               return;
             }
 
-            final hasSubImages = addProductController.selectedSubImages.isNotEmpty ||
-                addProductController.existingSubImages.isNotEmpty;
+            final hasSubImages =
+                addProductController.selectedSubImages.isNotEmpty ||
+                    addProductController.existingSubImages.isNotEmpty;
 
             if (!hasSubImages) {
               commonToast("please_add_sub_image".tr);
@@ -738,36 +1087,45 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             _submitProductData();
           },
           width: 190.w,
-          height: 42.h,
+          height: 44.h,
         ),
       ],
     );
   }
 
   void _submitProductData() {
+    final c = addProductController;
+
     addProductController.addProductData(
-      costPrice: addProductController.costPriceController.value.text.trim(),
-      status: widget.status.toString(),
+      existingCoverImageUrl: c.existingCoverImageUrl.value,
+      variant: c.variantType.value,
+      costPrice: c.costPriceController.value.text.trim(),
+      status: c.status.value,
       isUpdate: widget.isUpdate,
-      tag: addProductController.groupValue.value,
-      name: addProductController.productName.value.text.trim(),
-      categoryId: addProductController.categoryId.value,
+      name: c.productName.value.text.trim(),
+      categoryId: c.categoryId.value,
       productId: widget.productId ?? '',
-      description: addProductController.productDescriptionController.value.text.trim().isNotEmpty
-          ? addProductController.productDescriptionController.value.text.trim()
-          : (widget.isUpdate ? '' : ''),
-      price: addProductController.priceController.value.text.trim(),
-      salePrice: addProductController.salePriceController.value.text.trim(),
-      discountType: addProductController.discountType.value,
-      discountAmount: addProductController.salePriceController.value.text.trim(),
-      productStock: addProductController.stockQtyController.value.text.trim(),
-      trending: addProductController.trending.value,
-      productOtherDescription: addProductController.otherDescriptionController.value.text.trim(),
-      productMoreDescription: addProductController.moreInfoController.value.text.trim(),
-      coverImage: addProductController.coverImage.value,
-      otherDescriptionImage: addProductController.otherDescriptionImage.value,
-      moreInformationImage: addProductController.moreInformationImage.value,
-      selectedSubImages: addProductController.selectedSubImages.value,
+      description: c.productDescriptionController.value.text.trim(),
+      price: c.priceController.value.text.trim(),
+      salePrice: c.salePriceController.value.text.trim(),
+      productStock: c.stockQtyController.value.text.trim().isEmpty
+          ? '0'
+          : c.stockQtyController.value.text.trim(),
+      trending: c.trending.value,
+
+      // Images
+      coverImage: c.coverImage.value,
+      selectedSubImages: c.selectedSubImages,
+
+      // Tax / shipping / stock
+      taxId: c.taxStatus.value == 'none'
+          ? ''
+          : c.taxIdController.value.text.trim(),
+      taxStatus: c.taxStatus.value,
+      shippingId: c.shippingIdController.value.text.trim(),
+      productWeight: c.productWeightController.value.text.trim(),
+      trackStock: c.trackStock.value,
+      stockStatus: c.stockStatus.value,
     );
   }
 }

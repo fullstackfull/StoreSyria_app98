@@ -346,6 +346,15 @@ class _ProductDetailScreenState
     final String salePrice =
         product.salePrice?.toString() ?? '';
 
+ final String costPrice =
+        product.costPrice?.toString() ?? '';
+
+ final String finalPrice =
+        product.finalPrice?.toString() ?? '';
+
+ final String discount =
+        product.discountAmount?.toString() ?? '';
+
     final String productStock =
         product.productStock?.toString() ?? '0';
 
@@ -401,6 +410,45 @@ class _ProductDetailScreenState
           _thinDivider(borderColor),
 
           _infoRow(
+              label: 'cost_price'.tr,
+              value: costPrice,
+              primaryTextColor:
+              primaryTextColor,
+              secondaryTextColor:
+              secondaryTextColor,
+              leadingIcon:
+              Icons.monetization_on,
+          ),
+
+          _thinDivider(borderColor),
+
+          _infoRow(
+              label: 'final_price'.tr,
+              value: finalPrice,
+              primaryTextColor:
+              primaryTextColor,
+              secondaryTextColor:
+              secondaryTextColor,
+              leadingIcon:
+              Icons.price_check,
+          ),
+
+          _thinDivider(borderColor),
+
+          _infoRow(
+              label: 'discount_amount'.tr,
+              value: discount,
+              primaryTextColor:
+              primaryTextColor,
+              secondaryTextColor:
+              secondaryTextColor,
+              leadingIcon:
+              Icons.price_check,
+          ),
+
+          _thinDivider(borderColor),
+
+          _infoRow(
             label: 'product_stock'.tr,
             value: productStock,
             primaryTextColor:
@@ -424,8 +472,7 @@ class _ProductDetailScreenState
             leadingIcon:
             Icons.qr_code_rounded,
           ),
-        ],
-      ),
+      ]),
     );
   }
 
@@ -523,6 +570,9 @@ class _ProductDetailScreenState
     final String status =
         product.status?.toString() ?? '0';
 
+    final String trending =
+        product.trending?.toString() ?? '0';
+
     final String stockStatus =
         product.stockStatus
             ?.toString()
@@ -534,6 +584,7 @@ class _ProductDetailScreenState
         product.trackStock?.toString() ?? '0';
 
     final bool isVisible = status == '1';
+    final bool isTrending = trending == '1';
 
     final bool isInStock =
         stockStatus == 'in_stock';
@@ -609,6 +660,19 @@ class _ProductDetailScreenState
                     : 'hidden'.tr,
                 color: isVisible
                     ? const Color(0xFF2E7D32)
+                    : isDark
+                    ? Colors.grey
+                    : Colors.grey.shade800,
+              ),
+                _statusChip(
+                icon: isTrending
+                    ? Icons.local_fire_department
+                    : Icons.local_fire_department_outlined,
+                label: isTrending
+                    ? 'trending'.tr
+                    : 'not trending'.tr,
+                color: isTrending
+                    ? const Color(0xFFF19210)
                     : isDark
                     ? Colors.grey
                     : Colors.grey.shade800,

@@ -266,7 +266,13 @@ class _CustomerScreenState extends State<CustomerScreen>
                                   },
                                 );
                               },
-                              viewFun: (){},
+                              viewFun: (){
+                                Get.to(
+                                      () => CustomerDetailsScreen(
+                                    customerId: customer.id.toString(),
+                                  ),
+                                );
+                              },
                               onTap: (){
                                   Get.to(
                                         () => CustomerDetailsScreen(

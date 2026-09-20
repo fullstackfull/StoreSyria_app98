@@ -561,5 +561,15 @@ const Map<String, String> en = {
   "call": "Call",
   "whatsapp": "WhatsApp",
   'view_all_orders' : "View all orders",
-  "tap_again_to_close" : "Tap again to close"
+  "tap_again_to_close" : "Tap again to close",
+  'basic_information': 'Basic Information',
+  'product_images': 'Product Images',
+  'price_and_stock': 'Price & Stock',
+  'enter_product_name': 'Enter product name',
+  'enter_product_description': 'Enter product description',
+  'choose_files': 'Choose Files',
+  'variant_type': 'Variant Type',
+  'enter_sale_price': 'Enter sale price',
+  'costPrice': 'Cost Price',
+  'enter_cost_price': 'Enter cost price',
 };

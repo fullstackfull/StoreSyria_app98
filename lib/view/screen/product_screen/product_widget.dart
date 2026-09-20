@@ -413,7 +413,7 @@ Widget allProductsListItemWidget({
                             BorderRadius.circular(5.r),
                           ),
                           child: Text(
-                                isInStock
+                            isInStock
                                 ? 'in_stock'.tr
                                 : isBackorder
                                 ? 'on_backorder'.tr
@@ -452,9 +452,9 @@ Widget allProductsListItemWidget({
                         children: [
 
                           Icon(
-                              trackStock
-                                  ? Icons.track_changes_rounded
-                                  : Icons.do_not_disturb_on_outlined,
+                            trackStock
+                                ? Icons.track_changes_rounded
+                                : Icons.do_not_disturb_on_outlined,
                             size: 11.sp,
                             color: subTextColor,
                           ),
@@ -680,49 +680,81 @@ class _AddProductTextFieldState extends State<AddProductTextField> {
             )
           else
 
-            TextFormField(
-              controller: widget.controller,
-              cursorColor: accentColor,
-              autofocus: widget.autofocus ?? false,
-              focusNode: _focus,
-              maxLines: widget.maxLines ?? 1,
-              readOnly: widget.readOnly ?? false,
+          // Manual FormField wrapper: we render the error text ourselves
+          // (instead of relying on TextFormField's built-in errorText),
+          // using the exact same horizontal inset as the field's own
+          // content padding. This guarantees the error message lines up
+          // perfectly under the input text instead of looking shifted.
+            FormField<String>(
+              initialValue: widget.controller?.text,
               validator: widget.validator,
-              onChanged: widget.onChanged,
-              onTap: widget.onTap,
-              obscureText: widget.obscureText ?? false,
-              obscuringCharacter: widget.obscuringCharacter ?? '•',
-              keyboardType: widget.keyboardType,
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: textColor),
-              decoration: InputDecoration(
-                fillColor: bgColor,
-                filled: true,
-                hintText: widget.hintText, // يظهر الهينت هنا
-                hintStyle: TextStyle(fontSize: 14.sp, color: hintColor),
-                errorStyle: TextStyle(fontSize: 12.sp, color: AppColor.cRedText),
-                suffixIcon: widget.suffix,
-                contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: AppColor.cRedText),
-                ),
-                disabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: accentColor, width: 1.5),
-                ),
-              ),
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              builder: (FormFieldState<String> field) {
+                final hasError = field.hasError;
+                final activeBorderColor = hasError ? AppColor.cRedText : borderColor;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: widget.controller,
+                      cursorColor: accentColor,
+                      autofocus: widget.autofocus ?? false,
+                      focusNode: _focus,
+                      maxLines: widget.maxLines ?? 1,
+                      readOnly: widget.readOnly ?? false,
+                      onChanged: (value) {
+                        field.didChange(value);
+                        widget.onChanged?.call(value);
+                      },
+                      onTap: widget.onTap,
+                      obscureText: widget.obscureText ?? false,
+                      obscuringCharacter: widget.obscuringCharacter ?? '•',
+                      keyboardType: widget.keyboardType,
+                      textCapitalization: widget.textCapitalization ?? TextCapitalization.none,
+                      textInputAction: widget.textInputAction,
+                      autocorrect: widget.autocorrect ?? true,
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: textColor),
+                      decoration: InputDecoration(
+                        fillColor: bgColor,
+                        filled: true,
+                        hintText: widget.hintText, // يظهر الهينت هنا
+                        hintStyle: TextStyle(fontSize: 14.sp, color: hintColor),
+                        suffixIcon: widget.suffix,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(color: activeBorderColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(color: activeBorderColor),
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(
+                            color: hasError ? AppColor.cRedText : accentColor,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (hasError)
+                      Padding(
+                        padding: EdgeInsetsDirectional.only(start: 20.w, top: 6.h),
+                        child: Text(
+                          field.errorText ?? '',
+                          style: TextStyle(fontSize: 12.sp, color: AppColor.cRedText, height: 1.3),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
         ],
       ),

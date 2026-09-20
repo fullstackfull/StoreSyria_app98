@@ -8,21 +8,6 @@ class ProductDetailController extends GetxController {
   RxString colorType = ''.obs;
   RxString sizeType = ''.obs;
 
-  List colorList = [
-    "Red",
-    "Blue",
-    "Green",
-    "Yellow",
-  ];
-
-  List sizeList = [
-    "S",
-    "M",
-    "L",
-    "XL",
-    "XXL",
-  ];
-
   RxString productImage = ''.obs;
 
   ProductDetailModel? productDetailModel;

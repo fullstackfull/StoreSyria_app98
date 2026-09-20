@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:store_go_app/network_dio/network_dio.dart';
@@ -10,11 +9,8 @@ import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/utils/prefer.dart';
-import 'package:store_go_app/view/screen/dashboard_manager/dashboard_manager.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
-
 import '../notification_controller/notification_controller.dart';
 
 class AuthController extends GetxController {

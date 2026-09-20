@@ -727,6 +727,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                                       status: product.status,
                                       productId: product.id?.toString(),
                                       productName: product.name,
+                                      costPrice: product.costPrice,
                                       trending: product.trending?.toString(),
                                       qty: product.productStock?.toString(),
                                       productTax: product.retuenText,

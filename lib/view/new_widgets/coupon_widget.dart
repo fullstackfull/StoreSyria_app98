@@ -44,7 +44,7 @@ Widget productCouponWidget({
     if (value.isEmpty) return '-';
 
     if (cleanType == 'percentage') return '$value%';
-    if (cleanType == 'flat') return '$value\$';
+    if (cleanType == 'flat') return '$value';
 
     return value;
   }

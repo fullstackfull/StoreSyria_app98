@@ -70,14 +70,6 @@ class NotificationController extends GetxController
     super.onClose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      print('🔄 التطبيق عاد للواجهة من الخلفية (Resumed) -> إعادة جلب الإشعارات لتحديث عداد الجرس');
-      getNotifications(showLoading: false);
-    }
-  }
-
   Future<void> getNotifications({bool showLoading = true}) async {
     if (showLoading && notificationList.isEmpty) {
       isLoading.value = true;
