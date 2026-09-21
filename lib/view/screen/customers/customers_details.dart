@@ -365,7 +365,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         if (latestOrder != null && showOrdersSection) ...[
           Padding(
             padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 8.h),
-            child: Align(alignment: Alignment.centerRight, child: Text('latest_order'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
+            child: Align(alignment: Alignment.centerLeft, child: Text('latest_order'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
           ),
           if (!_isOrdersExpanded) Padding(padding: EdgeInsets.symmetric(horizontal: 20.w), child: _orderItem(latestOrder, customer)),
           Padding(
@@ -394,7 +394,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       children: [
         Padding(
           padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 8.h),
-          child: Align(alignment: Alignment.centerRight, child: Text('personal_data'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
+          child: Align(alignment: Alignment.centerLeft, child: Text('personal_data'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
         ),
         _card(
           isDark: isDark,
@@ -403,7 +403,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (_hasValue(customer.name)) _dataRow(label: 'name'.tr, value: customer.name!, textColor: textColor, subColor: subColor),
-              _dataRow(label: 'city'.tr, value: "city", textColor: textColor, subColor: subColor),
+              if(_hasValue(customer.defaultAddress?.stateName)) _dataRow(label: 'city'.tr, value: customer.defaultAddress!.stateName!, textColor: textColor, subColor: subColor),
               if (_hasValue(customer.defaultAddress?.address)) _dataRow(label: 'address'.tr, value: customer.defaultAddress!.address!, textColor: textColor, subColor: subColor),
               if (_hasValue(customer.mobile)) _dataRow(label: 'phone'.tr, value: customer.mobile!, textColor: textColor, subColor: subColor),
               if (_hasValue(customer.email)) _dataRow(label: 'email'.tr, value: customer.email!, textColor: textColor, subColor: subColor),

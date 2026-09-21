@@ -31,7 +31,7 @@ class OrderDetailData {
   String? orderId;
   String? deliveryDate;
   double? orderRewardPoint;
-  int? returnPrice;
+  String? returnPrice;
   dynamic returnStatusMessage;
   String? returnDate;
   String? orderStatusText;

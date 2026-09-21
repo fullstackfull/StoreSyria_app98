@@ -64,7 +64,7 @@ const Map<String, String> ar = {
   "tax": "الضريبة",
   "coupon": "القسيمة",
   "grand_total": "الإجمالي الكلي",
-  "paid_via": "تم الدفع عبر",
+  "paid_by": "تم الدفع عبر",
   "products": "المنتجات",
   "add_product": "إضافة منتج",
   "filter_by_category": "تصفية حسب الفئة",

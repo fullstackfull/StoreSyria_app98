@@ -74,35 +74,43 @@ Widget customerWidget({
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                displayName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: textColor,
+                    ),
+                  ),
                 ),
-              ),
-              const Spacer(),
-              statusPill(
-                label: statusLabel,
-                isActive: isActive,
-              ),
-              SizedBox(width: 8.w),
-              AppPopupMenu(
-                viewFun: viewFun,
-                changeFun: changeFun,
-                deleteFun: deleteFun,
-                viewText: 'view'.tr,
-                changeText: 'change'.tr,
-                deleteText: 'delete'.tr,
-              ),
-            ],
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    statusPill(
+                      label: statusLabel,
+                      isActive: isActive,
+                    ),
+                    AppPopupMenu(
+                      viewFun: viewFun,
+                      changeFun: changeFun,
+                      deleteFun: deleteFun,
+                      viewText: 'view'.tr,
+                      changeText: 'change'.tr,
+                      deleteText: 'delete'.tr,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           _customerInfoRow(
             context: context,

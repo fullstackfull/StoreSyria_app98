@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/product_controller/product_controller.dart';
 import 'package:store_go_app/core/model/product_model.dart';
@@ -71,7 +72,6 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
     scrollController.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -202,8 +202,7 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                       );
                     }
 
-                    final showLoader =
-                        !searching && productController.isScroll.value;
+                    final showLoader = !searching && productController.isScroll.value;
 
                     return ListView.separated(
                       controller: scrollController,
@@ -228,9 +227,47 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
 
                         final product = list[index];
 
-                        final int stock = product.trackStock ?? 0;
-                        final bool inStock = stock > 0;
+                        final String stock = product.stockStatus ?? '';
 
+                        Color getStockColor(String status) {
+                          switch (status) {
+                            case 'in_stock':
+                              return Colors.green;
+
+                            case 'on_backorder':
+                              return Colors.orange;
+
+                            case 'out_of_stock':
+                            case '0':
+                              return Colors.red;
+
+                            default:
+                              return Colors.grey;
+                          }
+                        }
+
+                        String getStockLabel(String status) {
+                          switch (status) {
+                            case 'in_stock':
+                              return 'in_stock'.tr;
+
+                            case 'on_backorder':
+                              return 'on_backorder'.tr;
+
+                            case 'out_of_stock':
+                            case '0':
+                              return 'out_of_stock'.tr;
+
+                            default:
+                              return status;
+                          }
+                        }
+
+                        final stockColor = getStockColor(stock);
+                        final productStock = product.productStock;
+                        final isTrack = (product.trackStock ?? 0) == 1;
+                        final canSelect =
+                            stock == 'in_stock' || stock == 'on_backorder';
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: ClipRRect(
@@ -257,10 +294,68 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14),
                           ),
-                          subtitle: Padding( padding: const EdgeInsets.only(top: 5), child: Align( alignment: Alignment.centerLeft, child: Container( padding: const EdgeInsets.symmetric( horizontal: 7, vertical: 3, ), decoration: BoxDecoration( color: inStock ? Colors.green.withOpacity(.10) : Colors.red.withOpacity(.10), borderRadius: BorderRadius.circular(6), border: Border.all( color: inStock ? Colors.green.withOpacity(.20) : Colors.red.withOpacity(.20), ), ), child: Text( inStock ? '${'in_stock'.tr} ($stock)' : 'out_of_stock'.tr, style: TextStyle( fontSize: 9, fontWeight: FontWeight.w700, color: inStock ? Colors.green[700] : Colors.red, ), ), ), ), ),
-                          onTap: inStock
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: stockColor.withOpacity(.10),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: stockColor.withOpacity(.20),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "${getStockLabel(stock)} ($productStock)",
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                      color: stockColor,
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(width: 5.w),
+
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isTrack
+                                        ? Colors.blue.withOpacity(.10)
+                                        : Colors.grey.withOpacity(.10),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: isTrack
+                                          ? Colors.blue.withOpacity(.20)
+                                          : Colors.grey.withOpacity(.20),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    isTrack ? 'tracked'.tr : 'not_tracked'.tr,
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                      color: isTrack ? Colors.blue[700] : Colors.grey[700],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onTap: canSelect
                               ? () => Navigator.of(context).pop(product)
-                              : () => commonToast(type: AppSnackBarType.warning,'this_product_is_out_of_stock'.tr),
+                              : () => commonToast(
+                            type: AppSnackBarType.warning,
+                            'this_product_is_out_of_stock'.tr,
+                          ),
                           enabled: true,
                         );
                       },

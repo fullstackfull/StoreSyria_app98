@@ -21,9 +21,9 @@ class AddNewProductScreen extends StatefulWidget {
   final String? productId;
   final int? status;
   final String? productName;
-  final double? price;
-  final double? costPrice;
-  final double? salePrice;
+  final String? price;
+  final String? costPrice;
+  final String? salePrice;
   final String? qty;
   final String? productCategories;
   final String? productTax;

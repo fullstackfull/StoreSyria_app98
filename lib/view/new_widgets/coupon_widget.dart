@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
+import 'package:store_go_app/view/new_widgets/status_pill.dart';
 import '../../utils/colors.dart';
 
 Widget productCouponWidget({
@@ -31,7 +32,6 @@ Widget productCouponWidget({
 
   final bool isActive = status == 1;
 
-  // تنظيف البيانات من علامات التنصيص الزائدة إن وجدت
   final String cleanType =
       couponType?.replaceAll('"', '').trim().toLowerCase() ?? '';
   final String cleanName = name?.replaceAll('"', '').trim() ?? '';
@@ -200,11 +200,9 @@ Widget productCouponWidget({
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // STATUS
-              couponStatusBadgeWidget(
-                label: isActive ? 'active'.tr : 'inactive'.tr,
-                type: isActive
-                    ? CouponBadgeType.success
-                    : CouponBadgeType.danger,
+              statusPill(
+                  label: isActive ? "active".tr : "inactive".tr,
+                  isActive: isActive
               ),
               const Spacer(),
               // EXPIRY DATE

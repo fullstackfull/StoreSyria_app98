@@ -6,6 +6,7 @@ import 'package:store_go_app/core/model/payment_model.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/text_style.dart';
+import 'package:store_go_app/view/new_widgets/status_pill.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
@@ -207,7 +208,7 @@ class _PaymentSettingScreenState
             width: 48.w,
             height: 48.w,
             decoration: BoxDecoration(
-              color: AppColor.themeGreenColor.withOpacity(
+              color: AppColor.themeNavyBlueColor.withOpacity(
                 isDark ? 0.14 : 0.08,
               ),
               borderRadius: BorderRadius.circular(14.r),
@@ -217,7 +218,7 @@ class _PaymentSettingScreenState
                 image: DefaultImages.cardIcn,
 
                 colorFilter: ColorFilter.mode(
-                  AppColor.themeGreenColor,
+                  AppColor.themeNavyBlueColor,
                   BlendMode.srcIn,
                 ),
               ),
@@ -252,43 +253,10 @@ class _PaymentSettingScreenState
             ),
           ),
           SizedBox(width: 10.w),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 10.w,
-              vertical: 6.h,
-            ),
-            decoration: BoxDecoration(
-              color: AppColor.themeGreenColor.withOpacity(
-                isDark ? 0.15 : 0.09,
-              ),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                color: AppColor.themeGreenColor.withOpacity(
-                  0.15,
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 6.w,
-                  height: 6.w,
-                  decoration: BoxDecoration(
-                    color: AppColor.themeGreenColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                SizedBox(width: 5.w),
-                Text(
-                  'Active'.tr,
-                  style: pMedium10.copyWith(
-                    color: AppColor.themeGreenColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          statusPill(
+              label: "active".tr,
+              isActive: true
+          )
         ],
       ),
     );

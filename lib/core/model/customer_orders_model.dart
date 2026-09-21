@@ -214,6 +214,7 @@ class CustomerAddress {
   String? phone;
   String? title;
   String? address;
+  String? stateName;
 
   int? countryId;
   int? stateId;
@@ -232,6 +233,7 @@ class CustomerAddress {
     this.address,
     this.countryId,
     this.stateId,
+    this.stateName,
     this.cityId,
     this.postcode,
     this.deliveryInstructions,
@@ -248,6 +250,7 @@ class CustomerAddress {
 
     countryId = _toInt(json['country_id']);
     stateId = _toInt(json['state_id']);
+    stateName = json['state_name'];
     cityId = _toInt(json['city_id']);
     postcode = _toInt(json['postcode']);
 
@@ -266,6 +269,7 @@ class CustomerAddress {
       'address': address,
       'country_id': countryId,
       'state_id': stateId,
+      'state_name': stateName,
       'city_id': cityId,
       'postcode': postcode,
       'delivery_instructions': deliveryInstructions,

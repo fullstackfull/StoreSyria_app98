@@ -339,30 +339,14 @@ class _ProductDetailScreenState
     required Color secondaryTextColor,
     required bool isDark,
   }) {
-    final String price =
-    product.finalPrice?.toString().trim().isNotEmpty == true
-        ? product.finalPrice.toString()
-        : product.price?.toString() ?? '0';
-
-    final String salePrice =
-        product.salePrice?.toString() ?? '';
-
- final String costPrice =
-        product.costPrice?.toString() ?? '';
-
- final String finalPrice =
-        product.finalPrice?.toString() ?? '';
-
- final String discount =
-        product.discountAmount?.toString() ?? '';
+    final String price = product.price.toString() ?? "";
+    final String salePrice = product.salePrice?.toString() ?? '';
+    final String costPrice = product.costPrice?.toString() ?? '';
+    final String finalPrice = product.finalPrice?.toString() ?? '';
 
     final String productStock =
         product.productStock?.toString() ?? '0';
 
-    final String sku =
-    product.productCode?.toString().trim().isNotEmpty == true
-        ? product.productCode.toString()
-        :  '';
 
     return productInfoContainer(
       backgroundColor: cardColor,

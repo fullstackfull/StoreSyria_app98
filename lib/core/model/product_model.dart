@@ -1,4 +1,6 @@
 // updated
+import '../../utils/helper.dart';
+
 class ProductModel {
   int? status;
   String? message;
@@ -83,9 +85,9 @@ class ProductData {
   int? customFieldStatus;
   double? productWeight;
 
-  double? price, salePrice,costPrice;
+  String? price, salePrice,costPrice;
   String? finalPrice;
-  int? discountAmount;
+  String? discountAmount;
   String? discountType;
 
   String? name, slug, productCode, tag, tagApi;
@@ -159,7 +161,7 @@ class ProductData {
     maximumQuantity = json['maximum_quantity'] as int?;
     lowStockThreshold = json['low_stock_threshold'] as int?;
     customFieldStatus = json['custom_field_status'] as int?;
-    discountAmount = json['discount_amount'] as int?;
+    discountAmount = json['discount_amount'] ;
 
     name = json['name'] as String?;
     slug = json['slug'] as String?;
@@ -206,19 +208,22 @@ class ProductData {
     inWhishlist = json['in_whishlist'] as bool?;
 
     try {
-      price = json['price'] != null ? double.tryParse(json['price'].toString()) : null;
+      price = formatPriceRaw(json['price']);
     } catch (_) { price = null; }
 
     try {
-      salePrice = json['sale_price'] != null ? double.tryParse(json['sale_price'].toString()) : null;
+      salePrice = formatPriceRaw(json['sale_price']);
     } catch (_) { salePrice = null; }
 
     try {
-      costPrice = json['cost_price'] != null ? double.tryParse(json['cost_price'].toString()) : null;
+      costPrice = formatPriceRaw(json['cost_price']);
     } catch (_) { costPrice = null; }
 
-    finalPrice = json['final_price'] as String?;
-    discountType = json['discount_type'] as String?;
+    try {
+      finalPrice = formatPriceRaw(json['final_price']);
+    } catch (_) { finalPrice = null; }
+
+    discountAmount = formatPriceRaw(json['discount_amount']);
 
     if (json['other_description_array'] != null && json['other_description_array'] is List) {
       otherDescriptionArray = <OtherDescriptionArray>[];

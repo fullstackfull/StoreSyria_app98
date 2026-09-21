@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
+import '../../../utils/helper.dart';
 import '../../../utils/images.dart';
 import '../../new_widgets/network_image_widget.dart';
 import '../../new_widgets/pop_up_menu.dart';
@@ -44,10 +45,6 @@ Widget allProductsListItemWidget({
       ? const Color(0xFF9CA3AF)
       : const Color(0xFF6B7280);
 
-  final borderColor = isDark
-      ? Colors.white.withOpacity(.08)
-      : const Color(0xFFE5E7EB);
-
   final imageBackground = isDark
       ? Colors.white.withOpacity(.05)
       : const Color(0xFFF3F4F6);
@@ -71,7 +68,7 @@ Widget allProductsListItemWidget({
   final isOutOfStock =
       stockValue == 'out_of_stock' || stockValue == '0';
 
-  final finalPrice = double.tryParse(price) ?? 0;
+  final finalPrice = parsePriceSafe(price);
   final displayPrice = finalPrice;
 
 
@@ -470,21 +467,16 @@ Widget allProductsListItemWidget({
                   ],
                   if (!variant && displayPrice > 0) ...[
                     SizedBox(height: 7.h),
-
                     Row(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-
                         Text(
-                          '${displayPrice.toStringAsFixed(2)}',
+                          price,
                           maxLines: 1,
-                          overflow:
-                          TextOverflow.ellipsis,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 13.sp,
-                            fontWeight:
-                            FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: textColor,
                           ),
                         ),

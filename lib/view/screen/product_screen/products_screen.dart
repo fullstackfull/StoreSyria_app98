@@ -668,21 +668,10 @@ class _ProductsScreenState extends State<ProductsScreen>
                                   categoryName: product.categoryName ?? '',
                                   productName: product.name ?? '',
                                   price: product.price?.toString() ?? '0',
-
-                                  salePrice:
-                                  (product.salePrice != null &&
-                                      product.salePrice != product.price)
-                                      ? product.salePrice.toString()
-                                      : null,
-
                                   stock: product.productStock?.toString() ?? '-',
-
                                   stockStatus: product.stockStatus,
-
                                   rating: product.averageRating?.toDouble() ?? 0.0,
-
                                   hasVariant: product.variantProduct == 1,
-
                                   onTap: () => Get.to(
                                         () => ProductDetailScreen(
                                       product: product,

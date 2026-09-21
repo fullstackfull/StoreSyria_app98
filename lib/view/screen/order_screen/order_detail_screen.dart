@@ -169,15 +169,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   btnColor: cardBg,
                   bColor: borderColor,
                   onPressed: () {
-                    Get.to(() => InvoicePdfViewScreen(
-                      productList: detail.product!,
-                      orderDetailData: detail,
-                      tax: orderController.extTax.value.toString(),
-                      deliveryCharge: double.parse(detail.deliveredCharge.toString()),
-                      couponAmount: double.parse(
-                        detail.couponInfo?.discountAmount.toString() ?? '0.0',
-                      ),
-                    ));
+                      Get.to(() => InvoicePdfViewScreen(
+                        productList: detail.product!,
+                        orderDetailData: detail,
+                        tax: orderController.extTax.value.toString(),
+                        deliveryCharge: parsePriceSafe(detail.deliveredCharge),
+                        couponAmount: parsePriceSafe(detail.couponInfo?.discountAmount),
+                      ));
                   },
                 ),
 
@@ -219,8 +217,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
                           final product = detail.product![index];
-                          final total = double.parse(product.qty!.toString()) *
-                              double.parse(product.finalPrice!.toString());
+                          final total = parsePriceSafe(product.qty) * parsePriceSafe(product.finalPrice);
                           return orderItemWidget(
                             index: index + 1,
                             name: product.name!,
@@ -458,7 +455,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               color: Colors.white.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Text("${"paid_via".tr} $paymentType", style: TextStyle(fontSize: 12.sp, color: Colors.white70)),
+            child: Text("${"paid_by".tr} $paymentType", style: TextStyle(fontSize: 12.sp, color: Colors.white70)),
           ),
         ],
       ),
@@ -478,7 +475,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  // ⭐⭐⭐ قسم الملاحظات ⭐⭐⭐
   Widget _buildNotesSection(
       BuildContext context,
       OrderDetailData detail,

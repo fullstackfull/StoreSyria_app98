@@ -14,7 +14,6 @@ class ProductDetailController extends GetxController {
 
   ProductData? product;
 
-
   final ProductRepository productRepository =
   ProductRepository();
 

@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_collection_literals, unnecessary_this
 
+import '../../utils/helper.dart';
+
 class OrderModel {
   int? status;
   String? message;
@@ -98,16 +100,16 @@ class OrderData {
   int? isGuest;
   String? productJson;
   String? productId;
-  double? productPrice;
-  double? couponPrice;
-  double? deliveryPrice;
-  double? taxPrice;
-  double? finalPrice;
-  double? returnPrice;
   String? paymentComment;
   String? paymentType;
   String? paymentStatus;
   int? deliveryId;
+  String? productPrice;
+  String? couponPrice;
+  String? deliveryPrice;
+  String? taxPrice;
+  String? finalPrice;
+  String? returnPrice;
   String? deliveryComment;
   int? deliveredStatus;
   String? deliveryDate;
@@ -168,12 +170,12 @@ class OrderData {
     isGuest = json['is_guest'];
     productJson = json['product_json'];
     productId = json['product_id'];
-    productPrice = json['product_price'] != null ? double.tryParse(json['product_price'].toString()) : null;
-    couponPrice = json['coupon_price'] != null ? double.tryParse(json['coupon_price'].toString()) : null;
-    deliveryPrice = json['delivery_price'] != null ? double.tryParse(json['delivery_price'].toString()) : null;
-    taxPrice = json['tax_price'] != null ? double.tryParse(json['tax_price'].toString()) : null;
-    finalPrice = json['final_price'] != null ? double.tryParse(json['final_price'].toString()) : null;
-    returnPrice = json['return_price'] != null ? double.tryParse(json['return_price'].toString()) : null;
+    productPrice = formatPriceRaw(json['product_price']);
+    couponPrice = formatPriceRaw(json['coupon_price']);
+    deliveryPrice = formatPriceRaw(json['delivery_price']);
+    taxPrice = formatPriceRaw(json['tax_price']);
+    finalPrice = formatPriceRaw(json['final_price']);
+    returnPrice = formatPriceRaw(json['return_price']);
     paymentComment = json['payment_comment'];
     paymentType = json['payment_type'];
     paymentStatus = json['payment_status'];

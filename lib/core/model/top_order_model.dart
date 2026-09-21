@@ -49,7 +49,7 @@ class TopOrderItem {
   String? customerName;
   int? customerId;
   String? orderDate;
-  double? finalPrice;
+  String? finalPrice;
   String? paymentStatus;
   int? deliveredStatus;
   String? deliveredStatusText;
@@ -73,8 +73,7 @@ class TopOrderItem {
     customerId = json['customer_id'];
     orderDate = json['order_date'];
 
-    final rawPrice = json['final_price']?.toString() ?? '';
-    finalPrice = double.tryParse(rawPrice.replaceAll(',', '')) ?? 0;
+    finalPrice = json['final_price']?.toString() ?? '';
 
     paymentStatus = json['payment_status'];
     deliveredStatus = json['delivered_status'];

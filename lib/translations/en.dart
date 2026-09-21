@@ -64,7 +64,7 @@ const Map<String, String> en = {
   "tax": "Tax",
   "coupon": "Coupon",
   "grand_total": "Grand Total",
-  "paid_via": "Paid via",
+  "paid_by": "Paid by",
   "products": "Products",
   "add_product": "Add Product",
   "filter_by_category": "Filter by Category",
