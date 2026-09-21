@@ -21,6 +21,7 @@ class ProductController extends GetxController implements StoreAware {
   static const String _cacheProductKey = 'home_product_list_data';
 
   ProductRepository productRepository = ProductRepository();
+  final RxList<ProductData> categoryResults = <ProductData>[].obs;
 
   ProductModel? productModel;
   RxString filterCategory = ''.obs;
@@ -157,10 +158,9 @@ class ProductController extends GetxController implements StoreAware {
     listMode.value = ProductListMode.category;
 
     searchQuery.value = '';
-
     isScroll.value = false;
 
-    productList.clear();
+    categoryResults.clear();
 
     isDataAvailable.value = true;
 
@@ -175,7 +175,7 @@ class ProductController extends GetxController implements StoreAware {
         if (data['status'] == 1) {
           final List products = data['data'] ?? [];
 
-          productList.assignAll(
+          categoryResults.assignAll(
             products
                 .map((e) => ProductData.fromJson(e))
                 .toList(),

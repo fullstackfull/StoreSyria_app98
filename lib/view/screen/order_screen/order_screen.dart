@@ -437,7 +437,6 @@ class _OrderScreenState extends State<OrderScreen>
                                   : "filter_by_date".tr,
 
                               onFilterTap: () async {
-                                // إذا كان بحث شغال، الغيه
                                 if (isSearchMode) {
                                   orderController.clearOrderSearch();
                                 }

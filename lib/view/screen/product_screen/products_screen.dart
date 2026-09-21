@@ -214,7 +214,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                           ),
               
                           TextButton(
-                            onPressed: () async {
+                            onPressed: () {
                               selectedCategoryId = '';
 
                               addProductController.category.value = '';
@@ -230,14 +230,13 @@ class _ProductsScreenState extends State<ProductsScreen>
                               productController.isScroll.value = true;
 
                               productController.searchResults.clear();
+                              productController.categoryResults.clear();
                               productController.searchTotal.value = 0;
                               productController.searchController.clear();
 
-                              productController.productList.clear();
+                              productController.errorMessage.value = '';
 
                               Navigator.pop(sheetContext);
-
-                              await _fetchInitialData();
                             },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.symmetric(
@@ -439,15 +438,10 @@ class _ProductsScreenState extends State<ProductsScreen>
 
       productController.searchResults.clear();
       productController.searchTotal.value = 0;
-      // Clear old products before filtering
-      productController.productList.clear();
 
-      // Clear old error
       productController.errorMessage.value = '';
 
-      // Start loading
       productController.isLoading.value = true;
-
       try {
         await productController.searchProductData(
           categoryId,
@@ -565,6 +559,8 @@ class _ProductsScreenState extends State<ProductsScreen>
                   final products =
                   productController.listMode.value == ProductListMode.search
                       ? productController.searchResults
+                      : productController.listMode.value == ProductListMode.category
+                      ? productController.categoryResults
                       : productController.productList;
 
                   if (productController.isDataAvailable2.value) {
