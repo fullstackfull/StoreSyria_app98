@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -5,6 +6,7 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/controller/customers/customer_controller.dart';
+import '../../new_widgets/search_widget.dart';
 import 'customer_bottom_sheet.dart';
 import '../../new_widgets/customer_widget.dart';
 import '../../widget/app_dialog.dart';
@@ -22,7 +24,6 @@ class _CustomerScreenState extends State<CustomerScreen>
     with AutomaticKeepAliveClientMixin {
 
   final CustomerController customerController = Get.find<CustomerController>();
-
   late final ScrollController scrollController;
 
   @override
@@ -47,6 +48,9 @@ class _CustomerScreenState extends State<CustomerScreen>
 
   void _onScroll() {
     if (!scrollController.hasClients) return;
+    if (customerController.isCustomerSearchActive.value) {
+      return;
+    }
 
     if (!customerController.isScroll.value) return;
 
@@ -54,7 +58,6 @@ class _CustomerScreenState extends State<CustomerScreen>
 
     if (scrollController.position.pixels >=
         scrollController.position.maxScrollExtent - 200) {
-
       customerController.getCustomersData(
         customerController.currantPage.value + 1,
       );
@@ -72,7 +75,6 @@ class _CustomerScreenState extends State<CustomerScreen>
   void dispose() {
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
-
     super.dispose();
   }
 
@@ -113,205 +115,227 @@ class _CustomerScreenState extends State<CustomerScreen>
         backgroundColor: isDark
             ? DarkThemeColor.cBackGround
             : const Color(0xFFF5F6F8),
-        body: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 20.w,
-            vertical: 16.h,
+      body: Padding(
+      padding: EdgeInsets.symmetric(
+      horizontal: 20.w,
+      vertical: 16.h,
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: SearchRowWidget(
+              context: context,
+              controller: customerController.searchController,
+              hint: 'search'.tr,
+              onChanged: customerController.onCustomerSearchChanged,
+              onClear: customerController.resetCustomerSearch,
+            ),
           ),
-          child: Obx(() {
 
-            if (customerController.isLoading.value &&
-                customerController.customerList.isEmpty) {
-              return const Center(
-                child: LoadingWidget(),
-              );
-            }
-            if (customerController.errorMessage.isNotEmpty &&
-                customerController.customerList.isEmpty) {
+          SizedBox(height: 12.h),
 
-              return RefreshIndicator(
-                backgroundColor: isDark
-                    ? DarkThemeColor.cCardBackground
-                    : Colors.white,
-                onRefresh: _fetchInitialData,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(
-                      height:
-                      MediaQuery.of(context).size.height * .6,
-                      child: Center(
-                        child: ErrorState(
-                          message: customerController.errorMessage.value,
-                          onRetry: _fetchInitialData,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            if (customerController.customerList.isEmpty) {
+          Expanded(
+            child: Obx(() {
+              final isSearchMode =
+                  customerController.isCustomerSearchActive.value;
 
-              return RefreshIndicator(
-                backgroundColor: isDark
-                    ? DarkThemeColor.cCardBackground
-                    : Colors.white,
-                onRefresh: _fetchInitialData,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
+              final customers = isSearchMode
+                  ? customerController.searchResults
+                  : customerController.customerList;
 
-                    SizedBox(
-                      height:
-                      MediaQuery.of(context).size.height * .6,
-                      child: Center(
-                        child: EmptyState(
-                          message:
-                          "no_customers_found".tr,
-                          icon:
-                          Icons.people_outline_rounded,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return RefreshIndicator(
-              backgroundColor: isDark
-                  ? DarkThemeColor.cCardBackground
-                  : Colors.white,
-              onRefresh: _fetchInitialData,
-              child: CustomScrollView(
-                controller: scrollController,
-                physics:
-                const AlwaysScrollableScrollPhysics(),
-                slivers: [
+              if (customerController.isSearchingCustomers.value &&
+                  customers.isEmpty) {
+                return const Center(
+                  child: LoadingWidget(),
+                );
+              }
 
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: 15.h,
-                      ),
-                      child: Row(
-                        children: [
+              if (!isSearchMode &&
+                  customerController.isLoading.value &&
+                  customerController.customerList.isEmpty) {
+                return const Center(
+                  child: LoadingWidget(),
+                );
+              }
 
-                          Text(
-                            "${customerController.customerModel?.data?.pagination?.total ?? customerController.customerList.length} ${'items'.tr}",
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: isDark
-                                  ? Colors.grey.shade400
-                                  : AppColor.cDarkGreyFont,
-                              fontWeight:
-                              FontWeight.w500,
-                            ),
+              if (customers.isEmpty) {
+                return RefreshIndicator(
+                  backgroundColor: isDark
+                      ? DarkThemeColor.cCardBackground
+                      : Colors.white,
+                  onRefresh: _fetchInitialData,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height:
+                        MediaQuery.of(context).size.height * .5,
+                        child: Center(
+                          child: EmptyState(
+                            message: 'no_customers_found'.tr,
+                            icon: Icons.people_outline_rounded,
                           ),
-
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
+                );
+              }
 
-                  SliverPadding(
-                    padding: EdgeInsets.only(
-                      bottom: 20.h,
-                    ),
-                    sliver: SliverList(
-                      delegate:
-                      SliverChildBuilderDelegate(
-                            (context, index) {
-                          final customer = customerController.customerList[index];
-                          final fullName = customer.customerInfo?.name?.trim() ?? '';
-                          final parts = fullName.split(RegExp(r'\s+'));
-
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              bottom: 12.h,
-                            ),
-                            child: customerWidget(
-                              changeFun: () {
-                                Get.bottomSheet(
-                                  AddNewCustomerWidget(
-                                    isUpdate: true,
-                                    customerId: customer.id.toString(),
-                                    firstName: parts.isNotEmpty ? parts.first : '',
-                                    lastName: parts.length > 1
-                                        ? parts.sublist(1).join(' ')
-                                        : '',
-                                    email: customer.email,
-                                    mobile: customer.customerInfo?.mobile,
-                                    status: customer.status.toString(),
-                                    //TODO :: configuration this parameters
-                                    // address: customer.address,
-                                    // cityId: customer.cityId?.toString(),
-                                    // deliveryInstructions: customer.deliveryInstructions,
-                                    // addressType: customer.type?.toString(),
-                                  ),
-                                  isScrollControlled: true,
-                                );
-                              },
-                              deleteFun: () {
-                                AppDialog.showCustomDialog(
-                                  context: context,
-                                  title: 'delete'.tr,
-                                  message: 'deleteCustomer'.tr,
-                                  lottieAsset: 'assets/lottie/delete_icon.json',
-                                  confirmColor: Colors.red,
-                                  onConfirm: () async {
-                                    await customerController.deleteCustomerData(
-                                     customerId: customer.id.toString(),
-                                    );
-                                  },
-                                );
-                              },
-                              viewFun: (){
-                                Get.to(
-                                      () => CustomerDetailsScreen(
-                                    customerId: customer.id.toString(),
-                                  ),
-                                );
-                              },
-                              onTap: (){
-                                  Get.to(
-                                        () => CustomerDetailsScreen(
-                                      customerId: customer.id.toString(),
-                                    ),
-                                  );
-                              },
-                              context: context,
-                              customer: customer,
-                            ),
-                          );
-                        },
-                        childCount:
-                        customerController.customerList.length,
-                      ),
-                    ),
-                  ),
-
-                  if (customerController.isScroll.value)
+              return RefreshIndicator(
+                backgroundColor: isDark
+                    ? DarkThemeColor.cCardBackground
+                    : Colors.white,
+                onRefresh: isSearchMode
+                    ? () async {}
+                    : _fetchInitialData,
+                child: CustomScrollView(
+                  controller: scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 20.h,
+                        padding: EdgeInsets.only(
+                          bottom: 15.h,
                         ),
-                        child: Center(
-                          child: customerController.isPageLoading.value
-                              ? CircularProgressIndicator(
-                            color: AppColor.themeNavyBlueColor,
-                          )
-                              : const SizedBox.shrink(),
+                        child: Row(
+                          children: [
+                            Text(
+                              "${isSearchMode ? customers.length : (customerController.customerModel?.data?.pagination?.total ?? customers.length)} ${'items'.tr}",
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: isDark
+                                    ? Colors.grey.shade400
+                                    : AppColor.cDarkGreyFont,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                ],
-              ),
-            );
-          }),
-        ),
+
+                    SliverPadding(
+                      padding: EdgeInsets.only(
+                        bottom: 20.h,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                            final customer = customers[index];
+
+                            final fullName =
+                                customer.customerInfo?.name?.trim() ?? '';
+
+                            final parts =
+                            fullName.split(RegExp(r'\s+'));
+
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                bottom: 12.h,
+                              ),
+                              child: customerWidget(
+                                changeFun: () {
+                                  Get.bottomSheet(
+                                    AddNewCustomerWidget(
+                                      isUpdate: true,
+                                      customerId:
+                                      customer.id.toString(),
+                                      firstName:
+                                      parts.isNotEmpty
+                                          ? parts.first
+                                          : '',
+                                      lastName:
+                                      parts.length > 1
+                                          ? parts
+                                          .sublist(1)
+                                          .join(' ')
+                                          : '',
+                                      email: customer.email,
+                                      mobile:
+                                      customer.customerInfo?.mobile,
+                                      status:
+                                      customer.status.toString(),
+                                    ),
+                                    isScrollControlled: true,
+                                  );
+                                },
+
+                                deleteFun: () {
+                                  AppDialog.showCustomDialog(
+                                    context: context,
+                                    title: 'delete'.tr,
+                                    message: 'deleteCustomer'.tr,
+                                    lottieAsset:
+                                    'assets/lottie/delete_icon.json',
+                                    confirmColor: Colors.red,
+                                    onConfirm: () async {
+                                      await customerController
+                                          .deleteCustomerData(
+                                        customerId:
+                                        customer.id.toString(),
+                                      );
+                                    },
+                                  );
+                                },
+
+                                viewFun: () {
+                                  Get.to(
+                                        () => CustomerDetailsScreen(
+                                      customerId:
+                                      customer.id.toString(),
+                                    ),
+                                  );
+                                },
+
+                                onTap: () {
+                                  Get.to(
+                                        () => CustomerDetailsScreen(
+                                      customerId:
+                                      customer.id.toString(),
+                                    ),
+                                  );
+                                },
+
+                                context: context,
+                                customer: customer,
+                              ),
+                            );
+                          },
+
+                          childCount: customers.length,
+                        ),
+                      ),
+                    ),
+
+                    if (!isSearchMode &&
+                        customerController.isScroll.value)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: 20.h,
+                          ),
+                          child: Center(
+                            child:
+                            customerController.isPageLoading.value
+                                ? CircularProgressIndicator(
+                              color: AppColor
+                                  .themeNavyBlueColor,
+                            )
+                                : const SizedBox.shrink(),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ],
       ),
+    ),
+    ),
     );
   }
 }

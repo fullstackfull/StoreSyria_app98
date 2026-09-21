@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/customers/customer_controller.dart';
 import 'package:store_go_app/core/model/customer_model.dart';
+import 'package:store_go_app/view/new_widgets/status_pill.dart';
 
 class CustomerPickerBottomSheet extends StatefulWidget {
   const CustomerPickerBottomSheet({super.key});
-
 
   static Future<CustomerData?> show(BuildContext context) {
     return showModalBottomSheet<CustomerData>(
@@ -25,13 +25,12 @@ class CustomerPickerBottomSheet extends StatefulWidget {
 class _CustomerPickerBottomSheetState
     extends State<CustomerPickerBottomSheet> {
   final CustomerController customerController = Get.find<CustomerController>();
-  final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
-  Timer? _debounce;
 
   static const Color navyBlue = Color(0xFF172C4E);
 
   bool get isDark => Theme.of(context).brightness == Brightness.dark;
+
 
   @override
   void initState() {
@@ -56,17 +55,9 @@ class _CustomerPickerBottomSheetState
     }
   }
 
-  void _onSearchChanged(String value) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), () {
-      customerController.searchCustomerData(name: value.trim());
-    });
-  }
 
   @override
   void dispose() {
-    _debounce?.cancel();
-    searchController.dispose();
     scrollController.dispose();
     customerController.clearCustomerSearch();
     super.dispose();
@@ -128,8 +119,8 @@ class _CustomerPickerBottomSheetState
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextField(
-                    controller: searchController,
-                    onChanged: _onSearchChanged,
+                    controller: customerController.searchController,
+                    onChanged: customerController.onCustomerSearchChanged,
                     decoration: InputDecoration(
                       hintText: 'search_customer_hint'.tr,
                       prefixIcon: const Icon(Icons.search),
@@ -144,13 +135,10 @@ class _CustomerPickerBottomSheetState
                             ),
                           );
                         }
-                        if (searchController.text.isNotEmpty) {
+                        if (customerController.searchController.text.isNotEmpty) {
                           return IconButton(
                             icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              customerController.clearCustomerSearch();
-                            },
+                            onPressed: customerController.resetCustomerSearch,
                           );
                         }
                         return const SizedBox.shrink();
@@ -228,6 +216,12 @@ class _CustomerPickerBottomSheetState
                         final customer = list[index];
                         final name = customer.customerInfo?.name ?? '';
                         final email = customer.email ?? '';
+                        final isActive = customer.status == 1;
+                        final statusLabel = customer?.statusText?.isNotEmpty == true
+                            ? customer!.statusText!
+                            : isActive
+                            ? 'active'.tr
+                            : 'inactive'.tr;
             
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
@@ -239,6 +233,10 @@ class _CustomerPickerBottomSheetState
                               style: const TextStyle(
                                   color: navyBlue, fontWeight: FontWeight.w700),
                             ),
+                          ),
+                          trailing: statusPill(
+                              label: statusLabel,
+                              isActive: isActive
                           ),
                           title: Text(
                             name,

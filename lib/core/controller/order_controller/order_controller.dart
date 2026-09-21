@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print, invalid_use_of_protected_member
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/order_repository.dart';
@@ -15,8 +16,12 @@ import '../../model/create_order_model.dart';
 import '../../model/customer_model.dart';
 import '../../model/top_order_model.dart';
 
-/// سطر منتج واحد داخل الطلب (التاب التاني)
-/// كل سطر عنده دروب داون لاختيار المنتج + حقل كمية + حقل سعر قابلين للتعديل اليدوي
+
+enum OrderListMode {
+  normal,
+  search,
+}
+
 class OrderLineItem {
   final Rx<ProductData?> product = Rx<ProductData?>(null);
   final TextEditingController qtyController =
@@ -38,6 +43,8 @@ class OrderController extends GetxController implements StoreAware {
   final OrderRepository orderRepository = OrderRepository();
   final OrderDetailRepository orderDetailRepository =
   OrderDetailRepository();
+  final RxList<OrderData> searchResults = <OrderData>[].obs;
+  final Rx<OrderListMode> listMode = OrderListMode.normal.obs;
 
   // ==================== Models ====================
   OrderModel? orderModel;
@@ -94,13 +101,11 @@ class OrderController extends GetxController implements StoreAware {
 
   void removeLineItem(int index) {
     if (index < 0 || index >= orderLineItems.length) return;
-    if (orderLineItems.length == 1) return; // خلي سطر واحد ع الأقل
+    if (orderLineItems.length == 1) return;
     orderLineItems[index].dispose();
     orderLineItems.removeAt(index);
   }
 
-  /// عند اختيار منتج من الدروب داون: بيعبي السعر تلقائياً من موديل المنتج،
-  /// والمستخدم قادر يعدله بعدين لأنه TextField عادي.
   void onProductSelected(int index, ProductData product) {
     if (index < 0 || index >= orderLineItems.length) return;
     final line = orderLineItems[index];
@@ -109,6 +114,23 @@ class OrderController extends GetxController implements StoreAware {
     if (line.qtyController.text.trim().isEmpty) {
       line.qtyController.text = '1';
     }
+  }
+
+  Timer? _orderSearchDebounce;
+
+  void clearOrderSearch() {
+    _orderSearchDebounce?.cancel();
+
+    searchController.clear();
+    searchResults.clear();
+
+    isSearching.value = false;
+    isSearchingOrders.value = false;
+
+    errorMessage.value = '';
+
+    listMode.value = OrderListMode.normal;
+    isScroll.value = true;
   }
 
   double get productsTotal {
@@ -131,7 +153,7 @@ class OrderController extends GetxController implements StoreAware {
   /// المدينة المختارة من الدروب داون (API)
   RxString selectedCityId = ''.obs;
   RxString selectedCityName = ''.obs;
-
+  final RxList<OrderData> filteredOrderList = <OrderData>[].obs;
   final TextEditingController deliveryPriceController = TextEditingController();
   final TextEditingController taxPriceController = TextEditingController();
 
@@ -293,6 +315,7 @@ class OrderController extends GetxController implements StoreAware {
 
   @override
   void onClose() {
+    _orderSearchDebounce?.cancel();
     searchController.dispose();
     noteController.dispose();
     firstNameController.dispose();
@@ -306,6 +329,8 @@ class OrderController extends GetxController implements StoreAware {
     stateController.dispose();
     countryController.dispose();
     postcodeController.dispose();
+    _orderSearchDebounce?.cancel();
+    searchController.dispose();
     for (final line in orderLineItems) {
       line.dispose();
     }
@@ -349,13 +374,27 @@ class OrderController extends GetxController implements StoreAware {
         DateTime? fromDate,
         DateTime? toDate,
       }) async {
+    if (listMode.value != OrderListMode.normal) return;
+
     if (page > 1 && isLoadingMoreOrders.value) return;
     if (page > 1 && !isScroll.value) return;
-    if (isSearching.value && page > 1) return;
+
+    final isDateFilterActive = fromDate != null || toDate != null;
 
     if (page == 1) {
       isLoadingOrders.value = true;
-      orderList.clear();
+
+      // إذا طلب عادي بدون date filter
+      if (!isDateFilterActive) {
+        orderList.clear();
+      }
+
+      // إذا date filter
+      // لا نمسح orderList لأنها القائمة الأصلية
+      if (isDateFilterActive) {
+        filteredOrderList.clear();
+      }
+
       currantPage.value = 1;
     } else {
       isLoadingMoreOrders.value = true;
@@ -371,25 +410,38 @@ class OrderController extends GetxController implements StoreAware {
 
       result.fold(
         onSuccess: (data) {
-          orderModel = OrderModel.fromJson(data);
-          final newItems = orderModel?.data?.data ?? [];
-          final existingIds = orderList.map((e) => e.id).toSet();
+          final model = OrderModel.fromJson(data);
+          final newItems = model.data?.data ?? [];
+
+          final targetList =
+          isDateFilterActive ? filteredOrderList : orderList;
+
+          final existingIds = targetList.map((e) => e.id).toSet();
 
           for (final item in newItems) {
             if (!existingIds.contains(item.id)) {
-              orderList.add(item);
+              targetList.add(item);
             }
           }
 
-          currantPage.value = page;
-          final lastPage = orderModel?.data?.lastPage ?? page;
-          isScroll.value = page < lastPage;
-          isDataAvailable.value = orderList.isNotEmpty;
+          if (!isDateFilterActive) {
+            orderModel = model;
+          }
 
+          currantPage.value = page;
+
+          final lastPage = model.data?.lastPage ?? page;
+
+          isScroll.value = page < lastPage;
+
+          isDataAvailable.value = targetList.isNotEmpty;
+
+          // Cache فقط للقائمة العادية بدون date filter
           if (page == 1 &&
               deliveredStatus == null &&
               fromDate == null &&
               toDate == null) {
+            orderModel = model;
             CacheService.save(_cacheOrderKey, data);
           }
         },
@@ -399,8 +451,11 @@ class OrderController extends GetxController implements StoreAware {
         },
       );
     } catch (e) {
-      errorMessage.value = 'unexpected_error_loading_orders'.tr;
+      errorMessage.value =
+          'unexpected_error_loading_orders'.tr;
+
       commonToast('unexpected_error_loading_orders'.tr);
+
       print('❌ getOrderData Error: $e');
     } finally {
       if (page == 1) {
@@ -435,53 +490,84 @@ class OrderController extends GetxController implements StoreAware {
 
   // ==================== Search ====================
 
-  Future<void> searchOrderData({required String name}) async {
-    if (name.trim().isEmpty) {
-      isSearching.value = false;
-      resetPagination();
-      await getOrderData(1);
+  Future<void> searchOrderData({
+    required String name,
+  }) async {
+    final query = name.trim();
+
+    if (query.isEmpty) {
+      clearOrderSearch();
       return;
     }
+
+    listMode.value = OrderListMode.search;
 
     isSearching.value = true;
     isSearchingOrders.value = true;
 
+    searchResults.clear();
+    errorMessage.value = '';
+    isScroll.value = false;
+
     try {
       final result = await searchRepository.getSearchData(
         type: "order",
-        name: name,
+        name: query,
       );
 
       result.fold(
         onSuccess: (data) {
-          orderList.clear();
+          searchResults.clear();
+
           final responseData = data['data'];
 
           if (responseData is List) {
             for (final item in responseData) {
-              orderList.add(OrderData.fromJson(item));
+              searchResults.add(
+                OrderData.fromJson(item),
+              );
             }
-            isDataAvailable.value = true;
-          } else {
-            isDataAvailable.value = false;
           }
-
-          isScroll.value = false;
         },
         onFailure: (reason, message, validationErrors) {
+          searchResults.clear();
           errorMessage.value = 'failed_to_search_orders'.tr;
           commonToast('failed_to_search_orders'.tr);
         },
       );
     } catch (e) {
+      searchResults.clear();
       errorMessage.value = 'failed_to_search_orders'.tr;
       commonToast('failed_to_search_orders'.tr);
+
       print('❌ searchOrderData Error: $e');
     } finally {
+      isSearching.value = false;
       isSearchingOrders.value = false;
     }
   }
 
+  void onOrderSearchChanged(String value) {
+    _orderSearchDebounce?.cancel();
+
+    final query = value.trim();
+
+    if (query.length < 3) {
+      if (query.isEmpty &&
+          listMode.value == OrderListMode.search) {
+        clearOrderSearch();
+      }
+
+      return;
+    }
+
+    _orderSearchDebounce = Timer(
+      const Duration(milliseconds: 600),
+          () {
+        searchOrderData(name: query);
+      },
+    );
+  }
   // ==================== Order Details ====================
 
   Future<void> getOrderDetailData(String orderId) async {

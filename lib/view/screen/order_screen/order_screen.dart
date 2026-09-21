@@ -71,8 +71,11 @@ class _OrderScreenState extends State<OrderScreen>
   // ============================================================
 
   void _onScroll() {
-    if (!orderController.isScroll.value) return;
+    if (orderController.listMode.value != OrderListMode.normal) {
+      return;
+    }
 
+    if (!orderController.isScroll.value) return;
     if (!scrollController.hasClients) return;
 
     if (scrollController.position.pixels >=
@@ -102,18 +105,32 @@ class _OrderScreenState extends State<OrderScreen>
     int? deliveredStatus,
     bool useDateFilter = true,
   }) async {
+    orderController.listMode.value = OrderListMode.normal;
+
     orderController.currantPage.value = 1;
     orderController.isScroll.value = true;
 
-    orderController.orderList.clear();
+    orderController.searchResults.clear();
+
+    final hasDateFilter =
+        useDateFilter && selectedDateRange != null;
+
+    // لا تمسح القائمة الأصلية إذا عم نجيب date-filtered data
+    if (hasDateFilter) {
+      orderController.filteredOrderList.clear();
+    } else {
+      orderController.orderList.clear();
+    }
 
     await orderController.getOrderData(
       1,
       deliveredStatus: deliveredStatus,
-      fromDate:
-      useDateFilter ? selectedDateRange?.start : null,
-      toDate:
-      useDateFilter ? selectedDateRange?.end : null,
+      fromDate: hasDateFilter
+          ? selectedDateRange?.start
+          : null,
+      toDate: hasDateFilter
+          ? selectedDateRange?.end
+          : null,
     );
   }
 
@@ -189,17 +206,19 @@ class _OrderScreenState extends State<OrderScreen>
                 width: double.infinity,
                 child: SearchRowWidget(
                   context: context,
-                  controller:
-                  orderController.searchController,
+                  controller: orderController.searchController,
                   hint: 'search'.tr,
                   onChanged: (value) {
-                    if (value.length > 2) {
-                      orderController.searchOrderData(
-                        name: value,
-                      );
-                    } else if (value.isEmpty) {
-                      _fetchInitialData();
+                    if (value.trim().length >= 3) {
+                      setState(() {
+                        selectedDateRange = null;
+                      });
                     }
+
+                    orderController.onOrderSearchChanged(value);
+                  },
+                  onClear: () {
+                    orderController.clearOrderSearch();
                   },
                 ),
               ),
@@ -212,8 +231,14 @@ class _OrderScreenState extends State<OrderScreen>
 
               Expanded(
                 child: Obx(() {
-                  final orderList =
-                      orderController.orderList;
+                  final isSearchMode =
+                      orderController.listMode.value == OrderListMode.search;
+
+                  final orderList = isSearchMode
+                      ? orderController.searchResults
+                      : selectedDateRange != null
+                      ? orderController.filteredOrderList
+                      : orderController.orderList;
 
                   final topOrders =
                       orderController.topOrderList;
@@ -221,38 +246,32 @@ class _OrderScreenState extends State<OrderScreen>
                   final isLoadingOrders =
                       orderController.isLoadingOrders.value;
 
+                  final isSearchingOrders =
+                      orderController.isSearchingOrders.value;
+
                   final hasTopOrders =
-                      topOrders.isNotEmpty;
+                      !isSearchMode && topOrders.isNotEmpty;
 
                   // ==================================================
                   // MAIN LOADING
                   // ==================================================
 
-                  if (isLoadingOrders &&
-                      orderController.currantPage.value == 1 &&
+                  if ((isLoadingOrders || isSearchingOrders) &&
                       orderList.isEmpty) {
                     return const Center(
                       child: LoadingWidget(),
                     );
                   }
-
                   // ==================================================
                   // ERROR
                   // ==================================================
 
-                  if (orderController
-                      .errorMessage
-                      .isNotEmpty &&
+                  if (orderController.errorMessage.isNotEmpty &&
                       orderList.isEmpty &&
-                      !isLoadingOrders) {
+                      !isLoadingOrders &&
+                      !isSearchingOrders) {
                     return RefreshIndicator(
-                      onRefresh: () async {
-                        await Future.wait([
-                          _fetchInitialData(),
-                          orderController
-                              .getTopOrderData(),
-                        ]);
-                      },
+                      onRefresh: _refreshOrders,
                       child: ListView(
                         physics:
                         const AlwaysScrollableScrollPhysics(),
@@ -284,15 +303,10 @@ class _OrderScreenState extends State<OrderScreen>
                   // ==================================================
 
                   if (orderList.isEmpty &&
-                      !isLoadingOrders) {
+                      !isLoadingOrders &&
+                      !isSearchingOrders) {
                     return RefreshIndicator(
-                      onRefresh: () async {
-                        await Future.wait([
-                          _fetchInitialData(),
-                          orderController
-                              .getTopOrderData(),
-                        ]);
-                      },
+                      onRefresh: _refreshOrders,
                       child: ListView(
                         physics:
                         const AlwaysScrollableScrollPhysics(),
@@ -325,12 +339,7 @@ class _OrderScreenState extends State<OrderScreen>
 
                   return RefreshIndicator(
                     backgroundColor: Colors.white,
-                    onRefresh: () async {
-                      await Future.wait([
-                        _fetchInitialData(),
-                        orderController.getTopOrderData(),
-                      ]);
-                    },
+                    onRefresh: _refreshOrders,
                     child: ListView.builder(
                       controller: scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -409,26 +418,45 @@ class _OrderScreenState extends State<OrderScreen>
                             padding: EdgeInsets.only(bottom: 15.h),
                             child: sectionHeaderWithFilterWidget(
                               isFilter: true,
-                              num: orderController.orderModel?.data?.total ?? 0,
+                              num: isSearchMode
+                                  ? orderController.searchResults.length
+                                  : selectedDateRange != null
+                                  ? orderController.filteredOrderList.length
+                                  : orderController.orderModel?.data?.total ?? 0,
                               context: context,
                               title: "all_orders".tr,
+
                               filterLabel: selectedDateRange != null
                                   ? "${dateFormatted(
                                 date: selectedDateRange!.start.toString(),
-                                formatType: formatForDateTime(
-                                  FormatType.date,
-                                ),
+                                formatType: formatForDateTime(FormatType.date),
                               )} - ${dateFormatted(
                                 date: selectedDateRange!.end.toString(),
-                                formatType: formatForDateTime(
-                                  FormatType.date,
-                                ),
+                                formatType: formatForDateTime(FormatType.date),
                               )}"
                                   : "filter_by_date".tr,
+
                               onFilterTap: () async {
+                                // إذا كان بحث شغال، الغيه
+                                if (isSearchMode) {
+                                  orderController.clearOrderSearch();
+                                }
+
                                 final range = await showDateRangeBottomSheet(
                                   context: context,
                                   initialRange: selectedDateRange,
+                                  onReset: () {
+                                    setState(() {
+                                      selectedDateRange = null;
+                                    });
+
+                                    orderController.filteredOrderList.clear();
+
+                                    orderController.currantPage.value = 1;
+                                    orderController.isScroll.value = true;
+                                    orderController.isDataAvailable.value =
+                                        orderController.orderList.isNotEmpty;
+                                  },
                                 );
 
                                 if (range != null) {
@@ -576,4 +604,30 @@ class _OrderScreenState extends State<OrderScreen>
       ),
     );
   }
+  Future<void> _refreshOrders() async {
+    if (orderController.listMode.value ==
+        OrderListMode.search) {
+      final query =
+      orderController.searchController.text.trim();
+
+      if (query.isNotEmpty) {
+        await orderController.searchOrderData(
+          name: query,
+        );
+      }
+
+      return;
+    }
+
+    await Future.wait([
+      _fetchInitialData(
+        deliveredStatus:
+        orderController.selectedStatus.value == 0
+            ? null
+            : orderController.selectedStatus.value - 1,
+      ),
+      orderController.getTopOrderData(),
+    ]);
+  }
 }
+

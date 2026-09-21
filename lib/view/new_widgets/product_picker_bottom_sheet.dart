@@ -34,9 +34,7 @@ class ProductPickerBottomSheet extends StatefulWidget {
 
 class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
   final ProductController productController = Get.find<ProductController>();
-  final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
-  Timer? _debounce;
 
   static const Color navyBlue = Color(0xFF172C4E);
 
@@ -68,22 +66,8 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
     }
   }
 
-  void _onSearchChanged(String value) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), () async {
-      final query = value.trim();
-      if (query.isEmpty) {
-        await productController.clearSearch();
-      } else if (query.length >= 3) {
-        await productController.searchProductName(query);
-      }
-    });
-  }
-
   @override
   void dispose() {
-    _debounce?.cancel();
-    searchController.dispose();
     scrollController.dispose();
     super.dispose();
   }
@@ -145,8 +129,8 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextField(
-                    controller: searchController,
-                    onChanged: _onSearchChanged,
+                    controller: productController.searchController,
+                    onChanged: productController.onProductSearchChanged,
                     decoration: InputDecoration(
                       hintText: 'search_product_hint'.tr,
                       prefixIcon: const Icon(Icons.search),
@@ -162,12 +146,12 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                             ),
                           );
                         }
-                        if (searchController.text.isNotEmpty) {
+                        if (productController.searchController.text.isNotEmpty) {
                           return IconButton(
                             icon: const Icon(Icons.clear),
                             onPressed: () async {
-                              searchController.clear();
-                              await productController.clearSearch();
+                              productController.searchController.clear();
+                              productController.clearSearch();
                             },
                           );
                         }
@@ -195,7 +179,9 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                 const SizedBox(height: 8),
                 Expanded(
                   child: Obx(() {
-                    final list = productController.productList;
+                    final list = productController.listMode.value == ProductListMode.search
+                        ? productController.searchResults
+                        : productController.productList;
                     final searching = isSearchMode;
 
                     final loadingFirstPage = searching

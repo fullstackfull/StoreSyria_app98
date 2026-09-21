@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -32,9 +31,6 @@ class _ProductsScreenState extends State<ProductsScreen>
   final ProductController productController = Get.find<ProductController>();
   final AddProductController addProductController = Get.put(AddProductController());
   final ScrollController scrollController = ScrollController();
-  final TextEditingController searchController = TextEditingController();
-  Timer? _searchDebounce;
-
   bool _isFirstLoad = true;
 
   @override
@@ -58,7 +54,6 @@ class _ProductsScreenState extends State<ProductsScreen>
         productController.filterCategoryId.value = '';
 
         productController.errorMessage.value = '';
-        productController.productList.clear();
 
         getData();
       }
@@ -101,28 +96,29 @@ class _ProductsScreenState extends State<ProductsScreen>
     final categoryId = productController.filterCategoryId.value;
 
     productController.errorMessage.value = '';
-    productController.productList.clear();
     productController.currantPage.value = 1;
 
     if (mode == ProductListMode.search &&
-        searchQuery.isNotEmpty) {
-      productController.isScroll.value = false;
+    searchQuery.isNotEmpty) {
+    productController.isScroll.value = false;
 
-      await productController.searchProductName(searchQuery);
-      return;
+    await productController.searchProductName(searchQuery);
+    return;
     }
 
     if (mode == ProductListMode.category &&
-        categoryId.isNotEmpty) {
-      productController.isScroll.value = false;
+    categoryId.isNotEmpty) {
+    productController.isScroll.value = false;
+    productController.productList.clear();
 
-      await productController.searchProductData(categoryId);
-      return;
+    await productController.searchProductData(categoryId);
+    return;
     }
 
     productController.listMode.value = ProductListMode.normal;
     productController.searchQuery.value = '';
     productController.isScroll.value = true;
+    productController.productList.clear();
 
     await productController.getProductData(1);
   }
@@ -232,6 +228,10 @@ class _ProductsScreenState extends State<ProductsScreen>
 
                               productController.currantPage.value = 1;
                               productController.isScroll.value = true;
+
+                              productController.searchResults.clear();
+                              productController.searchTotal.value = 0;
+                              productController.searchController.clear();
 
                               productController.productList.clear();
 
@@ -434,9 +434,11 @@ class _ProductsScreenState extends State<ProductsScreen>
 
       productController.isScroll.value = false;
       productController.currantPage.value = 1;
-      searchController.clear();
+      productController.searchController.clear();
       productController.searchQuery.value = '';
 
+      productController.searchResults.clear();
+      productController.searchTotal.value = 0;
       // Clear old products before filtering
       productController.productList.clear();
 
@@ -464,10 +466,12 @@ class _ProductsScreenState extends State<ProductsScreen>
     productController.filterCategoryId.value = '';
 
     productController.searchQuery.value = '';
-    productController.listMode.value = ProductListMode.normal;
-    productController.searchTotal.value = 0;
-    searchController.clear();
+    productController.searchController.clear();
 
+    productController.searchResults.clear();
+    productController.searchTotal.value = 0;
+
+    productController.listMode.value = ProductListMode.normal;
     productController.currantPage.value = 1;
     productController.isScroll.value = true;
 
@@ -480,8 +484,6 @@ class _ProductsScreenState extends State<ProductsScreen>
   void dispose() {
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
-    searchController.dispose();
-    _searchDebounce?.cancel();
     super.dispose();
   }
 
@@ -510,35 +512,16 @@ class _ProductsScreenState extends State<ProductsScreen>
                   Expanded(
                     child: SearchRowWidget(
                       context: context,
-                      controller: searchController,
+                      controller: productController.searchController,
                       hint: 'search'.tr,
-                      onChanged: (value) {
-                        _searchDebounce?.cancel();
-
-                        final query = value.trim();
-
-                        if (query.length < 3) {
-                          if (query.isEmpty &&
-                              productController.listMode.value ==
-                                  ProductListMode.search) {
-                            productController.clearSearch();
-                          }
-
-                          return;
-                        }
-
-                        _searchDebounce = Timer(
-                          const Duration(milliseconds: 600),
-                              () {
-                            productController.searchProductName(query);
-                          },
-                        );
-                      },
+                      onChanged: productController.onProductSearchChanged,
+                      onClear: productController.clearSearch,
                     ),
                   ),
 
                   horizontalSpace(10.w),
                   Obx(() {
+
                     final hasFilter =
                         productController.filterCategoryId.value.isNotEmpty;
                     return GestureDetector(
@@ -579,6 +562,10 @@ class _ProductsScreenState extends State<ProductsScreen>
 
               Expanded(
                 child: Obx(() {
+                  final products =
+                  productController.listMode.value == ProductListMode.search
+                      ? productController.searchResults
+                      : productController.productList;
 
                   if (productController.isDataAvailable2.value) {
                     return const Center(
@@ -594,7 +581,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                   }
 
                   if (productController.errorMessage.isNotEmpty &&
-                      productController.productList.isEmpty) {
+                      products.isEmpty) {
                     return RefreshIndicator(
                       backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
                       onRefresh: _fetchInitialData,
@@ -615,7 +602,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                     );
                   }
 
-                  if (productController.productList.isEmpty) {
+                  if (products.isEmpty) {
                     return RefreshIndicator(
                       backgroundColor: isDark ? DarkThemeColor.cCardBackground : Colors.white,
                       onRefresh: _fetchInitialData,
@@ -674,8 +661,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                           sliver: SliverGrid(
                             delegate: SliverChildBuilderDelegate(
                                   (context, index) {
-                                final product =
-                                productController.productList[index];
+                                    final product = products[index];
 
                                 return allProductsListItemWidget(
                                   productId: product.id.toString(),
@@ -758,8 +744,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                                   },
                                 );
                               },
-                              childCount: productController.productList.length,
-                            ),
+                              childCount: products.length,                            ),
                             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 220.w,
                               crossAxisSpacing: 12.w,
@@ -770,8 +755,9 @@ class _ProductsScreenState extends State<ProductsScreen>
                         ),
 
 
-                        if (productController.isScroll.value)
-                          SliverToBoxAdapter(
+                        if (productController.listMode.value ==
+                            ProductListMode.normal &&
+                            productController.isScroll.value)                          SliverToBoxAdapter(
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 20.h),
                               child: Center(

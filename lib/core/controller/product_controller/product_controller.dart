@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
@@ -29,6 +31,7 @@ class ProductController extends GetxController implements StoreAware {
   RxString searchQuery = ''.obs;
 
   RxList<ProductData> productList = <ProductData>[].obs;
+  final TextEditingController searchController = TextEditingController();
 
   List<File> selectedSubImages = [];
 
@@ -39,6 +42,8 @@ class ProductController extends GetxController implements StoreAware {
   RxBool isLoading = false.obs;
   RxString imageBaseUrl = ''.obs;
   RxString errorMessage = ''.obs;
+  final RxList<ProductData> searchResults = <ProductData>[].obs;
+  Timer? _productSearchDebounce;
 
 
   @override
@@ -190,16 +195,40 @@ class ProductController extends GetxController implements StoreAware {
     );
   }
 
+  void onProductSearchChanged(String value) {
+    _productSearchDebounce?.cancel();
+
+    final query = value.trim();
+
+    if (query.length < 3) {
+      if (query.isEmpty &&
+          listMode.value == ProductListMode.search) {
+        clearSearch();
+      }
+
+      return;
+    }
+
+    _productSearchDebounce = Timer(
+      const Duration(milliseconds: 600),
+          () {
+        searchProductName(query);
+      },
+    );
+  }
+
   Future<void> searchProductName(String name) async {
     if (name.trim().length < 3) return;
 
     listMode.value = ProductListMode.search;
     searchQuery.value = name.trim();
+
     filterCategory.value = '';
     filterCategoryId.value = '';
+
     isScroll.value = false;
 
-    productList.clear();
+    searchResults.clear();
     errorMessage.value = '';
     isDataAvailable2.value = true;
 
@@ -213,27 +242,28 @@ class ProductController extends GetxController implements StoreAware {
         if (data['status'] == 1) {
           searchTotal.value = data['data']?['total'] ?? 0;
 
-          final List products = data['data']?['data'] ?? [];
+          final List products =
+              data['data']?['data'] ?? [];
 
-          productList.assignAll(
-            products.map((e) => ProductData.fromJson(e)).toList(),
+          searchResults.assignAll(
+            products
+                .map((e) => ProductData.fromJson(e))
+                .toList(),
           );
 
           errorMessage.value = '';
         } else {
           searchTotal.value = 0;
-          productList.clear();
+          searchResults.clear();
           errorMessage.value = '';
         }
       },
-
       onFailure: (reason, message, validationErrors) {
         searchTotal.value = 0;
-        productList.clear();
+        searchResults.clear();
         isScroll.value = false;
 
         if (reason == FailureReason.notFound) {
-          // بحث بدون نتائج
           errorMessage.value = '';
           return;
         }
@@ -243,6 +273,7 @@ class ProductController extends GetxController implements StoreAware {
       },
     );
   }
+
   Future<void> deleteProductData({
     required String productId,
   }) async {
@@ -293,24 +324,31 @@ class ProductController extends GetxController implements StoreAware {
   }
 
 
-  Future<void> clearSearch() async {
-    searchQuery.value = '';
+  void clearSearch() {
+    _productSearchDebounce?.cancel();
 
+    searchController.clear();
+
+    searchQuery.value = '';
     listMode.value = ProductListMode.normal;
 
     filterCategory.value = '';
     filterCategoryId.value = '';
 
     searchTotal.value = 0;
-
-    currantPage.value = 1;
-    isScroll.value = true;
-
-    productList.clear();
+    searchResults.clear();
 
     errorMessage.value = '';
     isDataAvailable2.value = false;
 
-    await getProductData(1);
+    currantPage.value = 1;
+    isScroll.value = true;
+  }
+
+  @override
+  void onClose() {
+    _productSearchDebounce?.cancel();
+    searchController.dispose();
+    super.onClose();
   }
 }

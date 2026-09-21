@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:store_go_app/core/model/customer_model.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
+import 'package:store_go_app/view/new_widgets/status_pill.dart';
 
 Widget customerWidget({
   required BuildContext context,
@@ -88,7 +89,7 @@ Widget customerWidget({
                 ),
               ),
               const Spacer(),
-              _statusPill(
+              statusPill(
                 label: statusLabel,
                 isActive: isActive,
               ),
@@ -174,68 +175,5 @@ Widget _customerInfoRow({
         ),
       ),
     ],
-  );
-}
-
-String _getInitials(String name) {
-  final parts = name
-      .trim()
-      .split(RegExp(r'\s+'))
-      .where((e) => e.isNotEmpty)
-      .toList();
-
-  if (parts.isEmpty) return '?';
-
-  if (parts.length == 1) {
-    return parts[0].substring(0, 1).toUpperCase();
-  }
-
-  return (
-      parts[0].substring(0, 1) +
-          parts[1].substring(0, 1)
-  ).toUpperCase();
-}
-
-Widget _statusPill({
-  required String label,
-  required bool isActive,
-}) {
-  final color = isActive
-      ? const Color(0xFF00B894)
-      : const Color(0xFFFF5C5C);
-
-  return Container(
-    padding: EdgeInsets.symmetric(
-      horizontal: 8.w,
-      vertical: 5.h,
-    ),
-    decoration: BoxDecoration(
-      color: color.withOpacity(.09),
-      borderRadius: BorderRadius.circular(20.r),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 5.w,
-          height: 5.w,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-
-        SizedBox(width: 4.w),
-
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 9.sp,
-            fontWeight: FontWeight.w700,
-            color: color,
-          ),
-        ),
-      ],
-    ),
   );
 }

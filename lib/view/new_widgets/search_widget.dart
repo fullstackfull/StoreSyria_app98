@@ -9,9 +9,11 @@ Widget SearchRowWidget({
   required TextEditingController controller,
   String? hint,
   Function(String)? onChanged,
+  VoidCallback? onClear,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
+  final cardColor =
+  isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
 
   return Container(
     decoration: BoxDecoration(
@@ -21,11 +23,8 @@ Widget SearchRowWidget({
     child: CommonTextField(
       prefix: DefaultImages.searchIcn,
       suffix: IconButton(
-          onPressed: () {
-            controller.clear();
-            onChanged?.call("");
-            },
-          icon: Icon(Icons.arrow_right_alt_outlined)
+        onPressed: onClear,
+        icon: const Icon(Icons.arrow_right_alt_outlined),
       ),
       hintText: hint,
       color: isDark ? Colors.grey : Colors.white,

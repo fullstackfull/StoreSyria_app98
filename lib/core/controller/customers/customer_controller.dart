@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/customer_repository.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
@@ -11,16 +14,13 @@ class CustomerController extends GetxController implements StoreAware {
 
 static const String _cacheCustomerKey = 'home_customer_list_data';
 
-final SearchRepository searchRepository = SearchRepository();
-
+ SearchRepository searchRepository = SearchRepository();
   CustomerRepository customerRepository = CustomerRepository();
 
+final TextEditingController searchController = TextEditingController();
   CustomerModel? customerModel;
-
   CustomerCityModel? customerCityModel;
-
   RxList<CustomerData> customerList = <CustomerData>[].obs;
-
   RxInt currantPage = 1.obs;
   RxBool isScroll = true.obs;
   RxBool isDataAvailable = false.obs;
@@ -28,38 +28,52 @@ final SearchRepository searchRepository = SearchRepository();
   RxBool isLoading2 = false.obs;
   RxBool isPageLoading = false.obs;
   RxString errorMessage = ''.obs;
-
   CustomerOrdersModel? customerOrdersModel;
   Rx<CustomerProfile?> customerProfile = Rx<CustomerProfile?>(null);
   RxList<CustomerOrder> customerOrdersList = <CustomerOrder>[].obs;
-
   RxInt customerOrdersCurrentPage = 1.obs;
   RxBool isCustomerOrdersScroll = true.obs;
   RxBool isCustomerOrdersLoading = false.obs;
   RxBool isCustomerOrdersPageLoading = false.obs;
   RxString customerOrdersErrorMessage = ''.obs;
+  RxList<CustomerData> searchResults = <CustomerData>[].obs;
+  RxBool isSearchingCustomers = false.obs;
+  RxBool isCustomerSearchActive = false.obs;
+  Timer? _searchDebounce;
 
-  @override
+
+@override
   void onInit() {
     super.onInit();
-
     _loadCachedCustomers();
-
     StoreChangeService.instance.register(() => this);
   }
 
-// ==================== CUSTOMER SEARCH ====================
 
-RxList<CustomerData> searchResults = <CustomerData>[].obs;
-RxBool isSearchingCustomers = false.obs;
-RxBool isCustomerSearchActive = false.obs;
+  void onCustomerSearchChanged(String value) {
+  _searchDebounce?.cancel();
+
+  final query = value.trim();
+
+  if (query.length < 3) {
+    clearCustomerSearch();
+    return;
+  }
+
+  _searchDebounce = Timer(
+    const Duration(milliseconds: 600),
+        () {
+      searchCustomerData(name: query);
+    },
+  );
+}
 
   Future<void> searchCustomerData({
     required String name,
   }) async {
     final searchText = name.trim();
 
-    if (searchText.isEmpty) {
+    if (searchText.length < 3) {
       clearCustomerSearch();
       return;
     }
@@ -83,13 +97,39 @@ RxBool isCustomerSearchActive = false.obs;
 
               if (customers is List) {
                 searchResults.assignAll(
-                  customers
-                      .map(
-                        (item) => CustomerData.fromJson(
-                      Map<String, dynamic>.from(item),
-                    ),
-                  )
-                      .toList(),
+                  customers.map((item) {
+                    final json = Map<String, dynamic>.from(item);
+
+                    final firstName =
+                        json['first_name']?.toString() ?? '';
+
+                    final lastName =
+                        json['last_name']?.toString() ?? '';
+
+                    final phone =
+                        json['phone']?.toString() ?? '';
+
+                    return CustomerData(
+                      id: json['id'] is int
+                          ? json['id']
+                          : int.tryParse(
+                        json['id']?.toString() ?? '',
+                      ),
+
+                      email: json['email']?.toString(),
+
+                      customerInfo: CustomerInfo(
+                        name: '$firstName $lastName'.trim(),
+                        mobile: phone,
+                      ),
+
+                      status: json['status'] is int
+                          ? json['status']
+                          : int.tryParse(
+                        json['status']?.toString() ?? '',
+                      ),
+                    );
+                  }).toList(),
                 );
               }
             }
@@ -101,6 +141,7 @@ RxBool isCustomerSearchActive = false.obs;
             );
           }
         },
+
         onFailure: (
             reason,
             message,
@@ -109,19 +150,24 @@ RxBool isCustomerSearchActive = false.obs;
           searchResults.clear();
 
           commonToast(
-            message.isNotEmpty ? message : 'search_failed'.tr,
+            message.isNotEmpty
+                ? message
+                : 'search_failed'.tr,
           );
         },
       );
     } catch (e) {
       searchResults.clear();
+
       commonToast(e.toString());
     } finally {
       isSearchingCustomers.value = false;
     }
   }
 
+
 void clearCustomerSearch() {
+  _searchDebounce?.cancel();
   isCustomerSearchActive.value = false;
   isSearchingCustomers.value = false;
   searchResults.clear();
@@ -155,6 +201,10 @@ void clearCustomerSearch() {
   // =========================
   // STORE CHANGE
   // =========================
+void resetCustomerSearch() {
+  searchController.clear();
+  clearCustomerSearch();
+}
 
   @override
   void resetForStoreChange() {
@@ -517,6 +567,13 @@ Future<bool> updateCustomerData({
       },
     );
   }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
+  }
+
 
   void clearCustomerOrders() {
     customerOrdersModel = null;
