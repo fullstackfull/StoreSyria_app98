@@ -339,10 +339,11 @@ class _ProductDetailScreenState
     required Color secondaryTextColor,
     required bool isDark,
   }) {
-    final String price = product.price.toString() ?? "";
+    final String price = product.price?.toString() ?? '';
     final String salePrice = product.salePrice?.toString() ?? '';
     final String costPrice = product.costPrice?.toString() ?? '';
     final String finalPrice = product.finalPrice?.toString() ?? '';
+    final String currency = productDetailController.currencySymbol.value;
 
     final String productStock =
         product.productStock?.toString() ?? '0';
@@ -368,13 +369,10 @@ class _ProductDetailScreenState
 
           _infoRow(
             label: 'price'.tr,
-            value: price,
-            primaryTextColor:
-            primaryTextColor,
-            secondaryTextColor:
-            secondaryTextColor,
-            leadingIcon:
-            Icons.price_change,
+            value: '$price $currency',
+            primaryTextColor: primaryTextColor,
+            secondaryTextColor: secondaryTextColor,
+            leadingIcon: Icons.price_change,
           ),
 
           if (salePrice.trim().isNotEmpty) ...[
@@ -382,40 +380,31 @@ class _ProductDetailScreenState
 
             _infoRow(
               label: 'sale_price'.tr,
-              value: salePrice,
-              primaryTextColor:
-              primaryTextColor,
-              secondaryTextColor:
-              secondaryTextColor,
-              leadingIcon:
-              Icons.price_change_outlined,
+              value: '$salePrice $currency',
+              primaryTextColor: primaryTextColor,
+              secondaryTextColor: secondaryTextColor,
+              leadingIcon: Icons.price_change_outlined,
             ),
           ],
 
           _thinDivider(borderColor),
 
           _infoRow(
-              label: 'cost_price'.tr,
-              value: costPrice,
-              primaryTextColor:
-              primaryTextColor,
-              secondaryTextColor:
-              secondaryTextColor,
-              leadingIcon:
-              Icons.monetization_on,
+            label: 'cost_price'.tr,
+            value: '$costPrice $currency',
+            primaryTextColor: primaryTextColor,
+            secondaryTextColor: secondaryTextColor,
+            leadingIcon: Icons.monetization_on,
           ),
 
           _thinDivider(borderColor),
 
           _infoRow(
-              label: 'final_price'.tr,
-              value: finalPrice,
-              primaryTextColor:
-              primaryTextColor,
-              secondaryTextColor:
-              secondaryTextColor,
-              leadingIcon:
-              Icons.price_check,
+            label: 'final_price'.tr,
+            value: '$finalPrice $currency',
+            primaryTextColor: primaryTextColor,
+            secondaryTextColor: secondaryTextColor,
+            leadingIcon: Icons.price_check,
           ),
 
           _thinDivider(borderColor),

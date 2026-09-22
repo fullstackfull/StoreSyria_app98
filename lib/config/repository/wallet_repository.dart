@@ -5,9 +5,24 @@ import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 
 class WalletRepository {
-  getWalletData({int page = 1}) async {
+  getWalletData({
+    int page = 1,
+    String? fromDate,
+    String? toDate,
+    String? type,
+  }) async {
     String endPoint =
         "${API.walletUrl}${API.storeIdUrl}${Prefs.getStoreID()}&page=$page";
+    if (fromDate != null) endPoint += "&from_date=$fromDate";
+    if (toDate != null) endPoint += "&to_date=$toDate";
+    if (type != null) endPoint += "&type=$type";
+    var response = await NetworkHttps.getRequest(endPoint);
+    return response;
+  }
+
+  searchTransactions({required String transactionId}) async {
+    String endPoint =
+        "${API.walletUrl}${API.storeIdUrl}${Prefs.getStoreID()}&search_field=id&search_value=$transactionId";
     var response = await NetworkHttps.getRequest(endPoint);
     return response;
   }

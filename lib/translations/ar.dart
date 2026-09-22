@@ -572,4 +572,6 @@ const Map<String, String> ar = {
   'enter_sale_price': 'أدخل سعر البيع',
   'costPrice': 'سعر التكلفة',
   'enter_cost_price': 'أدخل سعر التكلفة',
+  'search_by_transaction_id': 'البحث برقم العملية...',
+  'no_transactions_found': 'لا توجد عمليات مالية',
 };

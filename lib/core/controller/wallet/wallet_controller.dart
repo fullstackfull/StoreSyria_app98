@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../config/repository/wallet_repository.dart';
@@ -10,6 +12,7 @@ class WalletController extends GetxController {
   RxBool isLoadingMore = false.obs;
   RxBool isAddingBalance = false.obs;
   RxBool isDeductingBalance = false.obs;
+  RxString currencySymbol = ''.obs;
 
   RxString errorMessage = ''.obs;
 
@@ -25,6 +28,13 @@ class WalletController extends GetxController {
   int _currentPage = 1;
 
   bool get hasMore => pagination.value?.hasMore ?? false;
+
+  // ---- Search ----
+  final TextEditingController searchController = TextEditingController();
+  RxList<WalletTransaction> searchResults = <WalletTransaction>[].obs;
+  RxBool isSearchingTransactions = false.obs;
+  RxBool isSearchActive = false.obs;
+  Timer? _searchDebounce;
 
   @override
   void onInit() {
@@ -52,6 +62,8 @@ class WalletController extends GetxController {
           if (data['status'] == 1) {
             final walletData =
             WalletData.fromJson(data['data']);
+            currencySymbol.value =
+                walletData.currencySymbol ?? currencySymbol.value;
 
             availableBalance.value = walletData.availableBalance;
 
@@ -81,6 +93,74 @@ class WalletController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // =========================
+  // Search by Transaction ID
+  // =========================
+
+  void onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    final query = value.trim();
+    if (query.isEmpty) {
+      resetSearch();
+      return;
+    }
+    _searchDebounce = Timer(
+      const Duration(milliseconds: 600),
+      () => searchTransactionById(id: query),
+    );
+  }
+
+  Future<void> searchTransactionById({required String id}) async {
+    final query = id.trim();
+    if (query.isEmpty) {
+      resetSearch();
+      return;
+    }
+
+    isSearchActive.value = true;
+    isSearchingTransactions.value = true;
+
+    try {
+      final response =
+          await walletRepository.searchTransactions(transactionId: query);
+
+      response.fold(
+        onSuccess: (data) {
+          searchResults.clear();
+          if (data['status'] == 1) {
+            final walletData = WalletData.fromJson(data['data']);
+            searchResults.assignAll(walletData.transactions);
+          } else {
+            commonToast(
+              data['message'] ?? 'search_failed'.tr,
+            );
+          }
+        },
+        onFailure: (reason, message, errors) {
+          searchResults.clear();
+          commonToast(message ?? 'search_failed'.tr);
+        },
+      );
+    } finally {
+      isSearchingTransactions.value = false;
+    }
+  }
+
+  void resetSearch() {
+    _searchDebounce?.cancel();
+    searchController.clear();
+    searchResults.clear();
+    isSearchActive.value = false;
+    isSearchingTransactions.value = false;
+  }
+
+  @override
+  void onClose() {
+    _searchDebounce?.cancel();
+    searchController.dispose();
+    super.onClose();
   }
 
   // =========================

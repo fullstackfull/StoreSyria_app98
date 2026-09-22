@@ -19,6 +19,7 @@ class TopOrderModel {
 class TopOrderData {
   int? storeId;
   String? storeName;
+  String? currentCurrency;
   List<TopOrderItem>? topOrders;
   int? count;
 
@@ -33,6 +34,7 @@ class TopOrderData {
     storeId = json['store_id'];
     storeName = json['store_name'];
     count = json['count'];
+    currentCurrency = json['currency_symbol'];
 
     if (json['top_orders'] != null && json['top_orders'] is List) {
       topOrders = <TopOrderItem>[];

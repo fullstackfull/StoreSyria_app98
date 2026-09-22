@@ -391,7 +391,7 @@ class _OrderScreenState extends State<OrderScreen>
                                           : (order.userName?.isEmpty ?? true)
                                           ? 'no_name'.tr
                                           : order.userName ?? '',
-                                      price: '${order.finalPrice}',
+                                      price:'${order.finalPrice} ${orderController.currencySymbol.value}',
                                       primaryBadgeLabel: order.deliveredStatus,
                                       secondaryBadgeLabel: order.paymentStatus,
                                       onTap: () {
@@ -565,8 +565,7 @@ class _OrderScreenState extends State<OrderScreen>
                                 : (order.userName?.isEmpty ?? true)
                                 ? 'no_name'.tr
                                 : order.userName ?? '',
-                            price: "${order.finalPrice}",
-                            secondaryBadgeLabel:order.paymentStatus,
+                            price: "${order.finalPrice} ${orderController.currencySymbol.value}",                            secondaryBadgeLabel:order.paymentStatus,
                             primaryBadgeLabel: order.deliveredStatus,
                             onTap: () => Get.to(
                                   () => OrderDetailScreen(

@@ -222,8 +222,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             index: index + 1,
                             name: product.name!,
                             quantity: product.qty.toString(),
-                            price: product.finalPrice!,
-                            totals: total.toStringAsFixed(2),
+                            price: '${product.finalPrice!} ${orderController.currencySymbol.value}',
+                            totals: '${total.toStringAsFixed(2)} ${orderController.currencySymbol.value}',
                             secondaryText: secondaryText,
                             primaryText: primaryText,
                             accentColor: accentColor,
@@ -279,11 +279,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
                 verticalSpace(15.h),
                 grandTotalsWidget(
-                  grandTotal: detail.finalPrice!,
-                  extTax: detail.taxPrice ?? "",
-                  applyCoupon: detail.couponInfo?.discountAmount ?? "0",
-                  shippingPrice: detail.deliveredCharge!,
-                  subTotal: detail.subTotal!,
+                  grandTotal:
+                  '${detail.finalPrice!} ${orderController.currencySymbol.value}',
+                  extTax:
+                  '${detail.taxPrice ?? ""} ${orderController.currencySymbol.value}',
+                  applyCoupon:
+                  '${detail.couponInfo?.discountAmount ?? "0"} ${orderController.currencySymbol.value}',
+                  shippingPrice:
+                  '${detail.deliveredCharge!} ${orderController.currencySymbol.value}',
+                  subTotal:
+                  '${detail.subTotal!} ${orderController.currencySymbol.value}',
                   paymentType: detail.paymnetType!,
                   accentColor: accentColor,
                 ),

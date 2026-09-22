@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
+import 'package:store_go_app/core/model/top_order_model.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
 import '../../utils/colors.dart';
@@ -33,9 +33,6 @@ Widget topOrderCardWidget({
       ),
       margin: EdgeInsets.only(right: 12.w),
       decoration: BoxDecoration(
-        // border: Border.all(
-        //   color: AppColor.themeNavyBlueColor.withOpacity(0.3),
-        // ),
         color: cardColor,
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [

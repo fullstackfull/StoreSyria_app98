@@ -9,7 +9,7 @@ class ProductDetailController extends GetxController {
   RxString sizeType = ''.obs;
 
   RxString productImage = ''.obs;
-
+  RxString currencySymbol = ''.obs;
   ProductDetailModel? productDetailModel;
 
   ProductData? product;
@@ -30,6 +30,8 @@ class ProductDetailController extends GetxController {
         if (data['status'] == 1) {
           productDetailModel =
               ProductDetailModel.fromJson(data);
+          currencySymbol.value =
+              productDetailModel?.data?.currencySymbol ?? '';
 
           update();
         } else {
@@ -102,7 +104,6 @@ class ProductDetailController extends GetxController {
 
   void setProduct(ProductData value) {
     product = value;
-
     productImage.value =
         value.coverImageUrl ?? '';
 

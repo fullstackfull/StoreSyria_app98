@@ -5,6 +5,7 @@ import 'package:store_go_app/utils/colors.dart';
 import '../../../core/controller/wallet/wallet_controller.dart';
 import '../../../translations/translation_service.dart';
 import '../../new_widgets/balance_card.dart';
+import '../../new_widgets/search_widget.dart';
 import '../../new_widgets/transactions_widget.dart';
 import '../../widget/common_appbar_widget.dart';
 import '../../widget/error_empty_state.dart';
@@ -82,11 +83,16 @@ class _WalletScreenState extends State<WalletScreen> {
               );
             }
 
-            final transactions = controller.transactions;
+            final isSearchMode = controller.isSearchActive.value;
+            final transactions = isSearchMode
+                ? controller.searchResults
+                : controller.transactions;
 
             return RefreshIndicator(
-              color: AppColor.themeGreenColor,
-              onRefresh: () => controller.getWalletData(isRefresh: true),
+              color: AppColor.themeNavyBlueColor,
+              onRefresh: isSearchMode
+                  ? () async {}
+                  : () => controller.getWalletData(isRefresh: true),
               child: CustomScrollView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -102,6 +108,18 @@ class _WalletScreenState extends State<WalletScreen> {
                     ),
                   ),
                   SliverPadding(
+                    padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+                    sliver: SliverToBoxAdapter(
+                      child: SearchRowWidget(
+                        context: context,
+                        controller: controller.searchController,
+                        hint: 'search_by_transaction_id'.tr,
+                        onChanged: controller.onSearchChanged,
+                        onClear: controller.resetSearch,
+                      ),
+                    ),
+                  ),
+                  SliverPadding(
                     padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 8.h),
                     sliver: SliverToBoxAdapter(
                       child: Align(
@@ -110,18 +128,27 @@ class _WalletScreenState extends State<WalletScreen> {
                       ),
                     ),
                   ),
-                  transactions.isEmpty
-                      ? SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: EmptyState(
-                      message: 'no_transactions_found'.tr,
-                      icon: Icons.receipt_long_outlined,
-                      iconColor: isDark
-                          ? Colors.white38
-                          : Colors.grey.shade400,
-                    ),
-                  )
-                      : SliverPadding(
+                  if (controller.isSearchingTransactions.value &&
+                      transactions.isEmpty)
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(child: LoadingWidget()),
+                    )
+                  else if (transactions.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: EmptyState(
+                        message: isSearchMode
+                            ? 'no_transactions_found'.tr
+                            : 'no_transactions_found'.tr,
+                        icon: Icons.receipt_long_outlined,
+                        iconColor: isDark
+                            ? Colors.white38
+                            : Colors.grey.shade400,
+                      ),
+                    )
+                  else
+                    SliverPadding(
                     padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 8.h),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
@@ -130,6 +157,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           return Padding(
                             padding: EdgeInsets.only(bottom: 10.h),
                             child: transactionCard(
+                              currency: controller.currencySymbol.value,
                               tx: tx,
                               isDark: isDark,
                             ),
@@ -139,9 +167,10 @@ class _WalletScreenState extends State<WalletScreen> {
                       ),
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: _loadMoreIndicator(isDark: isDark),
-                  ),
+                  if (!isSearchMode)
+                    SliverToBoxAdapter(
+                      child: _loadMoreIndicator(isDark: isDark),
+                    ),
                 ],
               ),
             );

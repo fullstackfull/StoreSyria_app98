@@ -572,4 +572,6 @@ const Map<String, String> en = {
   'enter_sale_price': 'Enter sale price',
   'costPrice': 'Cost Price',
   'enter_cost_price': 'Enter cost price',
+  'search_by_transaction_id': 'Search by transaction ID...',
+  'no_transactions_found': 'No transactions found',
 };

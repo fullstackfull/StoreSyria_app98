@@ -26,8 +26,7 @@ class ProductsScreen extends StatefulWidget {
   State<ProductsScreen> createState() => _ProductsScreenState();
 }
 
-class _ProductsScreenState extends State<ProductsScreen>
-    with AutomaticKeepAliveClientMixin {
+class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAliveClientMixin {
   final ProductController productController = Get.find<ProductController>();
   final AddProductController addProductController = Get.put(AddProductController());
   final ScrollController scrollController = ScrollController();
@@ -667,7 +666,7 @@ class _ProductsScreenState extends State<ProductsScreen>
                                   imageUrl: product.coverImageUrl ?? '',
                                   categoryName: product.categoryName ?? '',
                                   productName: product.name ?? '',
-                                  price: product.price?.toString() ?? '0',
+                                  price: "${product.salePrice?.toString() ?? ""}  ${productController.currencySymbol.value}",
                                   stock: product.productStock?.toString() ?? '-',
                                   stockStatus: product.stockStatus,
                                   rating: product.averageRating?.toDouble() ?? 0.0,

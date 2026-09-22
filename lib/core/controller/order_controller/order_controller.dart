@@ -36,6 +36,7 @@ class OrderLineItem {
 
 class OrderController extends GetxController implements StoreAware {
   static const String _cacheOrderKey = 'home_order_list_data';
+  final RxString currencySymbol = ''.obs;
 
   // ==================== Dependencies ====================
   final TextEditingController searchController = TextEditingController();
@@ -411,10 +412,9 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           final model = OrderModel.fromJson(data);
+          currencySymbol.value = model.data?.currencySymbol ?? currencySymbol.value;
           final newItems = model.data?.data ?? [];
-
-          final targetList =
-          isDateFilterActive ? filteredOrderList : orderList;
+          final targetList = isDateFilterActive ? filteredOrderList : orderList;
 
           final existingIds = targetList.map((e) => e.id).toSet();
 
@@ -473,6 +473,7 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           final model = TopOrderModel.fromJson(data);
+          currencySymbol.value = model.data?.currentCurrency ?? '';
           final items = model.data?.topOrders ?? [];
           topOrderList.value = items.map((e) => e.toOrderData()).toList();
         },
@@ -583,6 +584,7 @@ class OrderController extends GetxController implements StoreAware {
         onSuccess: (data) {
           orderDetailModel = OrderDetailModel.fromJson(data);
           orderDetail = orderDetailModel?.data;
+          currencySymbol.value = orderDetail?.currencySymbol ?? currencySymbol.value;
 
           // if (orderDetail?.tax != null) {
           //   double totalTax = 0;

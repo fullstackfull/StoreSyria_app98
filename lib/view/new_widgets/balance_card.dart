@@ -77,7 +77,7 @@ Widget balanceCard({
               Padding(
                 padding: const EdgeInsets.only(bottom: 5),
                 child: Text(
-                  controller.currencyCode.value,
+                  controller.currencySymbol.value,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 15,

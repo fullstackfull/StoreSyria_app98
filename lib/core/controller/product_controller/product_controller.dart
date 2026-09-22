@@ -8,7 +8,6 @@ import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/config/repository/product_repository.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
-
 import '../../../network_dio/result.dart';
 
 enum ProductListMode {
@@ -22,6 +21,7 @@ class ProductController extends GetxController implements StoreAware {
 
   ProductRepository productRepository = ProductRepository();
   final RxList<ProductData> categoryResults = <ProductData>[].obs;
+  RxString currencySymbol = ''.obs;
 
   ProductModel? productModel;
   RxString filterCategory = ''.obs;
@@ -56,16 +56,26 @@ class ProductController extends GetxController implements StoreAware {
   }
 
   void _loadCachedProducts() {
-    final cached = CacheService.get<Map<String, dynamic>>(_cacheProductKey);
+    final cached =
+    CacheService.get<Map<String, dynamic>>(_cacheProductKey);
+
     if (cached == null) return;
+
     try {
       productModel = ProductModel.fromJson(cached);
-      productList.value = productModel?.data?.data ?? [];
+
+      currencySymbol.value =
+          productModel?.data?.currencySymbol ?? '';
+
+      productList.value =
+          productModel?.data?.data ?? [];
 
       isScroll.value =
-          productModel?.data?.currentPage != productModel?.data?.lastPage;
+          productModel?.data?.currentPage !=
+              productModel?.data?.lastPage;
     } catch (_) {
       productModel = null;
+      currencySymbol.value = '';
     }
   }
 
@@ -108,6 +118,9 @@ class ProductController extends GetxController implements StoreAware {
         onSuccess: (data) {
           if (data['status'] == 1) {
             productModel = ProductModel.fromJson(data);
+
+            currencySymbol.value =
+                productModel?.data?.currencySymbol ?? '';
 
             final newProducts =
                 productModel?.data?.data ?? <ProductData>[];

@@ -58,6 +58,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     super.initState();
 
     orderController.resetCreateOrderForm();
+    orderController.deliveryPriceController.text = '0';
+    orderController.taxPriceController.text = '0';
     paymentSettingsController.getPaymentTypesData();
     customerController.getStatesData();
 
@@ -416,6 +418,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                   const TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
+                                  suffixText: orderController.currencySymbol.value,
                                 ),
                               ),
                             ],
@@ -814,19 +817,34 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               color: bold ? textColor : secondaryTextColor,
             ),
           ),
-          Text(
-            value.toStringAsFixed(2),
-            style: TextStyle(
-              fontSize: bold ? 15 : 13,
-              fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
-              color: bold ? navyBlue : textColor,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value.toStringAsFixed(2),
+                style: TextStyle(
+                  fontSize: bold ? 15 : 13,
+                  fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+                  color: bold ? navyBlue : textColor,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                orderController.currencySymbol.value,
+                style: TextStyle(
+                  fontSize: bold ? 10 : 9,
+                  fontWeight: FontWeight.w400,
+                  color: bold ? navyBlue : secondaryTextColor,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
-
 
   Widget _buildDropdownField<T>({
     required String label,

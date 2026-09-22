@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../core/model/wallet_model.dart';
-import '../../utils/colors.dart';
 import '../../utils/helper.dart';
 
 const Color success = Color(0xFF16A34A);
@@ -12,6 +11,7 @@ const Color warning = Color(0xFFF59E0B);
 
 Widget transactionCard({
   required WalletTransaction tx,
+  required String currency,
   required bool isDark,
 }) {
 
@@ -122,13 +122,29 @@ Widget transactionCard({
               style: TextStyle(fontSize: 10.5.sp, color: secondaryText),
             ),
             SizedBox(height: 8.h),
-            Text(
-              '${tx.isCredit ? '+' : '-'} ${tx.amount}',
-              style: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w800,
-                color: amountColor,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  '${tx.isCredit ? '+' : '-'} ${tx.amount}',
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                    color: amountColor,
+                  ),
+                ),
+                SizedBox(width: 4.w),
+                Text(
+                  currency,
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w500,
+                    color: amountColor,
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: 6.h),
             _statusBadge(status: tx.status, isDark: isDark),

@@ -67,12 +67,14 @@ class WalletTransaction {
 class WalletData {
   final int storeId;
   final String availableBalance;
+  String? currencySymbol;
   final String currencyCode;
   final List<WalletTransaction> transactions;
   final WalletPagination pagination;
 
   WalletData({
     required this.storeId,
+    required this.currencySymbol,
     required this.availableBalance,
     required this.currencyCode,
     required this.transactions,
@@ -82,7 +84,8 @@ class WalletData {
   factory WalletData.fromJson(Map<String, dynamic> json) {
     return WalletData(
       storeId: json['store_id'] ?? 0,
-      availableBalance: json['available_balance']?.toString() ?? '0',
+        currencySymbol : json['currency_symbol'] ?? "",
+        availableBalance: json['available_balance']?.toString() ?? '0',
       currencyCode: json['currency_code']?.toString() ?? '',
       transactions: (json['transactions'] as List? ?? [])
           .map((e) => WalletTransaction.fromJson(e))

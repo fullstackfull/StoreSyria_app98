@@ -30,6 +30,7 @@ class OrderModelData {
   int? currentPage;
   List<OrderData>? data;
   String? firstPageUrl;
+  String? currencySymbol;
   int? from;
   int? lastPage;
   String? lastPageUrl;
@@ -41,10 +42,25 @@ class OrderModelData {
   int? to;
   int? total;
 
-  OrderModelData({this.currentPage, this.data, this.firstPageUrl, this.from, this.lastPage, this.lastPageUrl, this.links, this.nextPageUrl, this.path, this.perPage, this.prevPageUrl, this.to, this.total});
+  OrderModelData({
+    this.currentPage,
+    this.currencySymbol,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total});
 
   OrderModelData.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'];
+    currencySymbol = json['currency_symbol'];
     if (json['data'] != null && json['data'] is List) {
       data = <OrderData>[];
       json['data'].forEach((v) {
@@ -72,6 +88,7 @@ class OrderModelData {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['current_page'] = this.currentPage;
+    data['currency_symbol'] = this.currencySymbol;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }

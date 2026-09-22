@@ -26,6 +26,7 @@ class ProductModel {
 }
 
 class ProductModelData {
+  String? currencySymbol;
   int? currentPage, from, lastPage, perPage, to, total;
   List<ProductData>? data;
   List<Links>? links;
@@ -34,11 +35,12 @@ class ProductModelData {
   ProductModelData({
     this.currentPage, this.data, this.firstPageUrl, this.from, this.lastPage,
     this.lastPageUrl, this.links, this.nextPageUrl, this.path, this.perPage,
-    this.prevPageUrl, this.to, this.total,
+    this.prevPageUrl, this.to, this.total,this.currencySymbol
   });
 
   ProductModelData.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'] as int?;
+    currencySymbol = json['currency_symbol'] as String?;
     from = json['from'] as int?;
     lastPage = json['last_page'] as int?;
     perPage = json['per_page'] as int?;
@@ -67,6 +69,7 @@ class ProductModelData {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+    data['currency_symbol'] = currencySymbol;
     data['current_page'] = currentPage; data['from'] = from; data['last_page'] = lastPage;
     data['per_page'] = perPage; data['to'] = to; data['total'] = total;
     data['first_page_url'] = firstPageUrl; data['last_page_url'] = lastPageUrl;

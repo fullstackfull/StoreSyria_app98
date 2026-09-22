@@ -36,20 +36,26 @@ class ProductDetailModel {
 
 class ProductDetailData {
   ProductData? product;
+  String? currencySymbol;
   List<SubImage> subImages;
 
   ProductDetailData({
     this.product,
+    this.currencySymbol,
     this.subImages = const [],
   });
 
   factory ProductDetailData.fromJson(Map<String, dynamic> json) {
     ProductData? product;
+    String? currencySymbol;
 
     if (json['Product'] is Map) {
-      product = ProductData.fromJson(
-        Map<String, dynamic>.from(json['Product']),
-      );
+      final productJson =
+      Map<String, dynamic>.from(json['Product']);
+
+      product = ProductData.fromJson(productJson);
+
+      currencySymbol = productJson['currency_symbol']?.toString();
     }
 
     final List<SubImage> subImages = [];
@@ -68,6 +74,7 @@ class ProductDetailData {
 
     return ProductDetailData(
       product: product,
+      currencySymbol: currencySymbol,
       subImages: subImages,
     );
   }
@@ -75,6 +82,7 @@ class ProductDetailData {
   Map<String, dynamic> toJson() {
     return {
       'Product': product?.toJson(),
+      'currency_symbol': currencySymbol,
       'Sub_Image': subImages
           .map((image) => image.toJson())
           .toList(),

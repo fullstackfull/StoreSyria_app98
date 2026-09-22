@@ -46,6 +46,7 @@ class OrderDetailData {
   String? paymentStatus;
   String? delivery;
   String? deliveredCharge;
+  String? currencySymbol;
   CouponInfo? couponInfo;
   List<Tax>? tax;
   String? subTotal;
@@ -56,6 +57,7 @@ class OrderDetailData {
   OrderDetailData(
       {this.id,
       this.isGuest,
+      this.currencySymbol,
       this.taxPrice,
       this.orderId,
       this.deliveryDate,
@@ -93,6 +95,7 @@ class OrderDetailData {
     returnStatusMessage = json['return_status_message'];
     returnDate = json['return_date'];
     orderStatusText = json['order_status_text'];
+    currencySymbol = json['currency_symbol'];
     orderStatus = json['order_status'];
     orderStatusMessage = json['order_status_message'];
     print('===============${json['product'].runtimeType}');
@@ -151,6 +154,7 @@ class OrderDetailData {
     data['id'] = this.id;
     data['is_guest'] = this.isGuest;
     data['order_id'] = this.orderId;
+    data['currency_symbol'] = this.currencySymbol;
     data['delivery_date'] = this.deliveryDate;
     data['order_reward_point'] = this.orderRewardPoint;
     data['return_price'] = this.returnPrice;

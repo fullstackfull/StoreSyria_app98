@@ -21,9 +21,11 @@ class AppTextField extends StatelessWidget {
 
   final bool obscureText;
   final bool enabled;
+  final String? suffixText;
 
   const AppTextField({
     super.key,
+    this.suffixText,
     required this.title,
     required this.hint,
     required this.controller,
@@ -110,6 +112,22 @@ class AppTextField extends StatelessWidget {
               ),
             ),
 
+            suffixIcon: (suffixText != null && suffixText!.isNotEmpty)
+                ? Padding(
+              padding: const EdgeInsets.only(left: 8, right: 12),
+              child: Center(
+                widthFactor: 1,
+                child: Text(
+                  suffixText!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: secondaryTextColor,
+                  ),
+                ),
+              ),
+            )
+                : null,
             filled: true,
             fillColor: backgroundColor,
 
