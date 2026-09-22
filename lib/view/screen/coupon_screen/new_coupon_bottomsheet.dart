@@ -7,6 +7,7 @@ import 'package:store_go_app/core/controller/home_controller/new_coupon_controll
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/validator.dart';
+import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 
 class AddNewCouponWidget extends StatefulWidget {
@@ -653,7 +654,7 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
           flex: 2,
           child: SizedBox(
             height: 48,
-            child: ElevatedButton(
+            child: AppButton(
               onPressed: () {
                 if (_formKey.currentState
                     ?.validate() ??
@@ -661,44 +662,15 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
                   _submit();
                 }
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: navyBlue,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                  BorderRadius.circular(14),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment:
-                MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    widget.isUpdate
-                        ? Icons.save_outlined
-                        : Icons.add_rounded,
-                    size: 19,
-                  ),
-
-                  const SizedBox(width: 8),
-
-                  Text(
-                    widget.isUpdate
+              isLoading: couponController.isLoading.value,
+              text:widget.isUpdate
                         ? 'update'.tr
                         : 'create'.tr,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
+
                   ),
-                ],
               ),
             ),
-          ),
-        ),
-      ],
-    );
+          ]);
   }
 
   void _submit() {

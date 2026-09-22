@@ -11,6 +11,7 @@ import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/model/order_detail_model.dart';
+import '../../new_widgets/customer_contact.dart';
 import '../../new_widgets/order_status_badge.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../widget/app_dialog.dart';
@@ -300,19 +301,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: infoSectionCard(
-                        title: "shipping_info".tr,
-                        icon: Icons.local_shipping_outlined,
-                        data: {
-                          "Name": detail.deliveryInformations!.name!,
-                          "Phone": detail.deliveryInformations!.phone!,
-                          "City": detail.deliveryInformations!.city!,
-                          "Address": "${detail.deliveryInformations!.state!} - ${detail.deliveryInformations!.country!}",
-                        },
-                        isDark: isDark,
-                        secondaryText: secondaryText,
-                        primaryText: primaryText,
-                        accentColor: accentColor,
+                  child: infoSectionCard(
+                  title: "shipping_info".tr,
+                   icon: Icons.local_shipping_outlined,
+                   data: {
+                   "name".tr: detail.deliveryInformations!.name ?? "",
+                   "phone".tr: detail.deliveryInformations!.phone ?? "",
+                   "city".tr: detail.deliveryInformations!.city ?? "",
+                   "address".tr:
+                   "${detail.deliveryInformations!.state ?? ""} - ${detail.deliveryInformations!.country ?? ""}",
+                   },
+                    isDark: isDark,
+                    secondaryText: secondaryText,
+                    primaryText: primaryText,
+                    accentColor: accentColor,
                       ),
                     ),
                     horizontalSpace(15.w),
@@ -323,8 +325,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         data: {
                           "Name": detail.billingInformations!.name!,
                           "Email": detail.billingInformations!.email!,
-                          "City": detail.billingInformations!.city!,
-                          "Zip": detail.billingInformations!.postCode!,
+                          "City": detail.billingInformations!.state!,
+                          "Address": detail.billingInformations!.address!,
                         },
                         isDark: isDark,
                         secondaryText: secondaryText,
@@ -334,10 +336,26 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ),
                   ],
                 ),
+                verticalSpace(20.h),
+
+                CustomerContactActions(
+                  phone: detail.deliveryInformations?.phone,
+                  email: detail.billingInformations?.email,
+                  isDark: isDark,
+                ),
+
                 verticalSpace(25.h),
 
-                // Notes Section
-                _buildNotesSection(context, detail, isDark, secondaryText, primaryText, accentColor, borderColor, cardBg),
+                _buildNotesSection(
+                  context,
+                  detail,
+                  isDark,
+                  secondaryText,
+                  primaryText,
+                  accentColor,
+                  borderColor,
+                  cardBg,
+                ),
               ],
             ),
           );

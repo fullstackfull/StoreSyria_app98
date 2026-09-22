@@ -33,9 +33,8 @@ Widget customerWidget({
 
   final orders = customer?.orders ?? 0;
 
-  // TODO: replace with real city when available
   final city =
-      customer?.email?.replaceAll('"', '').trim() ?? '';
+      customer?.city?.replaceAll('"', '').trim() ?? '';
 
   final bool isActive = customer?.status == 1;
 

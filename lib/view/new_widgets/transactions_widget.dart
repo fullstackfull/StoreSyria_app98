@@ -80,7 +80,7 @@ Widget transactionCard({
               SizedBox(height: 8.h),
               Text(
                 tx.description,
-                maxLines: 2,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 12.sp, color: secondaryText),
               ),
@@ -122,12 +122,7 @@ Widget transactionCard({
               style: TextStyle(fontSize: 10.5.sp, color: secondaryText),
             ),
             SizedBox(height: 8.h),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
+            Text(
                   '${tx.isCredit ? '+' : '-'} ${tx.amount}',
                   style: TextStyle(
                     fontSize: 15.sp,
@@ -135,17 +130,6 @@ Widget transactionCard({
                     color: amountColor,
                   ),
                 ),
-                SizedBox(width: 4.w),
-                Text(
-                  currency,
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w500,
-                    color: amountColor,
-                  ),
-                ),
-              ],
-            ),
             SizedBox(height: 6.h),
             _statusBadge(status: tx.status, isDark: isDark),
           ],

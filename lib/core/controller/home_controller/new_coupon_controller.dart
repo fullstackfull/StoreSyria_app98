@@ -592,6 +592,8 @@ class NewCouponController extends GetxController implements StoreAware {
 
     response.fold(
       onSuccess: (data) {
+        Get.back();
+
         if (data['status'] == 1) {
           commonToast(
             data['data']?['message'] ??
@@ -602,7 +604,6 @@ class NewCouponController extends GetxController implements StoreAware {
 
           awaitRefresh();
 
-          Get.back();
         } else {
           commonToast(
             data['data']?['message'] ??

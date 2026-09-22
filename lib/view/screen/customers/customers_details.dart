@@ -11,6 +11,7 @@ import '../../../core/controller/customers/customer_controller.dart';
 import '../../../core/controller/order_controller/order_controller.dart';
 import '../../../core/model/customer_orders_model.dart';
 import '../../new_widgets/app_snackbar.dart';
+import '../../new_widgets/customer_contact.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/top_orders.dart';
 import '../../widget/app_dialog.dart';
@@ -125,7 +126,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       orderId: order.orderId.toString(),
       date: "",
       maskedName: customer?.name ?? "",
-      price: "${order.finalPrice}",
+      price: "${order.finalPrice} ${orderController.currencySymbol.value}",
       secondaryBadgeLabel: order.paymentStatus,
       primaryBadgeLabel: 0,
       onTap: () {
@@ -153,33 +154,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 
   bool _hasValue(String? value) {
     return value != null && value.trim().isNotEmpty;
-  }
-
-  Future<void> _launch(Uri uri) async {
-    try {
-      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!ok) {
-        AppSnackBar.info(title: 'error', message: 'could_not_open'.tr);
-      }
-    } catch (_) {
-      AppSnackBar.info(title: 'error', message: 'could_not_open'.tr);
-    }
-  }
-
-  void _callCustomer(String? mobile) {
-    if (!_hasValue(mobile)) return;
-    _launch(Uri(scheme: 'tel', path: mobile));
-  }
-
-  void _whatsappCustomer(String? mobile) {
-    if (!_hasValue(mobile)) return;
-    final cleaned = mobile!.replaceAll(RegExp(r'[^0-9+]'), '');
-    _launch(Uri.parse('https://wa.me/$cleaned'));
-  }
-
-  void _emailCustomer(String? email) {
-    if (!_hasValue(email)) return;
-    _launch(Uri(scheme: 'mailto', path: email));
   }
 
   @override
@@ -288,7 +262,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                     ),
                   ),
 
-                SliverToBoxAdapter(child: _personalDataSection(customer: customer, isDark: isDark)),
+                SliverToBoxAdapter(
+                    child: _personalDataSection(customer: customer, isDark: isDark)),
 
                 SliverToBoxAdapter(
                   child: Padding(
@@ -343,20 +318,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                 ],
               ),
               SizedBox(height: 4.h),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Flexible(child: Text(customer.totalSpend ?? '0', style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w800, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                  SizedBox(width: 4.w),
-                  Text('العملة', style: TextStyle(fontSize: 12.sp, color: subColor)),
-                ],
-              ),
+              Text(customer.totalSpend ?? '0', style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w800, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
               SizedBox(height: 18.h),
               Row(
                 children: [
                   Expanded(child: _summaryStat(icon: Icons.shopping_bag_outlined, label: 'orders'.tr, value: '${customer.orders ?? customerController.customerOrdersList.length}', textColor: textColor, subColor: subColor)),
-                  Expanded(flex: 2,child: _summaryStat(icon: Icons.bar_chart_rounded, label: 'order_cost_avg'.tr, value: customer.aov ?? '0', suffix: 'العملة', textColor: textColor, subColor: subColor)),
+                  Expanded(flex: 2,child: _summaryStat(icon: Icons.bar_chart_rounded, label: 'order_cost_avg'.tr, value: customer.aov ?? '0', textColor: textColor, subColor: subColor)),
                 ],
               ),
             ],
@@ -409,16 +376,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
               if (_hasValue(customer.email)) _dataRow(label: 'email'.tr, value: customer.email!, textColor: textColor, subColor: subColor),
               if (_hasValue(customer.mobile) || _hasValue(customer.email)) ...[
                 SizedBox(height: 14.h),
-                Row(
-                  children: [
-                    if (_hasValue(customer.mobile)) Expanded(child: _contactAction(icon: Icons.call_outlined, label: 'call'.tr, onTap: () => _callCustomer(customer.mobile), isDark: isDark)),
-                    if (_hasValue(customer.mobile)) SizedBox(width: 10.w),
-                    if (_hasValue(customer.mobile)) Expanded(child: _contactAction(icon: Icons.chat_outlined, label: 'whatsapp'.tr, onTap: () => _whatsappCustomer(customer.mobile), isDark: isDark)),
-                    if (_hasValue(customer.email)) ...[
-                      if (_hasValue(customer.mobile)) SizedBox(width: 10.w),
-                      Expanded(child: _contactAction(icon: Icons.mail_outline_rounded, label: 'email2'.tr, onTap: () => _emailCustomer(customer.email), isDark: isDark)),
-                    ],
-                  ],
+                CustomerContactActions(
+                  phone: customer.mobile,
+                  email: customer.email,
+                  isDark: isDark,
                 ),
               ],
             ],
@@ -444,7 +405,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
     return InkWell(borderRadius: BorderRadius.circular(16.r), onTap: onTap, child: content);
   }
 
-  Widget _summaryStat({required IconData icon, required String label, required String value, required Color textColor, required Color subColor, String? suffix}) {
+  Widget _summaryStat({required IconData icon, required String label, required String value, required Color textColor, required Color subColor}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -462,14 +423,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             children: [
               Text(label,style: TextStyle(fontSize: 12.sp ,color: subColor), maxLines: 1, overflow: TextOverflow.ellipsis),
               SizedBox(height: 2.h),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Flexible(child: Text(value, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                  if (suffix != null) ...[SizedBox(width: 3.w), Text(suffix, style: TextStyle(fontSize: 11.sp, color: subColor))],
-                ],
-              ),
+              Text(value, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
             ],
           ),
         ),
@@ -486,25 +440,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
           SizedBox(width: 100.w, child: Text(label, style: TextStyle(fontSize: 13.sp, color: subColor))),
           Expanded(child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textColor))),
         ],
-      ),
-    );
-  }
-
-  Widget _contactAction({required IconData icon, required String label, required VoidCallback onTap, required bool isDark}) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(14.r),
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10.h),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14.r), border: Border.all(color: isDark ? Colors.white.withOpacity(.15) : Colors.grey.shade300)),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: isDark ? Colors.white : AppColor.themeNavyBlueColor)),
-            SizedBox(width: 10.w),
-            Icon(icon, size: 14.sp, color: AppColor.themeNavyBlueColor),
-          ],
-        ),
       ),
     );
   }

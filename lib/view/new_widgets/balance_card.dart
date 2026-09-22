@@ -67,9 +67,9 @@ Widget balanceCard({
                 CircularProgressIndicator(color: Colors.grey,strokeWidth: 2.w,) :
                 Text(
                   controller.availableBalance.value,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     color: Colors.white,
-                    fontSize: 30,
+                    fontSize: 30.sp,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -78,9 +78,9 @@ Widget balanceCard({
                 padding: const EdgeInsets.only(bottom: 5),
                 child: Text(
                   controller.currencySymbol.value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 15,
+                    fontSize: 25.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

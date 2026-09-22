@@ -74,9 +74,13 @@ class CustomerData {
   String? aov;
   int? status;
   String? statusText;
+  String? city;
+  String? address;
 
   CustomerData({
     this.id,
+    this.city,
+    this.address,
     this.customerInfo,
     this.email,
     this.lastActive,
@@ -96,6 +100,7 @@ class CustomerData {
         : null;
 
     email = json['email'];
+    address = json['address'];
     lastActive = json['last_active'];
     dateRegistered = json['date_registered'];
     orders = json['orders'];
@@ -103,6 +108,7 @@ class CustomerData {
     aov = json['aov'];
     status = json['status'];
     statusText = json['status_text'];
+    city = json['state_name'];
   }
 
   Map<String, dynamic> toJson() {

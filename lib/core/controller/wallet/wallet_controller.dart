@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../config/repository/wallet_repository.dart';
 import '../../model/wallet_model.dart';
@@ -35,6 +36,19 @@ class WalletController extends GetxController {
   RxBool isSearchingTransactions = false.obs;
   RxBool isSearchActive = false.obs;
   Timer? _searchDebounce;
+  // ---- Transaction Filters ----
+  Rxn<DateTime> filterFromDate = Rxn<DateTime>();
+  Rxn<DateTime> filterToDate = Rxn<DateTime>();
+  RxString filterTransactionType = ''.obs; // '' means no type filter
+
+  bool get hasActiveFilters =>
+      filterFromDate.value != null ||
+          filterToDate.value != null ||
+          filterTransactionType.value.isNotEmpty;
+
+  List<WalletTransaction>? _unfilteredTransactions;
+  WalletPagination? _unfilteredPagination;
+  int _unfilteredPage = 1;
 
   @override
   void onInit() {
@@ -53,6 +67,15 @@ class WalletController extends GetxController {
     try {
       final response = await walletRepository.getWalletData(
         page: _currentPage,
+        fromDate: filterFromDate.value != null
+            ? DateFormat('yyyy-MM-dd').format(filterFromDate.value!)
+            : null,
+        toDate: filterToDate.value != null
+            ? DateFormat('yyyy-MM-dd').format(filterToDate.value!)
+            : null,
+        type: filterTransactionType.value.isNotEmpty
+            ? filterTransactionType.value
+            : null,
       );
 
       response.fold(
@@ -189,9 +212,10 @@ class WalletController extends GetxController {
         onSuccess: (data) async {
           if (data['status'] == 1) {
             final balanceData = data['data'];
+            Get.back();
+
             commonToast(data['message'] ?? 'Balance added successfully.',
             );
-            Get.back();
 
             await getWalletData(isRefresh: true);
           } else {
@@ -228,12 +252,10 @@ class WalletController extends GetxController {
         description,
         amount,
       );
-
-      Get.back();
-
       response.fold(
         onSuccess: (data) async {
           if (data['status'] == 1) {
+            Get.back();
 
             commonToast(
               data['message'] ??
@@ -274,6 +296,15 @@ class WalletController extends GetxController {
       final response =
       await walletRepository.getWalletData(
         page: nextPage,
+        fromDate: filterFromDate.value != null
+            ? DateFormat('yyyy-MM-dd').format(filterFromDate.value!)
+            : null,
+        toDate: filterToDate.value != null
+            ? DateFormat('yyyy-MM-dd').format(filterToDate.value!)
+            : null,
+        type: filterTransactionType.value.isNotEmpty
+            ? filterTransactionType.value
+            : null,
       );
 
       response.fold(
@@ -311,6 +342,41 @@ class WalletController extends GetxController {
       );
     } finally {
       isLoadingMore.value = false;
+    }
+  }
+
+  Future<void> applyTransactionFilters({
+    DateTime? fromDate,
+    DateTime? toDate,
+    String? type,
+  }) async {
+    if (!hasActiveFilters) {
+      _unfilteredTransactions = List<WalletTransaction>.from(transactions);
+      _unfilteredPagination = pagination.value;
+      _unfilteredPage = _currentPage;
+    }
+
+    filterFromDate.value = fromDate;
+    filterToDate.value = toDate;
+    filterTransactionType.value = type ?? '';
+
+    await getWalletData(isRefresh: true);
+  }
+
+  Future<void> resetTransactionFilters() async {
+    filterFromDate.value = null;
+    filterToDate.value = null;
+    filterTransactionType.value = '';
+
+    if (_unfilteredTransactions != null) {
+      transactions.assignAll(_unfilteredTransactions!);
+      pagination.value = _unfilteredPagination;
+      _currentPage = _unfilteredPage;
+
+      _unfilteredTransactions = null;
+      _unfilteredPagination = null;
+    } else {
+      await getWalletData(isRefresh: true);
     }
   }
 }

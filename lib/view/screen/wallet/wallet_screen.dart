@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/utils/helper.dart';
 import '../../../core/controller/wallet/wallet_controller.dart';
 import '../../../translations/translation_service.dart';
+import '../../../utils/text_style.dart';
 import '../../new_widgets/balance_card.dart';
+import '../../new_widgets/date_filter.dart';
 import '../../new_widgets/search_widget.dart';
 import '../../new_widgets/transactions_widget.dart';
 import '../../widget/common_appbar_widget.dart';
@@ -18,16 +21,21 @@ class WalletScreen extends StatefulWidget {
   State<WalletScreen> createState() => _WalletScreenState();
 }
 
-enum _DirectionFilter { all, credit, debit }
+const List<String> _kTransactionTypes = [
+  "manual_deposit",
+  "manual_withdrawal",
+  "order_paid",
+  "sale",
+  "refund",
+  "commission",
+  "adjustment",
+];
 
 class _WalletScreenState extends State<WalletScreen> {
   final WalletController controller = Get.put(WalletController());
   final ScrollController _scrollController = ScrollController();
 
   static const Color _danger = Color(0xFFEF4444);
-
-  _DirectionFilter _directionFilter = _DirectionFilter.all;
-  String? _statusFilter;
 
   @override
   void initState() {
@@ -48,9 +56,6 @@ class _WalletScreenState extends State<WalletScreen> {
       controller.loadMoreTransactions();
     }
   }
-
-  bool get _hasActiveFilters =>
-      _directionFilter != _DirectionFilter.all || _statusFilter != null;
 
   @override
   Widget build(BuildContext context) {
@@ -108,23 +113,22 @@ class _WalletScreenState extends State<WalletScreen> {
                     ),
                   ),
                   SliverPadding(
-                    padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
-                    sliver: SliverToBoxAdapter(
-                      child: SearchRowWidget(
-                        context: context,
-                        controller: controller.searchController,
-                        hint: 'search_by_transaction_id'.tr,
-                        onChanged: controller.onSearchChanged,
-                        onClear: controller.resetSearch,
-                      ),
-                    ),
-                  ),
-                  SliverPadding(
                     padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 8.h),
                     sliver: SliverToBoxAdapter(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: _filterButton(isDark: isDark),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: SearchRowWidget(
+                              context: context,
+                              controller: controller.searchController,
+                              hint: 'search_by_id'.tr,
+                              onChanged: controller.onSearchChanged,
+                              onClear: controller.resetSearch,
+                            ),
+                          ),
+                          SizedBox(width: 10.w),
+                          _filterButton(isDark: isDark),
+                        ],
                       ),
                     ),
                   ),
@@ -135,38 +139,42 @@ class _WalletScreenState extends State<WalletScreen> {
                       child: Center(child: LoadingWidget()),
                     )
                   else if (transactions.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: EmptyState(
-                        message: isSearchMode
-                            ? 'no_transactions_found'.tr
-                            : 'no_transactions_found'.tr,
-                        icon: Icons.receipt_long_outlined,
-                        iconColor: isDark
-                            ? Colors.white38
-                            : Colors.grey.shade400,
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * .6,
+                        child: Center(
+                          child: EmptyState(
+                            message: isSearchMode
+                                ? 'no_transactions_found'.tr
+                                : 'no_transactions_found'.tr,
+                            icon: Icons.receipt_long_outlined,
+                            iconColor: isDark
+                                ? Colors.white38
+                                : Colors.grey.shade400,
+                          ),
+                        ),
                       ),
                     )
                   else
                     SliverPadding(
-                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 8.h),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                          final tx = transactions[index];
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 10.h),
-                            child: transactionCard(
-                              currency: controller.currencySymbol.value,
-                              tx: tx,
-                              isDark: isDark,
-                            ),
-                          );
-                        },
-                        childCount: transactions.length,
+                      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 8.h),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                            final tx = transactions[index];
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 10.h),
+                              child: transactionCard(
+                                currency: controller.currencySymbol.value,
+                                tx: tx,
+                                isDark: isDark,
+                              ),
+                            );
+                          },
+                          childCount: transactions.length,
+                        ),
                       ),
                     ),
-                  ),
                   if (!isSearchMode)
                     SliverToBoxAdapter(
                       child: _loadMoreIndicator(isDark: isDark),
@@ -182,15 +190,16 @@ class _WalletScreenState extends State<WalletScreen> {
 
   Widget _filterButton({required bool isDark}) {
     final Color surfaceColor =
-    isDark ? const Color(0xFF23252A) : const Color(0xFFF7F8FA);
-    final Color borderColor = isDark
-        ? Colors.white.withOpacity(.07)
-        : const Color(0xFFE8EAEE);
+    isDark ? const Color(0xFF23252A) : AppColor.cLight;
+    final Color borderColor =
+    isDark ? DarkThemeColor.cBorder : AppColor.cBorder;
     final Color textColor =
-    isDark ? Colors.white : const Color(0xFF15171A);
+    isDark ? DarkThemeColor.cText : LightThemeColor.cText;
+
+    final bool hasActiveFilters = controller.hasActiveFilters;
 
     return Material(
-      color: _hasActiveFilters ? AppColor.themeNavyBlueColor : surfaceColor,
+      color: hasActiveFilters ? AppColor.themeNavyBlueColor : surfaceColor,
       borderRadius: BorderRadius.circular(14.r),
       child: InkWell(
         borderRadius: BorderRadius.circular(14.r),
@@ -201,7 +210,7 @@ class _WalletScreenState extends State<WalletScreen> {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14.r),
-            border: _hasActiveFilters
+            border: hasActiveFilters
                 ? null
                 : Border.all(color: borderColor),
           ),
@@ -211,12 +220,12 @@ class _WalletScreenState extends State<WalletScreen> {
               Icon(
                 Icons.filter_alt_outlined,
                 size: 22.sp,
-                color: _hasActiveFilters ? Colors.white : textColor,
+                color: hasActiveFilters ? Colors.white : textColor,
               ),
-              if (_hasActiveFilters)
+              if (hasActiveFilters)
                 Positioned(
-                  top: -4,
-                  right: -4,
+                  top: -4.h,
+                  right: -4.w,
                   child: Container(
                     width: 8.w,
                     height: 8.w,
@@ -234,19 +243,27 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
   void _openFilterSheet({required bool isDark}) {
-    _DirectionFilter tempDirection = _directionFilter;
-    String? tempStatus = _statusFilter;
+    if (controller.isSearchActive.value) {
+      controller.resetSearch();
+    }
+
+    DateTime? tempFromDate = controller.filterFromDate.value;
+    DateTime? tempToDate = controller.filterToDate.value;
+    String? tempType = controller.filterTransactionType.value.isNotEmpty
+        ? controller.filterTransactionType.value
+        : null;
 
     final Color cardColor =
-    isDark ? const Color(0xFF1B1C20) : Colors.white;
+    isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
     final Color surfaceColor =
-    isDark ? const Color(0xFF23252A) : const Color(0xFFF7F8FA);
+    isDark ? const Color(0xFF23252A) : AppColor.cLight;
     final Color textColor =
-    isDark ? Colors.white : const Color(0xFF15171A);
+    isDark ? DarkThemeColor.cText : LightThemeColor.cText;
     final Color secondaryText =
-    isDark ? const Color(0xFF9297A1) : const Color(0xFF777D87);
+    isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont;
 
     showModalBottomSheet(
+      isScrollControlled: true,
       context: context,
       backgroundColor: cardColor,
       shape: RoundedRectangleBorder(
@@ -264,7 +281,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 onTap: onTap,
                 child: Container(
                   padding: EdgeInsets.symmetric(
-                      horizontal: 16.w, vertical: 9.h),
+                      horizontal: 14.w, vertical: 7.h),
                   decoration: BoxDecoration(
                     color: selected
                         ? AppColor.themeNavyBlueColor
@@ -273,9 +290,8 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                   child: Text(
                     label,
-                    style: TextStyle(
+                    style: pSemiBold12.copyWith(
                       fontSize: 12.5.sp,
-                      fontWeight: FontWeight.w600,
                       color: selected ? Colors.white : textColor,
                     ),
                   ),
@@ -283,134 +299,183 @@ class _WalletScreenState extends State<WalletScreen> {
               );
             }
 
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20.w,
-                right: 20.w,
-                top: 18.h,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20.h,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            String dateRangeLabel() {
+              if (tempFromDate == null && tempToDate == null) {
+                return 'select_date_range'.tr;
+              }
+              final from = tempFromDate != null
+                  ? dateFormatted(
+                  date: tempFromDate.toString(),
+                  formatType: formatForDateTime(FormatType.date))
+                  : '...';
+              final to = tempToDate != null
+                  ? dateFormatted(
+                  date: tempToDate.toString(),
+                  formatType: formatForDateTime(FormatType.date))
+                  : '...';
+              return '$from - $to';
+            }
+
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 20.w,
+                  right: 20.w,
+                  top: 18.h,
+                  bottom: MediaQuery.of(ctx).viewInsets.bottom + 20.h,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'filter_transactions'.tr,
+                            style: pBold16.copyWith(
+                              fontSize: 16.sp,
+                              color: textColor,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              Navigator.pop(ctx);
+                              await controller.resetTransactionFilters();
+                            },
+                            child: Text(
+                              'reset'.tr,
+                              style: pSemiBold14.copyWith(
+                                fontSize: 14.sp,
+                                color: _danger,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 18.h),
                       Text(
-                        'filter_transactions'.tr,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
+                        'date_range'.tr,
+                        style: pRegular12.copyWith(
+                          fontSize: 12.5.sp,
+                          color: secondaryText,
                         ),
                       ),
+                      SizedBox(height: 10.h),
                       GestureDetector(
-                        onTap: () {
-                          setSheetState(() {
-                            tempDirection = _DirectionFilter.all;
-                            tempStatus = null;
-                          });
+                        onTap: () async {
+                          final range = await showDateRangeBottomSheet(
+                            context: ctx,
+                            initialRange: (tempFromDate != null &&
+                                tempToDate != null)
+                                ? DateTimeRange(
+                                start: tempFromDate!, end: tempToDate!)
+                                : null,
+                            onReset: () {
+                              setSheetState(() {
+                                tempFromDate = null;
+                                tempToDate = null;
+                              });
+                            },
+                          );
+                          if (range != null) {
+                            setSheetState(() {
+                              tempFromDate = range.start;
+                              tempToDate = range.end;
+                            });
+                          }
                         },
-                        child: Text(
-                          'clear'.tr,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: _danger,
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 14.w, vertical: 12.h),
+                          decoration: BoxDecoration(
+                            color: surfaceColor,
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_outlined,
+                                size: 16.sp,
+                                color: AppColor.themeNavyBlueColor,
+                              ),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: Text(
+                                  dateRangeLabel(),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: pSemiBold12.copyWith(
+                                    fontSize: 13.sp,
+                                    color: textColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 18.h),
+                      Text(
+                        'transaction_type'.tr,
+                        style: pRegular12.copyWith(
+                          fontSize: 12.5.sp,
+                          color: secondaryText,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      Wrap(
+                        spacing: 8.w,
+                        runSpacing: 8.h,
+                        children: [
+                          chip(
+                            label: 'all'.tr,
+                            selected: tempType == null,
+                            onTap: () => setSheetState(() => tempType = null),
+                          ),
+                          for (final type in _kTransactionTypes)
+                            chip(
+                              label: type.tr,
+                              selected: tempType == type,
+                              onTap: () =>
+                                  setSheetState(() => tempType = type),
+                            ),
+                        ],
+                      ),
+                      SizedBox(height: 24.h),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48.h,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColor.themeNavyBlueColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          onPressed: () async {
+                            Navigator.pop(ctx);
+                            await controller.applyTransactionFilters(
+                              fromDate: tempFromDate,
+                              toDate: tempToDate,
+                              type: tempType,
+                            );
+                          },
+                          child: Text(
+                            'apply_filters'.tr,
+                            style: pBold14.copyWith(
+                              fontSize: 14.sp,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 18.h),
-                  Text(
-                    'direction'.tr,
-                    style: TextStyle(fontSize: 12.5.sp, color: secondaryText),
-                  ),
-                  SizedBox(height: 10.h),
-                  Wrap(
-                    spacing: 8.w,
-                    children: [
-                      chip(
-                        label: 'all'.tr,
-                        selected: tempDirection == _DirectionFilter.all,
-                        onTap: () => setSheetState(
-                                () => tempDirection = _DirectionFilter.all),
-                      ),
-                      chip(
-                        label: 'credit'.tr,
-                        selected: tempDirection == _DirectionFilter.credit,
-                        onTap: () => setSheetState(
-                                () => tempDirection = _DirectionFilter.credit),
-                      ),
-                      chip(
-                        label: 'debit'.tr,
-                        selected: tempDirection == _DirectionFilter.debit,
-                        onTap: () => setSheetState(
-                                () => tempDirection = _DirectionFilter.debit),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 18.h),
-                  Text(
-                    'status'.tr,
-                    style: TextStyle(fontSize: 12.5.sp, color: secondaryText),
-                  ),
-                  SizedBox(height: 10.h),
-                  Wrap(
-                    spacing: 8.w,
-                    children: [
-                      chip(
-                        label: 'all'.tr,
-                        selected: tempStatus == null,
-                        onTap: () => setSheetState(() => tempStatus = null),
-                      ),
-                      chip(
-                        label: 'completed'.tr,
-                        selected: tempStatus == 'completed',
-                        onTap: () =>
-                            setSheetState(() => tempStatus = 'completed'),
-                      ),
-                      chip(
-                        label: 'pending'.tr,
-                        selected: tempStatus == 'pending',
-                        onTap: () =>
-                            setSheetState(() => tempStatus = 'pending'),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 24.h),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48.h,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColor.themeNavyBlueColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        // TODO: لما تجهز فلترة الـ API، ابعت tempDirection/tempStatus
-                        setState(() {
-                          _directionFilter = tempDirection;
-                          _statusFilter = tempStatus;
-                        });
-                        Navigator.pop(ctx);
-                      },
-                      child: Text(
-                        'apply_filters'.tr,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             );
           },
