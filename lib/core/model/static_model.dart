@@ -115,21 +115,29 @@ class VisitorChartData {
 }
 
 class TopUrl {
-  int? totalClick;
+  double? totalClick;
   String? url;
 
-  TopUrl({this.totalClick, this.url});
+  TopUrl({
+    this.totalClick,
+    this.url,
+  });
 
   TopUrl.fromJson(Map<String, dynamic> json) {
-    totalClick = json['total_click'];
-    url = json['url'];
+    final value = json['total_click'];
+
+    totalClick = value is num
+        ? value.toDouble()
+        : null;
+
+    url = json['url']?.toString();
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['total_click'] = this.totalClick;
-    data['url'] = this.url;
-    return data;
+    return {
+      'total_click': totalClick,
+      'url': url,
+    };
   }
 }
 

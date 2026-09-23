@@ -1,171 +1,101 @@
-import 'dart:math' as math;
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-
 import 'package:store_go_app/core/model/static_model.dart';
-import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
-
-const Color kGlassDeepNavy =
-Color(0xFF070B14);
-
-const Color kGlassMidNavy =
-Color(0xFF101827);
+import '../../../utils/colors.dart';
 
 class StatisticsTheme {
-  // =========================
   // LIGHT
-  // =========================
+  static const lightBackground = Color(0xFFF6F7F9);
+  static const lightCard = Color(0xFFFFFFFF);
+  static const lightCardStrong = Color(0xFFF9FAFB);
+  static const lightBorder = Color(0xFFE5E7EB);
+  static const lightBorderStrong = Color(0xFFD1D5DB);
+  static const lightText = Color(0xFF111827);
+  static const lightSecondary = Color(0xFF6B7280);
+  static const lightMuted = Color(0xFF9CA3AF);
 
-  static const lightBackground =
-  Color(0xFFF5F7FA);
-
-  static const lightCard =
-  Color(0xFFFFFFFF);
-
-  static const lightCardStrong =
-  Color(0xFFF8FAFC);
-
-  static const lightBorder =
-  Color(0xFFE2E8F0);
-
-  static const lightBorderStrong =
-  Color(0xFFCBD5E1);
-
-  static const lightText =
-  Color(0xFF172033);
-
-  static const lightSecondary =
-  Color(0xFF64748B);
-
-  static const lightMuted =
-  Color(0xFF94A3B8);
-
-  // =========================
   // DARK
-  // =========================
+  static const darkBackground = Color(0xFF0B1120);
+  static const darkCard = Color(0xFF111827);
+  static const darkCardStrong = Color(0xFF172033);
+  static const darkBorder = Color(0xFF1F2937);
+  static const darkBorderStrong = Color(0xFF374151);
+  static const darkText = Color(0xFFF9FAFB);
+  static const darkSecondary = Color(0xFF9CA3AF);
+  static const darkMuted = Color(0xFF6B7280);
 
-  static const darkBackground =
-  Color(0xFF070B14);
-
-  static const darkCard =
-  Color(0xFF101827);
-
-  static const darkBorder =
-  Color(0xFF263246);
-
-  static const darkBorderStrong =
-  Color(0xFF3A465A);
-
-  static const darkText =
-  Color(0xFFF8FAFC);
-
-  static const darkSecondary =
-  Color(0xFF94A3B8);
-
-  static const darkMuted =
-  Color(0xFF64748B);
+  // DASHBOARD ACCENTS
+  static Color primary = AppColor.blueColor;
+  static const secondary = Color(0xFF3BF6A8);
+  static const warning = Color(0xFFF59E0B);
+  static const danger = Color(0xFFEF4444);
 }
 
 class Glass {
-  static bool isDark(
-      BuildContext context,
-      ) {
-    return Theme.of(context).brightness ==
-        Brightness.dark;
-  }
+  static bool isDark(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
 
-  static Color surface(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? Colors.white.withOpacity(.055)
-        : StatisticsTheme.lightCard;
-  }
+  static Color surface(BuildContext context) =>
+      isDark(context)
+          ? StatisticsTheme.darkCard
+          : StatisticsTheme.lightCard;
 
-  static Color surfaceStrong(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? Colors.white.withOpacity(.095)
-        : StatisticsTheme.lightCardStrong;
-  }
+  static Color surfaceStrong(BuildContext context) =>
+      isDark(context)
+          ? StatisticsTheme.darkCardStrong
+          : StatisticsTheme.lightCardStrong;
 
-  static Color border(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? Colors.white.withOpacity(.11)
-        : StatisticsTheme.lightBorder;
-  }
+  static Color border(BuildContext context) =>
+      isDark(context)
+          ? StatisticsTheme.darkBorder
+          : StatisticsTheme.lightBorder;
 
-  static Color borderStrong(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? Colors.white.withOpacity(.22)
-        : StatisticsTheme.lightBorderStrong;
-  }
+  static Color borderStrong(BuildContext context) =>
+      isDark(context)
+          ? StatisticsTheme.darkBorderStrong
+          : StatisticsTheme.lightBorderStrong;
 
-  static Color textPrimary(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? StatisticsTheme.darkText
-        : StatisticsTheme.lightText;
-  }
+  static Color textPrimary(BuildContext context) =>
+      isDark(context)
+          ? StatisticsTheme.darkText
+          : StatisticsTheme.lightText;
 
-  static Color textSecondary(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? StatisticsTheme.darkSecondary
-        : StatisticsTheme.lightSecondary;
-  }
+  static Color textSecondary(BuildContext context) =>
+      isDark(context)
+          ? StatisticsTheme.darkSecondary
+          : StatisticsTheme.lightSecondary;
 
-  static Color textMuted(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? StatisticsTheme.darkMuted
-        : StatisticsTheme.lightMuted;
-  }
+  static Color textMuted(BuildContext context) =>
+      isDark(context)
+          ? StatisticsTheme.darkMuted
+          : StatisticsTheme.lightMuted;
 
-  static Color chartGrid(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? Colors.white.withOpacity(.06)
-        : const Color(0xFFE8EDF3);
-  }
+  static Color chartGrid(BuildContext context) =>
+      isDark(context)
+          ? Colors.white.withOpacity(.07)
+          : const Color(0xFFE5E7EB);
 
-  static Color chartBackground(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? kGlassMidNavy
-        : Colors.white;
-  }
+  static Color chartBackground(BuildContext context) =>
+      isDark(context)
+          ? StatisticsTheme.darkCard
+          : StatisticsTheme.lightCard;
 
-  static Color tooltipBackground(
-      BuildContext context,
-      ) {
-    return isDark(context)
-        ? kGlassMidNavy
-        : Colors.white;
-  }
+  static Color tooltipBackground(BuildContext context) =>
+      isDark(context)
+          ? const Color(0xFF1F2937)
+          : Colors.white;
 }
 
 // ============================================================
-// GLASS PANEL
+// CLEAN PANEL
 // ============================================================
 
 class GlassPanel extends StatelessWidget {
@@ -180,10 +110,9 @@ class GlassPanel extends StatelessWidget {
   const GlassPanel({
     super.key,
     required this.child,
-    this.padding =
-    const EdgeInsets.all(18),
-    this.radius = 24,
-    this.blur = 22,
+    this.padding = const EdgeInsets.all(18),
+    this.radius = 20,
+    this.blur = 0,
     this.tint,
     this.borderColor,
     this.shadows,
@@ -191,71 +120,45 @@ class GlassPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark =
-    Glass.isDark(context);
+    final isDark = Glass.isDark(context);
 
-    return Container(
+    Widget content = Container(
+      padding: padding,
       decoration: BoxDecoration(
-        borderRadius:
-        BorderRadius.circular(radius),
+        color: tint ?? Glass.surface(context),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: borderColor ?? Glass.border(context),
+        ),
         boxShadow: shadows ??
             [
               BoxShadow(
-                color:
-                Colors.black.withOpacity(
-                  isDark ? .25 : .06,
-                ),
-                blurRadius: 24,
-                offset:
-                const Offset(0, 12),
+                color: Colors.black.withOpacity(isDark ? .16 : .035),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
             ],
       ),
-      child: ClipRRect(
-        borderRadius:
-        BorderRadius.circular(radius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: blur,
-            sigmaY: blur,
-          ),
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: tint ??
-                  Glass.surface(context),
-              borderRadius:
-              BorderRadius.circular(
-                radius,
-              ),
-              border: Border.all(
-                color: borderColor ??
-                    Glass.border(context),
-              ),
-              gradient: isDark
-                  ? LinearGradient(
-                begin:
-                Alignment.topLeft,
-                end: Alignment
-                    .bottomRight,
-                colors: [
-                  Colors.white
-                      .withOpacity(.055),
-                  Colors.transparent,
-                ],
-              )
-                  : null,
-            ),
-            child: child,
-          ),
+      child: child,
+    );
+
+    if (blur <= 0) return content;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: blur,
+          sigmaY: blur,
         ),
+        child: content,
       ),
     );
   }
 }
 
 // ============================================================
-// GLASS CARD
+// CLEAN CARD
 // ============================================================
 
 class GlassCard extends StatelessWidget {
@@ -271,17 +174,16 @@ class GlassCard extends StatelessWidget {
     this.subtitle,
     required this.child,
     this.icon,
-    this.padding =
-    const EdgeInsets.all(18),
+    this.padding = const EdgeInsets.all(18),
   });
 
   @override
   Widget build(BuildContext context) {
     return GlassPanel(
       padding: padding,
+      radius: 18,
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -289,62 +191,37 @@ class GlassCard extends StatelessWidget {
                 Container(
                   width: 34,
                   height: 34,
-                  alignment:
-                  Alignment.center,
-                  decoration:
-                  BoxDecoration(
-                    borderRadius:
-                    BorderRadius
-                        .circular(11),
-                    gradient:
-                    LinearGradient(
-                      colors: [
-                        AppColor
-                            .themeGreenColor,
-                        AppColor.blueColor,
-                      ],
-                    ),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: StatisticsTheme.primary.withOpacity(.10),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     icon,
-                    size: 16,
-                    color: Colors.white,
+                    size: 17,
+                    color: StatisticsTheme.primary,
                   ),
                 ),
-
                 horizontalSpace(10),
               ],
-
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment
-                      .start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style:
-                      pBold14.copyWith(
-                        color:
-                        Glass.textPrimary(
-                          context,
-                        ),
+                      style: pBold14.copyWith(
+                        color: Glass.textPrimary(context),
                       ),
                     ),
-
-                    if (subtitle !=
-                        null) ...[
+                    if (subtitle != null) ...[
                       verticalSpace(3),
-
                       Text(
                         subtitle!,
-                        style:
-                        pRegular10
-                            .copyWith(
-                          color: Glass
-                              .textSecondary(
-                            context,
-                          ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: pRegular10.copyWith(
+                          color: Glass.textSecondary(context),
                         ),
                       ),
                     ],
@@ -353,9 +230,7 @@ class GlassCard extends StatelessWidget {
               ),
             ],
           ),
-
           verticalSpace(16),
-
           child,
         ],
       ),
@@ -367,169 +242,17 @@ class GlassCard extends StatelessWidget {
 // BACKDROP
 // ============================================================
 
-class GlassBackdrop extends StatefulWidget {
-  const GlassBackdrop({
-    super.key,
-  });
-
-  @override
-  State<GlassBackdrop> createState() =>
-      _GlassBackdropState();
-}
-
-class _GlassBackdropState
-    extends State<GlassBackdrop>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController
-  _controller;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller =
-    AnimationController(
-      vsync: this,
-      duration:
-      const Duration(seconds: 14),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class GlassBackdrop extends StatelessWidget {
+  const GlassBackdrop({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final size =
-        MediaQuery.of(context).size;
+    final isDark = Glass.isDark(context);
 
-    final isDark =
-    Glass.isDark(context);
-
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: isDark
-                  ? StatisticsTheme
-                  .darkBackground
-                  : StatisticsTheme
-                  .lightBackground,
-            ),
-          ),
-        ),
-
-        if (isDark)
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) {
-              final t =
-                  _controller.value *
-                      2 *
-                      math.pi;
-
-              return Stack(
-                children: [
-                  _blob(
-                    color: AppColor
-                        .themeGreenColor,
-                    size:
-                    size.width * .95,
-                    left:
-                    -size.width * .35 +
-                        18 *
-                            math.sin(t),
-                    top:
-                    -size.height * .06 +
-                        14 *
-                            math.cos(t),
-                    opacity: .24,
-                  ),
-
-                  _blob(
-                    color:
-                    AppColor.blueColor,
-                    size:
-                    size.width * .85,
-                    right:
-                    -size.width * .30 +
-                        16 *
-                            math.cos(
-                              t * 1.3,
-                            ),
-                    top:
-                    size.height * .18 +
-                        14 *
-                            math.sin(
-                              t * 1.3,
-                            ),
-                    opacity: .20,
-                  ),
-
-                  _blob(
-                    color: AppColor
-                        .themeGreenColor,
-                    size:
-                    size.width * .7,
-                    left:
-                    size.width * .05 +
-                        18 *
-                            math.cos(
-                              t * .8,
-                            ),
-                    bottom:
-                    -size.height * .08 +
-                        14 *
-                            math.sin(
-                              t * .8,
-                            ),
-                    opacity: .13,
-                  ),
-                ],
-              );
-            },
-          ),
-      ],
-    );
-  }
-
-  Widget _blob({
-    required Color color,
-    required double size,
-    double? left,
-    double? top,
-    double? right,
-    double? bottom,
-    required double opacity,
-  }) {
-    return Positioned(
-      left: left,
-      top: top,
-      right: right,
-      bottom: bottom,
-      child: IgnorePointer(
-        child: Container(
-          width: size,
-          height: size,
-          decoration:
-          BoxDecoration(
-            shape: BoxShape.circle,
-            gradient:
-            RadialGradient(
-              colors: [
-                color.withOpacity(
-                  opacity,
-                ),
-                color.withOpacity(0),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return ColoredBox(
+      color: isDark
+          ? StatisticsTheme.darkBackground
+          : StatisticsTheme.lightBackground,
     );
   }
 }
@@ -538,8 +261,7 @@ class _GlassBackdropState
 // HERO CARD
 // ============================================================
 
-class StatisticsHeroCard
-    extends StatelessWidget {
+class StatisticsHeroCard extends StatelessWidget {
   final String periodLabel;
   final int totalPageViews;
   final int totalUniqueViews;
@@ -555,274 +277,111 @@ class StatisticsHeroCard
 
   @override
   Widget build(BuildContext context) {
-    final isDark =
-    Glass.isDark(context);
+    final isDark = Glass.isDark(context);
 
     return GlassPanel(
-      radius: 28,
-      blur: 28,
-      padding:
-      const EdgeInsets.fromLTRB(
-        22,
-        22,
-        22,
-        20,
-      ),
+      radius: 20,
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       tint: isDark
-          ? Colors.white.withOpacity(.05)
-          : Colors.white,
-      borderColor: AppColor
-          .themeGreenColor
-          .withOpacity(
-        isDark ? .30 : .22,
-      ),
+          ? StatisticsTheme.darkCard
+          : StatisticsTheme.lightCard,
+      borderColor: isDark
+          ? StatisticsTheme.darkBorderStrong
+          : StatisticsTheme.lightBorder,
       shadows: [
         BoxShadow(
-          color: AppColor
-              .themeGreenColor
-              .withOpacity(
-            isDark ? .16 : .08,
-          ),
-          blurRadius: 40,
-          spreadRadius: -4,
-          offset:
-          const Offset(0, 16),
-        ),
-        BoxShadow(
-          color: Colors.black
-              .withOpacity(
-            isDark ? .35 : .06,
-          ),
-          blurRadius: 22,
-          offset:
-          const Offset(0, 10),
+          color: Colors.black.withOpacity(isDark ? .20 : .045),
+          blurRadius: 18,
+          offset: const Offset(0, 8),
         ),
       ],
-      child: Stack(
-        clipBehavior: Clip.none,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration:
-              BoxDecoration(
-                borderRadius:
-                BorderRadius.circular(
-                  28,
-                ),
-                gradient:
-                LinearGradient(
-                  begin:
-                  Alignment.topLeft,
-                  end: Alignment
-                      .bottomRight,
-                  colors: [
-                    AppColor
-                        .themeGreenColor
-                        .withOpacity(
-                      isDark ? .16 : .07,
-                    ),
-                    AppColor.blueColor
-                        .withOpacity(
-                      isDark ? .05 : .03,
-                    ),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
+          Row(
             children: [
-              Row(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment
-                          .start,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration:
-                              BoxDecoration(
-                                shape: BoxShape
-                                    .circle,
-                                color: AppColor
-                                    .themeGreenColor,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColor
-                                        .themeGreenColor
-                                        .withOpacity(
-                                      .9,
-                                    ),
-                                    blurRadius:
-                                    6,
-                                    spreadRadius:
-                                    1,
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            horizontalSpace(
-                              7,
-                            ),
-
-                            Text(
-                              "Overview".tr,
-                              style:
-                              pSemiBold14
-                                  .copyWith(
-                                color: Glass
-                                    .textPrimary(
-                                  context,
-                                ).withOpacity(
-                                  .9,
-                                ),
-                                letterSpacing:
-                                .3,
-                              ),
-                            ),
-                          ],
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            color: StatisticsTheme.primary,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-
-                        verticalSpace(5),
-
+                        horizontalSpace(7),
                         Text(
-                          periodLabel,
-                          style:
-                          pRegular10
-                              .copyWith(
-                            color: Glass
-                                .textMuted(
-                              context,
-                            ),
+                          'Overview'.tr,
+                          style: pSemiBold14.copyWith(
+                            color: Glass.textPrimary(context),
                           ),
                         ),
                       ],
                     ),
-                  ),
-
-                  Container(
-                    padding:
-                    const EdgeInsets
-                        .all(10),
-                    decoration:
-                    BoxDecoration(
-                      color: Glass
-                          .surfaceStrong(
-                        context,
-                      ),
-                      borderRadius:
-                      BorderRadius
-                          .circular(
-                        14,
-                      ),
-                      border: Border.all(
-                        color: Glass
-                            .border(
-                          context,
-                        ),
+                    verticalSpace(5),
+                    Text(
+                      periodLabel,
+                      style: pRegular10.copyWith(
+                        color: Glass.textMuted(context),
                       ),
                     ),
-                    child: Icon(
-                      Icons
-                          .auto_graph_rounded,
-                      color: AppColor
-                          .themeGreenColor,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-
-              verticalSpace(20),
-
-              Text(
-                "Total page views".tr,
-                style:
-                pRegular10.copyWith(
-                  color: Glass
-                      .textSecondary(
-                    context,
-                  ),
+                  ],
                 ),
               ),
-
-              verticalSpace(4),
-
-              ShaderMask(
-                shaderCallback:
-                    (rect) {
-                  return LinearGradient(
-                    colors: isDark
-                        ? [
-                      Colors.white,
-                      AppColor
-                          .themeGreenColor,
-                    ]
-                        : [
-                      AppColor
-                          .themeNavyBlueColor,
-                      AppColor
-                          .themeGreenColor,
-                    ],
-                  ).createShader(rect);
-                },
-                child:
-                AnimatedCounterText(
-                  value:
-                  totalPageViews,
-                  style:
-                  pBold30.copyWith(
-                    color:
-                    Colors.white,
-                  ),
+              Container(
+                width: 38,
+                height: 38,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: StatisticsTheme.primary.withOpacity(.10),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Icon(
+                  Icons.bar_chart_rounded,
+                  color: StatisticsTheme.primary,
+                  size: 20,
                 ),
               ),
-
-              verticalSpace(20),
-
-              Row(
-                children: [
-                  Expanded(
-                    child:
-                    _heroMiniStat(
-                      context: context,
-                      icon: Icons
-                          .person_outline_rounded,
-                      label:
-                      "Unique visitors"
-                          .tr,
-                      value:
-                      totalUniqueViews,
-                    ),
-                  ),
-
-                  horizontalSpace(10),
-
-                  Expanded(
-                    child:
-                    _heroMiniStat(
-                      context: context,
-                      icon: Icons
-                          .link_rounded,
-                      label:
-                      "Top links".tr,
-                      value:
-                      topLinksCount,
-                    ),
-                  ),
-                ],
+            ],
+          ),
+          verticalSpace(20),
+          Text(
+            'Total page views'.tr,
+            style: pRegular10.copyWith(
+              color: Glass.textSecondary(context),
+            ),
+          ),
+          verticalSpace(4),
+          AnimatedCounterText(
+            value: totalPageViews,
+            style: pBold30.copyWith(
+              color: Glass.textPrimary(context),
+            ),
+          ),
+          verticalSpace(18),
+          Row(
+            children: [
+              Expanded(
+                child: _heroMiniStat(
+                  context: context,
+                  icon: Icons.person_outline_rounded,
+                  label: 'Unique visitors'.tr,
+                  value: totalUniqueViews,
+                ),
+              ),
+              horizontalSpace(10),
+              Expanded(
+                child: _heroMiniStat(
+                  context: context,
+                  icon: Icons.link_rounded,
+                  label: 'Top links'.tr,
+                  value: topLinksCount,
+                ),
               ),
             ],
           ),
@@ -838,77 +397,50 @@ class StatisticsHeroCard
     required int value,
   }) {
     return Container(
-      padding:
-      const EdgeInsets.symmetric(
-        horizontal: 13,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
         vertical: 11,
       ),
-      decoration:
-      BoxDecoration(
-        color:
-        Glass.surfaceStrong(
-          context,
-        ),
-        borderRadius:
-        BorderRadius.circular(14),
+      decoration: BoxDecoration(
+        color: Glass.surfaceStrong(context),
+        borderRadius: BorderRadius.circular(13),
         border: Border.all(
-          color: Glass.border(
-            context,
-          ),
+          color: Glass.border(context),
         ),
       ),
       child: Row(
         children: [
           Container(
-            padding:
-            const EdgeInsets.all(6),
-            decoration:
-            BoxDecoration(
-              color: AppColor
-                  .themeGreenColor
-                  .withOpacity(.16),
-              borderRadius:
-              BorderRadius.circular(
-                9,
-              ),
+            width: 30,
+            height: 30,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: StatisticsTheme.primary.withOpacity(.10),
+              borderRadius: BorderRadius.circular(9),
             ),
             child: Icon(
               icon,
-              color: AppColor
-                  .themeGreenColor,
-              size: 14,
+              color: StatisticsTheme.primary,
+              size: 15,
             ),
           ),
-
-          horizontalSpace(9),
-
+          horizontalSpace(8),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AnimatedCounterText(
                   value: value,
-                  style:
-                  pBold16.copyWith(
-                    color: Glass
-                        .textPrimary(
-                      context,
-                    ),
+                  style: pBold16.copyWith(
+                    color: Glass.textPrimary(context),
                   ),
                 ),
-
                 Text(
                   label,
                   maxLines: 1,
-                  overflow:
-                  TextOverflow.ellipsis,
-                  style:
-                  pRegular8.copyWith(
-                    color: Glass
-                        .textMuted(
-                      context,
-                    ),
+                  overflow: TextOverflow.ellipsis,
+                  style: pRegular8.copyWith(
+                    color: Glass.textMuted(context),
                   ),
                 ),
               ],
@@ -924,8 +456,7 @@ class StatisticsHeroCard
 // ANIMATED COUNTER
 // ============================================================
 
-class AnimatedCounterText
-    extends StatelessWidget {
+class AnimatedCounterText extends StatelessWidget {
   final int value;
   final TextStyle style;
   final Duration duration;
@@ -934,27 +465,16 @@ class AnimatedCounterText
     super.key,
     required this.value,
     required this.style,
-    this.duration =
-    const Duration(
-      milliseconds: 900,
-    ),
+    this.duration = const Duration(milliseconds: 900),
   });
 
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<
-        double>(
-      tween: Tween(
-        begin: 0,
-        end: value.toDouble(),
-      ),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: value.toDouble()),
       duration: duration,
       curve: Curves.easeOutCubic,
-      builder: (
-          context,
-          value,
-          child,
-          ) {
+      builder: (context, value, child) {
         return Text(
           value.round().toString(),
           style: style,
@@ -964,12 +484,216 @@ class AnimatedCounterText
   }
 }
 
+class TopUrlChart extends StatelessWidget {
+  final List<TopUrl> list;
+  final Animation<double> animation;
+
+  const TopUrlChart({
+    super.key,
+    required this.list,
+    required this.animation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final visible =
+    list.length > 7
+        ? list.sublist(0, 7)
+        : list;
+
+    if (visible.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final chartData =
+    List<_TopUrlChartData>.generate(
+      visible.length,
+          (index) {
+        final item = visible[index];
+
+        return _TopUrlChartData(
+          '#${index + 1}',
+          item.totalClick ?? 0,
+        );
+      },
+      growable: false,
+    );
+
+    return Container(
+      height: 205,
+      padding:
+      const EdgeInsets.fromLTRB(
+        8,
+        12,
+        8,
+        0,
+      ),
+      decoration: BoxDecoration(
+        color:
+        Glass.surfaceStrong(context),
+        borderRadius:
+        BorderRadius.circular(14),
+        border: Border.all(
+          color: Glass.border(context),
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter:
+                  _TopUrlLinePainter(
+                    data: chartData,
+                    animation: animation,
+                    lineColor:
+                    StatisticsTheme.primary,
+                    fillColor:
+                    StatisticsTheme.primary
+                        .withOpacity(.10),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          SfCartesianChart(
+            plotAreaBorderWidth: 0,
+            enableAxisAnimation: false,
+
+            margin:
+            const EdgeInsets.fromLTRB(
+              4,
+              8,
+              4,
+              4,
+            ),
+
+            legend: const Legend(
+              isVisible: false,
+            ),
+
+            primaryXAxis: CategoryAxis(
+              interval: 1,
+              borderWidth: 0,
+              majorGridLines:
+              const MajorGridLines(
+                width: 0,
+              ),
+              majorTickLines:
+              const MajorTickLines(
+                width: 0,
+              ),
+              axisLine:
+              const AxisLine(
+                width: 0,
+              ),
+              labelStyle:
+              pMedium8.copyWith(
+                color:
+                Glass.textMuted(
+                  context,
+                ),
+              ),
+            ),
+
+            primaryYAxis: NumericAxis(
+              borderWidth: 0,
+              majorGridLines:
+              MajorGridLines(
+                color:
+                Glass.chartGrid(
+                  context,
+                ),
+              ),
+              majorTickLines:
+              const MajorTickLines(
+                width: 0,
+              ),
+              axisLine:
+              const AxisLine(
+                width: 0,
+              ),
+              labelStyle:
+              pMedium8.copyWith(
+                color:
+                Glass.textMuted(
+                  context,
+                ),
+              ),
+            ),
+
+            tooltipBehavior:
+             TooltipBehavior(
+              enable: false,
+            ),
+
+            series: <
+                CartesianSeries<
+                    _TopUrlChartData,
+                    String>>[
+              SplineSeries<
+                  _TopUrlChartData,
+                  String>(
+                dataSource: chartData,
+
+                xValueMapper:
+                    (data, _) => data.x,
+
+                yValueMapper:
+                    (data, _) => data.y,
+
+                color:
+                Colors.transparent,
+
+                width: 0,
+
+                animationDuration: 0,
+
+                markerSettings:
+                const MarkerSettings(
+                  isVisible: true,
+                  width: 7,
+                  height: 7,
+                  color:
+                  Colors.transparent,
+                ),
+
+                dataLabelSettings:
+                DataLabelSettings(
+                  isVisible: true,
+                  labelAlignment:
+                  ChartDataLabelAlignment
+                      .top,
+                  textStyle:
+                  pSemiBold8.copyWith(
+                    color:
+                    StatisticsTheme
+                        .primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopUrlChartData {
+  final String x;
+  final double y;
+
+  const _TopUrlChartData(this.x, this.y);
+}
+
 // ============================================================
-// OLD STATISTICS CARD
+// COMPATIBILITY CARD
 // ============================================================
 
-class StatisticsCard
-    extends StatelessWidget {
+class StatisticsCard extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Widget child;
@@ -980,96 +704,16 @@ class StatisticsCard
     required this.title,
     this.subtitle,
     required this.child,
-    this.padding =
-    const EdgeInsets.all(16),
+    this.padding = const EdgeInsets.all(16),
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration:
-      BoxDecoration(
-        color: AppColor.cBackGround,
-        borderRadius:
-        BorderRadius.circular(18),
-        border: Border.all(
-          color: AppColor.cBorder
-              .withOpacity(.7),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black
-                .withOpacity(.035),
-            blurRadius: 15,
-            offset:
-            const Offset(0, 5),
-          ),
-        ],
-      ),
+    return GlassCard(
+      title: title,
+      subtitle: subtitle,
       padding: padding,
-      child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 4,
-                height: 28,
-                decoration:
-                BoxDecoration(
-                  color: AppColor
-                      .themeNavyBlueColor,
-                  borderRadius:
-                  BorderRadius.circular(
-                    10,
-                  ),
-                ),
-              ),
-
-              horizontalSpace(10),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style:
-                      pBold14.copyWith(
-                        color: AppColor
-                            .cDarkGreyFont,
-                      ),
-                    ),
-
-                    if (subtitle !=
-                        null) ...[
-                      verticalSpace(3),
-                      Text(
-                        subtitle!,
-                        style:
-                        pRegular10
-                            .copyWith(
-                          color: AppColor
-                              .cDarkGreyFont
-                              .withOpacity(
-                            .65,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          verticalSpace(16),
-
-          child,
-        ],
-      ),
+      child: child,
     );
   }
 }
@@ -1087,207 +731,132 @@ Widget topUrlWidget({
   required Function() shareFun,
 }) {
   final rankColors = [
-    const Color(0xFFC9A227),
-    const Color(0xFF9AA5B1),
-    const Color(0xFFB2723A),
+    const Color(0xFFD4A72C),
+    const Color(0xFF9CA3AF),
+    const Color(0xFFB7794B),
   ];
 
-  final int rankIndex =
-      int.tryParse(digit) ?? 99;
-
-  final Color rankColor =
-  rankIndex >= 1 &&
-      rankIndex <= 3
+  final rankIndex = int.tryParse(digit) ?? 99;
+  final rankColor = rankIndex >= 1 && rankIndex <= 3
       ? rankColors[rankIndex - 1]
-      : AppColor
-      .themeNavyBlueColor;
+      : Glass.textSecondary(context);
 
   return Container(
-    margin:
-    const EdgeInsets.only(
-      bottom: 10,
-    ),
-    decoration:
-    BoxDecoration(
+    margin: const EdgeInsets.only(bottom: 9),
+    decoration: BoxDecoration(
       color: Glass.surface(context),
-      borderRadius:
-      BorderRadius.circular(15),
+      borderRadius: BorderRadius.circular(14),
       border: Border.all(
         color: Glass.border(context),
       ),
     ),
     child: Material(
       color: Colors.transparent,
-      borderRadius:
-      BorderRadius.circular(15),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        borderRadius:
-        BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(14),
         onTap: shareFun,
         child: Padding(
-          padding:
-          const EdgeInsets.symmetric(
-            horizontal: 13,
-            vertical: 12,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 11,
           ),
           child: Row(
             children: [
               Container(
                 width: 32,
                 height: 32,
-                alignment:
-                Alignment.center,
-                decoration:
-                BoxDecoration(
-                  color:
-                  rankColor.withOpacity(
-                    .18,
-                  ),
-                  borderRadius:
-                  BorderRadius.circular(
-                    10,
-                  ),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: rankColor.withOpacity(.10),
+                  borderRadius: BorderRadius.circular(9),
                   border: Border.all(
-                    color: rankColor
-                        .withOpacity(
-                      .35,
-                    ),
+                    color: rankColor.withOpacity(.25),
                   ),
                 ),
                 child: Text(
                   '#$digit',
-                  style:
-                  pBold12.copyWith(
+                  style: pBold12.copyWith(
                     color: rankColor,
                   ),
                 ),
               ),
-
-              horizontalSpace(12),
-
+              horizontalSpace(11),
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment
-                      .start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         Icon(
-                          Icons
-                              .link_rounded,
+                          Icons.link_rounded,
                           size: 11,
-                          color: Glass
-                              .textMuted(
-                            context,
-                          ),
+                          color: Glass.textMuted(context),
                         ),
-
                         horizontalSpace(4),
-
                         Expanded(
                           child: Text(
                             title,
                             maxLines: 1,
-                            overflow:
-                            TextOverflow
-                                .ellipsis,
-                            style:
-                            pRegular10
-                                .copyWith(
-                              color: Glass
-                                  .textMuted(
-                                context,
-                              ),
+                            overflow: TextOverflow.ellipsis,
+                            style: pRegular10.copyWith(
+                              color: Glass.textMuted(context),
                             ),
                           ),
                         ),
                       ],
                     ),
-
                     verticalSpace(3),
-
                     Text(
                       subTitle,
                       maxLines: 1,
-                      overflow:
-                      TextOverflow.ellipsis,
-                      style:
-                      pSemiBold12
-                          .copyWith(
-                        color: Glass
-                            .textPrimary(
-                          context,
-                        ),
+                      overflow: TextOverflow.ellipsis,
+                      style: pSemiBold12.copyWith(
+                        color: Glass.textPrimary(context),
                       ),
                     ),
                   ],
                 ),
               ),
-
               horizontalSpace(8),
-
               Container(
-                padding:
-                const EdgeInsets
-                    .symmetric(
-                  horizontal: 10,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 9,
                   vertical: 6,
                 ),
-                decoration:
-                BoxDecoration(
-                  color: AppColor
-                      .themeGreenColor
-                      .withOpacity(.16),
-                  borderRadius:
-                  BorderRadius.circular(
-                    9,
-                  ),
+                decoration: BoxDecoration(
+                  color: StatisticsTheme.primary.withOpacity(.10),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   total,
-                  style:
-                  pBold12.copyWith(
-                    color: AppColor
-                        .themeGreenColor,
+                  style: pBold12.copyWith(
+                    color: StatisticsTheme.primary,
                   ),
                 ),
               ),
-
               horizontalSpace(6),
-
-              InkWell(
-                borderRadius:
-                BorderRadius.circular(
-                  9,
-                ),
-                onTap: shareFun,
-                child: Container(
-                  padding:
-                  const EdgeInsets
-                      .all(7),
-                  decoration:
-                  BoxDecoration(
-                    color: Glass
-                        .surfaceStrong(
-                      context,
-                    ),
-                    borderRadius:
-                    BorderRadius.circular(
-                      9,
-                    ),
-                    border: Border.all(
-                      color: Glass.border(
-                        context,
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: shareFun,
+                  child: Container(
+                    width: 31,
+                    height: 31,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Glass.surfaceStrong(context),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Glass.border(context),
                       ),
                     ),
-                  ),
-                  child: Icon(
-                    Icons
-                        .ios_share_rounded,
-                    size: 15,
-                    color: AppColor
-                        .themeGreenColor,
+                    child: Icon(
+                      Icons.ios_share_rounded,
+                      size: 15,
+                      color: StatisticsTheme.primary,
+                    ),
                   ),
                 ),
               ),
@@ -1300,13 +869,11 @@ Widget topUrlWidget({
 }
 
 // ============================================================
-// OLD VISITOR GRAPH
+// OLD VISITOR GRAPH - KEPT FOR COMPATIBILITY
 // ============================================================
 
-class StatisticsVisitorGraph
-    extends StatefulWidget {
-  final List<VisitorChartData>
-  visitorChart;
+class StatisticsVisitorGraph extends StatefulWidget {
+  final List<VisitorChartData> visitorChart;
 
   const StatisticsVisitorGraph({
     Key? key,
@@ -1314,8 +881,7 @@ class StatisticsVisitorGraph
   }) : super(key: key);
 
   @override
-  State<StatisticsVisitorGraph>
-  createState() =>
+  State<StatisticsVisitorGraph> createState() =>
       _StatisticsVisitorGraphState();
 }
 
@@ -1329,348 +895,183 @@ class _StatisticsVisitorGraphState
     _loadChartData();
   }
 
-  void _loadChartData() {
-    chartData = [];
-
-    if (Prefs.getBool(
-      AppConstant.isDemoMode,
-    ) ==
-        true) {
-      chartData = [
-        ChartData(
-          '19-jul',
-          5,
-          8,
-        ),
-        ChartData(
-          '20-jul',
-          10,
-          15,
-        ),
-        ChartData(
-          '21-jul',
-          12,
-          17,
-        ),
-        ChartData(
-          '22-jul',
-          14,
-          19,
-        ),
-        ChartData(
-          '23-jul',
-          12,
-          17,
-        ),
-        ChartData(
-          '24-jul',
-          15,
-          10,
-        ),
-        ChartData(
-          '25-jul',
-          8,
-          5,
-        ),
-      ];
-    } else {
-      final data =
-          widget.visitorChart;
-
-      final start = data.length > 7
-          ? data.length - 7
-          : 0;
-
-      chartData =
-          data.sublist(start).map(
-                (data) {
-              return ChartData(
-                data.date ?? '',
-                data.uniquePageview ??
-                    0,
-                data.pageview ?? 0,
-              );
-            },
-          ).toList();
+  @override
+  void didUpdateWidget(
+      covariant StatisticsVisitorGraph oldWidget,
+      ) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.visitorChart != widget.visitorChart) {
+      _loadChartData();
     }
   }
 
+  void _loadChartData() {
+    if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+      chartData = [
+        ChartData('19-jul', 5, 8),
+        ChartData('20-jul', 10, 15),
+        ChartData('21-jul', 12, 17),
+        ChartData('22-jul', 14, 19),
+        ChartData('23-jul', 12, 17),
+        ChartData('24-jul', 15, 10),
+        ChartData('25-jul', 8, 5),
+      ];
+    } else {
+      final data = widget.visitorChart;
+      final start = data.length > 7 ? data.length - 7 : 0;
+      chartData = data.sublist(start).map((data) {
+        return ChartData(
+          data.date ?? '',
+          data.uniquePageview ?? 0,
+          data.pageview ?? 0,
+        );
+      }).toList();
+    }
+    if (mounted) setState(() {});
+  }
+
   @override
-  Widget build(
-      BuildContext context,
-      ) {
-    return Container(
-      height: 250,
-      decoration:
-      BoxDecoration(
-        borderRadius:
-        BorderRadius.circular(15),
-        border: Border.all(
-          color: AppColor.cBorder,
-        ),
-      ),
+  Widget build(BuildContext context) {
+    return GlassPanel(
+      radius: 16,
+      padding: const EdgeInsets.fromLTRB(14, 13, 14, 10),
       child: Column(
         children: [
-          Padding(
-            padding:
-            const EdgeInsets.all(15),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor:
-                  AppColor
-                      .themeNavyBlueColor,
-                  radius: 6,
-                ),
-
-                horizontalSpace(10),
-
-                Text(
-                  "Total page view".tr,
-                  style: pMedium8,
-                ),
-
-                horizontalSpace(15),
-
-                CircleAvatar(
-                  backgroundColor:
-                  AppColor
-                      .themeGreenColor,
-                  radius: 6,
-                ),
-
-                horizontalSpace(10),
-
-                Text(
-                  "Unique page view".tr,
-                  style: pMedium8,
-                ),
-              ],
-            ),
+          Row(
+            children: [
+              _legendDot(
+                StatisticsTheme.secondary,
+                'Total page view'.tr,
+                context,
+              ),
+              horizontalSpace(16),
+              _legendDot(
+                StatisticsTheme.primary,
+                'Unique page view'.tr,
+                context,
+              ),
+            ],
           ),
-
-          Expanded(
-            child:
-            _buildStackedBarChart(),
+          verticalSpace(8),
+          SizedBox(
+            height: 225,
+            child: chartData.isEmpty
+                ? _emptyChart(context)
+                : _buildStackedBarChart(context),
           ),
         ],
       ),
     );
   }
 
-  SfCartesianChart
-  _buildStackedBarChart() {
-    return SfCartesianChart(
-      enableAxisAnimation: true,
-      plotAreaBorderWidth: 0,
-      legend:
-      Legend(isVisible: false),
-      zoomPanBehavior:
-      ZoomPanBehavior(
-        enablePanning: true,
-      ),
-      primaryXAxis: CategoryAxis(
-        borderWidth: 0,
-        autoScrollingMode:
-        AutoScrollingMode.start,
-        autoScrollingDelta: 7,
-        maximumLabels: 100,
-        majorGridLines:
-        MajorGridLines(
-          color: AppColor.cBorder,
+  Widget _legendDot(
+      Color color,
+      String label,
+      BuildContext context,
+      ) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
         ),
-        axisLine: AxisLine(
-          width: 0,
-          color:
-          AppColor.cTransparent,
+        horizontalSpace(6),
+        Text(
+          label,
+          style: pMedium8.copyWith(
+            color: Glass.textSecondary(context),
+          ),
         ),
-        interval: 1,
-        majorTickLines:
-        MajorTickLines(
-          width: 0,
-        ),
-        axisBorderType:
-        AxisBorderType
-            .withoutTopAndBottom,
-      ),
-      primaryYAxis: NumericAxis(
-        borderWidth: 0,
-        majorGridLines:
-        MajorGridLines(
-          color:
-          AppColor.cTransparent,
-        ),
-        axisLine: AxisLine(
-          width: 0,
-          color:
-          AppColor.cTransparent,
-        ),
-        majorTickLines:
-        MajorTickLines(
-          width: 0,
-        ),
-      ),
-      tooltipBehavior:
-      TooltipBehavior(
-        enable: true,
-        color:
-        AppColor.cBackGround,
-        activationMode:
-        ActivationMode.singleTap,
-        canShowMarker: true,
-        shouldAlwaysShow: false,
-        borderColor:
-        AppColor.cBorder,
-        borderWidth: 1,
-        builder: (
-            data,
-            point,
-            series,
-            pointIndex,
-            seriesIndex,
-            ) {
-          final bool isUnique =
-              seriesIndex == 0;
-
-          final String title =
-          isUnique
-              ? "Unique Page View"
-              .tr
-              : "Total Page View".tr;
-
-          final num value = isUnique
-              ? chartData[pointIndex]
-              .desktop
-              : chartData[pointIndex]
-              .mobile;
-
-          return Container(
-            decoration:
-            BoxDecoration(
-              color:
-              AppColor.cBackGround,
-              border: Border.all(
-                color:
-                AppColor.cBorder,
-              ),
-              borderRadius:
-              BorderRadius.circular(
-                8,
-              ),
-            ),
-            padding:
-            const EdgeInsets
-                .symmetric(
-              horizontal: 15,
-              vertical: 10,
-            ),
-            child: Column(
-              mainAxisSize:
-              MainAxisSize.min,
-              crossAxisAlignment:
-              CrossAxisAlignment
-                  .start,
-              children: [
-                Text(
-                  title,
-                  style:
-                  pBold12.copyWith(
-                    color: AppColor
-                        .cDarkGreyFont,
-                  ),
-                ),
-                verticalSpace(8),
-                Text(
-                  value.toString(),
-                  style:
-                  pBold16.copyWith(
-                    color: isUnique
-                        ? AppColor
-                        .themeGreenColor
-                        : AppColor
-                        .themeNavyBlueColor,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-      series:
-      _getStackedBarSeries(),
+      ],
     );
   }
 
-  List<CartesianSeries<ChartData,
-      String>>
-  _getStackedBarSeries() {
-    return [
-      StackedColumnSeries<
-          ChartData, String>(
-        dataSource: chartData,
-        xValueMapper:
-            (ChartData data, _) =>
-        data.x,
-        yValueMapper:
-            (ChartData data, _) =>
-        data.desktop,
-        color:
-        AppColor.themeGreenColor,
-        name:
-        'Unique Page View'.tr,
-        animationDuration: 900,
-        dataLabelSettings:
-        DataLabelSettings(
-          isVisible: true,
-          textStyle:
-          pMedium10.copyWith(
-            color:
-            AppColor.cWhite,
-          ),
+  Widget _emptyChart(BuildContext context) {
+    return Center(
+      child: Text(
+        'No data'.tr,
+        style: pRegular10.copyWith(
+          color: Glass.textMuted(context),
         ),
       ),
-      StackedColumnSeries<
-          ChartData, String>(
-        dataSource: chartData,
-        xValueMapper:
-            (ChartData data, _) =>
-        data.x,
-        yValueMapper:
-            (ChartData data, _) =>
-        data.mobile,
-        color:
-        AppColor.themeNavyBlueColor,
-        name:
-        'Total Page View'.tr,
-        animationDuration: 1100,
-        borderRadius:
-        const BorderRadius
-            .vertical(
-          top: Radius.circular(8),
-        ),
-        dataLabelSettings:
-        DataLabelSettings(
-          isVisible: true,
-          textStyle:
-          pMedium10.copyWith(
-            color:
-            AppColor.cWhite,
-          ),
-          borderRadius: 12,
+    );
+  }
+
+  SfCartesianChart _buildStackedBarChart(BuildContext context) {
+    return SfCartesianChart(
+      enableAxisAnimation: true,
+      plotAreaBorderWidth: 0,
+      margin: EdgeInsets.zero,
+      legend: const Legend(isVisible: false),
+      primaryXAxis: CategoryAxis(
+        borderWidth: 0,
+        interval: 1,
+        majorGridLines: const MajorGridLines(width: 0),
+        axisLine: const AxisLine(width: 0),
+        majorTickLines: const MajorTickLines(width: 0),
+        labelStyle: pMedium8.copyWith(
+          color: Glass.textMuted(context),
         ),
       ),
-    ];
+      primaryYAxis: NumericAxis(
+        borderWidth: 0,
+        majorGridLines: MajorGridLines(
+          color: Glass.chartGrid(context),
+        ),
+        axisLine: const AxisLine(width: 0),
+        majorTickLines: const MajorTickLines(width: 0),
+        labelStyle: pMedium8.copyWith(
+          color: Glass.textMuted(context),
+        ),
+      ),
+      tooltipBehavior: TooltipBehavior(
+        enable: true,
+        activationMode: ActivationMode.singleTap,
+        color: Glass.tooltipBackground(context),
+        borderColor: Glass.borderStrong(context),
+        borderWidth: 1,
+        canShowMarker: true,
+        shouldAlwaysShow: false,
+      ),
+      series: [
+        StackedColumnSeries<ChartData, String>(
+          dataSource: chartData,
+          xValueMapper: (data, _) => data.x,
+          yValueMapper: (data, _) => data.desktop,
+          color: StatisticsTheme.primary,
+          name: 'Unique Page View'.tr,
+          animationDuration: 0,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(6),
+          ),
+        ),
+        StackedColumnSeries<ChartData, String>(
+          dataSource: chartData,
+          xValueMapper: (data, _) => data.x,
+          yValueMapper: (data, _) => data.mobile,
+          color: StatisticsTheme.secondary,
+          name: 'Total Page View'.tr,
+          animationDuration: 0,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(6),
+          ),
+        ),
+      ],
+    );
   }
 }
 
 // ============================================================
-// GLASS VISITOR CHART
+// CLEAN VISITOR CHART
 // ============================================================
 
-class GlassVisitorChart
-    extends StatefulWidget {
-  final List<VisitorChartData>
-  visitorChart;
+class GlassVisitorChart extends StatefulWidget {
+  final List<VisitorChartData> visitorChart;
 
   const GlassVisitorChart({
     super.key,
@@ -1678,13 +1079,10 @@ class GlassVisitorChart
   });
 
   @override
-  State<GlassVisitorChart>
-  createState() =>
-      _GlassVisitorChartState();
+  State<GlassVisitorChart> createState() => _GlassVisitorChartState();
 }
 
-class _GlassVisitorChartState
-    extends State<GlassVisitorChart> {
+class _GlassVisitorChartState extends State<GlassVisitorChart> {
   List<ChartData> chartData = [];
 
   @override
@@ -1695,87 +1093,64 @@ class _GlassVisitorChartState
 
   @override
   void didUpdateWidget(
-      covariant GlassVisitorChart
-      oldWidget,
+      covariant GlassVisitorChart oldWidget,
       ) {
-    super.didUpdateWidget(
-      oldWidget,
-    );
-
-    if (oldWidget.visitorChart !=
-        widget.visitorChart) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.visitorChart != widget.visitorChart) {
       _load();
     }
   }
 
   void _load() {
-    final data =
-        widget.visitorChart;
+    final data = widget.visitorChart;
+    final start = data.length > 7 ? data.length - 7 : 0;
 
-    final start = data.length > 7
-        ? data.length - 7
-        : 0;
-
-    chartData =
-        data.sublist(start).map(
-              (e) {
-            return ChartData(
-              e.date ?? '',
-              e.uniquePageview ?? 0,
-              e.pageview ?? 0,
-            );
-          },
-        ).toList();
+    chartData = data.sublist(start).map((e) {
+      return ChartData(
+        e.date ?? '',
+        e.uniquePageview ?? 0,
+        e.pageview ?? 0,
+      );
+    }).toList();
   }
 
   @override
-  Widget build(
-      BuildContext context,
-      ) {
+  Widget build(BuildContext context) {
     return GlassCard(
-      title: "Visitors".tr,
-      subtitle:
-      "Page views over the selected period"
-          .tr,
+      title: 'Visitors'.tr,
+      subtitle: 'Page views over the selected period'.tr,
       icon: Icons.show_chart_rounded,
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               _legendDot(
-                AppColor
-                    .themeGreenColor,
-                "Unique page view".tr,
+                StatisticsTheme.primary,
+                'Unique page view'.tr,
+                context,
               ),
               horizontalSpace(16),
               _legendDot(
-                AppColor.blueColor,
-                "Total page view".tr,
+                StatisticsTheme.secondary,
+                'Total page view'.tr,
+                context,
               ),
             ],
           ),
-
           verticalSpace(14),
-
           SizedBox(
             height: 190,
             child: chartData.isEmpty
                 ? Center(
               child: Text(
-                "No data".tr,
-                style:
-                pRegular10
-                    .copyWith(
-                  color: Glass
-                      .textMuted(
-                    context,
-                  ),
+                'No data'.tr,
+                style: pRegular10.copyWith(
+                  color: Glass.textMuted(context),
                 ),
               ),
             )
-                : _buildChart(),
+                : _buildChart(context),
           ),
         ],
       ),
@@ -1785,266 +1160,97 @@ class _GlassVisitorChartState
   Widget _legendDot(
       Color color,
       String label,
+      BuildContext context,
       ) {
     return Row(
-      mainAxisSize:
-      MainAxisSize.min,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 7,
           height: 7,
-          decoration:
-          BoxDecoration(
-            shape: BoxShape.circle,
+          decoration: BoxDecoration(
             color: color,
-            boxShadow: [
-              BoxShadow(
-                color:
-                color.withOpacity(
-                  .8,
-                ),
-                blurRadius: 6,
-              ),
-            ],
+            shape: BoxShape.circle,
           ),
         ),
-
         horizontalSpace(7),
-
         Text(
           label,
           style: pMedium8.copyWith(
-            color: Glass
-                .textSecondary(
-              context,
-            ),
+            color: Glass.textSecondary(context),
           ),
         ),
       ],
     );
   }
 
-  SfCartesianChart _buildChart() {
-    final isDark =
-    Glass.isDark(context);
+  SfCartesianChart _buildChart(BuildContext context) {
+    final isDark = Glass.isDark(context);
 
     return SfCartesianChart(
       enableAxisAnimation: true,
       plotAreaBorderWidth: 0,
-      legend:
-      Legend(isVisible: false),
-      zoomPanBehavior:
-      ZoomPanBehavior(
-        enablePanning: true,
-      ),
+      margin: EdgeInsets.zero,
+      legend: const Legend(isVisible: false),
       primaryXAxis: CategoryAxis(
         borderWidth: 0,
-        autoScrollingMode:
-        AutoScrollingMode.start,
-        autoScrollingDelta: 7,
-        maximumLabels: 100,
         interval: 1,
-        majorGridLines:
-        MajorGridLines(
-          color:
-          Glass.chartGrid(
-            context,
-          ),
-        ),
-        axisLine: AxisLine(
-          width: 0,
-          color:
-          AppColor.cTransparent,
-        ),
-        majorTickLines:
-        const MajorTickLines(
-          width: 0,
-        ),
-        axisBorderType:
-        AxisBorderType
-            .withoutTopAndBottom,
-        labelStyle:
-        pMedium8.copyWith(
-          color: Glass.textMuted(
-            context,
-          ),
+        majorGridLines: const MajorGridLines(width: 0),
+        axisLine: const AxisLine(width: 0),
+        majorTickLines: const MajorTickLines(width: 0),
+        labelStyle: pMedium8.copyWith(
+          color: Glass.textMuted(context),
         ),
       ),
       primaryYAxis: NumericAxis(
         borderWidth: 0,
-        majorGridLines:
-        MajorGridLines(
-          color:
-          Glass.chartGrid(
-            context,
-          ),
+        majorGridLines: MajorGridLines(
+          color: Glass.chartGrid(context),
         ),
-        axisLine: AxisLine(
-          width: 0,
-          color:
-          AppColor.cTransparent,
-        ),
-        majorTickLines:
-        const MajorTickLines(
-          width: 0,
-        ),
-        labelStyle:
-        pMedium8.copyWith(
-          color: Glass.textMuted(
-            context,
-          ),
+        axisLine: const AxisLine(width: 0),
+        majorTickLines: const MajorTickLines(width: 0),
+        labelStyle: pMedium8.copyWith(
+          color: Glass.textMuted(context),
         ),
       ),
-      tooltipBehavior:
-      TooltipBehavior(
+      tooltipBehavior: TooltipBehavior(
         enable: true,
-        color:
-        Glass.tooltipBackground(
-          context,
-        ),
-        activationMode:
-        ActivationMode.singleTap,
+        activationMode: ActivationMode.singleTap,
+        color: Glass.tooltipBackground(context),
+        borderColor: Glass.borderStrong(context),
+        borderWidth: 1,
         canShowMarker: true,
         shouldAlwaysShow: false,
-        borderColor:
-        Glass.borderStrong(
-          context,
-        ),
-        borderWidth: 1,
-        builder: (
-            data,
-            point,
-            series,
-            pointIndex,
-            seriesIndex,
-            ) {
-          final bool isUnique =
-              seriesIndex == 0;
-
-          final String title =
-          isUnique
-              ? "Unique Page View"
-              .tr
-              : "Total Page View".tr;
-
-          final num value = isUnique
-              ? chartData[pointIndex]
-              .desktop
-              : chartData[pointIndex]
-              .mobile;
-
-          return Container(
-            decoration:
-            BoxDecoration(
-              color: Glass
-                  .tooltipBackground(
-                context,
-              ),
-              border: Border.all(
-                color: Glass
-                    .borderStrong(
-                  context,
-                ),
-              ),
-              borderRadius:
-              BorderRadius.circular(
-                10,
-              ),
-            ),
-            padding:
-            const EdgeInsets
-                .symmetric(
-              horizontal: 14,
-              vertical: 9,
-            ),
-            child: Column(
-              mainAxisSize:
-              MainAxisSize.min,
-              crossAxisAlignment:
-              CrossAxisAlignment
-                  .start,
-              children: [
-                Text(
-                  title,
-                  style:
-                  pBold12.copyWith(
-                    color: Glass
-                        .textSecondary(
-                      context,
-                    ),
-                  ),
-                ),
-
-                verticalSpace(6),
-
-                Text(
-                  value.toString(),
-                  style:
-                  pBold16.copyWith(
-                    color: isUnique
-                        ? AppColor
-                        .themeGreenColor
-                        : AppColor
-                        .blueColor,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       ),
-      series: <
-          CartesianSeries<
-              ChartData, String>>[
-        SplineAreaSeries<
-            ChartData, String>(
+      series: <CartesianSeries<ChartData, String>>[
+        SplineAreaSeries<ChartData, String>(
           dataSource: chartData,
-          xValueMapper:
-              (d, _) => d.x,
-          yValueMapper:
-              (d, _) => d.desktop,
-          color: AppColor
-              .themeGreenColor
-              .withOpacity(.20),
-          borderColor:
-          AppColor
-              .themeGreenColor,
-          borderWidth: 2.4,
-          animationDuration: 900,
-          markerSettings:
-          MarkerSettings(
+          xValueMapper: (d, _) => d.x,
+          yValueMapper: (d, _) => d.desktop,
+          color: StatisticsTheme.primary.withOpacity(.10),
+          borderColor: StatisticsTheme.primary,
+          borderWidth: 2,
+          animationDuration: 700,
+          markerSettings: MarkerSettings(
             isVisible: true,
-            color: isDark
-                ? kGlassDeepNavy
-                : Colors.white,
-            borderColor:
-            AppColor
-                .themeGreenColor,
+            color: isDark ? StatisticsTheme.darkCard : Colors.white,
+            borderColor: StatisticsTheme.primary,
             borderWidth: 2,
             width: 6,
             height: 6,
           ),
         ),
-
-        SplineSeries<
-            ChartData, String>(
+        SplineSeries<ChartData, String>(
           dataSource: chartData,
-          xValueMapper:
-              (d, _) => d.x,
-          yValueMapper:
-              (d, _) => d.mobile,
-          color:
-          AppColor.blueColor,
-          width: 2.4,
-          animationDuration: 1100,
-          markerSettings:
-          MarkerSettings(
+          xValueMapper: (d, _) => d.x,
+          yValueMapper: (d, _) => d.mobile,
+          color: StatisticsTheme.secondary,
+          width: 2,
+          animationDuration: 800,
+          markerSettings: MarkerSettings(
             isVisible: true,
-            color: isDark
-                ? kGlassDeepNavy
-                : Colors.white,
-            borderColor:
-            AppColor.blueColor,
+            color: isDark ? StatisticsTheme.darkCard : Colors.white,
+            borderColor: StatisticsTheme.secondary,
             borderWidth: 2,
             width: 6,
             height: 6,
@@ -2059,8 +1265,7 @@ class _GlassVisitorChartState
 // PLATFORM CHART
 // ============================================================
 
-class PlatformBarChart
-    extends StatefulWidget {
+class PlatformBarChart extends StatefulWidget {
   final List<PlatformData> list;
 
   const PlatformBarChart({
@@ -2069,15 +1274,11 @@ class PlatformBarChart
   });
 
   @override
-  State<PlatformBarChart>
-  createState() =>
-      _PlatformBarChartState();
+  State<PlatformBarChart> createState() => _PlatformBarChartState();
 }
 
-class _PlatformBarChartState
-    extends State<PlatformBarChart> {
-  List<BarChartData> chartData =
-  [];
+class _PlatformBarChartState extends State<PlatformBarChart> {
+  List<BarChartData> chartData = [];
 
   @override
   void initState() {
@@ -2085,143 +1286,99 @@ class _PlatformBarChartState
     _loadData();
   }
 
-  void _loadData() {
-    chartData = [];
+  @override
+  void didUpdateWidget(
+      covariant PlatformBarChart oldWidget,
+      ) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.list != widget.list) {
+      _loadData();
+    }
+  }
 
-    if (Prefs.getBool(
-      AppConstant.isDemoMode,
-    ) ==
-        true) {
+  void _loadData() {
+    if (Prefs.getBool(AppConstant.isDemoMode) == true) {
       chartData = [
-        BarChartData(
-          'Windows',
-          5,
-          Colors.pink,
-        ),
-        BarChartData(
-          'OS X',
-          10,
-          Colors.purple,
-        ),
-        BarChartData(
-          'Linux',
-          12,
-          Colors.amber,
-        ),
-        BarChartData(
-          'iOS',
-          14,
-          Colors.brown,
-        ),
-        BarChartData(
-          'AndroidOS',
-          12,
-          Colors.indigo,
-        ),
-        BarChartData(
-          'Other',
-          15,
-          Colors.lime,
-        ),
+        BarChartData('Windows', 5, const Color(0xFF64748B)),
+        BarChartData('OS X', 10, const Color(0xFF3B82F6)),
+        BarChartData('Linux', 12, const Color(0xFF22C55E)),
+        BarChartData('iOS', 14, const Color(0xFF8B5CF6)),
+        BarChartData('AndroidOS', 12, const Color(0xFFF59E0B)),
+        BarChartData('Other', 15, const Color(0xFF94A3B8)),
       ];
     } else {
-      for (final data
-      in widget.list) {
-        chartData.add(
-          BarChartData(
-            data.platform ?? '',
-            data.data ?? 0,
-            HexColor(
-              data.colour ??
-                  '#000000',
-            ),
-          ),
+      chartData = widget.list.map((data) {
+        return BarChartData(
+          data.platform ?? '',
+          data.data ?? 0,
+          HexColor(data.colour ?? '#64748B'),
         );
-      }
+      }).toList();
     }
   }
 
   @override
-  Widget build(
-      BuildContext context,
-      ) {
+  Widget build(BuildContext context) {
     return GlassCard(
       title: 'Platforms'.tr,
-      subtitle:
-      'Visitors by operating system'
-          .tr,
-      icon:
-      Icons.devices_other_rounded,
+      subtitle: 'Visitors by operating system'.tr,
+      icon: Icons.devices_other_rounded,
       child: Column(
         children: [
-          _buildPlatformLegend(),
-
+          _buildPlatformLegend(context),
           verticalSpace(12),
-
           SizedBox(
             height: 205,
-            child: _buildChart(),
+            child: chartData.isEmpty
+                ? Center(
+              child: Text(
+                'No data'.tr,
+                style: pRegular10.copyWith(
+                  color: Glass.textMuted(context),
+                ),
+              ),
+            )
+                : _buildChart(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPlatformLegend() {
+  Widget _buildPlatformLegend(BuildContext context) {
     return Wrap(
       spacing: 14,
       runSpacing: 9,
-      children: chartData.map(
-            (data) {
-          return Row(
-            mainAxisSize:
-            MainAxisSize.min,
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration:
-                BoxDecoration(
-                  color: data.color,
-                  shape:
-                  BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: data.color
-                          .withOpacity(
-                        .7,
-                      ),
-                      blurRadius: 5,
-                    ),
-                  ],
-                ),
+      children: chartData.map((data) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: data.color,
+                shape: BoxShape.circle,
               ),
-
-              horizontalSpace(6),
-
-              Text(
-                data.x,
-                style:
-                pMedium8.copyWith(
-                  color: Glass
-                      .textSecondary(
-                    context,
-                  ),
-                ),
+            ),
+            horizontalSpace(6),
+            Text(
+              data.x,
+              style: pMedium8.copyWith(
+                color: Glass.textSecondary(context),
               ),
-            ],
-          );
-        },
-      ).toList(),
+            ),
+          ],
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildChart() {
+  Widget _buildChart(BuildContext context) {
     return SfCartesianChart(
       enableAxisAnimation: true,
       plotAreaBorderWidth: 0,
-      margin:
-      const EdgeInsets.only(
+      margin: const EdgeInsets.only(
         left: 0,
         right: 5,
         top: 10,
@@ -2229,162 +1386,46 @@ class _PlatformBarChartState
       primaryXAxis: CategoryAxis(
         interval: 1,
         borderWidth: 0,
-        majorTickLines:
-        const MajorTickLines(
-          width: 0,
-        ),
-        majorGridLines:
-        MajorGridLines(
-          color:
-          Glass.chartGrid(
-            context,
-          ),
-        ),
-        axisLine: AxisLine(
-          width: 0,
-          color:
-          AppColor.cTransparent,
-        ),
-        labelStyle:
-        pMedium8.copyWith(
-          color: Glass.textSecondary(
-            context,
-          ),
+        majorTickLines: const MajorTickLines(width: 0),
+        majorGridLines: const MajorGridLines(width: 0),
+        axisLine: const AxisLine(width: 0),
+        labelStyle: pMedium8.copyWith(
+          color: Glass.textSecondary(context),
         ),
       ),
       primaryYAxis: NumericAxis(
         borderWidth: 0,
-        majorTickLines:
-        const MajorTickLines(
-          width: 0,
+        majorTickLines: const MajorTickLines(width: 0),
+        majorGridLines: MajorGridLines(
+          color: Glass.chartGrid(context),
         ),
-        majorGridLines:
-        MajorGridLines(
-          color:
-          Glass.chartGrid(
-            context,
-          ),
-        ),
-        axisLine: AxisLine(
-          width: 0,
-          color:
-          AppColor.cTransparent,
-        ),
-        labelStyle:
-        pMedium8.copyWith(
-          color: Glass.textMuted(
-            context,
-          ),
+        axisLine: const AxisLine(width: 0),
+        labelStyle: pMedium8.copyWith(
+          color: Glass.textMuted(context),
         ),
       ),
-      tooltipBehavior:
-      TooltipBehavior(
+      tooltipBehavior: TooltipBehavior(
         enable: true,
-        activationMode:
-        ActivationMode.singleTap,
-        color:
-        Glass.tooltipBackground(
-          context,
-        ),
-        borderColor:
-        Glass.borderStrong(
-          context,
-        ),
+        activationMode: ActivationMode.singleTap,
+        color: Glass.tooltipBackground(context),
+        borderColor: Glass.borderStrong(context),
         borderWidth: 1,
-        builder: (
-            data,
-            point,
-            series,
-            pointIndex,
-            seriesIndex,
-            ) {
-          final item =
-          chartData[pointIndex];
-
-          return Container(
-            padding:
-            const EdgeInsets
-                .symmetric(
-              horizontal: 14,
-              vertical: 10,
-            ),
-            decoration:
-            BoxDecoration(
-              color: Glass
-                  .tooltipBackground(
-                context,
-              ),
-              borderRadius:
-              BorderRadius.circular(
-                12,
-              ),
-              border: Border.all(
-                color: Glass
-                    .borderStrong(
-                  context,
-                ),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment
-                  .start,
-              mainAxisSize:
-              MainAxisSize.min,
-              children: [
-                Text(
-                  item.x,
-                  style:
-                  pMedium10.copyWith(
-                    color: Glass
-                        .textSecondary(
-                      context,
-                    ),
-                  ),
-                ),
-
-                verticalSpace(5),
-
-                Text(
-                  item.desktop
-                      .toString(),
-                  style:
-                  pBold16.copyWith(
-                    color: item.color,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       ),
       series: [
-        ColumnSeries<
-            BarChartData, String>(
+        ColumnSeries<BarChartData, String>(
           dataSource: chartData,
           width: .55,
-          borderRadius:
-          const BorderRadius
-              .vertical(
-            top:
-            Radius.circular(8),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(7),
           ),
-          xValueMapper:
-              (data, _) => data.x,
-          yValueMapper:
-              (data, _) =>
-          data.desktop,
-          pointColorMapper:
-              (data, _) =>
-          data.color,
+          xValueMapper: (data, _) => data.x,
+          yValueMapper: (data, _) => data.desktop,
+          pointColorMapper: (data, _) => data.color,
           name: 'Page View'.tr,
-          dataLabelSettings:
-          DataLabelSettings(
+          dataLabelSettings: DataLabelSettings(
             isVisible: true,
-            textStyle:
-            pMedium10.copyWith(
-              color:
-              AppColor.cWhite,
+            textStyle: pMedium10.copyWith(
+              color: Colors.white,
             ),
           ),
         ),
@@ -2397,8 +1438,7 @@ class _PlatformBarChartState
 // BROWSER / DEVICE
 // ============================================================
 
-class BrowsersGraph
-    extends StatefulWidget {
+class BrowsersGraph extends StatefulWidget {
   final List<BrowserData>? browser;
   final List<DeviceData>? device;
   final bool isDevice;
@@ -2411,15 +1451,11 @@ class BrowsersGraph
   }) : super(key: key);
 
   @override
-  State<BrowsersGraph>
-  createState() =>
-      _BrowsersGraphState();
+  State<BrowsersGraph> createState() => _BrowsersGraphState();
 }
 
-class _BrowsersGraphState
-    extends State<BrowsersGraph> {
-  List<_ChartData> chartData =
-  [];
+class _BrowsersGraphState extends State<BrowsersGraph> {
+  List<_ChartData> chartData = [];
 
   @override
   void initState() {
@@ -2427,172 +1463,126 @@ class _BrowsersGraphState
     _loadData();
   }
 
+  @override
+  void didUpdateWidget(covariant BrowsersGraph oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.browser != widget.browser ||
+        oldWidget.device != widget.device ||
+        oldWidget.isDevice != widget.isDevice) {
+      _loadData();
+    }
+  }
+
   void _loadData() {
+    final palette = <Color>[
+      StatisticsTheme.primary,
+      StatisticsTheme.secondary,
+      const Color(0xFF6366F1),
+      const Color(0xFF8B5CF6),
+      const Color(0xFF64748B),
+      const Color(0xFF94A3B8),
+    ];
+
     if (widget.isDevice) {
-      if (Prefs.getBool(
-        AppConstant.isDemoMode,
-      ) ==
-          true) {
+      if (Prefs.getBool(AppConstant.isDemoMode) == true) {
         chartData = [
-          _ChartData(
-            'WebKit',
-            350,
-            Colors.pink,
-          ),
-          _ChartData(
-            'Samsung',
-            100,
-            Colors.purple,
-          ),
-          _ChartData(
-            'Nexus',
-            120,
-            Colors.amber,
-          ),
-          _ChartData(
-            'iPhone',
-            140,
-            Colors.brown,
-          ),
-          _ChartData(
-            'Other',
-            120,
-            Colors.indigo,
-          ),
+          _ChartData('WebKit', 350, palette[0]),
+          _ChartData('Samsung', 100, palette[1]),
+          _ChartData('Nexus', 120, palette[2]),
+          _ChartData('iPhone', 140, palette[3]),
+          _ChartData('Other', 120, palette[4]),
         ];
       } else {
-        chartData =
-            (widget.device ?? [])
-                .map(
-                  (element) {
-                return _ChartData(
-                  element.device ?? '',
-                  element.data ?? 0,
-                  HexColor(
-                    element.colour ??
-                        '#000000',
-                  ),
-                );
-              },
-            ).toList();
+        chartData = (widget.device ?? []).asMap().entries.map((entry) {
+          final element = entry.value;
+          return _ChartData(
+            element.device ?? '',
+            element.data ?? 0,
+            palette[entry.key % palette.length],
+          );
+        }).toList();
       }
     } else {
-      if (Prefs.getBool(
-        AppConstant.isDemoMode,
-      ) ==
-          true) {
+      if (Prefs.getBool(AppConstant.isDemoMode) == true) {
         chartData = [
-          _ChartData(
-            'Safari',
-            200,
-            Colors.amber,
-          ),
-          _ChartData(
-            'Mozilla',
-            320,
-            Colors.orange,
-          ),
-          _ChartData(
-            'Firefox',
-            420,
-            Colors.green,
-          ),
-          _ChartData(
-            'Edge',
-            540,
-            Colors.lightBlue,
-          ),
-          _ChartData(
-            'Chrome',
-            700,
-            Colors.indigo,
-          ),
+          _ChartData('Safari', 200, palette[0]),
+          _ChartData('Mozilla', 320, palette[1]),
+          _ChartData('Firefox', 420, palette[2]),
+          _ChartData('Edge', 540, palette[3]),
+          _ChartData('Chrome', 700, palette[4]),
         ];
       } else {
-        chartData =
-            (widget.browser ?? [])
-                .map(
-                  (element) {
-                return _ChartData(
-                  element.browser ?? '',
-                  element.data ?? 0,
-                  HexColor(
-                    element.colour ??
-                        '#000000',
-                  ),
-                );
-              },
-            ).toList();
+        chartData = (widget.browser ?? []).asMap().entries.map((entry) {
+          final element = entry.value;
+          return _ChartData(
+            element.browser ?? '',
+            element.data ?? 0,
+            palette[entry.key % palette.length],
+          );
+        }).toList();
       }
     }
   }
 
   @override
-  Widget build(
-      BuildContext context,
-      ) {
+  Widget build(BuildContext context) {
     return GlassCard(
-      title: widget.isDevice
-          ? 'Devices'.tr
-          : 'Browsers'.tr,
+      title: widget.isDevice ? 'Devices'.tr : 'Browsers'.tr,
       subtitle: widget.isDevice
           ? 'Visitors by device'.tr
           : 'Visitors by browser'.tr,
       icon: widget.isDevice
           ? Icons.phone_iphone_rounded
           : Icons.public_rounded,
-      child: Column(
+      child: chartData.isEmpty
+          ? SizedBox(
+        height: 120,
+        child: Center(
+          child: Text(
+            'No data'.tr,
+            style: pRegular10.copyWith(
+              color: Glass.textMuted(context),
+            ),
+          ),
+        ),
+      )
+          : Column(
         children: [
           SizedBox(
             height: 210,
             child: widget.isDevice
-                ? _buildPieChart()
-                : _buildRadialChart(),
+                ? _buildPieChart(context)
+                : _buildRadialChart(context),
           ),
-
           verticalSpace(10),
-
-          _buildDetails(),
+          _buildDetails(context),
         ],
       ),
     );
   }
 
-  Widget _buildPieChart() {
+  Widget _buildPieChart(BuildContext context) {
     return SfCircularChart(
       margin: EdgeInsets.zero,
       series: [
-        PieSeries<
-            _ChartData, String>(
+        PieSeries<_ChartData, String>(
           dataSource: chartData,
-          xValueMapper:
-              (data, _) => data.x,
-          yValueMapper:
-              (data, _) => data.y,
-          pointColorMapper:
-              (data, _) => data.color,
+          xValueMapper: (data, _) => data.x,
+          yValueMapper: (data, _) => data.y,
+          pointColorMapper: (data, _) => data.color,
           explode: true,
           explodeIndex: 0,
-          explodeOffset: '8%',
-          radius: '90%',
-          dataLabelSettings:
-          DataLabelSettings(
+          explodeOffset: '6%',
+          radius: '88%',
+          dataLabelSettings: DataLabelSettings(
             isVisible: true,
-            labelPosition:
-            ChartDataLabelPosition
-                .outside,
-            textStyle:
-            pMedium10.copyWith(
-              color: Glass
-                  .textSecondary(
-                context,
-              ),
+            labelPosition: ChartDataLabelPosition.outside,
+            textStyle: pSemiBold8.copyWith(
+              color: Glass.textSecondary(context),
             ),
-            connectorLineSettings:
-            const ConnectorLineSettings(
-              length: '12%',
-              type: ConnectorType
-                  .curve,
+            connectorLineSettings: const ConnectorLineSettings(
+              length: '10%',
+              type: ConnectorType.curve,
             ),
             builder: (
                 data,
@@ -2602,15 +1592,9 @@ class _BrowsersGraphState
                 seriesIndex,
                 ) {
               return Text(
-                chartData[pointIndex]
-                    .y
-                    .toString(),
-                style:
-                pSemiBold8.copyWith(
-                  color:
-                  chartData[
-                  pointIndex]
-                      .color,
+                chartData[pointIndex].y.toString(),
+                style: pSemiBold8.copyWith(
+                  color: chartData[pointIndex].color,
                 ),
               );
             },
@@ -2620,105 +1604,79 @@ class _BrowsersGraphState
     );
   }
 
-  Widget _buildRadialChart() {
+  Widget _buildRadialChart(BuildContext context) {
+    final maxValue = chartData.fold<num>(
+      0,
+          (max, item) => item.y > max ? item.y : max,
+    );
+
     return SfCircularChart(
       margin: EdgeInsets.zero,
       series: [
-        RadialBarSeries<
-            _ChartData, String>(
+        RadialBarSeries<_ChartData, String>(
           dataSource: chartData,
-          maximumValue: 1000,
+          maximumValue: maxValue <= 0 ? 100 : maxValue.toDouble(),
           radius: '90%',
-          innerRadius: '30%',
+          innerRadius: '32%',
           gap: '5%',
           strokeWidth: 0,
-          trackColor:
-          Glass.isDark(context)
-              ? Colors.white
-              .withOpacity(.06)
-              : const Color(
-            0xFFE9EEF4,
-          ),
-          cornerStyle:
-          CornerStyle.bothCurve,
-          xValueMapper:
-              (data, _) => data.x,
-          yValueMapper:
-              (data, _) => data.y,
-          pointColorMapper:
-              (data, _) => data.color,
+          trackColor: Glass.isDark(context)
+              ? Colors.white.withOpacity(.06)
+              : const Color(0xFFE5E7EB),
+          cornerStyle: CornerStyle.bothCurve,
+          xValueMapper: (data, _) => data.x,
+          yValueMapper: (data, _) => data.y,
+          pointColorMapper: (data, _) => data.color,
         ),
       ],
     );
   }
 
-  Widget _buildDetails() {
+  Widget _buildDetails(BuildContext context) {
     return Column(
-      children: chartData.map(
-            (data) {
-          return Container(
-            margin:
-            const EdgeInsets.only(
-              bottom: 8,
+      children: chartData.map((data) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 7),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: Glass.surfaceStrong(context),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: Glass.border(context),
             ),
-            padding:
-            const EdgeInsets.symmetric(
-              horizontal: 13,
-              vertical: 11,
-            ),
-            decoration:
-            BoxDecoration(
-              color: data.color
-                  .withOpacity(.13),
-              borderRadius:
-              BorderRadius.circular(
-                11,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: data.color,
+                  shape: BoxShape.circle,
+                ),
               ),
-              border: Border.all(
-                color: data.color
-                    .withOpacity(.28),
+              horizontalSpace(9),
+              Expanded(
+                child: Text(
+                  data.x,
+                  style: pMedium10.copyWith(
+                    color: Glass.textSecondary(context),
+                  ),
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration:
-                  BoxDecoration(
-                    color: data.color,
-                    shape:
-                    BoxShape.circle,
-                  ),
+              Text(
+                data.y.toString(),
+                style: pBold12.copyWith(
+                  color: Glass.textPrimary(context),
                 ),
-
-                horizontalSpace(9),
-
-                Expanded(
-                  child: Text(
-                    data.x,
-                    style:
-                    pMedium10
-                        .copyWith(
-                      color:
-                      data.color,
-                    ),
-                  ),
-                ),
-
-                Text(
-                  data.y.toString(),
-                  style:
-                  pBold12.copyWith(
-                    color:
-                    data.color,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ).toList(),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -2749,4 +1707,255 @@ class _ChartData {
       this.y,
       this.color,
       );
+}
+class _TopUrlLinePainter extends CustomPainter {
+  final List<_TopUrlChartData> data;
+  final Animation<double> animation;
+  final Color lineColor;
+  final Color fillColor;
+
+  PathMetric? _metric;
+  Size? _lastSize;
+
+  _TopUrlLinePainter({
+    required this.data,
+    required this.animation,
+    required this.lineColor,
+    required this.fillColor,
+  }) : super(repaint: animation);
+
+  @override
+  void paint(
+      Canvas canvas,
+      Size size,
+      ) {
+    if (data.length < 2) {
+      return;
+    }
+
+    _ensurePath(size);
+
+    final metric = _metric;
+
+    if (metric == null || metric.length <= 0) {
+      return;
+    }
+
+    // نفس الـanimation controller
+    final progress = Curves.easeInOutCubic.transform(
+      animation.value.clamp(0.0, 1.0),
+    );
+
+    if (progress <= 0) {
+      return;
+    }
+
+    final visibleLength =
+        metric.length * progress;
+
+    final visiblePath = metric.extractPath(
+      0,
+      visibleLength,
+    );
+
+    // =========================
+    // LINE
+    // =========================
+
+    final linePaint = Paint()
+      ..color = lineColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    canvas.drawPath(
+      visiblePath,
+      linePaint,
+    );
+
+    // =========================
+    // AREA
+    // =========================
+
+    _drawArea(
+      canvas: canvas,
+      size: size,
+      metric: metric,
+      visiblePath: visiblePath,
+      visibleLength: visibleLength,
+    );
+  }
+
+  void _ensurePath(Size size) {
+    if (_metric != null && _lastSize == size) {
+      return;
+    }
+
+    _lastSize = size;
+    _metric = null;
+
+    const left = 42.0;
+    const right = 14.0;
+    const top = 18.0;
+    const bottom = 28.0;
+
+    final width =
+        size.width - left - right;
+
+    final height =
+        size.height - top - bottom;
+
+    if (width <= 0 || height <= 0) {
+      return;
+    }
+
+    double minY = data.first.y;
+    double maxY = data.first.y;
+
+    for (final item in data) {
+      if (item.y < minY) {
+        minY = item.y;
+      }
+
+      if (item.y > maxY) {
+        maxY = item.y;
+      }
+    }
+
+    final range = maxY - minY;
+
+    double x(int index) {
+      return left +
+          (width * index / (data.length - 1));
+    }
+
+    double y(double value) {
+      if (range == 0) {
+        return top + height / 2;
+      }
+
+      final normalized =
+          (value - minY) / range;
+
+      return top +
+          height -
+          (normalized * height);
+    }
+
+    final path = Path();
+
+    for (int i = 0; i < data.length; i++) {
+      final currentX = x(i);
+      final currentY = y(data[i].y);
+
+      if (i == 0) {
+        path.moveTo(
+          currentX,
+          currentY,
+        );
+        continue;
+      }
+
+      final previousX = x(i - 1);
+      final previousY = y(data[i - 1].y);
+
+      final controlX =
+          (previousX + currentX) / 2;
+
+      path.cubicTo(
+        controlX,
+        previousY,
+        controlX,
+        currentY,
+        currentX,
+        currentY,
+      );
+    }
+
+    final metrics =
+    path.computeMetrics().toList(
+      growable: false,
+    );
+
+    if (metrics.isEmpty) {
+      return;
+    }
+
+    _metric = metrics.first;
+  }
+
+  void _drawArea({
+    required Canvas canvas,
+    required Size size,
+    required PathMetric metric,
+    required Path visiblePath,
+    required double visibleLength,
+  }) {
+    const left = 42.0;
+    const top = 18.0;
+    const bottom = 28.0;
+
+    final height =
+        size.height - top - bottom;
+
+    final tangent =
+    metric.getTangentForOffset(
+      visibleLength.clamp(
+        0.0,
+        metric.length,
+      ),
+    );
+
+    if (tangent == null) {
+      return;
+    }
+
+    final areaPath = Path()
+      ..addPath(
+        visiblePath,
+        Offset.zero,
+      )
+      ..lineTo(
+        tangent.position.dx,
+        top + height,
+      )
+      ..lineTo(
+        left,
+        top + height,
+      )
+      ..close();
+
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          fillColor,
+          fillColor.withOpacity(0),
+        ],
+      ).createShader(
+        Rect.fromLTWH(
+          0,
+          top,
+          size.width,
+          height,
+        ),
+      );
+
+    canvas.drawPath(
+      areaPath,
+      fillPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(
+      covariant _TopUrlLinePainter oldDelegate,
+      ) {
+    return oldDelegate.data != data ||
+        oldDelegate.animation != animation ||
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.fillColor != fillColor;
+  }
 }
