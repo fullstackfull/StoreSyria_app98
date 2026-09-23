@@ -65,7 +65,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     _animationsStarted = true;
 
     _sectionController.forward(from: 0);
-    _chartController.repeat();
+    _chartController.forward(from: 0);
   }
 
   Animation<double> _sectionAnimation(
@@ -284,6 +284,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             sectionIndex++,
             GlassVisitorChart(
               visitorChart: visitorChart,
+              animation: _chartController,
             ),
           ),
 
@@ -315,7 +316,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                         padding:
                         const EdgeInsets
                             .only(
-                          top: 14,
+                          top: 0,
                         ),
                         child:
                         TopUrlChart(

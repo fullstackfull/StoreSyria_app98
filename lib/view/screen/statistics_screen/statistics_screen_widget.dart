@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -625,7 +626,7 @@ class TopUrlChart extends StatelessWidget {
             ),
 
             tooltipBehavior:
-             TooltipBehavior(
+            TooltipBehavior(
               enable: false,
             ),
 
@@ -1070,42 +1071,24 @@ class _StatisticsVisitorGraphState
 // CLEAN VISITOR CHART
 // ============================================================
 
-class GlassVisitorChart extends StatefulWidget {
+class GlassVisitorChart extends StatelessWidget {
   final List<VisitorChartData> visitorChart;
+  final Animation<double> animation;
 
   const GlassVisitorChart({
     super.key,
     required this.visitorChart,
+    required this.animation,
   });
 
-  @override
-  State<GlassVisitorChart> createState() => _GlassVisitorChartState();
-}
+  List<ChartData> _loadChartData() {
+    final data = visitorChart;
 
-class _GlassVisitorChartState extends State<GlassVisitorChart> {
-  List<ChartData> chartData = [];
+    final start = data.length > 7
+        ? data.length - 7
+        : 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  @override
-  void didUpdateWidget(
-      covariant GlassVisitorChart oldWidget,
-      ) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.visitorChart != widget.visitorChart) {
-      _load();
-    }
-  }
-
-  void _load() {
-    final data = widget.visitorChart;
-    final start = data.length > 7 ? data.length - 7 : 0;
-
-    chartData = data.sublist(start).map((e) {
+    return data.sublist(start).map((e) {
       return ChartData(
         e.date ?? '',
         e.uniquePageview ?? 0,
@@ -1116,151 +1099,52 @@ class _GlassVisitorChartState extends State<GlassVisitorChart> {
 
   @override
   Widget build(BuildContext context) {
+    final chartData = _loadChartData();
+
     return GlassCard(
       title: 'Visitors'.tr,
       subtitle: 'Page views over the selected period'.tr,
       icon: Icons.show_chart_rounded,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _legendDot(
-                StatisticsTheme.primary,
-                'Unique page view'.tr,
-                context,
-              ),
-              horizontalSpace(16),
-              _legendDot(
-                StatisticsTheme.secondary,
-                'Total page view'.tr,
-                context,
-              ),
-            ],
+      child: SizedBox(
+        height: 220,
+        child: chartData.isEmpty
+            ? Center(
+          child: Text(
+            'No data'.tr,
+            style: pRegular10.copyWith(
+              color: Glass.textMuted(context),
+            ),
           ),
-          verticalSpace(14),
-          SizedBox(
-            height: 190,
-            child: chartData.isEmpty
-                ? Center(
-              child: Text(
-                'No data'.tr,
-                style: pRegular10.copyWith(
-                  color: Glass.textMuted(context),
-                ),
-              ),
-            )
-                : _buildChart(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _legendDot(
-      Color color,
-      String label,
-      BuildContext context,
-      ) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 7,
-          height: 7,
+        )
+            : Container(
           decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
+            color: const Color(0xFFF5F6F8),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFFE5E7EB),
+            ),
           ),
-        ),
-        horizontalSpace(7),
-        Text(
-          label,
-          style: pMedium8.copyWith(
-            color: Glass.textSecondary(context),
+          clipBehavior: Clip.antiAlias,
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _VisitorLinePainter(
+                data: chartData,
+                animation: animation,
+                lineColor: StatisticsTheme.primary,
+                fillColor:
+                StatisticsTheme.primary.withOpacity(.10),
+              ),
+              size: const Size(
+                double.infinity,
+                double.infinity,
+              ),
+            ),
           ),
-        ),
-      ],
-    );
-  }
-
-  SfCartesianChart _buildChart(BuildContext context) {
-    final isDark = Glass.isDark(context);
-
-    return SfCartesianChart(
-      enableAxisAnimation: true,
-      plotAreaBorderWidth: 0,
-      margin: EdgeInsets.zero,
-      legend: const Legend(isVisible: false),
-      primaryXAxis: CategoryAxis(
-        borderWidth: 0,
-        interval: 1,
-        majorGridLines: const MajorGridLines(width: 0),
-        axisLine: const AxisLine(width: 0),
-        majorTickLines: const MajorTickLines(width: 0),
-        labelStyle: pMedium8.copyWith(
-          color: Glass.textMuted(context),
         ),
       ),
-      primaryYAxis: NumericAxis(
-        borderWidth: 0,
-        majorGridLines: MajorGridLines(
-          color: Glass.chartGrid(context),
-        ),
-        axisLine: const AxisLine(width: 0),
-        majorTickLines: const MajorTickLines(width: 0),
-        labelStyle: pMedium8.copyWith(
-          color: Glass.textMuted(context),
-        ),
-      ),
-      tooltipBehavior: TooltipBehavior(
-        enable: true,
-        activationMode: ActivationMode.singleTap,
-        color: Glass.tooltipBackground(context),
-        borderColor: Glass.borderStrong(context),
-        borderWidth: 1,
-        canShowMarker: true,
-        shouldAlwaysShow: false,
-      ),
-      series: <CartesianSeries<ChartData, String>>[
-        SplineAreaSeries<ChartData, String>(
-          dataSource: chartData,
-          xValueMapper: (d, _) => d.x,
-          yValueMapper: (d, _) => d.desktop,
-          color: StatisticsTheme.primary.withOpacity(.10),
-          borderColor: StatisticsTheme.primary,
-          borderWidth: 2,
-          animationDuration: 700,
-          markerSettings: MarkerSettings(
-            isVisible: true,
-            color: isDark ? StatisticsTheme.darkCard : Colors.white,
-            borderColor: StatisticsTheme.primary,
-            borderWidth: 2,
-            width: 6,
-            height: 6,
-          ),
-        ),
-        SplineSeries<ChartData, String>(
-          dataSource: chartData,
-          xValueMapper: (d, _) => d.x,
-          yValueMapper: (d, _) => d.mobile,
-          color: StatisticsTheme.secondary,
-          width: 2,
-          animationDuration: 800,
-          markerSettings: MarkerSettings(
-            isVisible: true,
-            color: isDark ? StatisticsTheme.darkCard : Colors.white,
-            borderColor: StatisticsTheme.secondary,
-            borderWidth: 2,
-            width: 6,
-            height: 6,
-          ),
-        ),
-      ],
     );
   }
 }
-
 // ============================================================
 // PLATFORM CHART
 // ============================================================
@@ -1291,6 +1175,7 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
       covariant PlatformBarChart oldWidget,
       ) {
     super.didUpdateWidget(oldWidget);
+
     if (oldWidget.list != widget.list) {
       _loadData();
     }
@@ -1299,21 +1184,51 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
   void _loadData() {
     if (Prefs.getBool(AppConstant.isDemoMode) == true) {
       chartData = [
-        BarChartData('Windows', 5, const Color(0xFF64748B)),
-        BarChartData('OS X', 10, const Color(0xFF3B82F6)),
-        BarChartData('Linux', 12, const Color(0xFF22C55E)),
-        BarChartData('iOS', 14, const Color(0xFF8B5CF6)),
-        BarChartData('AndroidOS', 12, const Color(0xFFF59E0B)),
-        BarChartData('Other', 15, const Color(0xFF94A3B8)),
+        BarChartData(
+          'Windows',
+          5,
+          const Color(0xFF64748B),
+        ),
+        BarChartData(
+          'OS X',
+          10,
+          const Color(0xFF3B82F6),
+        ),
+        BarChartData(
+          'Linux',
+          12,
+          const Color(0xFF22C55E),
+        ),
+        BarChartData(
+          'iOS',
+          14,
+          const Color(0xFF8B5CF6),
+        ),
+        BarChartData(
+          'AndroidOS',
+          12,
+          const Color(0xFFF59E0B),
+        ),
+        BarChartData(
+          'Other',
+          15,
+          const Color(0xFF94A3B8),
+        ),
       ];
     } else {
       chartData = widget.list.map((data) {
         return BarChartData(
           data.platform ?? '',
           data.data ?? 0,
-          HexColor(data.colour ?? '#64748B'),
+          HexColor(
+            data.colour ?? '#64748B',
+          ),
         );
       }).toList();
+    }
+
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -1345,7 +1260,9 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
     );
   }
 
-  Widget _buildPlatformLegend(BuildContext context) {
+  Widget _buildPlatformLegend(
+      BuildContext context,
+      ) {
     return Wrap(
       spacing: 14,
       runSpacing: 9,
@@ -1375,61 +1292,84 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
   }
 
   Widget _buildChart(BuildContext context) {
-    return SfCartesianChart(
-      enableAxisAnimation: true,
-      plotAreaBorderWidth: 0,
-      margin: const EdgeInsets.only(
-        left: 0,
-        right: 5,
-        top: 10,
+    return Container(
+      height: 205,
+      padding: const EdgeInsets.fromLTRB(
+        8,
+        12,
+        8,
+        0,
       ),
-      primaryXAxis: CategoryAxis(
-        interval: 1,
-        borderWidth: 0,
-        majorTickLines: const MajorTickLines(width: 0),
-        majorGridLines: const MajorGridLines(width: 0),
-        axisLine: const AxisLine(width: 0),
-        labelStyle: pMedium8.copyWith(
-          color: Glass.textSecondary(context),
+      decoration: BoxDecoration(
+        color: Glass.surfaceStrong(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Glass.border(context),
         ),
       ),
-      primaryYAxis: NumericAxis(
-        borderWidth: 0,
-        majorTickLines: const MajorTickLines(width: 0),
-        majorGridLines: MajorGridLines(
-          color: Glass.chartGrid(context),
+      child: SfCartesianChart(
+        plotAreaBorderWidth: 0,
+        enableAxisAnimation: false,
+        margin: const EdgeInsets.fromLTRB(
+          4,
+          8,
+          4,
+          4,
         ),
-        axisLine: const AxisLine(width: 0),
-        labelStyle: pMedium8.copyWith(
-          color: Glass.textMuted(context),
+        legend: const Legend(
+          isVisible: false,
         ),
-      ),
-      tooltipBehavior: TooltipBehavior(
-        enable: true,
-        activationMode: ActivationMode.singleTap,
-        color: Glass.tooltipBackground(context),
-        borderColor: Glass.borderStrong(context),
-        borderWidth: 1,
-      ),
-      series: [
-        ColumnSeries<BarChartData, String>(
-          dataSource: chartData,
-          width: .55,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(7),
+        primaryXAxis: CategoryAxis(
+          interval: 1,
+          borderWidth: 0,
+          majorGridLines: const MajorGridLines(
+            width: 0,
           ),
-          xValueMapper: (data, _) => data.x,
-          yValueMapper: (data, _) => data.desktop,
-          pointColorMapper: (data, _) => data.color,
-          name: 'Page View'.tr,
-          dataLabelSettings: DataLabelSettings(
-            isVisible: true,
-            textStyle: pMedium10.copyWith(
-              color: Colors.white,
+          majorTickLines: const MajorTickLines(
+            width: 0,
+          ),
+          axisLine: const AxisLine(
+            width: 0,
+          ),
+          labelStyle: pMedium8.copyWith(
+            color: Glass.textMuted(context),
+          ),
+        ),
+        primaryYAxis: NumericAxis(
+          borderWidth: 0,
+          majorGridLines: MajorGridLines(
+            color: Glass.chartGrid(context),
+          ),
+          majorTickLines: const MajorTickLines(
+            width: 0,
+          ),
+          axisLine: const AxisLine(
+            width: 0,
+          ),
+          labelStyle: pMedium8.copyWith(
+            color: Glass.textMuted(context),
+          ),
+        ),
+        tooltipBehavior: TooltipBehavior(
+          enable: false,
+        ),
+        series: <CartesianSeries<BarChartData, String>>[
+          ColumnSeries<BarChartData, String>(
+            dataSource: chartData,
+            xValueMapper: (data, _) => data.x,
+            yValueMapper: (data, _) => data.desktop,
+            pointColorMapper: (data, _) => data.color,
+            width: 0.55,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(7),
+            ),
+            animationDuration: 700,
+            dataLabelSettings: const DataLabelSettings(
+              isVisible: false,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1952,6 +1892,461 @@ class _TopUrlLinePainter extends CustomPainter {
   @override
   bool shouldRepaint(
       covariant _TopUrlLinePainter oldDelegate,
+      ) {
+    return oldDelegate.data != data ||
+        oldDelegate.animation != animation ||
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.fillColor != fillColor;
+  }
+}
+class _VisitorLinePainter extends CustomPainter {
+  final List<ChartData> data;
+  final Animation<double> animation;
+  final Color lineColor;
+  final Color fillColor;
+
+  static const double left = 42.0;
+  static const double right = 14.0;
+  static const double top = 18.0;
+  static const double bottom = 34.0;
+
+  _VisitorLinePainter({
+    required this.data,
+    required this.animation,
+    required this.lineColor,
+    required this.fillColor,
+  }) : super(repaint: animation);
+
+  PathMetric? _metric;
+  Size? _lastSize;
+
+  double _minY = 0;
+  double _maxY = 1;
+
+  double _value(ChartData item) {
+    return (item.desktop + item.mobile).toDouble();
+  }
+
+  @override
+  void paint(
+      Canvas canvas,
+      Size size,
+      ) {
+    if (data.isEmpty) return;
+
+    _ensurePath(size);
+
+    final metric = _metric;
+
+    if (metric == null) return;
+
+    final progress =
+    Curves.easeInOutCubic.transform(
+      animation.value.clamp(0.0, 1.0),
+    );
+
+    if (progress <= 0) return;
+
+    final visibleLength =
+        metric.length * progress;
+
+    final visiblePath =
+    metric.extractPath(
+      0,
+      visibleLength,
+    );
+
+    _drawGrid(canvas, size);
+
+    _drawArea(
+      canvas,
+      size,
+      metric,
+      visiblePath,
+      visibleLength,
+    );
+
+    final linePaint = Paint()
+      ..color = lineColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    canvas.drawPath(
+      visiblePath,
+      linePaint,
+    );
+
+    _drawValues(canvas, size);
+
+    _drawDates(canvas, size);
+  }
+
+  void _ensurePath(Size size) {
+    if (_metric != null &&
+        _lastSize == size) {
+      return;
+    }
+
+    _lastSize = size;
+    _metric = null;
+
+    final width =
+        size.width - left - right;
+
+    final height =
+        size.height - top - bottom;
+
+    if (width <= 0 || height <= 0) {
+      return;
+    }
+
+    _minY = 0;
+    _maxY = 0;
+
+    for (final item in data) {
+      final value = _value(item);
+
+      if (value > _maxY) {
+        _maxY = value;
+      }
+    }
+
+    if (_maxY <= 0) {
+      _maxY = 1;
+    }
+
+    double x(int index) {
+      if (data.length == 1) {
+        return left + width / 2;
+      }
+
+      return left +
+          width *
+              index /
+              (data.length - 1);
+    }
+
+    double y(double value) {
+      final normalized =
+          (value - _minY) /
+              (_maxY - _minY);
+
+      return top +
+          height -
+          normalized.clamp(0.0, 1.0) *
+              height;
+    }
+
+    final path = Path();
+
+    for (int i = 0; i < data.length; i++) {
+      final currentX = x(i);
+      final currentY =
+      y(_value(data[i]));
+
+      if (i == 0) {
+        path.moveTo(
+          currentX,
+          currentY,
+        );
+        continue;
+      }
+
+      final previousX = x(i - 1);
+      final previousY =
+      y(_value(data[i - 1]));
+
+      final controlX =
+          (previousX + currentX) / 2;
+
+      path.cubicTo(
+        controlX,
+        previousY,
+        controlX,
+        currentY,
+        currentX,
+        currentY,
+      );
+    }
+
+    final metrics =
+    path.computeMetrics().toList(
+      growable: false,
+    );
+
+    if (metrics.isNotEmpty) {
+      _metric = metrics.first;
+    }
+  }
+
+  void _drawGrid(
+      Canvas canvas,
+      Size size,
+      ) {
+    final chartHeight =
+        size.height - top - bottom;
+
+    final gridPaint = Paint()
+      ..color = const Color(0xFFE5E7EB)
+      ..strokeWidth = 1;
+
+    const divisions = 4;
+
+    for (int i = 0; i <= divisions; i++) {
+      final y =
+          top +
+              chartHeight *
+                  i /
+                  divisions;
+
+      canvas.drawLine(
+        Offset(left, y),
+        Offset(
+          size.width - right,
+          y,
+        ),
+        gridPaint,
+      );
+    }
+
+    final textStyle =
+    pMedium8.copyWith(
+      color: const Color(0xFF9CA3AF),
+    );
+
+    for (int i = 0; i <= divisions; i++) {
+      final value =
+          _maxY -
+              ((_maxY - _minY) *
+                  i /
+                  divisions);
+
+      final text =
+      _formatNumber(value);
+
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      final y =
+          top +
+              chartHeight *
+                  i /
+                  divisions;
+
+      textPainter.paint(
+        canvas,
+        Offset(
+          left -
+              textPainter.width -
+              8,
+          y -
+              textPainter.height / 2,
+        ),
+      );
+    }
+  }
+
+  String _formatNumber(double value) {
+    if (value >= 1000) {
+      final formatted =
+      value % 1000 == 0
+          ? (value / 1000)
+          .toStringAsFixed(0)
+          : (value / 1000)
+          .toStringAsFixed(1);
+
+      return '${formatted}k';
+    }
+
+    return value.round().toString();
+  }
+
+  void _drawArea(
+      Canvas canvas,
+      Size size,
+      PathMetric metric,
+      Path visiblePath,
+      double visibleLength,
+      ) {
+    final chartBottom =
+        size.height - bottom;
+
+    final tangent =
+    metric.getTangentForOffset(
+      visibleLength.clamp(
+        0.0,
+        metric.length,
+      ),
+    );
+
+    if (tangent == null) return;
+
+    final areaPath = Path()
+      ..addPath(
+        visiblePath,
+        Offset.zero,
+      )
+      ..lineTo(
+        tangent.position.dx,
+        chartBottom,
+      )
+      ..lineTo(
+        left,
+        chartBottom,
+      )
+      ..close();
+
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          fillColor,
+          fillColor.withOpacity(0),
+        ],
+      ).createShader(
+        Rect.fromLTWH(
+          0,
+          top,
+          size.width,
+          chartBottom - top,
+        ),
+      );
+
+    canvas.drawPath(
+      areaPath,
+      fillPaint,
+    );
+  }
+
+  void _drawValues(
+      Canvas canvas,
+      Size size,
+      ) {
+    if (data.isEmpty) return;
+
+    final chartWidth =
+        size.width - left - right;
+
+    final chartHeight =
+        size.height - top - bottom;
+
+    double x(int index) {
+      if (data.length == 1) {
+        return left +
+            chartWidth / 2;
+      }
+
+      return left +
+          chartWidth *
+              index /
+              (data.length - 1);
+    }
+
+    double y(double value) {
+      final normalized =
+          (value - _minY) /
+              (_maxY - _minY);
+
+      return top +
+          chartHeight -
+          normalized.clamp(0.0, 1.0) *
+              chartHeight;
+    }
+
+    for (int i = 0; i < data.length; i++) {
+      final value =
+      _value(data[i]);
+
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: _formatNumber(value),
+          style: pSemiBold8.copyWith(
+            color: lineColor,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      textPainter.paint(
+        canvas,
+        Offset(
+          x(i) -
+              textPainter.width / 2,
+          y(value) -
+              textPainter.height -
+              7,
+        ),
+      );
+    }
+  }
+
+  void _drawDates(
+      Canvas canvas,
+      Size size,
+      ) {
+    if (data.isEmpty) return;
+
+    final chartWidth =
+        size.width - left - right;
+
+    final textStyle =
+    pMedium8.copyWith(
+      color: const Color(0xFF9CA3AF),
+    );
+
+    double x(int index) {
+      if (data.length == 1) {
+        return left +
+            chartWidth / 2;
+      }
+
+      return left +
+          chartWidth *
+              index /
+              (data.length - 1);
+    }
+
+    for (int i = 0; i < data.length; i++) {
+      if (data.length > 8 &&
+          i % 2 != 0 &&
+          i != data.length - 1) {
+        continue;
+      }
+
+      final text = data[i].x;
+
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      textPainter.paint(
+        canvas,
+        Offset(
+          x(i) -
+              textPainter.width / 2,
+          size.height -
+              bottom +
+              8,
+        ),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(
+      covariant _VisitorLinePainter oldDelegate,
       ) {
     return oldDelegate.data != data ||
         oldDelegate.animation != animation ||
