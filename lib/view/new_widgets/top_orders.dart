@@ -195,6 +195,7 @@ Widget allOrdersListItemWidget({
   int? primaryBadgeLabel,
   String? secondaryBadgeLabel,
   String? changeText,
+  String? method,
   String? changeText2,
   VoidCallback? onTap,
   VoidCallback? viewFun,
@@ -317,6 +318,7 @@ Widget allOrdersListItemWidget({
             children: [
               if (secondaryBadgeLabel != null)
                 CommonStatusBadge(
+                  paymentMethod: method,
                   isCard: true,
                   type: StatusBadgeType.payment,
                   paymentStatus: secondaryBadgeLabel,

@@ -219,6 +219,7 @@ class CommonStatusBadge extends StatelessWidget {
   final String? paymentStatus;
 
   final String? customLabel;
+  final String? paymentMethod;
 
   final VoidCallback? onTap;
 
@@ -231,6 +232,7 @@ class CommonStatusBadge extends StatelessWidget {
     required this.type,
     this.orderStatus,
     this.paymentStatus,
+    this.paymentMethod,
     this.customLabel,
     this.onTap,
     this.showArrow = false,
@@ -256,9 +258,18 @@ class CommonStatusBadge extends StatelessWidget {
     }
 
     if (type == StatusBadgeType.payment) {
-      return StatusBadgeHelper.getPaymentLabel(
-        paymentStatus,
-      );
+      final isPaid =
+          (paymentStatus ?? 'Unpaid').toLowerCase().trim() == 'paid';
+
+      if (isPaid) {
+        if (paymentMethod != null &&
+            paymentMethod!.trim().isNotEmpty) {
+        return '${'paid'.tr} by ${paymentMethod!.trim()[0].toUpperCase()}${paymentMethod!.trim().substring(1)}';        }
+
+        return 'paid'.tr;
+      }
+
+      return 'unpaid'.tr;
     }
 
     return StatusBadgeHelper.getOrderLabel(

@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print, invalid_use_of_protected_member
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -164,24 +162,24 @@ class OrderController extends GetxController implements StoreAware {
   final TextEditingController countryController = TextEditingController();
   final TextEditingController postcodeController = TextEditingController();
 
-  /// يعبي بيانات الشحن تلقائياً من الزبون المختار (بس المستخدم قادر يعدلها)
+
   void fillShippingFromCustomer(CustomerData customer) {
     final fullName = customer.customerInfo?.name?.trim() ?? '';
+
     if (fullName.isNotEmpty) {
       final parts = fullName.split(RegExp(r'\s+'));
+
       firstNameController.text = parts.first;
       lastNameController.text =
       parts.length > 1 ? parts.sublist(1).join(' ') : '';
+    } else {
+      firstNameController.clear();
+      lastNameController.clear();
     }
-
-    emailController.text = customer.email ?? '';
-    phoneController.text = customer.customerInfo?.mobile ?? '';
-
-    // ملاحظة: موديل CustomerData ما فيه address/city، فبتبقى فاضية
-    // والمستخدم لازم يدخلهم يدوياً بالخطوة الثالثة.
-    addressController.clear();
-    selectedCityId.value = '';
-    selectedCityName.value = '';
+    emailController.text = customer.email?.trim() ?? '';
+    phoneController.text = customer.customerInfo?.mobile?.trim() ?? '';
+    addressController.text = customer.address?.trim() ?? '';
+    selectedCityName.value = customer.city?.trim() ?? '';
   }
 
   void resetCreateOrderForm() {
@@ -759,6 +757,29 @@ class OrderController extends GetxController implements StoreAware {
       print('❌ deleteOrderData Error: $e');
     } finally {
       isDeletingOrder.value = false;
+    }
+  }
+
+  void fillCustomerShippingData(
+      CustomerData customer,
+      List<CityModel> cities,
+      ) {
+    fillShippingFromCustomer(customer);
+
+    final customerStateName =
+    (customer.city ?? '').trim().toLowerCase();
+
+    final matchedCity = cities.firstWhereOrNull(
+          (city) =>
+      city.name.trim().toLowerCase() == customerStateName,
+    );
+
+    if (matchedCity != null) {
+      selectedCityId.value = matchedCity.id.toString();
+      selectedCityName.value = matchedCity.name;
+    } else {
+      selectedCityId.value = '';
+      selectedCityName.value = customer.city ?? '';
     }
   }
 }

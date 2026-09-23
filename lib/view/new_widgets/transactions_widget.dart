@@ -122,14 +122,28 @@ Widget transactionCard({
               style: TextStyle(fontSize: 10.5.sp, color: secondaryText),
             ),
             SizedBox(height: 8.h),
-            Text(
-                  '${tx.isCredit ? '+' : '-'} ${tx.amount}',
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w800,
-                    color: amountColor,
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${tx.isCredit ? '+' : '-'} ${tx.amount}',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w800,
+                      color: amountColor,
+                    ),
                   ),
-                ),
+                  TextSpan(
+                    text: ' ${tx.currencyCode}',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w400,
+                      color: amountColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             SizedBox(height: 6.h),
             _statusBadge(status: tx.status, isDark: isDark),
           ],

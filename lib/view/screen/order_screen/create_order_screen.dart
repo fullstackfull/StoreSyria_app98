@@ -1,9 +1,7 @@
-// view/screen/order_screen/create_order_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/setting_controller/payment_setting_controller/payment_setting_controller.dart';
 import 'package:store_go_app/core/model/payment_model.dart';
-import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
@@ -176,7 +174,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   final picked = await CustomerPickerBottomSheet.show(context);
                   if (picked != null) {
                     orderController.selectedCustomer.value = picked;
-                    orderController.fillShippingFromCustomer(picked);
+                    orderController.fillCustomerShippingData(
+                      picked,
+                      customerController.customerCityModel?.cities ?? [],
+                    );
                   }
                 },
                 child: InputDecorator(
@@ -529,6 +530,33 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             Obx(() {
               final cities = customerController.customerCityModel?.cities ?? [];
 
+              final customer = orderController.selectedCustomer.value;
+
+              if (customer != null &&
+                  cities.isNotEmpty &&
+                  orderController.selectedCityId.value.isEmpty) {
+
+                final customerStateName =
+                (customer.city ?? '').trim().toLowerCase();
+
+                final matchedCity = cities.firstWhereOrNull(
+                      (CityModel city) =>
+                  city.name.trim().toLowerCase() == customerStateName,
+                );
+
+                if (matchedCity != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+
+                    orderController.selectedCityId.value =
+                        matchedCity.id.toString();
+
+                    orderController.selectedCityName.value =
+                        matchedCity.name;
+                  });
+                }
+              }
+
               return _buildDropdownField<String>(
                 label: 'city'.tr,
                 hint: 'select_city'.tr,
@@ -544,11 +572,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 }).toList(),
                 onChanged: (id) {
                   if (id == null) return;
+
                   final city = cities.firstWhereOrNull(
                         (CityModel c) => c.id.toString() == id,
                   );
+
                   orderController.selectedCityId.value = id;
-                  orderController.selectedCityName.value = city?.name ?? '';
+                  orderController.selectedCityName.value =
+                      city?.name ?? '';
                 },
                 validator: (value) {
                   if (value == null) return 'select_city'.tr;

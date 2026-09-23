@@ -509,6 +509,7 @@ class _OrderScreenState extends State<OrderScreen>
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: allOrdersListItemWidget(
                             showChangeAction: true,
+                            method: order.paymentType,
                             showChangeAction2: true,
                             context: context,
                             changeText: "change_payment_status".tr,
@@ -525,7 +526,7 @@ class _OrderScreenState extends State<OrderScreen>
                                 model.productOrderId ?? '',
 
                                 getPaymentStatus: (model) =>
-                                model.paymentStatus ?? 'Unpaid',
+                                model.paymentStatus ?? '',
 
                                 setOrderStatus: (model, newStatus) {
                                   model.deliveredStatus = newStatus;
@@ -565,7 +566,8 @@ class _OrderScreenState extends State<OrderScreen>
                                 : (order.userName?.isEmpty ?? true)
                                 ? 'no_name'.tr
                                 : order.userName ?? '',
-                            price: "${order.finalPrice} ${orderController.currencySymbol.value}",                            secondaryBadgeLabel:order.paymentStatus,
+                            price: "${order.finalPrice} ${orderController.currencySymbol.value}",
+                            secondaryBadgeLabel: "${order.paymentStatus}",
                             primaryBadgeLabel: order.deliveredStatus,
                             onTap: () => Get.to(
                                   () => OrderDetailScreen(

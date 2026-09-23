@@ -27,15 +27,17 @@ class WalletPagination {
 class WalletTransaction {
   final int id;
   final String type;
-  final String direction; // credit / debit
+  final String direction;
   final String amount;
+  final String currencyCode;
   final String balanceBefore;
   final String balanceAfter;
   final String description;
   final String status;
   final String createdAt;
 
-  WalletTransaction({
+  WalletTransaction( {
+    required this.currencyCode,
     required this.id,
     required this.type,
     required this.direction,
@@ -55,6 +57,7 @@ class WalletTransaction {
       type: json['type']?.toString() ?? '',
       direction: json['direction']?.toString() ?? '',
       amount: json['amount']?.toString() ?? '0',
+      currencyCode: json['currency_code']?.toString() ?? '',
       balanceBefore: json['balance_before']?.toString() ?? '0',
       balanceAfter: json['balance_after']?.toString() ?? '0',
       description: json['description']?.toString() ?? '',
