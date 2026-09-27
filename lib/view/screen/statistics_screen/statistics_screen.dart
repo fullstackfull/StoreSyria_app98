@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -11,8 +12,7 @@ class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  State<StatisticsScreen> createState() =>
-      _StatisticsScreenState();
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen>
@@ -21,93 +21,123 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
   late final AnimationController _sectionController;
   late final AnimationController _chartController;
+  late final AnimationController _lineOpacityController;
 
   bool _showTopUrls = true;
+
+  bool _animationsStarted = false;
+  Timer? _animationTimer;
 
   @override
   void initState() {
     super.initState();
 
-    statisticsController = Get.put(
-      StatisticsController(),
-    );
+    statisticsController = Get.put(StatisticsController());
 
     _sectionController = AnimationController(
       vsync: this,
-      duration: const Duration(
-        milliseconds: 1400,
-      ),
+      duration: const Duration(milliseconds: 4500),
     );
 
+    // مدة رسم الخط - عدّل هالرقم لتغيير سرعة الرسم (أكبر = أبطأ)
     _chartController = AnimationController(
       vsync: this,
-      duration: const Duration(
-        milliseconds: 4500,
-      ),
+      duration: const Duration(seconds: 30),
+    );
+
+    // كنترولر التعتيم (fade) المستخدم لإخفاء/إظهار الخط بين كل دورة رسم والثانية
+    _lineOpacityController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+      value: 1, // مبين بالكامل من البداية
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       statisticsController.getStaticData();
+
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _startAnimation();
+        }
+      });
     });
   }
 
   @override
   void dispose() {
+    _animationTimer?.cancel();
     _sectionController.dispose();
     _chartController.dispose();
+    _lineOpacityController.dispose();
     super.dispose();
   }
-  bool _animationsStarted = false;
+
+  /// دورة الأنيميشن الكاملة لرسم الخط:
+  /// 1) الخط يترسم من الصفر للكامل (يمشي أفقيًا من اليسار لليمين)
+  /// 2) يضل ظاهر شوي (مدة الانتظار)
+  /// 3) يختفي تدريجيًا (fade-out) - بدون أي حركة "عكسية"
+  /// 4) يترجّع لنقطة البداية وهو غير ظاهر أصلاً (ما حدا بيشوف القفزة)
+  /// 5) يظهر تدريجيًا (fade-in) ويبلش يترسم من جديد
+  /// وتتكرر الدورة
+  Future<void> _runChartCycle() async {
+    if (!mounted) return;
+
+    // 1) ترسم الخط
+    await _chartController.forward(from: 0);
+    if (!mounted) return;
+
+    // 2) يضل ظاهر لحظة
+    await Future.delayed(const Duration(milliseconds: 900));
+    if (!mounted) return;
+
+    // 3) يختفي بهدوء
+    await _lineOpacityController.reverse();
+    if (!mounted) return;
+
+    // 4) يترجع لنقطة الصفر وهو غير ظاهر (opacity = 0 حاليًا)
+    _chartController.value = 0;
+
+    // 5) يظهر بهدوء
+    await _lineOpacityController.forward();
+    if (!mounted) return;
+
+    // إعادة الدورة من جديد
+    _runChartCycle();
+  }
 
   void _startAnimation() {
     if (!mounted || _animationsStarted) return;
-
     _animationsStarted = true;
 
     _sectionController.forward(from: 0);
-    _chartController.forward(from: 0);
+
+    // نبلش دورة رسم الخط (بتعيد نفسها تلقائيًا لحالها لآخر الدورات)
+    _runChartCycle();
   }
 
-  Animation<double> _sectionAnimation(
-      int index,
-      ) {
-    final start =
-    (index * 0.10).clamp(0.0, 0.60);
-
-    final end =
-    (start + 0.35).clamp(0.0, 1.0);
+  Animation<double> _sectionAnimation(int index) {
+    final start = (index * 0.10).clamp(0.0, 0.60);
+    final end = (start + 0.35).clamp(0.0, 1.0);
 
     return CurvedAnimation(
       parent: _sectionController,
-      curve: Interval(
-        start,
-        end,
-        curve: Curves.easeOutCubic,
-      ),
+      curve: Interval(start, end, curve: Curves.easeOutCubic),
     );
   }
 
-  Widget _fadeSlide(
-      int index,
-      Widget child,
-      ) {
-    final animation =
-    _sectionAnimation(index);
+  Widget _fadeSlide(int index, Widget child) {
+    final animation = _sectionAnimation(index);
 
     return AnimatedBuilder(
       animation: animation,
       child: child,
       builder: (context, child) {
-        final value =
-        animation.value.clamp(0.0, 1.0);
+        final value = animation.value.clamp(0.0, 1.0);
 
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(
-              0,
-              (1 - value) * 22,
-            ),
+            offset: Offset(0, (1 - value) * 22),
             child: Transform.scale(
               scale: 0.97 + (0.03 * value),
               child: child,
@@ -118,18 +148,12 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     );
   }
 
-  String _periodLabel(
-      List<VisitorChartData>? chart,
-      ) {
+  String _periodLabel(List<VisitorChartData>? chart) {
     if (chart == null || chart.isEmpty) {
       return "Last 7 days".tr;
     }
 
-    final start =
-    chart.length > 7
-        ? chart.length - 7
-        : 0;
-
+    final start = chart.length > 7 ? chart.length - 7 : 0;
     final window = chart.sublist(start);
 
     final first = window.first.date;
@@ -144,14 +168,10 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark =
-        Theme.of(context).brightness ==
-            Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: isDark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
+      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
         appBar: simpleAppBar(
           title: "analytics".tr,
@@ -160,48 +180,24 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           isBack: true,
           onNewLabelTap: () {},
         ),
-        backgroundColor: isDark
-            ? StatisticsTheme.darkBackground
-            : StatisticsTheme.lightBackground,
+        backgroundColor:
+        isDark ? StatisticsTheme.darkBackground : StatisticsTheme.lightBackground,
         extendBodyBehindAppBar: true,
         body: Stack(
           children: [
-            const Positioned.fill(
-              child: GlassBackdrop(),
-            ),
-
+            const Positioned.fill(child: GlassBackdrop()),
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  20,
-                  6,
-                  20,
-                  20,
-                ),
+                padding: const EdgeInsets.fromLTRB(20, 6, 20, 20),
                 child: Obx(() {
-                  final isLoading =
-                      statisticsController
-                          .isDataAvailable
-                          .value ||
-                          statisticsController
-                              .staticsDataModel ==
-                              null;
+                  final isLoading = statisticsController.isDataAvailable.value ||
+                      statisticsController.staticsDataModel == null;
 
                   if (isLoading) {
                     return const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.4,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2.4),
                     );
                   }
-
-                  // Start animation once,
-                  // outside the build process.
-                  WidgetsBinding.instance
-                      .addPostFrameCallback(
-                        (_) => _startAnimation(),
-                  );
-
                   return _buildContent(context);
                 }),
               ),
@@ -212,114 +208,74 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     );
   }
 
-  Widget _buildContent(
-      BuildContext context,
-      ) {
-    final model =
-        statisticsController
-            .staticsDataModel;
-
+  Widget _buildContent(BuildContext context) {
+    final model = statisticsController.staticsDataModel;
     final data = model?.data;
 
     if (data == null) {
       return const SizedBox.shrink();
     }
 
-    final visitorChart =
-        data.visitorchart ?? [];
+    final visitorChart = data.visitorchart ?? [];
+    final topUrlList = statisticsController.topUrlList;
+    final platformList = data.platform ?? [];
+    final browserList = data.browser ?? [];
+    final deviceList = data.device ?? [];
 
-    final topUrlList =
-        statisticsController.topUrlList;
-
-    final platformList =
-        data.platform ?? [];
-
-    final browserList =
-        data.browser ?? [];
-
-    final deviceList =
-        data.device ?? [];
-
-    final totalPageViews =
-    visitorChart.fold<int>(
+    final totalPageViews = visitorChart.fold<int>(
       0,
-          (sum, item) =>
-      sum + (item.pageview ?? 0),
+          (sum, item) => sum + (item.pageview ?? 0),
     );
 
-    final totalUniqueViews =
-    visitorChart.fold<int>(
+    final totalUniqueViews = visitorChart.fold<int>(
       0,
-          (sum, item) =>
-      sum +
-          (item.uniquePageview ?? 0),
+          (sum, item) => sum + (item.uniquePageview ?? 0),
     );
 
     int sectionIndex = 0;
 
     return SingleChildScrollView(
-      physics:
-      const BouncingScrollPhysics(),
+      physics: const BouncingScrollPhysics(),
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _fadeSlide(
             sectionIndex++,
             StatisticsHeroCard(
-              periodLabel:
-              _periodLabel(visitorChart),
-              totalPageViews:
-              totalPageViews,
-              totalUniqueViews:
-              totalUniqueViews,
-              topLinksCount:
-              topUrlList.length,
+              periodLabel: _periodLabel(visitorChart),
+              totalPageViews: totalPageViews,
+              totalUniqueViews: totalUniqueViews,
+              topLinksCount: topUrlList.length,
             ),
           ),
-
           verticalSpace(18),
-
           _fadeSlide(
             sectionIndex++,
             GlassVisitorChart(
               visitorChart: visitorChart,
               animation: _chartController,
+              lineOpacity: _lineOpacityController,
             ),
           ),
-
           if (topUrlList.isNotEmpty) ...[
             verticalSpace(18),
-
             _fadeSlide(
               sectionIndex++,
               GlassCard(
                 title: "Top URL".tr,
-                subtitle:
-                "Most visited links".tr,
-                icon:
-                Icons.emoji_events_rounded,
+                subtitle: "Most visited links".tr,
+                icon: Icons.emoji_events_rounded,
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     AnimatedSize(
-                      duration:
-                      const Duration(
-                        milliseconds: 260,
-                      ),
-                      curve:
-                      Curves.easeOutCubic,
+                      duration: const Duration(milliseconds: 260),
+                      curve: Curves.easeOutCubic,
                       child: !_showTopUrls
                           ? const SizedBox.shrink()
                           : Padding(
-                        padding:
-                        const EdgeInsets
-                            .only(
-                          top: 0,
-                        ),
-                        child:
-                        TopUrlChart(
+                        padding: const EdgeInsets.only(top: 0),
+                        child: TopUrlChart(
                           list: topUrlList,
                           animation: _chartController,
                         ),
@@ -330,42 +286,24 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               ),
             ),
           ],
-
           if (platformList.isNotEmpty) ...[
             verticalSpace(18),
-
-            _fadeSlide(
-              sectionIndex++,
-              PlatformBarChart(
-                list: platformList,
-              ),
-            ),
+            _fadeSlide(sectionIndex++, PlatformBarChart(list: platformList)),
           ],
-
           if (browserList.isNotEmpty) ...[
             verticalSpace(18),
-
             _fadeSlide(
               sectionIndex++,
-              BrowsersGraph(
-                isDevice: false,
-                browser: browserList,
-              ),
+              BrowsersGraph(isDevice: false, browser: browserList),
             ),
           ],
-
           if (deviceList.isNotEmpty) ...[
             verticalSpace(18),
-
             _fadeSlide(
               sectionIndex++,
-              BrowsersGraph(
-                isDevice: true,
-                device: deviceList,
-              ),
+              BrowsersGraph(isDevice: true, device: deviceList),
             ),
           ],
-
           verticalSpace(10),
         ],
       ),

@@ -45,54 +45,40 @@ class Glass {
       Theme.of(context).brightness == Brightness.dark;
 
   static Color surface(BuildContext context) =>
-      isDark(context)
-          ? StatisticsTheme.darkCard
-          : StatisticsTheme.lightCard;
+      isDark(context) ? StatisticsTheme.darkCard : StatisticsTheme.lightCard;
 
-  static Color surfaceStrong(BuildContext context) =>
-      isDark(context)
-          ? StatisticsTheme.darkCardStrong
-          : StatisticsTheme.lightCardStrong;
+  static Color surfaceStrong(BuildContext context) => isDark(context)
+      ? StatisticsTheme.darkCardStrong
+      : StatisticsTheme.lightCardStrong;
 
-  static Color border(BuildContext context) =>
-      isDark(context)
-          ? StatisticsTheme.darkBorder
-          : StatisticsTheme.lightBorder;
+  static Color border(BuildContext context) => isDark(context)
+      ? StatisticsTheme.darkBorder
+      : StatisticsTheme.lightBorder;
 
-  static Color borderStrong(BuildContext context) =>
-      isDark(context)
-          ? StatisticsTheme.darkBorderStrong
-          : StatisticsTheme.lightBorderStrong;
+  static Color borderStrong(BuildContext context) => isDark(context)
+      ? StatisticsTheme.darkBorderStrong
+      : StatisticsTheme.lightBorder;
 
   static Color textPrimary(BuildContext context) =>
-      isDark(context)
-          ? StatisticsTheme.darkText
-          : StatisticsTheme.lightText;
+      isDark(context) ? StatisticsTheme.darkText : StatisticsTheme.lightText;
 
-  static Color textSecondary(BuildContext context) =>
-      isDark(context)
-          ? StatisticsTheme.darkSecondary
-          : StatisticsTheme.lightSecondary;
+  static Color textSecondary(BuildContext context) => isDark(context)
+      ? StatisticsTheme.darkSecondary
+      : StatisticsTheme.lightSecondary;
 
-  static Color textMuted(BuildContext context) =>
-      isDark(context)
-          ? StatisticsTheme.darkMuted
-          : StatisticsTheme.lightMuted;
+  static Color textMuted(BuildContext context) => isDark(context)
+      ? StatisticsTheme.darkMuted
+      : StatisticsTheme.lightMuted;
 
-  static Color chartGrid(BuildContext context) =>
-      isDark(context)
-          ? Colors.white.withOpacity(.07)
-          : const Color(0xFFE5E7EB);
+  static Color chartGrid(BuildContext context) => isDark(context)
+      ? Colors.white.withOpacity(.07)
+      : const Color(0xFFE5E7EB);
 
   static Color chartBackground(BuildContext context) =>
-      isDark(context)
-          ? StatisticsTheme.darkCard
-          : StatisticsTheme.lightCard;
+      isDark(context) ? StatisticsTheme.darkCard : StatisticsTheme.lightCard;
 
   static Color tooltipBackground(BuildContext context) =>
-      isDark(context)
-          ? const Color(0xFF1F2937)
-          : Colors.white;
+      isDark(context) ? const Color(0xFF1F2937) : Colors.white;
 }
 
 // ============================================================
@@ -128,9 +114,7 @@ class GlassPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: tint ?? Glass.surface(context),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color: borderColor ?? Glass.border(context),
-        ),
+        border: Border.all(color: borderColor ?? Glass.border(context)),
         boxShadow: shadows ??
             [
               BoxShadow(
@@ -148,10 +132,7 @@ class GlassPanel extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: blur,
-          sigmaY: blur,
-        ),
+        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: content,
       ),
     );
@@ -197,11 +178,7 @@ class GlassCard extends StatelessWidget {
                     color: StatisticsTheme.primary.withOpacity(.10),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 17,
-                    color: StatisticsTheme.primary,
-                  ),
+                  child: Icon(icon, size: 17, color: StatisticsTheme.primary),
                 ),
                 horizontalSpace(10),
               ],
@@ -283,9 +260,7 @@ class StatisticsHeroCard extends StatelessWidget {
     return GlassPanel(
       radius: 20,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-      tint: isDark
-          ? StatisticsTheme.darkCard
-          : StatisticsTheme.lightCard,
+      tint: isDark ? StatisticsTheme.darkCard : StatisticsTheme.lightCard,
       borderColor: isDark
           ? StatisticsTheme.darkBorderStrong
           : StatisticsTheme.lightBorder,
@@ -353,16 +328,12 @@ class StatisticsHeroCard extends StatelessWidget {
           verticalSpace(20),
           Text(
             'Total page views'.tr,
-            style: pRegular10.copyWith(
-              color: Glass.textSecondary(context),
-            ),
+            style: pRegular10.copyWith(color: Glass.textSecondary(context)),
           ),
           verticalSpace(4),
           AnimatedCounterText(
             value: totalPageViews,
-            style: pBold30.copyWith(
-              color: Glass.textPrimary(context),
-            ),
+            style: pBold30.copyWith(color: Glass.textPrimary(context)),
           ),
           verticalSpace(18),
           Row(
@@ -398,16 +369,11 @@ class StatisticsHeroCard extends StatelessWidget {
     required int value,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 11,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       decoration: BoxDecoration(
         color: Glass.surfaceStrong(context),
         borderRadius: BorderRadius.circular(13),
-        border: Border.all(
-          color: Glass.border(context),
-        ),
+        border: Border.all(color: Glass.border(context)),
       ),
       child: Row(
         children: [
@@ -419,11 +385,7 @@ class StatisticsHeroCard extends StatelessWidget {
               color: StatisticsTheme.primary.withOpacity(.10),
               borderRadius: BorderRadius.circular(9),
             ),
-            child: Icon(
-              icon,
-              color: StatisticsTheme.primary,
-              size: 15,
-            ),
+            child: Icon(icon, color: StatisticsTheme.primary, size: 15),
           ),
           horizontalSpace(8),
           Expanded(
@@ -432,17 +394,13 @@ class StatisticsHeroCard extends StatelessWidget {
               children: [
                 AnimatedCounterText(
                   value: value,
-                  style: pBold16.copyWith(
-                    color: Glass.textPrimary(context),
-                  ),
+                  style: pBold16.copyWith(color: Glass.textPrimary(context)),
                 ),
                 Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: pRegular8.copyWith(
-                    color: Glass.textMuted(context),
-                  ),
+                  style: pRegular8.copyWith(color: Glass.textMuted(context)),
                 ),
               ],
             ),
@@ -476,67 +434,46 @@ class AnimatedCounterText extends StatelessWidget {
       duration: duration,
       curve: Curves.easeOutCubic,
       builder: (context, value, child) {
-        return Text(
-          value.round().toString(),
-          style: style,
-        );
+        return Text(value.round().toString(), style: style);
       },
     );
   }
 }
 
+// ============================================================
+// TOP URL CHART
+// ============================================================
+
 class TopUrlChart extends StatelessWidget {
   final List<TopUrl> list;
   final Animation<double> animation;
 
-  const TopUrlChart({
-    super.key,
-    required this.list,
-    required this.animation,
-  });
+  const TopUrlChart({super.key, required this.list, required this.animation});
 
   @override
   Widget build(BuildContext context) {
-    final visible =
-    list.length > 7
-        ? list.sublist(0, 7)
-        : list;
+    final visible = list.length > 7 ? list.sublist(0, 7) : list;
 
     if (visible.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final chartData =
-    List<_TopUrlChartData>.generate(
+    final chartData = List<_TopUrlChartData>.generate(
       visible.length,
           (index) {
         final item = visible[index];
-
-        return _TopUrlChartData(
-          '#${index + 1}',
-          item.totalClick ?? 0,
-        );
+        return _TopUrlChartData('#${index + 1}', item.totalClick ?? 0);
       },
       growable: false,
     );
 
     return Container(
       height: 205,
-      padding:
-      const EdgeInsets.fromLTRB(
-        8,
-        12,
-        8,
-        0,
-      ),
+      padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
       decoration: BoxDecoration(
-        color:
-        Glass.surfaceStrong(context),
-        borderRadius:
-        BorderRadius.circular(14),
-        border: Border.all(
-          color: Glass.border(context),
-        ),
+        color: Glass.surfaceStrong(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Glass.border(context)),
       ),
       child: Stack(
         children: [
@@ -544,134 +481,56 @@ class TopUrlChart extends StatelessWidget {
             child: IgnorePointer(
               child: RepaintBoundary(
                 child: CustomPaint(
-                  painter:
-                  _TopUrlLinePainter(
+                  painter: _TopUrlLinePainter(
                     data: chartData,
                     animation: animation,
-                    lineColor:
-                    StatisticsTheme.primary,
-                    fillColor:
-                    StatisticsTheme.primary
-                        .withOpacity(.10),
+                    lineColor: StatisticsTheme.primary,
+                    fillColor: StatisticsTheme.primary.withOpacity(.10),
                   ),
                 ),
               ),
             ),
           ),
-
           SfCartesianChart(
             plotAreaBorderWidth: 0,
             enableAxisAnimation: false,
-
-            margin:
-            const EdgeInsets.fromLTRB(
-              4,
-              8,
-              4,
-              4,
-            ),
-
-            legend: const Legend(
-              isVisible: false,
-            ),
-
+            margin: const EdgeInsets.fromLTRB(4, 8, 4, 4),
+            legend: const Legend(isVisible: false),
             primaryXAxis: CategoryAxis(
               interval: 1,
               borderWidth: 0,
-              majorGridLines:
-              const MajorGridLines(
-                width: 0,
-              ),
-              majorTickLines:
-              const MajorTickLines(
-                width: 0,
-              ),
-              axisLine:
-              const AxisLine(
-                width: 0,
-              ),
-              labelStyle:
-              pMedium8.copyWith(
-                color:
-                Glass.textMuted(
-                  context,
-                ),
-              ),
+              majorGridLines: const MajorGridLines(width: 0),
+              majorTickLines: const MajorTickLines(width: 0),
+              axisLine: const AxisLine(width: 0),
+              labelStyle: pMedium8.copyWith(color: Glass.textMuted(context)),
             ),
-
             primaryYAxis: NumericAxis(
               borderWidth: 0,
-              majorGridLines:
-              MajorGridLines(
-                color:
-                Glass.chartGrid(
-                  context,
-                ),
-              ),
-              majorTickLines:
-              const MajorTickLines(
-                width: 0,
-              ),
-              axisLine:
-              const AxisLine(
-                width: 0,
-              ),
-              labelStyle:
-              pMedium8.copyWith(
-                color:
-                Glass.textMuted(
-                  context,
-                ),
-              ),
+              majorGridLines: MajorGridLines(color: Glass.chartGrid(context)),
+              majorTickLines: const MajorTickLines(width: 0),
+              axisLine: const AxisLine(width: 0),
+              labelStyle: pMedium8.copyWith(color: Glass.textMuted(context)),
             ),
-
-            tooltipBehavior:
-            TooltipBehavior(
-              enable: false,
-            ),
-
-            series: <
-                CartesianSeries<
-                    _TopUrlChartData,
-                    String>>[
-              SplineSeries<
-                  _TopUrlChartData,
-                  String>(
+            tooltipBehavior: TooltipBehavior(enable: false),
+            series: <CartesianSeries<_TopUrlChartData, String>>[
+              SplineSeries<_TopUrlChartData, String>(
                 dataSource: chartData,
-
-                xValueMapper:
-                    (data, _) => data.x,
-
-                yValueMapper:
-                    (data, _) => data.y,
-
-                color:
-                Colors.transparent,
-
+                xValueMapper: (data, _) => data.x,
+                yValueMapper: (data, _) => data.y,
+                color: Colors.transparent,
                 width: 0,
-
                 animationDuration: 0,
-
-                markerSettings:
-                const MarkerSettings(
+                markerSettings: const MarkerSettings(
                   isVisible: true,
                   width: 7,
                   height: 7,
-                  color:
-                  Colors.transparent,
+                  color: Colors.transparent,
                 ),
-
-                dataLabelSettings:
-                DataLabelSettings(
+                dataLabelSettings: DataLabelSettings(
                   isVisible: true,
-                  labelAlignment:
-                  ChartDataLabelAlignment
-                      .top,
-                  textStyle:
-                  pSemiBold8.copyWith(
-                    color:
-                    StatisticsTheme
-                        .primary,
+                  labelAlignment: ChartDataLabelAlignment.top,
+                  textStyle: pSemiBold8.copyWith(
+                    color: StatisticsTheme.primary,
                   ),
                 ),
               ),
@@ -710,12 +569,7 @@ class StatisticsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
-      title: title,
-      subtitle: subtitle,
-      padding: padding,
-      child: child,
-    );
+    return GlassCard(title: title, subtitle: subtitle, padding: padding, child: child);
   }
 }
 
@@ -747,9 +601,7 @@ Widget topUrlWidget({
     decoration: BoxDecoration(
       color: Glass.surface(context),
       borderRadius: BorderRadius.circular(14),
-      border: Border.all(
-        color: Glass.border(context),
-      ),
+      border: Border.all(color: Glass.border(context)),
     ),
     child: Material(
       color: Colors.transparent,
@@ -758,10 +610,7 @@ Widget topUrlWidget({
         borderRadius: BorderRadius.circular(14),
         onTap: shareFun,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 11,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           child: Row(
             children: [
               Container(
@@ -771,16 +620,9 @@ Widget topUrlWidget({
                 decoration: BoxDecoration(
                   color: rankColor.withOpacity(.10),
                   borderRadius: BorderRadius.circular(9),
-                  border: Border.all(
-                    color: rankColor.withOpacity(.25),
-                  ),
+                  border: Border.all(color: rankColor.withOpacity(.25)),
                 ),
-                child: Text(
-                  '#$digit',
-                  style: pBold12.copyWith(
-                    color: rankColor,
-                  ),
-                ),
+                child: Text('#$digit', style: pBold12.copyWith(color: rankColor)),
               ),
               horizontalSpace(11),
               Expanded(
@@ -789,20 +631,14 @@ Widget topUrlWidget({
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.link_rounded,
-                          size: 11,
-                          color: Glass.textMuted(context),
-                        ),
+                        Icon(Icons.link_rounded, size: 11, color: Glass.textMuted(context)),
                         horizontalSpace(4),
                         Expanded(
                           child: Text(
                             title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: pRegular10.copyWith(
-                              color: Glass.textMuted(context),
-                            ),
+                            style: pRegular10.copyWith(color: Glass.textMuted(context)),
                           ),
                         ),
                       ],
@@ -812,29 +648,19 @@ Widget topUrlWidget({
                       subTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: pSemiBold12.copyWith(
-                        color: Glass.textPrimary(context),
-                      ),
+                      style: pSemiBold12.copyWith(color: Glass.textPrimary(context)),
                     ),
                   ],
                 ),
               ),
               horizontalSpace(8),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 9,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                 decoration: BoxDecoration(
                   color: StatisticsTheme.primary.withOpacity(.10),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  total,
-                  style: pBold12.copyWith(
-                    color: StatisticsTheme.primary,
-                  ),
-                ),
+                child: Text(total, style: pBold12.copyWith(color: StatisticsTheme.primary)),
               ),
               horizontalSpace(6),
               Material(
@@ -849,15 +675,9 @@ Widget topUrlWidget({
                     decoration: BoxDecoration(
                       color: Glass.surfaceStrong(context),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Glass.border(context),
-                      ),
+                      border: Border.all(color: Glass.border(context)),
                     ),
-                    child: Icon(
-                      Icons.ios_share_rounded,
-                      size: 15,
-                      color: StatisticsTheme.primary,
-                    ),
+                    child: Icon(Icons.ios_share_rounded, size: 15, color: StatisticsTheme.primary),
                   ),
                 ),
               ),
@@ -876,18 +696,13 @@ Widget topUrlWidget({
 class StatisticsVisitorGraph extends StatefulWidget {
   final List<VisitorChartData> visitorChart;
 
-  const StatisticsVisitorGraph({
-    Key? key,
-    required this.visitorChart,
-  }) : super(key: key);
+  const StatisticsVisitorGraph({Key? key, required this.visitorChart}) : super(key: key);
 
   @override
-  State<StatisticsVisitorGraph> createState() =>
-      _StatisticsVisitorGraphState();
+  State<StatisticsVisitorGraph> createState() => _StatisticsVisitorGraphState();
 }
 
-class _StatisticsVisitorGraphState
-    extends State<StatisticsVisitorGraph> {
+class _StatisticsVisitorGraphState extends State<StatisticsVisitorGraph> {
   List<ChartData> chartData = [];
 
   @override
@@ -897,9 +712,7 @@ class _StatisticsVisitorGraphState
   }
 
   @override
-  void didUpdateWidget(
-      covariant StatisticsVisitorGraph oldWidget,
-      ) {
+  void didUpdateWidget(covariant StatisticsVisitorGraph oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.visitorChart != widget.visitorChart) {
       _loadChartData();
@@ -921,11 +734,7 @@ class _StatisticsVisitorGraphState
       final data = widget.visitorChart;
       final start = data.length > 7 ? data.length - 7 : 0;
       chartData = data.sublist(start).map((data) {
-        return ChartData(
-          data.date ?? '',
-          data.uniquePageview ?? 0,
-          data.pageview ?? 0,
-        );
+        return ChartData(data.date ?? '', data.uniquePageview ?? 0, data.pageview ?? 0);
       }).toList();
     }
     if (mounted) setState(() {});
@@ -940,67 +749,34 @@ class _StatisticsVisitorGraphState
         children: [
           Row(
             children: [
-              _legendDot(
-                StatisticsTheme.secondary,
-                'Total page view'.tr,
-                context,
-              ),
+              _legendDot(StatisticsTheme.secondary, 'Total page view'.tr, context),
               horizontalSpace(16),
-              _legendDot(
-                StatisticsTheme.primary,
-                'Unique page view'.tr,
-                context,
-              ),
+              _legendDot(StatisticsTheme.primary, 'Unique page view'.tr, context),
             ],
           ),
           verticalSpace(8),
           SizedBox(
             height: 225,
-            child: chartData.isEmpty
-                ? _emptyChart(context)
-                : _buildStackedBarChart(context),
+            child: chartData.isEmpty ? _emptyChart(context) : _buildStackedBarChart(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _legendDot(
-      Color color,
-      String label,
-      BuildContext context,
-      ) {
+  Widget _legendDot(Color color, String label, BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 7,
-          height: 7,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
+        Container(width: 7, height: 7, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         horizontalSpace(6),
-        Text(
-          label,
-          style: pMedium8.copyWith(
-            color: Glass.textSecondary(context),
-          ),
-        ),
+        Text(label, style: pMedium8.copyWith(color: Glass.textSecondary(context))),
       ],
     );
   }
 
   Widget _emptyChart(BuildContext context) {
-    return Center(
-      child: Text(
-        'No data'.tr,
-        style: pRegular10.copyWith(
-          color: Glass.textMuted(context),
-        ),
-      ),
-    );
+    return Center(child: Text('No data'.tr, style: pRegular10.copyWith(color: Glass.textMuted(context))));
   }
 
   SfCartesianChart _buildStackedBarChart(BuildContext context) {
@@ -1015,20 +791,14 @@ class _StatisticsVisitorGraphState
         majorGridLines: const MajorGridLines(width: 0),
         axisLine: const AxisLine(width: 0),
         majorTickLines: const MajorTickLines(width: 0),
-        labelStyle: pMedium8.copyWith(
-          color: Glass.textMuted(context),
-        ),
+        labelStyle: pMedium8.copyWith(color: Glass.textMuted(context)),
       ),
       primaryYAxis: NumericAxis(
         borderWidth: 0,
-        majorGridLines: MajorGridLines(
-          color: Glass.chartGrid(context),
-        ),
+        majorGridLines: MajorGridLines(color: Glass.chartGrid(context)),
         axisLine: const AxisLine(width: 0),
         majorTickLines: const MajorTickLines(width: 0),
-        labelStyle: pMedium8.copyWith(
-          color: Glass.textMuted(context),
-        ),
+        labelStyle: pMedium8.copyWith(color: Glass.textMuted(context)),
       ),
       tooltipBehavior: TooltipBehavior(
         enable: true,
@@ -1047,9 +817,7 @@ class _StatisticsVisitorGraphState
           color: StatisticsTheme.primary,
           name: 'Unique Page View'.tr,
           animationDuration: 0,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(6),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
         ),
         StackedColumnSeries<ChartData, String>(
           dataSource: chartData,
@@ -1058,9 +826,7 @@ class _StatisticsVisitorGraphState
           color: StatisticsTheme.secondary,
           name: 'Total Page View'.tr,
           animationDuration: 0,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(6),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
         ),
       ],
     );
@@ -1074,26 +840,21 @@ class _StatisticsVisitorGraphState
 class GlassVisitorChart extends StatelessWidget {
   final List<VisitorChartData> visitorChart;
   final Animation<double> animation;
+  final Animation<double> lineOpacity;
 
   const GlassVisitorChart({
     super.key,
     required this.visitorChart,
     required this.animation,
+    required this.lineOpacity,
   });
 
   List<ChartData> _loadChartData() {
     final data = visitorChart;
-
-    final start = data.length > 7
-        ? data.length - 7
-        : 0;
+    final start = data.length > 7 ? data.length - 7 : 0;
 
     return data.sublist(start).map((e) {
-      return ChartData(
-        e.date ?? '',
-        e.uniquePageview ?? 0,
-        e.pageview ?? 0,
-      );
+      return ChartData(e.date ?? '', e.uniquePageview ?? 0, e.pageview ?? 0);
     }).toList();
   }
 
@@ -1111,40 +872,50 @@ class GlassVisitorChart extends StatelessWidget {
             ? Center(
           child: Text(
             'No data'.tr,
-            style: pRegular10.copyWith(
-              color: Glass.textMuted(context),
-            ),
+            style: pRegular10.copyWith(color: Glass.textMuted(context)),
           ),
         )
             : Container(
           decoration: BoxDecoration(
             color: const Color(0xFFF5F6F8),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFE5E7EB),
-            ),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
           ),
           clipBehavior: Clip.antiAlias,
-          child: RepaintBoundary(
-            child: CustomPaint(
-              painter: _VisitorLinePainter(
-                data: chartData,
-                animation: animation,
-                lineColor: StatisticsTheme.primary,
-                fillColor:
-                StatisticsTheme.primary.withOpacity(.10),
+          child: Stack(
+            children: [
+              // طبقة ثابتة: شبكة + أرقام + تواريخ - بترسم مرة وحدة بس
+              Positioned.fill(
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: _VisitorStaticPainter(data: chartData),
+                  ),
+                ),
               ),
-              size: const Size(
-                double.infinity,
-                double.infinity,
+              // طبقة متحركة: الخط + التظليل بس، ملفوفة بـ fade
+              Positioned.fill(
+                child: FadeTransition(
+                  opacity: lineOpacity,
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      painter: _VisitorLinePainter(
+                        data: chartData,
+                        animation: animation,
+                        lineColor: StatisticsTheme.primary,
+                        fillColor: StatisticsTheme.primary.withOpacity(.10),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 }
+
 // ============================================================
 // PLATFORM CHART
 // ============================================================
@@ -1152,10 +923,7 @@ class GlassVisitorChart extends StatelessWidget {
 class PlatformBarChart extends StatefulWidget {
   final List<PlatformData> list;
 
-  const PlatformBarChart({
-    super.key,
-    required this.list,
-  });
+  const PlatformBarChart({super.key, required this.list});
 
   @override
   State<PlatformBarChart> createState() => _PlatformBarChartState();
@@ -1171,11 +939,8 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
   }
 
   @override
-  void didUpdateWidget(
-      covariant PlatformBarChart oldWidget,
-      ) {
+  void didUpdateWidget(covariant PlatformBarChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (oldWidget.list != widget.list) {
       _loadData();
     }
@@ -1184,46 +949,16 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
   void _loadData() {
     if (Prefs.getBool(AppConstant.isDemoMode) == true) {
       chartData = [
-        BarChartData(
-          'Windows',
-          5,
-          const Color(0xFF64748B),
-        ),
-        BarChartData(
-          'OS X',
-          10,
-          const Color(0xFF3B82F6),
-        ),
-        BarChartData(
-          'Linux',
-          12,
-          const Color(0xFF22C55E),
-        ),
-        BarChartData(
-          'iOS',
-          14,
-          const Color(0xFF8B5CF6),
-        ),
-        BarChartData(
-          'AndroidOS',
-          12,
-          const Color(0xFFF59E0B),
-        ),
-        BarChartData(
-          'Other',
-          15,
-          const Color(0xFF94A3B8),
-        ),
+        BarChartData('Windows', 5, const Color(0xFF64748B)),
+        BarChartData('OS X', 10, const Color(0xFF3B82F6)),
+        BarChartData('Linux', 12, const Color(0xFF22C55E)),
+        BarChartData('iOS', 14, const Color(0xFF8B5CF6)),
+        BarChartData('AndroidOS', 12, const Color(0xFFF59E0B)),
+        BarChartData('Other', 15, const Color(0xFF94A3B8)),
       ];
     } else {
       chartData = widget.list.map((data) {
-        return BarChartData(
-          data.platform ?? '',
-          data.data ?? 0,
-          HexColor(
-            data.colour ?? '#64748B',
-          ),
-        );
+        return BarChartData(data.platform ?? '', data.data ?? 0, HexColor(data.colour ?? '#64748B'));
       }).toList();
     }
 
@@ -1248,9 +983,7 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
                 ? Center(
               child: Text(
                 'No data'.tr,
-                style: pRegular10.copyWith(
-                  color: Glass.textMuted(context),
-                ),
+                style: pRegular10.copyWith(color: Glass.textMuted(context)),
               ),
             )
                 : _buildChart(context),
@@ -1260,9 +993,7 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
     );
   }
 
-  Widget _buildPlatformLegend(
-      BuildContext context,
-      ) {
+  Widget _buildPlatformLegend(BuildContext context) {
     return Wrap(
       spacing: 14,
       runSpacing: 9,
@@ -1273,18 +1004,10 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
             Container(
               width: 8,
               height: 8,
-              decoration: BoxDecoration(
-                color: data.color,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: data.color, shape: BoxShape.circle),
             ),
             horizontalSpace(6),
-            Text(
-              data.x,
-              style: pMedium8.copyWith(
-                color: Glass.textSecondary(context),
-              ),
-            ),
+            Text(data.x, style: pMedium8.copyWith(color: Glass.textSecondary(context))),
           ],
         );
       }).toList(),
@@ -1294,65 +1017,33 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
   Widget _buildChart(BuildContext context) {
     return Container(
       height: 205,
-      padding: const EdgeInsets.fromLTRB(
-        8,
-        12,
-        8,
-        0,
-      ),
+      padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
       decoration: BoxDecoration(
         color: Glass.surfaceStrong(context),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Glass.border(context),
-        ),
+        border: Border.all(color: Glass.border(context)),
       ),
       child: SfCartesianChart(
         plotAreaBorderWidth: 0,
         enableAxisAnimation: false,
-        margin: const EdgeInsets.fromLTRB(
-          4,
-          8,
-          4,
-          4,
-        ),
-        legend: const Legend(
-          isVisible: false,
-        ),
+        margin: const EdgeInsets.fromLTRB(4, 8, 4, 4),
+        legend: const Legend(isVisible: false),
         primaryXAxis: CategoryAxis(
           interval: 1,
           borderWidth: 0,
-          majorGridLines: const MajorGridLines(
-            width: 0,
-          ),
-          majorTickLines: const MajorTickLines(
-            width: 0,
-          ),
-          axisLine: const AxisLine(
-            width: 0,
-          ),
-          labelStyle: pMedium8.copyWith(
-            color: Glass.textMuted(context),
-          ),
+          majorGridLines: const MajorGridLines(width: 0),
+          majorTickLines: const MajorTickLines(width: 0),
+          axisLine: const AxisLine(width: 0),
+          labelStyle: pMedium8.copyWith(color: Glass.textMuted(context)),
         ),
         primaryYAxis: NumericAxis(
           borderWidth: 0,
-          majorGridLines: MajorGridLines(
-            color: Glass.chartGrid(context),
-          ),
-          majorTickLines: const MajorTickLines(
-            width: 0,
-          ),
-          axisLine: const AxisLine(
-            width: 0,
-          ),
-          labelStyle: pMedium8.copyWith(
-            color: Glass.textMuted(context),
-          ),
+          majorGridLines: MajorGridLines(color: Glass.chartGrid(context)),
+          majorTickLines: const MajorTickLines(width: 0),
+          axisLine: const AxisLine(width: 0),
+          labelStyle: pMedium8.copyWith(color: Glass.textMuted(context)),
         ),
-        tooltipBehavior: TooltipBehavior(
-          enable: false,
-        ),
+        tooltipBehavior: TooltipBehavior(enable: false),
         series: <CartesianSeries<BarChartData, String>>[
           ColumnSeries<BarChartData, String>(
             dataSource: chartData,
@@ -1360,13 +1051,9 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
             yValueMapper: (data, _) => data.desktop,
             pointColorMapper: (data, _) => data.color,
             width: 0.55,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(7),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
             animationDuration: 700,
-            dataLabelSettings: const DataLabelSettings(
-              isVisible: false,
-            ),
+            dataLabelSettings: const DataLabelSettings(isVisible: false),
           ),
         ],
       ),
@@ -1383,12 +1070,7 @@ class BrowsersGraph extends StatefulWidget {
   final List<DeviceData>? device;
   final bool isDevice;
 
-  const BrowsersGraph({
-    Key? key,
-    this.browser,
-    this.device,
-    required this.isDevice,
-  }) : super(key: key);
+  const BrowsersGraph({Key? key, this.browser, this.device, required this.isDevice}) : super(key: key);
 
   @override
   State<BrowsersGraph> createState() => _BrowsersGraphState();
@@ -1435,11 +1117,7 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
       } else {
         chartData = (widget.device ?? []).asMap().entries.map((entry) {
           final element = entry.value;
-          return _ChartData(
-            element.device ?? '',
-            element.data ?? 0,
-            palette[entry.key % palette.length],
-          );
+          return _ChartData(element.device ?? '', element.data ?? 0, palette[entry.key % palette.length]);
         }).toList();
       }
     } else {
@@ -1454,11 +1132,7 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
       } else {
         chartData = (widget.browser ?? []).asMap().entries.map((entry) {
           final element = entry.value;
-          return _ChartData(
-            element.browser ?? '',
-            element.data ?? 0,
-            palette[entry.key % palette.length],
-          );
+          return _ChartData(element.browser ?? '', element.data ?? 0, palette[entry.key % palette.length]);
         }).toList();
       }
     }
@@ -1468,21 +1142,15 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
   Widget build(BuildContext context) {
     return GlassCard(
       title: widget.isDevice ? 'Devices'.tr : 'Browsers'.tr,
-      subtitle: widget.isDevice
-          ? 'Visitors by device'.tr
-          : 'Visitors by browser'.tr,
-      icon: widget.isDevice
-          ? Icons.phone_iphone_rounded
-          : Icons.public_rounded,
+      subtitle: widget.isDevice ? 'Visitors by device'.tr : 'Visitors by browser'.tr,
+      icon: widget.isDevice ? Icons.phone_iphone_rounded : Icons.public_rounded,
       child: chartData.isEmpty
           ? SizedBox(
         height: 120,
         child: Center(
           child: Text(
             'No data'.tr,
-            style: pRegular10.copyWith(
-              color: Glass.textMuted(context),
-            ),
+            style: pRegular10.copyWith(color: Glass.textMuted(context)),
           ),
         ),
       )
@@ -1490,9 +1158,7 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
         children: [
           SizedBox(
             height: 210,
-            child: widget.isDevice
-                ? _buildPieChart(context)
-                : _buildRadialChart(context),
+            child: widget.isDevice ? _buildPieChart(context) : _buildRadialChart(context),
           ),
           verticalSpace(10),
           _buildDetails(context),
@@ -1517,25 +1183,12 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
           dataLabelSettings: DataLabelSettings(
             isVisible: true,
             labelPosition: ChartDataLabelPosition.outside,
-            textStyle: pSemiBold8.copyWith(
-              color: Glass.textSecondary(context),
-            ),
-            connectorLineSettings: const ConnectorLineSettings(
-              length: '10%',
-              type: ConnectorType.curve,
-            ),
-            builder: (
-                data,
-                point,
-                series,
-                pointIndex,
-                seriesIndex,
-                ) {
+            textStyle: pSemiBold8.copyWith(color: Glass.textSecondary(context)),
+            connectorLineSettings: const ConnectorLineSettings(length: '10%', type: ConnectorType.curve),
+            builder: (data, point, series, pointIndex, seriesIndex) {
               return Text(
                 chartData[pointIndex].y.toString(),
-                style: pSemiBold8.copyWith(
-                  color: chartData[pointIndex].color,
-                ),
+                style: pSemiBold8.copyWith(color: chartData[pointIndex].color),
               );
             },
           ),
@@ -1545,10 +1198,7 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
   }
 
   Widget _buildRadialChart(BuildContext context) {
-    final maxValue = chartData.fold<num>(
-      0,
-          (max, item) => item.y > max ? item.y : max,
-    );
+    final maxValue = chartData.fold<num>(0, (max, item) => item.y > max ? item.y : max);
 
     return SfCircularChart(
       margin: EdgeInsets.zero,
@@ -1560,9 +1210,7 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
           innerRadius: '32%',
           gap: '5%',
           strokeWidth: 0,
-          trackColor: Glass.isDark(context)
-              ? Colors.white.withOpacity(.06)
-              : const Color(0xFFE5E7EB),
+          trackColor: Glass.isDark(context) ? Colors.white.withOpacity(.06) : const Color(0xFFE5E7EB),
           cornerStyle: CornerStyle.bothCurve,
           xValueMapper: (data, _) => data.x,
           yValueMapper: (data, _) => data.y,
@@ -1577,42 +1225,24 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
       children: chartData.map((data) {
         return Container(
           margin: const EdgeInsets.only(bottom: 7),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: Glass.surfaceStrong(context),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: Glass.border(context),
-            ),
+            border: Border.all(color: Glass.border(context)),
           ),
           child: Row(
             children: [
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(
-                  color: data.color,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: data.color, shape: BoxShape.circle),
               ),
               horizontalSpace(9),
               Expanded(
-                child: Text(
-                  data.x,
-                  style: pMedium10.copyWith(
-                    color: Glass.textSecondary(context),
-                  ),
-                ),
+                child: Text(data.x, style: pMedium10.copyWith(color: Glass.textSecondary(context))),
               ),
-              Text(
-                data.y.toString(),
-                style: pBold12.copyWith(
-                  color: Glass.textPrimary(context),
-                ),
-              ),
+              Text(data.y.toString(), style: pBold12.copyWith(color: Glass.textPrimary(context))),
             ],
           ),
         );
@@ -1626,11 +1256,7 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
 // ============================================================
 
 class BarChartData {
-  BarChartData(
-      this.x,
-      this.desktop,
-      this.color,
-      );
+  BarChartData(this.x, this.desktop, this.color);
 
   final String x;
   final num desktop;
@@ -1642,12 +1268,13 @@ class _ChartData {
   final int y;
   final Color color;
 
-  _ChartData(
-      this.x,
-      this.y,
-      this.color,
-      );
+  _ChartData(this.x, this.y, this.color);
 }
+
+// ============================================================
+// TOP URL PAINTER (بدون تغيير)
+// ============================================================
+
 class _TopUrlLinePainter extends CustomPainter {
   final List<_TopUrlChartData> data;
   final Animation<double> animation;
@@ -1665,10 +1292,7 @@ class _TopUrlLinePainter extends CustomPainter {
   }) : super(repaint: animation);
 
   @override
-  void paint(
-      Canvas canvas,
-      Size size,
-      ) {
+  void paint(Canvas canvas, Size size) {
     if (data.length < 2) {
       return;
     }
@@ -1681,26 +1305,15 @@ class _TopUrlLinePainter extends CustomPainter {
       return;
     }
 
-    // نفس الـanimation controller
-    final progress = Curves.easeInOutCubic.transform(
+    final progress = Curves.easeIn.transform(
       animation.value.clamp(0.0, 1.0),
     );
-
     if (progress <= 0) {
       return;
     }
 
-    final visibleLength =
-        metric.length * progress;
-
-    final visiblePath = metric.extractPath(
-      0,
-      visibleLength,
-    );
-
-    // =========================
-    // LINE
-    // =========================
+    final visibleLength = metric.length * progress;
+    final visiblePath = metric.extractPath(0, visibleLength);
 
     final linePaint = Paint()
       ..color = lineColor
@@ -1709,14 +1322,7 @@ class _TopUrlLinePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    canvas.drawPath(
-      visiblePath,
-      linePaint,
-    );
-
-    // =========================
-    // AREA
-    // =========================
+    canvas.drawPath(visiblePath, linePaint);
 
     _drawArea(
       canvas: canvas,
@@ -1740,11 +1346,8 @@ class _TopUrlLinePainter extends CustomPainter {
     const top = 18.0;
     const bottom = 28.0;
 
-    final width =
-        size.width - left - right;
-
-    final height =
-        size.height - top - bottom;
+    final width = size.width - left - right;
+    final height = size.height - top - bottom;
 
     if (width <= 0 || height <= 0) {
       return;
@@ -1757,7 +1360,6 @@ class _TopUrlLinePainter extends CustomPainter {
       if (item.y < minY) {
         minY = item.y;
       }
-
       if (item.y > maxY) {
         maxY = item.y;
       }
@@ -1766,21 +1368,15 @@ class _TopUrlLinePainter extends CustomPainter {
     final range = maxY - minY;
 
     double x(int index) {
-      return left +
-          (width * index / (data.length - 1));
+      return left + (width * index / (data.length - 1));
     }
 
     double y(double value) {
       if (range == 0) {
         return top + height / 2;
       }
-
-      final normalized =
-          (value - minY) / range;
-
-      return top +
-          height -
-          (normalized * height);
+      final normalized = (value - minY) / range;
+      return top + height - (normalized * height);
     }
 
     final path = Path();
@@ -1790,33 +1386,18 @@ class _TopUrlLinePainter extends CustomPainter {
       final currentY = y(data[i].y);
 
       if (i == 0) {
-        path.moveTo(
-          currentX,
-          currentY,
-        );
+        path.moveTo(currentX, currentY);
         continue;
       }
 
       final previousX = x(i - 1);
       final previousY = y(data[i - 1].y);
+      final controlX = (previousX + currentX) / 2;
 
-      final controlX =
-          (previousX + currentX) / 2;
-
-      path.cubicTo(
-        controlX,
-        previousY,
-        controlX,
-        currentY,
-        currentX,
-        currentY,
-      );
+      path.cubicTo(controlX, previousY, controlX, currentY, currentX, currentY);
     }
 
-    final metrics =
-    path.computeMetrics().toList(
-      growable: false,
-    );
+    final metrics = path.computeMetrics().toList(growable: false);
 
     if (metrics.isEmpty) {
       return;
@@ -1836,79 +1417,132 @@ class _TopUrlLinePainter extends CustomPainter {
     const top = 18.0;
     const bottom = 28.0;
 
-    final height =
-        size.height - top - bottom;
+    final height = size.height - top - bottom;
 
-    final tangent =
-    metric.getTangentForOffset(
-      visibleLength.clamp(
-        0.0,
-        metric.length,
-      ),
-    );
+    final tangent = metric.getTangentForOffset(visibleLength.clamp(0.0, metric.length));
 
     if (tangent == null) {
       return;
     }
 
     final areaPath = Path()
-      ..addPath(
-        visiblePath,
-        Offset.zero,
-      )
-      ..lineTo(
-        tangent.position.dx,
-        top + height,
-      )
-      ..lineTo(
-        left,
-        top + height,
-      )
+      ..addPath(visiblePath, Offset.zero)
+      ..lineTo(tangent.position.dx, top + height)
+      ..lineTo(left, top + height)
       ..close();
 
     final fillPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
-          fillColor,
-          fillColor.withOpacity(0),
-        ],
-      ).createShader(
-        Rect.fromLTWH(
-          0,
-          top,
-          size.width,
-          height,
-        ),
-      );
+        colors: [fillColor, fillColor.withOpacity(0)],
+      ).createShader(Rect.fromLTWH(0, top, size.width, height));
 
-    canvas.drawPath(
-      areaPath,
-      fillPaint,
-    );
+    canvas.drawPath(areaPath, fillPaint);
   }
 
   @override
-  bool shouldRepaint(
-      covariant _TopUrlLinePainter oldDelegate,
-      ) {
+  bool shouldRepaint(covariant _TopUrlLinePainter oldDelegate) {
     return oldDelegate.data != data ||
         oldDelegate.animation != animation ||
         oldDelegate.lineColor != lineColor ||
         oldDelegate.fillColor != fillColor;
   }
 }
+
+// ============================================================
+// طبقة ثابتة: شبكة + Y labels + date labels + value labels
+// بترسم مرة وحدة بس، ما إلها علاقة بالأنيميشن إطلاقًا
+// ============================================================
+class _VisitorStaticPainter extends CustomPainter {
+  final List<ChartData> data;
+
+  static const double left = 42;
+  static const double right = 14;
+  static const double top = 18;
+  static const double bottom = 34;
+
+  _VisitorStaticPainter({required this.data});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (data.isEmpty) return;
+
+    final chartWidth = size.width - left - right;
+    final chartHeight = size.height - top - bottom;
+    if (chartWidth <= 0 || chartHeight <= 0) return;
+
+    double maxY = 0;
+    for (final item in data) {
+      final value = (item.desktop + item.mobile).toDouble();
+      if (value > maxY) maxY = value;
+    }
+    if (maxY <= 0) maxY = 1;
+
+    final gridPaint = Paint()
+      ..color = const Color(0xFFE5E7EB)
+      ..strokeWidth = 1;
+    const divisions = 4;
+    for (int i = 0; i <= divisions; i++) {
+      final gridY = top + chartHeight * i / divisions;
+      canvas.drawLine(Offset(left, gridY), Offset(size.width - right, gridY), gridPaint);
+    }
+
+    final yTextStyle = pMedium8.copyWith(color: const Color(0xFF9CA3AF));
+    for (int i = 0; i <= divisions; i++) {
+      final value = maxY - (maxY * i / divisions);
+      final painter = TextPainter(
+        text: TextSpan(text: _formatNumber(value), style: yTextStyle),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final labelY = top + chartHeight * i / divisions;
+      painter.paint(canvas, Offset(left - painter.width - 8, labelY - painter.height / 2));
+    }
+
+    double x(int index) =>
+        data.length == 1 ? left + chartWidth / 2 : left + chartWidth * index / (data.length - 1);
+    double y(double value) => top + chartHeight - (value / maxY).clamp(0.0, 1.0) * chartHeight;
+
+    for (int i = 0; i < data.length; i++) {
+      final value = (data[i].desktop + data[i].mobile).toDouble();
+      final point = Offset(x(i), y(value));
+      final painter = TextPainter(
+        text: TextSpan(text: _formatNumber(value), style: pSemiBold8.copyWith(color: StatisticsTheme.primary)),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      painter.paint(canvas, Offset(point.dx - painter.width / 2, point.dy - painter.height - 7));
+    }
+
+    final dateStyle = pMedium8.copyWith(color: const Color(0xFF9CA3AF));
+    for (int i = 0; i < data.length; i++) {
+      if (data.length > 8 && i % 2 != 0 && i != data.length - 1) continue;
+      final painter = TextPainter(
+        text: TextSpan(text: data[i].x, style: dateStyle),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final px = x(i);
+      painter.paint(canvas, Offset(px - painter.width / 2, size.height - bottom + 8));
+    }
+  }
+
+  String _formatNumber(double value) {
+    if (value >= 1000) {
+      final formatted =
+      value % 1000 == 0 ? (value / 1000).toStringAsFixed(0) : (value / 1000).toStringAsFixed(1);
+      return '${formatted}k';
+    }
+    return value.round().toString();
+  }
+
+  @override
+  bool shouldRepaint(covariant _VisitorStaticPainter oldDelegate) => oldDelegate.data != data;
+}
+
 class _VisitorLinePainter extends CustomPainter {
   final List<ChartData> data;
   final Animation<double> animation;
   final Color lineColor;
   final Color fillColor;
-
-  static const double left = 42.0;
-  static const double right = 14.0;
-  static const double top = 18.0;
-  static const double bottom = 34.0;
 
   _VisitorLinePainter({
     required this.data,
@@ -1917,54 +1551,176 @@ class _VisitorLinePainter extends CustomPainter {
     required this.fillColor,
   }) : super(repaint: animation);
 
+  static const double left = 42;
+  static const double right = 14;
+  static const double top = 18;
+  static const double bottom = 34;
+
+  Path? _linePath;
   PathMetric? _metric;
   Size? _lastSize;
 
-  double _minY = 0;
-  double _maxY = 1;
+  void _ensurePath(Size size) {
+    if (_linePath != null && _lastSize == size) {
+      return;
+    }
 
-  double _value(ChartData item) {
-    return (item.desktop + item.mobile).toDouble();
+    final chartWidth = size.width - left - right;
+    final chartHeight = size.height - top - bottom;
+
+    if (chartWidth <= 0 || chartHeight <= 0 || data.isEmpty) {
+      _linePath = null;
+      _metric = null;
+      return;
+    }
+
+    // نفس القيمة المستخدمة في _VisitorStaticPainter
+    final values = data
+        .map((e) => (e.desktop + e.mobile).toDouble())
+        .toList();
+
+    // نفس مقياس الـ Y الموجود في الرسم الثابت
+    double maxY = 0;
+
+    for (final value in values) {
+      if (value > maxY) {
+        maxY = value;
+      }
+    }
+
+    if (maxY <= 0) {
+      maxY = 1;
+    }
+
+    double x(int index) {
+      if (data.length == 1) {
+        return left + chartWidth / 2;
+      }
+
+      return left +
+          chartWidth * index / (data.length - 1);
+    }
+
+    double y(double value) {
+      final normalized =
+      (value / maxY).clamp(0.0, 1.0);
+
+      return top +
+          chartHeight -
+          normalized * chartHeight;
+    }
+
+    final path = Path();
+
+    for (int i = 0; i < data.length; i++) {
+      final currentX = x(i);
+      final currentY = y(values[i]);
+
+      if (i == 0) {
+        path.moveTo(currentX, currentY);
+        continue;
+      }
+
+      final previousX = x(i - 1);
+      final previousY = y(values[i - 1]);
+
+      // منحنى ناعم بين النقطتين
+      final controlX = (previousX + currentX) / 2;
+
+      path.cubicTo(
+        controlX,
+        previousY,
+        controlX,
+        currentY,
+        currentX,
+        currentY,
+      );
+    }
+
+    _linePath = path;
+    _lastSize = size;
+
+    final metrics = path.computeMetrics().toList(growable: false);
+
+    _metric = metrics.isEmpty ? null : metrics.first;
   }
 
   @override
-  void paint(
-      Canvas canvas,
-      Size size,
-      ) {
-    if (data.isEmpty) return;
-
+  void paint(Canvas canvas, Size size) {
     _ensurePath(size);
 
     final metric = _metric;
 
-    if (metric == null) return;
+    if (metric == null || metric.length <= 0) {
+      return;
+    }
 
-    final progress =
-    Curves.easeInOutCubic.transform(
+    // 0 → 1
+    final progress = Curves.easeInOutCubic.transform(
       animation.value.clamp(0.0, 1.0),
     );
 
-    if (progress <= 0) return;
+    if (progress <= 0) {
+      return;
+    }
 
-    final visibleLength =
-        metric.length * progress;
+    // طول الجزء الذي سيتم رسمه
+    final visibleLength = metric.length * progress;
 
-    final visiblePath =
-    metric.extractPath(
+    // أهم سطر:
+    // يرسم الـ Path فعليًا من اليسار لليمين
+    final visiblePath = metric.extractPath(
       0,
       visibleLength,
     );
 
-    _drawGrid(canvas, size);
+    // =========================================================
+    // AREA / GRADIENT
+    // =========================================================
 
-    _drawArea(
-      canvas,
-      size,
-      metric,
-      visiblePath,
-      visibleLength,
+    final tangent = metric.getTangentForOffset(
+      visibleLength.clamp(0.0, metric.length),
     );
+
+    if (tangent != null) {
+      final areaPath = Path()
+        ..addPath(visiblePath, Offset.zero)
+        ..lineTo(
+          tangent.position.dx,
+          size.height - bottom,
+        )
+        ..lineTo(
+          left,
+          size.height - bottom,
+        )
+        ..close();
+
+      final areaPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            fillColor,
+            fillColor.withOpacity(0),
+          ],
+        ).createShader(
+          Rect.fromLTWH(
+            0,
+            top,
+            size.width,
+            size.height - top - bottom,
+          ),
+        );
+
+      canvas.drawPath(
+        areaPath,
+        areaPaint,
+      );
+    }
+
+    // =========================================================
+    // LINE
+    // =========================================================
 
     final linePaint = Paint()
       ..color = lineColor
@@ -1977,371 +1733,6 @@ class _VisitorLinePainter extends CustomPainter {
       visiblePath,
       linePaint,
     );
-
-    _drawValues(canvas, size);
-
-    _drawDates(canvas, size);
-  }
-
-  void _ensurePath(Size size) {
-    if (_metric != null &&
-        _lastSize == size) {
-      return;
-    }
-
-    _lastSize = size;
-    _metric = null;
-
-    final width =
-        size.width - left - right;
-
-    final height =
-        size.height - top - bottom;
-
-    if (width <= 0 || height <= 0) {
-      return;
-    }
-
-    _minY = 0;
-    _maxY = 0;
-
-    for (final item in data) {
-      final value = _value(item);
-
-      if (value > _maxY) {
-        _maxY = value;
-      }
-    }
-
-    if (_maxY <= 0) {
-      _maxY = 1;
-    }
-
-    double x(int index) {
-      if (data.length == 1) {
-        return left + width / 2;
-      }
-
-      return left +
-          width *
-              index /
-              (data.length - 1);
-    }
-
-    double y(double value) {
-      final normalized =
-          (value - _minY) /
-              (_maxY - _minY);
-
-      return top +
-          height -
-          normalized.clamp(0.0, 1.0) *
-              height;
-    }
-
-    final path = Path();
-
-    for (int i = 0; i < data.length; i++) {
-      final currentX = x(i);
-      final currentY =
-      y(_value(data[i]));
-
-      if (i == 0) {
-        path.moveTo(
-          currentX,
-          currentY,
-        );
-        continue;
-      }
-
-      final previousX = x(i - 1);
-      final previousY =
-      y(_value(data[i - 1]));
-
-      final controlX =
-          (previousX + currentX) / 2;
-
-      path.cubicTo(
-        controlX,
-        previousY,
-        controlX,
-        currentY,
-        currentX,
-        currentY,
-      );
-    }
-
-    final metrics =
-    path.computeMetrics().toList(
-      growable: false,
-    );
-
-    if (metrics.isNotEmpty) {
-      _metric = metrics.first;
-    }
-  }
-
-  void _drawGrid(
-      Canvas canvas,
-      Size size,
-      ) {
-    final chartHeight =
-        size.height - top - bottom;
-
-    final gridPaint = Paint()
-      ..color = const Color(0xFFE5E7EB)
-      ..strokeWidth = 1;
-
-    const divisions = 4;
-
-    for (int i = 0; i <= divisions; i++) {
-      final y =
-          top +
-              chartHeight *
-                  i /
-                  divisions;
-
-      canvas.drawLine(
-        Offset(left, y),
-        Offset(
-          size.width - right,
-          y,
-        ),
-        gridPaint,
-      );
-    }
-
-    final textStyle =
-    pMedium8.copyWith(
-      color: const Color(0xFF9CA3AF),
-    );
-
-    for (int i = 0; i <= divisions; i++) {
-      final value =
-          _maxY -
-              ((_maxY - _minY) *
-                  i /
-                  divisions);
-
-      final text =
-      _formatNumber(value);
-
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: text,
-          style: textStyle,
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      final y =
-          top +
-              chartHeight *
-                  i /
-                  divisions;
-
-      textPainter.paint(
-        canvas,
-        Offset(
-          left -
-              textPainter.width -
-              8,
-          y -
-              textPainter.height / 2,
-        ),
-      );
-    }
-  }
-
-  String _formatNumber(double value) {
-    if (value >= 1000) {
-      final formatted =
-      value % 1000 == 0
-          ? (value / 1000)
-          .toStringAsFixed(0)
-          : (value / 1000)
-          .toStringAsFixed(1);
-
-      return '${formatted}k';
-    }
-
-    return value.round().toString();
-  }
-
-  void _drawArea(
-      Canvas canvas,
-      Size size,
-      PathMetric metric,
-      Path visiblePath,
-      double visibleLength,
-      ) {
-    final chartBottom =
-        size.height - bottom;
-
-    final tangent =
-    metric.getTangentForOffset(
-      visibleLength.clamp(
-        0.0,
-        metric.length,
-      ),
-    );
-
-    if (tangent == null) return;
-
-    final areaPath = Path()
-      ..addPath(
-        visiblePath,
-        Offset.zero,
-      )
-      ..lineTo(
-        tangent.position.dx,
-        chartBottom,
-      )
-      ..lineTo(
-        left,
-        chartBottom,
-      )
-      ..close();
-
-    final fillPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          fillColor,
-          fillColor.withOpacity(0),
-        ],
-      ).createShader(
-        Rect.fromLTWH(
-          0,
-          top,
-          size.width,
-          chartBottom - top,
-        ),
-      );
-
-    canvas.drawPath(
-      areaPath,
-      fillPaint,
-    );
-  }
-
-  void _drawValues(
-      Canvas canvas,
-      Size size,
-      ) {
-    if (data.isEmpty) return;
-
-    final chartWidth =
-        size.width - left - right;
-
-    final chartHeight =
-        size.height - top - bottom;
-
-    double x(int index) {
-      if (data.length == 1) {
-        return left +
-            chartWidth / 2;
-      }
-
-      return left +
-          chartWidth *
-              index /
-              (data.length - 1);
-    }
-
-    double y(double value) {
-      final normalized =
-          (value - _minY) /
-              (_maxY - _minY);
-
-      return top +
-          chartHeight -
-          normalized.clamp(0.0, 1.0) *
-              chartHeight;
-    }
-
-    for (int i = 0; i < data.length; i++) {
-      final value =
-      _value(data[i]);
-
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: _formatNumber(value),
-          style: pSemiBold8.copyWith(
-            color: lineColor,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      textPainter.paint(
-        canvas,
-        Offset(
-          x(i) -
-              textPainter.width / 2,
-          y(value) -
-              textPainter.height -
-              7,
-        ),
-      );
-    }
-  }
-
-  void _drawDates(
-      Canvas canvas,
-      Size size,
-      ) {
-    if (data.isEmpty) return;
-
-    final chartWidth =
-        size.width - left - right;
-
-    final textStyle =
-    pMedium8.copyWith(
-      color: const Color(0xFF9CA3AF),
-    );
-
-    double x(int index) {
-      if (data.length == 1) {
-        return left +
-            chartWidth / 2;
-      }
-
-      return left +
-          chartWidth *
-              index /
-              (data.length - 1);
-    }
-
-    for (int i = 0; i < data.length; i++) {
-      if (data.length > 8 &&
-          i % 2 != 0 &&
-          i != data.length - 1) {
-        continue;
-      }
-
-      final text = data[i].x;
-
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: text,
-          style: textStyle,
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      textPainter.paint(
-        canvas,
-        Offset(
-          x(i) -
-              textPainter.width / 2,
-          size.height -
-              bottom +
-              8,
-        ),
-      );
-    }
   }
 
   @override
