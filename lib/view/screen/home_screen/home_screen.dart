@@ -47,12 +47,30 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   final ThemeController themeController = Get.find<ThemeController>();
   final GlobalKey<LiquidPullToRefreshState> _refreshIndicatorKey = GlobalKey<LiquidPullToRefreshState>();  @override
   bool get wantKeepAlive => true;
+  late final AnimationController _visitorChartController;
+  late final AnimationController _visitorLineOpacityController;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getData());
+
+    _visitorChartController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 30),
+    );
+
+    _visitorLineOpacityController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+      value: 1,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getData();
+      _startVisitorChartAnimation();
+    });
   }
+
 
   Future<void> getData() async {
     await homeController.getDashboardData();
@@ -104,42 +122,42 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 "StoreSyria Admin",
                             onValue: (_) => getData(),
                           ),
-                          verticalSpace(16),
-
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? DarkThemeColor.cCardBackground
-                                  : AppColor.themeGreenColor.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Icons.lightbulb_outline_rounded,
-                                    size: 18, color: AppColor.themeGreenColor),
-                                horizontalSpace(10),
-                                Expanded(
-                                  child: Text.rich(
-                                    TextSpan(
-                                      text: 'Have a nice day! '.tr,
-                                      style: pBold12.copyWith(color: AppColor.cDarkGreyFont),
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                          text: 'Did you know that you can quickly add your favorite product or category to the store?'
-                                              .tr,
-                                          style: pRegular12.copyWith(
-                                              color: AppColor.cDarkGreyFont),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          // verticalSpace(16),
+                          //
+                          // Container(
+                          //   width: double.infinity,
+                          //   padding: const EdgeInsets.all(14),
+                          //   decoration: BoxDecoration(
+                          //     color: isDark
+                          //         ? DarkThemeColor.cCardBackground
+                          //         : AppColor.themeGreenColor.withOpacity(0.08),
+                          //     borderRadius: BorderRadius.circular(16),
+                          //   ),
+                          //   child: Row(
+                          //     crossAxisAlignment: CrossAxisAlignment.start,
+                          //     children: [
+                          //       Icon(Icons.lightbulb_outline_rounded,
+                          //           size: 18, color: AppColor.themeGreenColor),
+                          //       horizontalSpace(10),
+                          //       Expanded(
+                          //         child: Text.rich(
+                          //           TextSpan(
+                          //             text: 'Have a nice day! '.tr,
+                          //             style: pBold12.copyWith(color: AppColor.cDarkGreyFont),
+                          //             children: <TextSpan>[
+                          //               TextSpan(
+                          //                 text: 'Did you know that you can quickly add your favorite product or category to the store?'
+                          //                     .tr,
+                          //                 style: pRegular12.copyWith(
+                          //                     color: AppColor.cDarkGreyFont),
+                          //               ),
+                          //             ],
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
                           verticalSpace(16),
 
                           Obx(() {
@@ -307,13 +325,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                               ),
                             ),
                           ],
-                          verticalSpace(25),
-
-                          simpleAppBar(
-                            title: "Statistics".tr,
-                            label: "Show more statistics".tr,
-                            onNewLabelTap: () => Get.to(() => StatisticsScreen()),
-                          ),
                           verticalSpace(15),
                           qrCodeWidget(
                               qrString: homeController.dashboardData?.qrcode?.url ??
@@ -349,129 +360,115 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                               ),
                             ],
                           ),
+
                           verticalSpace(30),
-
-                          // Text("Orders".tr,
-                          //     style: pMedium16.copyWith(fontSize: 18, fontWeight: FontWeight.w700)),
-                          // verticalSpace(10),
-                          // OrderGraph(
-                          //     list: homeController.dashboardData?.orderchart ?? []),
-                          // verticalSpace(25),
-
-                          StatisticsCard(
-                            title: "Orders".tr,
-                            subtitle: "Orders overview".tr,
-                            child: OrderGraph(
-                              list: homeController.dashboardData?.orderchart ?? [],
-                            ),
+                          GlassVisitorChart(
+                            visitorChart: homeController.dashboardData?.visitorchart ??
+                                <VisitorChartData>[],
+                            animation: _visitorChartController,
+                            lineOpacity: _visitorLineOpacityController,
                           ),
                           verticalSpace(18),
 
-                          simpleAppBar(
-                            title: "Categories".tr,
-                            label: "add_category".tr,
-                            onNewLabelTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                backgroundColor: Colors.transparent,
-                                barrierColor: Colors.black54,
-                                isScrollControlled: true,
-                                useSafeArea: false,
-                                transitionAnimationController: AnimationController(
-                                  vsync: Navigator.of(context),
-                                  duration: const Duration(milliseconds: 400),
-                                ),
-                                builder: (context) {
-                                  return AddNewCategoriesWidget(
-                                    isUpdate: false,
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                          verticalSpace(15),
-                          Obx(() {
-                            if (categoryController.isLoading.value && categoryController.categoriesList.isEmpty) {
-                              return const Center(child: LoadingWidget());
-                            }
-                            if (categoryController.categoriesList.isEmpty) {
-                              return Container(
-                                height: 150,
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "no_categories_found".tr,
-                                  style: TextStyle(
-                                    color: isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont,
-                                  ),
-                                ),
-                              );
-                            }
-                            return GridView.builder(
-                              itemCount: categoryController.categoriesList.take(6).length,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 220.w,
-                                crossAxisSpacing: 12.w,
-                                mainAxisSpacing: 12.h,
-                                mainAxisExtent: 285.h,
-                              ),
-                              itemBuilder: (context, index) {
-                                final category = categoryController.categoriesList[index];
-                                return buildCategoryWidget(
-                                  context: context,
-                                  category: category,
-                                  categoryController: categoryController,
-                                );
-                              },
-                            );
-                          }),
-                          verticalSpace(25),
-
-                          simpleAppBar(
-                            title: "Recent orders".tr,
-                            label: "new_order".tr,
-                            onNewLabelTap: () {},
-                          ),
-                          verticalSpace(15),
-                          ListView.builder(
-                            itemCount: homeController.recentOrderList.length,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              final order = homeController.recentOrderList[index];
-                              return Padding(
-                                padding: EdgeInsets.only(bottom: 12.h),
-                                child: allOrdersListItemWidget(
-                                  context: context,
-                                  orderId: order.productOrderId ?? '',
-                                  date: order.orderDate ?? '',
-                                  maskedName: order.userName ?? '',
-                                  price: "${order.finalPrice ?? '0.00'}",
-                                  //paymentStatusLabel:order.paymentStatus,
-                                  //orderStatusLabel: order.deliveredStatusString,
-                                  onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id?.toString() ?? "")),
-                                  viewFun: () => Get.to(() => OrderDetailScreen(orderId: order.id?.toString() ?? "")),
-                                  deleteFun: () {
-                                    if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                      commonToast(AppConstant.demoString.tr);
-                                    } else {
-                                      orderController.deleteOrderData(orderId: order.id?.toString() ?? "");
-                                      getData();
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          verticalSpace(10),
-
-                          StatisticsVisitorGraph(
-                            visitorChart:
-                            homeController.dashboardData?.visitorchart ??
-                                <VisitorChartData>[],
-                          ),
-                        ],
+                          // simpleAppBar(
+                          //   title: "Categories".tr,
+                          //   label: "add_category".tr,
+                          //   onNewLabelTap: () {
+                          //     showModalBottomSheet(
+                          //       context: context,
+                          //       backgroundColor: Colors.transparent,
+                          //       barrierColor: Colors.black54,
+                          //       isScrollControlled: true,
+                          //       useSafeArea: false,
+                          //       transitionAnimationController: AnimationController(
+                          //         vsync: Navigator.of(context),
+                          //         duration: const Duration(milliseconds: 400),
+                          //       ),
+                          //       builder: (context) {
+                          //         return AddNewCategoriesWidget(
+                          //           isUpdate: false,
+                          //         );
+                          //       },
+                          //     );
+                          //   },
+                          // ),
+                          // verticalSpace(15),
+                          // Obx(() {
+                          //   if (categoryController.isLoading.value && categoryController.categoriesList.isEmpty) {
+                          //     return const Center(child: LoadingWidget());
+                          //   }
+                          //   if (categoryController.categoriesList.isEmpty) {
+                          //     return Container(
+                          //       height: 150,
+                          //       alignment: Alignment.center,
+                          //       child: Text(
+                          //         "no_categories_found".tr,
+                          //         style: TextStyle(
+                          //           color: isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont,
+                          //         ),
+                          //       ),
+                          //     );
+                          //   }
+                          //   return GridView.builder(
+                          //     itemCount: categoryController.categoriesList.take(6).length,
+                          //     shrinkWrap: true,
+                          //     physics: const NeverScrollableScrollPhysics(),
+                          //     gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          //       maxCrossAxisExtent: 220.w,
+                          //       crossAxisSpacing: 12.w,
+                          //       mainAxisSpacing: 12.h,
+                          //       mainAxisExtent: 285.h,
+                          //     ),
+                          //     itemBuilder: (context, index) {
+                          //       final category = categoryController.categoriesList[index];
+                          //       return buildCategoryWidget(
+                          //         context: context,
+                          //         category: category,
+                          //         categoryController: categoryController,
+                          //       );
+                          //     },
+                          //   );
+                          // }),
+                          // verticalSpace(25),
+                          //
+                          // simpleAppBar(
+                          //   title: "Recent orders".tr,
+                          //   label: "new_order".tr,
+                          //   onNewLabelTap: () {},
+                          // ),
+                          // verticalSpace(15),
+                          // ListView.builder(
+                          //   itemCount: homeController.recentOrderList.length,
+                          //   shrinkWrap: true,
+                          //   physics: const NeverScrollableScrollPhysics(),
+                          //   itemBuilder: (context, index) {
+                          //     final order = homeController.recentOrderList[index];
+                          //     return Padding(
+                          //       padding: EdgeInsets.only(bottom: 12.h),
+                          //       child: allOrdersListItemWidget(
+                          //         context: context,
+                          //         orderId: order.productOrderId ?? '',
+                          //         date: order.orderDate ?? '',
+                          //         maskedName: order.userName ?? '',
+                          //         price: "${order.finalPrice ?? '0.00'}",
+                          //         //paymentStatusLabel:order.paymentStatus,
+                          //         //orderStatusLabel: order.deliveredStatusString,
+                          //         onTap: () => Get.to(() => OrderDetailScreen(orderId: order.id?.toString() ?? "")),
+                          //         viewFun: () => Get.to(() => OrderDetailScreen(orderId: order.id?.toString() ?? "")),
+                          //         deleteFun: () {
+                          //           if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+                          //             commonToast(AppConstant.demoString.tr);
+                          //           } else {
+                          //             orderController.deleteOrderData(orderId: order.id?.toString() ?? "");
+                          //             getData();
+                          //           }
+                          //         },
+                          //       ),
+                          //     );
+                          //   },
+                          // ),
+                          // verticalSpace(10),
+                      ],
                       ),
                     ),
                   ),
@@ -479,7 +476,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               });
         });
   }
-
   Widget buildListTile({String? image, String? text, Function()? onPressed}) {
     return ListTile(
       leading: assetSvdImageWidget(image: image!),
@@ -527,5 +523,37 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
         ),
       ),
     );
+  }
+  Future<void> _startVisitorChartAnimation() async {
+    if (!mounted) return;
+
+    await _visitorChartController.forward(from: 0);
+
+    if (!mounted) return;
+
+    await Future.delayed(
+      const Duration(milliseconds: 900),
+    );
+
+    if (!mounted) return;
+
+    await _visitorLineOpacityController.reverse();
+
+    if (!mounted) return;
+
+    _visitorChartController.value = 0;
+
+    await _visitorLineOpacityController.forward();
+
+    if (!mounted) return;
+
+    _startVisitorChartAnimation();
+  }
+  @override
+  void dispose() {
+    _visitorChartController.dispose();
+    _visitorLineOpacityController.dispose();
+
+    super.dispose();
   }
 }
