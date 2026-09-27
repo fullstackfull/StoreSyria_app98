@@ -177,7 +177,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                             if (taxController.nameController.text.isNotEmpty || taxController.amountController.text.isNotEmpty || taxController.chargesType.isNotEmpty) {
                               if (widget.isUpdate == true) {
                                 if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                  commonToast(AppConstant.demoString.tr);
+                                  commonToast(type: AppSnackBarType.info, AppConstant.demoString.tr);
                                 } else {
                                   taxController.addTaxData(
                                     isUpdate: widget.isUpdate,
@@ -199,7 +199,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                                 );
                               }
                             } else {
-                              commonToast("Please fill all field".tr);
+                              commonToast(type: AppSnackBarType.info, "Please fill all field".tr);
                             }
                           },
                           width: 240,

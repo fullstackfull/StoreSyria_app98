@@ -310,7 +310,7 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
                               if (Prefs.getBool(
                                   AppConstant.isDemoMode) ==
                                   true) {
-                                commonToast(AppConstant.demoString);
+                                commonToast(type: AppSnackBarType.info, AppConstant.demoString);
                               } else {
                                 addReviewController.addReview(
                                   id: widget.id,

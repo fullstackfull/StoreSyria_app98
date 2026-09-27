@@ -19,7 +19,6 @@ class TopOrderModel {
 class TopOrderData {
   int? storeId;
   String? storeName;
-  String? currentCurrency;
   List<TopOrderItem>? topOrders;
   int? count;
 
@@ -34,7 +33,6 @@ class TopOrderData {
     storeId = json['store_id'];
     storeName = json['store_name'];
     count = json['count'];
-    currentCurrency = json['currency_symbol'];
 
     if (json['top_orders'] != null && json['top_orders'] is List) {
       topOrders = <TopOrderItem>[];
@@ -52,6 +50,7 @@ class TopOrderItem {
   int? customerId;
   String? orderDate;
   String? finalPrice;
+  String? currencySymbol;
   String? paymentStatus;
   int? deliveredStatus;
   String? deliveredStatusText;
@@ -59,6 +58,7 @@ class TopOrderItem {
   TopOrderItem({
     this.id,
     this.orderNumber,
+    this.currencySymbol,
     this.customerName,
     this.customerId,
     this.orderDate,
@@ -71,6 +71,7 @@ class TopOrderItem {
   TopOrderItem.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     orderNumber = json['order_number'];
+    currencySymbol = json['currency_symbol'];
     customerName = json['customer_name'];
     customerId = json['customer_id'];
     orderDate = json['order_date'];
@@ -88,6 +89,7 @@ class TopOrderItem {
       productOrderId: orderNumber,
       orderDate: orderDate,
       userId: customerId,
+      currencySymbol:currencySymbol,
       finalPrice: finalPrice,
       paymentStatus: paymentStatus,
       deliveredStatus: deliveredStatus,

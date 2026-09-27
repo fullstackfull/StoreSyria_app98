@@ -152,7 +152,7 @@ class CategoryController extends GetxController
             isScroll.value = true;
           }
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']['message'] ?? '',
           );
         }
@@ -162,7 +162,7 @@ class CategoryController extends GetxController
           errors,) {
         errorMessage.value = message;
 
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -197,7 +197,7 @@ class CategoryController extends GetxController
 
           categoriesList.refresh();
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']['message'] ?? '',
           );
         }
@@ -205,7 +205,7 @@ class CategoryController extends GetxController
       onFailure: (reason,
           message,
           errors,) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
 
@@ -287,7 +287,7 @@ class CategoryController extends GetxController
         currantPage.value,
       );
     } else {
-      commonToast(
+      commonToast(type: AppSnackBarType.error, 
         response.reasonPhrase ?? '',
       );
     }
@@ -319,11 +319,11 @@ class CategoryController extends GetxController
                 categoriesModel!.data!.total! - 1;
           }
 
-          commonToast(
+          commonToast(type: AppSnackBarType.success, 
             data['data']['message'] ?? '',
           );
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']['message'] ??
                 'Delete failed',
           );
@@ -332,7 +332,7 @@ class CategoryController extends GetxController
       onFailure: (reason,
           message,
           errors,) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }

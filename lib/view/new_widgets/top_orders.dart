@@ -124,19 +124,19 @@ Widget topOrderCardWidget({
 
           /// ================= DATE =================
 
-         Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                date,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w500,
-                  color: subTextColor,
-                ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              date,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w500,
+                color: subTextColor,
               ),
             ),
+          ),
         ],
       ),
     ),

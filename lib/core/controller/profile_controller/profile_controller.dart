@@ -96,7 +96,7 @@ class ProfileController extends GetxController {
           response.statusCode == 201) {
         if (decodedData['status'] == 1 ||
             decodedData['success'] == true) {
-          commonToast(
+          commonToast(type: AppSnackBarType.success, 
             decodedData['data']?['message'] ??
                 decodedData['message'] ??
                 "Profile Updated Successfully",
@@ -104,7 +104,7 @@ class ProfileController extends GetxController {
 
           selectedImagePath.value = '';
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             decodedData['data']?['message'] ??
                 decodedData['message'] ??
                 "Update Failed",
@@ -117,7 +117,7 @@ class ProfileController extends GetxController {
               () => NormalLoginWidget(),
         );
       } else {
-        commonToast(
+        commonToast(type: AppSnackBarType.error, 
           decodedData['data']?['message'] ??
               decodedData['message'] ??
               "Something went wrong",
@@ -128,7 +128,7 @@ class ProfileController extends GetxController {
         "Error in editProfile: $e",
       );
 
-      commonToast(
+      commonToast(type: AppSnackBarType.error, 
         "Failed to update profile. Check your connection.",
       );
     } finally {
@@ -164,7 +164,7 @@ class ProfileController extends GetxController {
 
         if (data['status'] == 1 ||
             data['success'] == true) {
-          commonToast(
+          commonToast(type: AppSnackBarType.success, 
             data['data']?['message'] ??
                 data['message'] ??
                 "Password Updated Successfully",
@@ -176,7 +176,7 @@ class ProfileController extends GetxController {
 
           Get.back();
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']?['message'] ??
                 data['message'] ??
                 "Failed to update password",
@@ -190,7 +190,7 @@ class ProfileController extends GetxController {
           ) {
         Loader.hideLoader();
 
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }

@@ -1067,7 +1067,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                     addProductController.existingCoverImageUrl.value.isNotEmpty;
 
             if (!hasCover) {
-              commonToast("please_add_cover_image".tr);
+              commonToast(type: AppSnackBarType.info, "please_add_cover_image".tr);
               return;
             }
 
@@ -1076,7 +1076,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                     addProductController.existingSubImages.isNotEmpty;
 
             if (!hasSubImages) {
-              commonToast("please_add_sub_image".tr);
+              commonToast(type: AppSnackBarType.info, "please_add_sub_image".tr);
               return;
             }
 

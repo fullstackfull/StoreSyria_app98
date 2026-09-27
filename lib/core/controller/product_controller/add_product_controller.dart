@@ -91,7 +91,7 @@ class AddProductController extends GetxController {
       }
       selectedSubImages.refresh();
     } else {
-      commonToast("Nothing is selected");
+      commonToast(type: AppSnackBarType.info, "Nothing is selected");
     }
   }
 
@@ -190,7 +190,7 @@ class AddProductController extends GetxController {
         }
       },
       onFailure: (reason, message, validationErrors) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -284,7 +284,7 @@ class AddProductController extends GetxController {
           'cover_${DateTime.now().millisecondsSinceEpoch}',
         );
         if (path == null) {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
               "Failed to load the current cover image, please check your internet or pick it again");
           return;
         }
@@ -324,16 +324,16 @@ class AddProductController extends GetxController {
           await Get.closeCurrentSnackbar();
         }
         Get.back(result: true);
-        commonToast(successMessage ?? 'Success');
+        commonToast(type: AppSnackBarType.success, successMessage ?? 'Success');
       } else {
-        commonToast(errorMessage ?? 'Something went wrong');
+        commonToast(type: AppSnackBarType.error, errorMessage ?? 'Something went wrong');
       }
     } on TimeoutException {
-      commonToast('Request timed out, please check your internet connection');
+      commonToast(type: AppSnackBarType.error, 'Request timed out, please check your internet connection');
     } on SocketException {
-      commonToast('No internet connection');
+      commonToast(type: AppSnackBarType.error, 'No internet connection');
     } catch (_) {
-      commonToast('Something went wrong, please try again');
+      commonToast(type: AppSnackBarType.error, 'Something went wrong, please try again');
     } finally {
       isAddLoading.value = false;
     }

@@ -134,7 +134,7 @@ final TextEditingController searchController = TextEditingController();
               }
             }
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['data']?['message'] ??
                   data['message'] ??
                   'Error',
@@ -149,7 +149,7 @@ final TextEditingController searchController = TextEditingController();
             ) {
           searchResults.clear();
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message.isNotEmpty
                 ? message
                 : 'search_failed'.tr,
@@ -159,7 +159,7 @@ final TextEditingController searchController = TextEditingController();
     } catch (e) {
       searchResults.clear();
 
-      commonToast(e.toString());
+      commonToast(type: AppSnackBarType.error, e.toString());
     } finally {
       isSearchingCustomers.value = false;
     }
@@ -264,7 +264,7 @@ void resetCustomerSearch() {
 
         } else {
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']?['message'] ??
                 data['message'] ??
                 'Error',
@@ -284,7 +284,7 @@ void resetCustomerSearch() {
 
         errorMessage.value = message;
 
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
 
         if (currantPage.value == page) {
           currantPage.value -= 1;
@@ -312,7 +312,7 @@ void resetCustomerSearch() {
           customerCityModel = CustomerCityModel.fromJson(data);
 
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']?['message'] ??
                 data['message'] ??
                 'Error',
@@ -325,7 +325,7 @@ void resetCustomerSearch() {
           validationErrors,
           ) {
         errorMessage.value = message;
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -382,7 +382,7 @@ void resetCustomerSearch() {
           if (data['status'] == 1) {
             success = true;
 
-            commonToast(
+            commonToast(type: AppSnackBarType.success, 
               data['data']?['message'] ??
                   data['message'] ??
                   'Customer added successfully',
@@ -480,7 +480,7 @@ Future<bool> updateCustomerData({
         if (data['status'] == 1) {
           success = true;
 
-          commonToast(
+          commonToast(type: AppSnackBarType.success, 
             data['data']?['message'] ??
                 data['message'] ??
                 'Customer updated successfully',
@@ -542,7 +542,7 @@ Future<bool> updateCustomerData({
 
     response.fold(
       onSuccess: (data) async {
-        commonToast(
+        commonToast(type: AppSnackBarType.success, 
           data['data']?['message'] ??
               data['message'] ??
               'Deleted',
@@ -563,7 +563,7 @@ Future<bool> updateCustomerData({
           validationErrors,
           ) {
         errorMessage.value = message;
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -657,7 +657,7 @@ Future<bool> updateCustomerData({
                 'Error';
 
             customerOrdersErrorMessage.value = msg.toString();
-            commonToast(msg.toString());
+            commonToast(type: AppSnackBarType.error, msg.toString());
           }
         },
         onFailure: (
@@ -669,12 +669,12 @@ Future<bool> updateCustomerData({
             customerOrdersErrorMessage.value = message;
           }
 
-          commonToast(message);
+          commonToast(type: AppSnackBarType.error, message);
         },
       );
     } catch (e) {
       customerOrdersErrorMessage.value = e.toString();
-      commonToast(e.toString());
+      commonToast(type: AppSnackBarType.error, e.toString());
     } finally {
       if (page == 1) {
         isCustomerOrdersLoading.value = false;

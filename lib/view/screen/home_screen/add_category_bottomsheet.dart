@@ -676,7 +676,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     Validator.validateRequired(name);
 
     if (nameError != null) {
-      commonToast(nameError);
+      commonToast(type: AppSnackBarType.error, nameError);
       return;
     }
 
@@ -685,7 +685,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     // ----------------------------------------------------------
 
     if (image.isEmpty) {
-      commonToast(
+      commonToast(type: AppSnackBarType.info, 
         'category_image_required'.tr,
       );
       return;
@@ -696,7 +696,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     // ----------------------------------------------------------
 
     if (icon.isEmpty) {
-      commonToast(
+      commonToast(type: AppSnackBarType.info, 
         'category_icon_required'.tr,
       );
       return;
@@ -711,7 +711,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
           AppConstant.isDemoMode,
         ) ==
             true) {
-      commonToast(
+      commonToast(type: AppSnackBarType.info, 
         AppConstant.demoString,
       );
       return;

@@ -170,7 +170,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                             print("----->(${shippingController.imagePath.value})");
                             if (widget.isUpdate == true) {
                               if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                commonToast(AppConstant.demoString.tr);
+                                commonToast(type: AppSnackBarType.info, AppConstant.demoString.tr);
                               } else {
                                 shippingController.addShippingData(
                                     isUpdate: widget.isUpdate,
@@ -186,7 +186,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                                   description: shippingController.descriptionController.text.trim());
                             }
                           } else {
-                            commonToast("Please fill all field".tr);
+                            commonToast(type: AppSnackBarType.info, "Please fill all field".tr);
                           }
                         },
                         width: 240,

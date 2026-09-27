@@ -115,7 +115,7 @@ class HomeController extends GetxController implements StoreAware {
         CacheService.save(_cacheImageUrlKey, data['data']);
       },
       onFailure: (reason, message, errors) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
 
@@ -131,7 +131,7 @@ class HomeController extends GetxController implements StoreAware {
       onSuccess: (data) {
         if (data['status'] == 1) {
           isStore.value = false;
-          commonToast(data['data']['message']);
+          commonToast(type: AppSnackBarType.success, data['data']['message']);
 
           Prefs.setStoreID(storeId);
 
@@ -144,7 +144,7 @@ class HomeController extends GetxController implements StoreAware {
           // تبعها.
           StoreChangeService.instance.notifyStoreChanged();
         } else {
-          commonToast(data['data']['message']);
+          commonToast(type: AppSnackBarType.error, data['data']['message']);
         }
       },
       onFailure: (reason, message, errors) {
@@ -178,7 +178,7 @@ class HomeController extends GetxController implements StoreAware {
         CacheService.save(_cacheDashboardKey, data['data']);
       },
       onFailure: (reason, message, errors) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
 

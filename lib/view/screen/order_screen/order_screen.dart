@@ -152,8 +152,8 @@ class _OrderScreenState extends State<OrderScreen>
           isBold: true,
           label: "new_order".tr,
           onNewLabelTap: () {
-         Get.to(() => const CreateOrderScreen());
-      },
+            Get.to(() => const CreateOrderScreen());
+          },
         ),
         backgroundColor: AppColor.cLight,
         body: Padding(
@@ -391,7 +391,7 @@ class _OrderScreenState extends State<OrderScreen>
                                           : (order.userName?.isEmpty ?? true)
                                           ? 'no_name'.tr
                                           : order.userName ?? '',
-                                      price:'${order.finalPrice} ${orderController.currencySymbol.value}',
+                                      price:'${order.finalPrice} ${order.currencySymbol}',
                                       primaryBadgeLabel: order.deliveredStatus,
                                       secondaryBadgeLabel: order.paymentStatus,
                                       onTap: () {
@@ -566,7 +566,7 @@ class _OrderScreenState extends State<OrderScreen>
                                 : (order.userName?.isEmpty ?? true)
                                 ? 'no_name'.tr
                                 : order.userName ?? '',
-                            price: "${order.finalPrice} ${orderController.currencySymbol.value}",
+                            price: "${order.finalPrice} ${order.currencySymbol}",
                             secondaryBadgeLabel: "${order.paymentStatus}",
                             primaryBadgeLabel: order.deliveredStatus,
                             onTap: () => Get.to(

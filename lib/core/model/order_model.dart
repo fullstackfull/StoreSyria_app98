@@ -30,7 +30,6 @@ class OrderModelData {
   int? currentPage;
   List<OrderData>? data;
   String? firstPageUrl;
-  String? currencySymbol;
   int? from;
   int? lastPage;
   String? lastPageUrl;
@@ -44,7 +43,6 @@ class OrderModelData {
 
   OrderModelData({
     this.currentPage,
-    this.currencySymbol,
     this.data,
     this.firstPageUrl,
     this.from,
@@ -60,7 +58,6 @@ class OrderModelData {
 
   OrderModelData.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'];
-    currencySymbol = json['currency_symbol'];
     if (json['data'] != null && json['data'] is List) {
       data = <OrderData>[];
       json['data'].forEach((v) {
@@ -88,7 +85,6 @@ class OrderModelData {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['current_page'] = this.currentPage;
-    data['currency_symbol'] = this.currencySymbol;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -126,6 +122,7 @@ class OrderData {
   String? deliveryPrice;
   String? taxPrice;
   String? finalPrice;
+  String? currencySymbol;
   String? returnPrice;
   String? deliveryComment;
   int? deliveredStatus;
@@ -146,44 +143,46 @@ class OrderData {
 
   OrderData(
       {this.id,
-      this.productOrderId,
-      this.orderDate,
-      this.userId,
-      this.isGuest,
-      this.productJson,
-      this.productId,
-      this.productPrice,
-      this.couponPrice,
-      this.deliveryPrice,
-      this.taxPrice,
-      this.finalPrice,
-      this.returnPrice,
-      this.paymentComment,
-      this.paymentType,
-      this.paymentStatus,
-      this.deliveryId,
-      this.deliveryComment,
-      this.deliveredStatus,
-      this.deliveryDate,
-      this.returnStatus,
-      this.returnDate,
-      this.cancelDate,
-      this.rewardPoints,
-      this.themeId,
-      this.storeId,
-      this.createdAt,
-      this.updatedAt,
-      this.demoField,
-      this.deliveredStatusString,
-      this.deliveredImage,
-      this.orderIdString,
-      this.userName});
+        this.productOrderId,
+        this.orderDate,
+        this.userId,
+        this.currencySymbol,
+        this.isGuest,
+        this.productJson,
+        this.productId,
+        this.productPrice,
+        this.couponPrice,
+        this.deliveryPrice,
+        this.taxPrice,
+        this.finalPrice,
+        this.returnPrice,
+        this.paymentComment,
+        this.paymentType,
+        this.paymentStatus,
+        this.deliveryId,
+        this.deliveryComment,
+        this.deliveredStatus,
+        this.deliveryDate,
+        this.returnStatus,
+        this.returnDate,
+        this.cancelDate,
+        this.rewardPoints,
+        this.themeId,
+        this.storeId,
+        this.createdAt,
+        this.updatedAt,
+        this.demoField,
+        this.deliveredStatusString,
+        this.deliveredImage,
+        this.orderIdString,
+        this.userName});
 
   OrderData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     productOrderId = json['product_order_id'];
     orderDate = json['order_date'];
     userId = json['user_id'];
+    currencySymbol = json['currency_symbol'];
     isGuest = json['is_guest'];
     productJson = json['product_json'];
     productId = json['product_id'];
@@ -219,6 +218,7 @@ class OrderData {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;
     data['product_order_id'] = this.productOrderId;
+    data['currency_symbol'] = this.currencySymbol;
     data['order_date'] = this.orderDate;
     data['user_id'] = this.userId;
     data['is_guest'] = this.isGuest;

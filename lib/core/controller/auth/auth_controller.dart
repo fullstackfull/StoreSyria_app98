@@ -111,7 +111,7 @@ class AuthController extends GetxController {
             decoded['success'] == true) {
           await _clearLocalSession();
 
-          commonToast(
+          commonToast(type: AppSnackBarType.success, 
             decoded['message'] ??
                 decoded['data']?['message'] ??
                 'Logout Successfully',
@@ -119,18 +119,18 @@ class AuthController extends GetxController {
 
           Get.offAllNamed(AppRoutes.login);
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             decoded['message'] ??
                 decoded['data']?['message'] ??
                 'Logout failed',
           );
         }
       } else {
-        commonToast('Logout failed');
+        commonToast(type: AppSnackBarType.error, 'Logout failed');
       }
     } catch (e) {
       log('=== LOGOUT ERROR === $e');
-      commonToast('An unexpected error occurred');
+      commonToast(type: AppSnackBarType.error, 'An unexpected error occurred');
     } finally {
       isLoading.value = false;
     }
@@ -181,7 +181,7 @@ class AuthController extends GetxController {
 
           isLoading.value = false;
 
-          commonToast("$userName Login Successfully");
+          commonToast(type: AppSnackBarType.success, "$userName Login Successfully");
 
           _sendFcmTokenAfterLogin(storeId);
 
@@ -190,7 +190,7 @@ class AuthController extends GetxController {
         } else {
           isLoading.value = false;
           String msg = decoded['message'] ?? decoded['data']?['message'] ?? "Login failed";
-          commonToast(msg);
+          commonToast(type: AppSnackBarType.error, msg);
         }
       } else {
         isLoading.value = false;
@@ -201,13 +201,13 @@ class AuthController extends GetxController {
           errorMsg = errorBody['message'] ?? errorMsg;
         } catch (e) {}
 
-        commonToast(errorMsg);
+        commonToast(type: AppSnackBarType.error, errorMsg);
       }
 
     } catch (e) {
       isLoading.value = false;
       print("===Exception============ $e");
-      commonToast("An unexpected error occurred. Please check logs.");
+      commonToast(type: AppSnackBarType.error, "An unexpected error occurred. Please check logs.");
     }
   }
 

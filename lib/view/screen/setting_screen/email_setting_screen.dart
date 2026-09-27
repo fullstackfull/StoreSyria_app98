@@ -226,7 +226,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                                                         if (emailSettingController.emailController.text.isNotEmpty) {
                                                           emailSettingController.sendTextEmailData(email: emailSettingController.emailController.text.trim());
                                                         } else {
-                                                          commonToast("Please fill email field");
+                                                          commonToast(type: AppSnackBarType.info, "Please fill email field");
                                                         }
                                                       },
                                                       width: 240,
@@ -253,7 +253,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
                               if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                commonToast(AppConstant.demoString);
+                                commonToast(type: AppSnackBarType.info, AppConstant.demoString);
                               } else {
                                 emailSettingController.saveEmailSettingData(
                                   mailDriver: emailSettingController.mailDriver.text.trim(),

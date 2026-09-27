@@ -133,7 +133,7 @@ class AddReviewController extends GetxController {
     final response = await reviewRepository.deleteReviewData(reviewId);
     response.fold(
       onSuccess: (data) async {
-        commonToast(
+        commonToast(type: AppSnackBarType.success, 
           data['data']?['message'] ??
               data['message'] ??
               "Deleted",
@@ -142,7 +142,7 @@ class AddReviewController extends GetxController {
         await getReviewData(productId);
       },
       onFailure: (reason, message, validationErrors) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -176,7 +176,7 @@ class AddReviewController extends GetxController {
 
       response.fold(
         onSuccess: (data) async {
-          commonToast(
+          commonToast(type: AppSnackBarType.success, 
             data['data']?['message'] ??
                 data['message'] ??
                 "Success",
@@ -187,7 +187,7 @@ class AddReviewController extends GetxController {
           Get.back();
         },
         onFailure: (reason, message, validationErrors) {
-          commonToast(message);
+          commonToast(type: AppSnackBarType.error, message);
         },
       );
     } catch (e) {

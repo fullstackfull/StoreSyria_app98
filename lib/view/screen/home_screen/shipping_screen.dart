@@ -151,7 +151,7 @@ class _ShippingScreenState extends State<ShippingScreen> {
                             slidableActionWidget(
                                 onTap: () {
                                   if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                    commonToast(AppConstant.demoString.tr);
+                                    commonToast(type: AppSnackBarType.info, AppConstant.demoString.tr);
                                   } else {
                                     shippingController.deleteShippingData(shippingId: shipping.id.toString());
                                   }

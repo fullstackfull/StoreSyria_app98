@@ -80,7 +80,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
             data,
           );
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['message']?.toString() ?? 'Error',
           );
         }
@@ -92,7 +92,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
           validationErrors,
           ) {
         errorMessage.value = message;
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -138,7 +138,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
             CacheService.clear(_cacheDeliveryBoyKey);
             Get.back();
             await getDeliveryBoysData();
-            commonToast(
+            commonToast(type: AppSnackBarType.success, 
               data['message']?.toString() ??
                   'delivery_man_added_successfully'.tr,
             );
@@ -219,7 +219,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
             deliveryBoyList.clear();
             errorMessage.value = '';
             Get.back();
-            commonToast(
+            commonToast(type: AppSnackBarType.success, 
               data['message']?.toString() ??
                   'Delivery Boy updated successfully',
             );
@@ -277,7 +277,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
 
     response.fold(
       onSuccess: (data) async {
-        commonToast(
+        commonToast(type: AppSnackBarType.success, 
           data['message']?.toString() ??
               'Deleted',
         );
@@ -295,7 +295,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
           validationErrors,
           ) {
         errorMessage.value = message;
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }

@@ -162,7 +162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             onPressed: () {
                               if (profileFormKey.currentState!.validate()) {
                                 if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                  commonToast(AppConstant.demoString);
+                                  commonToast(type: AppSnackBarType.info, AppConstant.demoString);
                                 } else {
                                   profileController.editProfile(name: profileController.nameController.text.trim(), email: profileController.emailController.text.trim(), imagePath: profileController.selectedImagePath.value);
                                 }
@@ -260,7 +260,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
                                 if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                  commonToast(AppConstant.demoString);
+                                  commonToast(type: AppSnackBarType.info, AppConstant.demoString);
                                 } else {
                                   profileController.updatePassword(
                                     oldPassword: profileController.oldPasswordController.text.trim(),

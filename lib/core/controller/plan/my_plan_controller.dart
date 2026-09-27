@@ -41,12 +41,12 @@ class PlanController extends GetxController {
                   'Something went wrong';
 
           errorMessage.value = message;
-          commonToast(message);
+          commonToast(type: AppSnackBarType.error, message);
         }
       },
       onFailure: (reason, message, errors) {
         errorMessage.value = message;
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }

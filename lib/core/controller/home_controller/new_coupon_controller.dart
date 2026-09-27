@@ -278,7 +278,7 @@ class NewCouponController extends GetxController implements StoreAware {
                   '/ hasMore: ${hasMore.value}',
             );
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ??
                   "Something went wrong",
             );
@@ -293,7 +293,7 @@ class NewCouponController extends GetxController implements StoreAware {
           errorMessage.value =
               message ?? "Connection error";
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? "Connection error",
           );
         },
@@ -306,7 +306,7 @@ class NewCouponController extends GetxController implements StoreAware {
       errorMessage.value =
       "Connection error";
 
-      commonToast(
+      commonToast(type: AppSnackBarType.error, 
         "Connection error",
       );
     } finally {
@@ -479,7 +479,7 @@ class NewCouponController extends GetxController implements StoreAware {
               message ??
                   'Something went wrong';
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ??
                 'Something went wrong',
           );
@@ -497,7 +497,7 @@ class NewCouponController extends GetxController implements StoreAware {
       usedCouponErrorMessage.value =
       'Something went wrong';
 
-      commonToast(
+      commonToast(type: AppSnackBarType.error, 
         'Something went wrong',
       );
     } finally {
@@ -550,7 +550,7 @@ class NewCouponController extends GetxController implements StoreAware {
           message,
           errors,
           ) {
-        commonToast(
+        commonToast(type: AppSnackBarType.error, 
           message ??
               "Error generating code",
         );
@@ -595,7 +595,7 @@ class NewCouponController extends GetxController implements StoreAware {
         Get.back();
 
         if (data['status'] == 1) {
-          commonToast(
+          commonToast(type: AppSnackBarType.success, 
             data['data']?['message'] ??
                 "Success",
           );
@@ -605,7 +605,7 @@ class NewCouponController extends GetxController implements StoreAware {
           awaitRefresh();
 
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']?['message'] ??
                 "Failed",
           );
@@ -621,7 +621,7 @@ class NewCouponController extends GetxController implements StoreAware {
             message ??
                 "Error adding coupon";
 
-        commonToast(
+        commonToast(type: AppSnackBarType.error, 
           message ??
               "Error adding coupon",
         );
@@ -662,7 +662,7 @@ class NewCouponController extends GetxController implements StoreAware {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          commonToast(
+          commonToast(type: AppSnackBarType.success, 
             data['data']?['message'] ??
                 "Deleted successfully",
           );
@@ -673,7 +673,7 @@ class NewCouponController extends GetxController implements StoreAware {
             Get.back();
           }
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']?['message'] ??
                 "Failed",
           );
@@ -689,7 +689,7 @@ class NewCouponController extends GetxController implements StoreAware {
             message ??
                 "Delete error";
 
-        commonToast(
+        commonToast(type: AppSnackBarType.error, 
           message ??
               "Delete error",
         );

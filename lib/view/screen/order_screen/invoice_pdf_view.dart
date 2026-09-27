@@ -72,7 +72,7 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
     await file.writeAsBytes(bytes);
 
     if (mounted) {
-      commonToast("document_saved".tr);
+      commonToast(type: AppSnackBarType.success, "document_saved".tr);
       await OpenFile.open(file.path);
     }
   }
@@ -92,7 +92,7 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: simpleAppBar(title: 'invoice'.tr, label: '', onNewLabelTap: () {  }),
+      appBar: simpleAppBar(title: 'invoice'.tr,isBack: true ,isBold: true,label: null, onNewLabelTap: () {  }),
       body: Padding(
         padding: EdgeInsets.only(top: 10.h),
         child: PdfPreview(
@@ -116,7 +116,8 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
                 widget.orderDetailData,
                 widget.tax,
                 widget.deliveryCharge,
-                widget.couponAmount
+                widget.couponAmount,
+              widget.orderDetailData.currencySymbol ?? "",
             );
           },
         ),
@@ -125,10 +126,10 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
   }
 
   _showSharedToast(BuildContext context) {
-    commonToast("document_shared_success".tr);
+    commonToast(type: AppSnackBarType.success, "document_shared_success".tr);
   }
 
   _showPrintedToast(BuildContext context) {
-    commonToast('document_printed_success'.tr);
+    commonToast(type: AppSnackBarType.success, 'document_printed_success'.tr);
   }
 }

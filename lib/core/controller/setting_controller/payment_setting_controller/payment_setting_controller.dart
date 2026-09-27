@@ -44,7 +44,7 @@ class PaymentSettingController extends GetxController {
             errorMessage.value =
                 data['message'] ?? 'Something went wrong';
 
-            commonToast(errorMessage.value);
+            commonToast(type: AppSnackBarType.error, errorMessage.value);
           }
         },
 
@@ -54,12 +54,12 @@ class PaymentSettingController extends GetxController {
             validationErrors,
             ) {
           errorMessage.value = message;
-          commonToast(message);
+          commonToast(type: AppSnackBarType.error, message);
         },
       );
     } catch (e) {
       errorMessage.value = e.toString();
-      commonToast(errorMessage.value);
+      commonToast(type: AppSnackBarType.error, errorMessage.value);
     } finally {
       isLoading.value = false;
     }

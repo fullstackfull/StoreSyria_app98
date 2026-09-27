@@ -98,7 +98,7 @@ class WalletController extends GetxController {
 
             _currentPage = walletData.pagination.currentPage;
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ??
                   'Failed to load wallet data',
             );
@@ -108,7 +108,7 @@ class WalletController extends GetxController {
           errorMessage.value =
               message ?? 'Error loading wallet data';
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error loading wallet data',
           );
         },
@@ -156,14 +156,14 @@ class WalletController extends GetxController {
             final walletData = WalletData.fromJson(data['data']);
             searchResults.assignAll(walletData.transactions);
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ?? 'search_failed'.tr,
             );
           }
         },
         onFailure: (reason, message, errors) {
           searchResults.clear();
-          commonToast(message ?? 'search_failed'.tr);
+          commonToast(type: AppSnackBarType.error, message ?? 'search_failed'.tr);
         },
       );
     } finally {
@@ -195,7 +195,7 @@ class WalletController extends GetxController {
     required String description,
   }) async {
     if (amount <= 0) {
-      commonToast('Amount must be greater than 0');
+      commonToast(type: AppSnackBarType.info, 'Amount must be greater than 0');
       return;
     }
 
@@ -214,17 +214,17 @@ class WalletController extends GetxController {
             final balanceData = data['data'];
             Get.back();
 
-            commonToast(data['message'] ?? 'Balance added successfully.',
+            commonToast(type: AppSnackBarType.success, data['message'] ?? 'Balance added successfully.',
             );
 
             await getWalletData(isRefresh: true);
           } else {
-            commonToast(data['message'] ?? 'Failed to add balance',
+            commonToast(type: AppSnackBarType.error, data['message'] ?? 'Failed to add balance',
             );
           }
         },
         onFailure: (reason, message, errors) {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error adding balance',
           );
         },
@@ -240,7 +240,7 @@ class WalletController extends GetxController {
     required String description,
   }) async {
     if (amount <= 0) {
-      commonToast('Amount must be greater than 0');
+      commonToast(type: AppSnackBarType.info, 'Amount must be greater than 0');
       return;
     }
 
@@ -257,21 +257,21 @@ class WalletController extends GetxController {
           if (data['status'] == 1) {
             Get.back();
 
-            commonToast(
+            commonToast(type: AppSnackBarType.success, 
               data['message'] ??
                   'Balance deducted successfully.',
             );
 
             await getWalletData(isRefresh: true);
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ??
                   'Failed to deduct balance',
             );
           }
         },
         onFailure: (reason, message, errors) {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error deducting balance',
           );
         },
@@ -327,14 +327,14 @@ class WalletController extends GetxController {
             _currentPage =
                 walletData.pagination.currentPage;
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ??
                   'Failed to load more',
             );
           }
         },
         onFailure: (reason, message, errors) {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ??
                 'Error loading more transactions',
           );

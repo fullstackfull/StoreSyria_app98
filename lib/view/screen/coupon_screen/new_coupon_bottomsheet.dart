@@ -679,7 +679,7 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
     if (Prefs.getBool(AppConstant.isDemoMode) ==
         true) {
       if (widget.isUpdate) {
-        commonToast(
+        commonToast(type: AppSnackBarType.info, 
           AppConstant.demoString,
         );
         return;
@@ -707,35 +707,35 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
         .trim();
 
     if (name.isEmpty) {
-      commonToast(
+      commonToast(type: AppSnackBarType.info, 
         'coupon_name_required'.tr,
       );
       return;
     }
 
     if (discount.isEmpty) {
-      commonToast(
+      commonToast(type: AppSnackBarType.info, 
         'discount_required'.tr,
       );
       return;
     }
 
     if (limit.isEmpty) {
-      commonToast(
+      commonToast(type: AppSnackBarType.info, 
         'coupon_limit_required'.tr,
       );
       return;
     }
 
     if (date.isEmpty) {
-      commonToast(
+      commonToast(type: AppSnackBarType.info, 
         'expiry_date_required'.tr,
       );
       return;
     }
 
     if (code.isEmpty) {
-      commonToast(
+      commonToast(type: AppSnackBarType.info, 
         'coupon_code_required'.tr,
       );
       return;

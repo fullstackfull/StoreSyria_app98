@@ -22,14 +22,14 @@ class LoyaltyController extends GetxController {
     response.fold(
       onSuccess: (data) {
         if(data['status'] == 1) {
-          commonToast(data['data']['message'] ?? 'Success');
+          commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
         } else {
-          commonToast(data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
         }
       },
       onFailure: (reason, message, errors) {
         errorMessage.value = message ?? 'Error saving loyalty';
-        commonToast(message ?? 'Error saving loyalty');
+        commonToast(type: AppSnackBarType.error, message ?? 'Error saving loyalty');
       },
     );
   }
@@ -50,12 +50,12 @@ class LoyaltyController extends GetxController {
           }
           status.value = data['data']['loyality_program_enabled'] ?? 'off';
         } else {
-          commonToast(data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
         }
       },
       onFailure: (reason, message, errors) {
         errorMessage.value = message ?? 'Error loading loyalty';
-        commonToast(message ?? 'Error loading loyalty');
+        commonToast(type: AppSnackBarType.error, message ?? 'Error loading loyalty');
       },
     );
   }

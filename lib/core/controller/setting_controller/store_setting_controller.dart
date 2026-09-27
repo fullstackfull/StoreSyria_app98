@@ -141,7 +141,7 @@ class StoreSettingController extends GetxController {
               "Store Name =====> ${storeInfoData.value?.store?.name}",
             );
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ?? 'Failed to get store information',
             );
           }
@@ -150,7 +150,7 @@ class StoreSettingController extends GetxController {
           errorMessage.value =
               message ?? 'Error getting store information';
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error getting store information',
           );
         },
@@ -317,7 +317,7 @@ class StoreSettingController extends GetxController {
               data['status'] == '1' ||
               data['status'] == 'success') {
 
-            commonToast(
+            commonToast(type: AppSnackBarType.success, 
               data['message'] ??
                   'Store information updated successfully',
             );
@@ -327,7 +327,7 @@ class StoreSettingController extends GetxController {
 
             await getStoreInfoData();
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ??
                   'Failed to update store information',
             );
@@ -337,7 +337,7 @@ class StoreSettingController extends GetxController {
           errorMessage.value =
               message ?? 'Error updating store information';
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error updating store information',
           );
         },
@@ -347,7 +347,7 @@ class StoreSettingController extends GetxController {
 
       print("Update Store Error =====> $e");
 
-      commonToast(
+      commonToast(type: AppSnackBarType.error, 
         'Error updating store information',
       );
     } finally {
@@ -371,7 +371,7 @@ class StoreSettingController extends GetxController {
           print("Change Language Response =====> $data");
 
           if (data['status'] == 1) {
-            commonToast(
+            commonToast(type: AppSnackBarType.success, 
               data['message'] ?? 'Language changed successfully',
             );
 
@@ -391,7 +391,7 @@ class StoreSettingController extends GetxController {
               "Current Language =====> ${currentLanguage.value?.code}",
             );
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ?? 'Failed to change language',
             );
           }
@@ -400,7 +400,7 @@ class StoreSettingController extends GetxController {
           errorMessage.value =
               message ?? 'Error changing language';
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error changing language',
           );
         },
@@ -427,7 +427,7 @@ class StoreSettingController extends GetxController {
           print("Change Currency Response =====> $data");
 
           if (data['status'] == 1) {
-            commonToast(
+            commonToast(type: AppSnackBarType.success, 
               data['message'] ?? 'Currency changed successfully',
             );
 
@@ -466,7 +466,7 @@ class StoreSettingController extends GetxController {
 
             getCurrencyRatesData(forceRefresh: true);
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ?? 'Failed to change currency',
             );
           }
@@ -475,7 +475,7 @@ class StoreSettingController extends GetxController {
           errorMessage.value =
               message ?? 'Error changing currency';
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error changing currency',
           );
         },
@@ -511,7 +511,7 @@ class StoreSettingController extends GetxController {
             }
 
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ??
                   'Failed to get languages and currency',
             );
@@ -521,7 +521,7 @@ class StoreSettingController extends GetxController {
           errorMessage.value =
               message ?? 'Error getting languages and currency';
 
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error getting languages and currency',
           );
         },
@@ -614,12 +614,12 @@ class StoreSettingController extends GetxController {
 
             print("Currencies Length =====> ${currencies.length}");
           } else {
-            commonToast(data['message'] ?? 'Failed to get currencies');
+            commonToast(type: AppSnackBarType.error, data['message'] ?? 'Failed to get currencies');
           }
         },
         onFailure: (reason, message, errors) {
           errorMessage.value = message ?? 'Error getting currencies';
-          commonToast(message ?? 'Error getting currencies');
+          commonToast(type: AppSnackBarType.error, message ?? 'Error getting currencies');
         },
       );
     } finally {
@@ -638,7 +638,7 @@ class StoreSettingController extends GetxController {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          commonToast(data['data']['message'] ?? 'Success');
+          commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
 
           print(
             "StoreID----->${data['data']['user_info']['current_store']}",
@@ -652,14 +652,14 @@ class StoreSettingController extends GetxController {
             "StoreID----->--${Prefs.getStoreID()}",
           );
         } else {
-          commonToast(data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
         }
       },
       onFailure: (reason, message, errors) {
         errorMessage.value =
             message ?? 'Error deleting store';
 
-        commonToast(
+        commonToast(type: AppSnackBarType.error, 
           message ?? 'Error deleting store',
         );
       },
@@ -685,11 +685,11 @@ class StoreSettingController extends GetxController {
               defaultRatesCurrency.value = currencyRatesResponse.data!.defaultCurrency;
             }
           } else {
-            commonToast(data['message'] ?? 'Failed to get currency rates');
+            commonToast(type: AppSnackBarType.error, data['message'] ?? 'Failed to get currency rates');
           }
         },
         onFailure: (reason, message, errors) {
-          commonToast(message ?? 'Error getting currency rates');
+          commonToast(type: AppSnackBarType.error, message ?? 'Error getting currency rates');
         },
       );
     } finally {
@@ -718,7 +718,7 @@ class StoreSettingController extends GetxController {
 
           if (data['status'] == 1) {
             success = true;
-            commonToast(
+            commonToast(type: AppSnackBarType.success, 
               data['message'] ?? 'Currency status updated successfully.',
             );
 
@@ -739,13 +739,13 @@ class StoreSettingController extends GetxController {
               );
             }
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ?? 'Failed to update currency status',
             );
           }
         },
         onFailure: (reason, message, errors) {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error updating currency status',
           );
         },
@@ -778,7 +778,7 @@ class StoreSettingController extends GetxController {
 
           if (data['status'] == 1) {
             success = true;
-            commonToast(
+            commonToast(type: AppSnackBarType.success, 
               data['message'] ?? 'Currency rate updated successfully.',
             );
 
@@ -799,13 +799,13 @@ class StoreSettingController extends GetxController {
               );
             }
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['message'] ?? 'Failed to update currency rate',
             );
           }
         },
         onFailure: (reason, message, errors) {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             message ?? 'Error updating currency rate',
           );
         },

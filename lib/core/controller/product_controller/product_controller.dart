@@ -138,7 +138,7 @@ class ProductController extends GetxController implements StoreAware {
 
             isScroll.value = page < lastPage;
           } else {
-            commonToast(
+            commonToast(type: AppSnackBarType.error, 
               data['data']?['message'] ??
                   data['message'] ??
                   'Error',
@@ -152,7 +152,7 @@ class ProductController extends GetxController implements StoreAware {
         onFailure: (reason, message, validationErrors) {
           errorMessage.value = message;
 
-          commonToast(message);
+          commonToast(type: AppSnackBarType.error, message);
 
           if (page > 1 && currantPage.value == page) {
             currantPage.value = page - 1;
@@ -194,7 +194,7 @@ class ProductController extends GetxController implements StoreAware {
                 .toList(),
           );
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']?['message'] ??
                 data['message'] ??
                 'Error',
@@ -203,7 +203,7 @@ class ProductController extends GetxController implements StoreAware {
       },
       onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -282,7 +282,7 @@ class ProductController extends GetxController implements StoreAware {
         }
 
         errorMessage.value = message;
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -300,7 +300,7 @@ class ProductController extends GetxController implements StoreAware {
 
     response.fold(
       onSuccess: (data) async {
-        commonToast(
+        commonToast(type: AppSnackBarType.success, 
           data['data']?['message'] ??
               data['message'] ??
               'Deleted',
@@ -313,7 +313,7 @@ class ProductController extends GetxController implements StoreAware {
       },
       onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }

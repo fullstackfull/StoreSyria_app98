@@ -34,7 +34,7 @@ class ShippingController extends GetxController {
       return file.path;
     } else {
       // User canceled the picker
-      commonToast('File not pick');
+      commonToast(type: AppSnackBarType.info, 'File not pick');
     }
   }
 
@@ -55,11 +55,11 @@ class ShippingController extends GetxController {
             isScroll.value = false;
           }
         } else {
-          commonToast(data['message'] ?? '');
+          commonToast(type: AppSnackBarType.error, data['message'] ?? '');
         }
         },
       onFailure: (reason, message, errors) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -80,11 +80,11 @@ class ShippingController extends GetxController {
 
     response.fold(
       onSuccess: (data) {
-        commonToast(data['message'] ?? data['data']['message']);
+        commonToast(type: AppSnackBarType.success, data['message'] ?? data['data']['message']);
         getShippingData(currantPage.value);
       },
       onFailure: (reason, message, errors) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
@@ -96,11 +96,11 @@ class ShippingController extends GetxController {
 
     response.fold(
       onSuccess: (data) {
-        commonToast(data['message'] ?? '');
+        commonToast(type: AppSnackBarType.success, data['message'] ?? '');
         getShippingData(currantPage.value);
       },
       onFailure: (reason, message, errors) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }

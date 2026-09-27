@@ -96,12 +96,12 @@ class _LoyaltyProgramScreenState extends State<LoyaltyProgramScreen> {
                       onPressed: () {
                         if (loyaltyController.rewardPointController.text.isNotEmpty) {
                           if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                            commonToast(AppConstant.demoString);
+                            commonToast(type: AppSnackBarType.info, AppConstant.demoString);
                           } else {
                             loyaltyController.setLoyaltyData(status: loyaltyController.status.value, point: loyaltyController.rewardPointController.text.trim());
                           }
                         } else {
-                          commonToast("Please enter points");
+                          commonToast(type: AppSnackBarType.info, "Please enter points");
                         }
                       },
                       btnColor: AppColor.themeGreenColor,

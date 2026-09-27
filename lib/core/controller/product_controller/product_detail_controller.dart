@@ -35,7 +35,7 @@ class ProductDetailController extends GetxController {
 
           update();
         } else {
-          commonToast(
+          commonToast(type: AppSnackBarType.error, 
             data['data']?['message'] ??
                 data['message'] ??
                 'Error',

@@ -250,20 +250,20 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           success = true;
-          commonToast('order_created_successfully'.tr);
+          commonToast(type: AppSnackBarType.success, 'order_created_successfully'.tr);
           resetCreateOrderForm();
           resetPagination();
         },
         onFailure: (reason, message, validationErrors) {
           success = false;
-          commonToast(
+          commonToast(type: AppSnackBarType.error,
             message.isNotEmpty ? message : 'failed_to_create_order'.tr,
           );
         },
       );
     } catch (e) {
       success = false;
-      commonToast('failed_to_create_order'.tr);
+      commonToast(type: AppSnackBarType.error, 'failed_to_create_order'.tr);
       print('❌ createOrderData Error: $e');
     } finally {
       isCreatingOrder.value = false;
@@ -410,7 +410,6 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           final model = OrderModel.fromJson(data);
-          currencySymbol.value = model.data?.currencySymbol ?? currencySymbol.value;
           final newItems = model.data?.data ?? [];
           final targetList = isDateFilterActive ? filteredOrderList : orderList;
 
@@ -445,14 +444,14 @@ class OrderController extends GetxController implements StoreAware {
         },
         onFailure: (reason, message, validationErrors) {
           errorMessage.value = 'failed_to_load_orders'.tr;
-          commonToast('failed_to_load_orders'.tr);
+          commonToast(type: AppSnackBarType.error, 'failed_to_load_orders'.tr);
         },
       );
     } catch (e) {
       errorMessage.value =
           'unexpected_error_loading_orders'.tr;
 
-      commonToast('unexpected_error_loading_orders'.tr);
+      commonToast(type: AppSnackBarType.error, 'unexpected_error_loading_orders'.tr);
 
       print('❌ getOrderData Error: $e');
     } finally {
@@ -471,16 +470,15 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           final model = TopOrderModel.fromJson(data);
-          currencySymbol.value = model.data?.currentCurrency ?? '';
           final items = model.data?.topOrders ?? [];
           topOrderList.value = items.map((e) => e.toOrderData()).toList();
         },
         onFailure: (reason, message, validationErrors) {
-          commonToast('failed_to_load_orders'.tr);
+          commonToast(type: AppSnackBarType.error, 'failed_to_load_orders'.tr);
         },
       );
     } catch (e) {
-      commonToast('unexpected_error_loading_orders'.tr);
+      commonToast(type: AppSnackBarType.error, 'unexpected_error_loading_orders'.tr);
       print('❌ getTopOrderData Error: $e');
     } finally {
       isLoadingTopOrders.value = false;
@@ -531,13 +529,13 @@ class OrderController extends GetxController implements StoreAware {
         onFailure: (reason, message, validationErrors) {
           searchResults.clear();
           errorMessage.value = 'failed_to_search_orders'.tr;
-          commonToast('failed_to_search_orders'.tr);
+          commonToast(type: AppSnackBarType.error, 'failed_to_search_orders'.tr);
         },
       );
     } catch (e) {
       searchResults.clear();
       errorMessage.value = 'failed_to_search_orders'.tr;
-      commonToast('failed_to_search_orders'.tr);
+      commonToast(type: AppSnackBarType.error, 'failed_to_search_orders'.tr);
 
       print('❌ searchOrderData Error: $e');
     } finally {
@@ -594,12 +592,12 @@ class OrderController extends GetxController implements StoreAware {
         },
         onFailure: (reason, message, validationErrors) {
           errorMessage.value = 'failed_to_load_order_details'.tr;
-          commonToast('failed_to_load_order_details'.tr);
+          commonToast(type: AppSnackBarType.error, 'failed_to_load_order_details'.tr);
         },
       );
     } catch (e) {
       errorMessage.value = 'failed_to_process_order_details'.tr;
-      commonToast('failed_to_process_order_details'.tr);
+      commonToast(type: AppSnackBarType.error, 'failed_to_process_order_details'.tr);
       print('❌ getOrderDetailData Error: $e');
     } finally {
       isLoadingOrderDetails.value = false;
@@ -640,16 +638,16 @@ class OrderController extends GetxController implements StoreAware {
 
           resetPagination();
           await getOrderData(1);
-          commonToast('order_status_updated_successfully'.tr);
+          commonToast(type: AppSnackBarType.success, 'order_status_updated_successfully'.tr);
         },
         onFailure: (reason, message, validationErrors) async {
           success = false;
-          commonToast('failed_to_update_order_status'.tr);
+          commonToast(type: AppSnackBarType.error, 'failed_to_update_order_status'.tr);
         },
       );
     } catch (e) {
       success = false;
-      commonToast('failed_to_update_order_status'.tr);
+      commonToast(type: AppSnackBarType.error, 'failed_to_update_order_status'.tr);
       print('❌ updateOrderStatus Error: $e');
     } finally {
       isUpdatingOrderStatus.value = false;
@@ -678,16 +676,16 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           success = true;
-          commonToast('order_note_added_successfully'.tr);
+          commonToast(type: AppSnackBarType.success, 'order_note_added_successfully'.tr);
         },
         onFailure: (reason, message, validationErrors) {
           success = false;
-          commonToast('failed_to_add_order_note'.tr);
+          commonToast(type: AppSnackBarType.error, 'failed_to_add_order_note'.tr);
         },
       );
     } catch (e) {
       success = false;
-      commonToast('failed_to_add_order_note'.tr);
+      commonToast(type: AppSnackBarType.error, 'failed_to_add_order_note'.tr);
       print('❌ createOrderNote Error: $e');
     } finally {
       isCreatingOrderNote.value = false;
@@ -714,16 +712,16 @@ class OrderController extends GetxController implements StoreAware {
       result.fold(
         onSuccess: (data) {
           success = true;
-          commonToast('order_note_deleted_successfully'.tr);
+          commonToast(type: AppSnackBarType.success, 'order_note_deleted_successfully'.tr);
         },
         onFailure: (reason, message, validationErrors) {
           success = false;
-          commonToast('failed_to_delete_order_note'.tr);
+          commonToast(type: AppSnackBarType.error, 'failed_to_delete_order_note'.tr);
         },
       );
     } catch (e) {
       success = false;
-      commonToast('failed_to_delete_order_note'.tr);
+      commonToast(type: AppSnackBarType.error, 'failed_to_delete_order_note'.tr);
       print('❌ deleteOrderNote Error: $e');
     } finally {
       isDeletingOrderNote.value = false;
@@ -742,18 +740,18 @@ class OrderController extends GetxController implements StoreAware {
 
       result.fold(
         onSuccess: (data) {
-          commonToast('order_deleted_successfully'.tr);
+          commonToast(type: AppSnackBarType.success, 'order_deleted_successfully'.tr);
           orderList.removeWhere((element) => element.id.toString() == orderId);
           isDataAvailable.value = orderList.isNotEmpty;
           resetPagination();
           getOrderData(1);
         },
         onFailure: (reason, message, validationErrors) {
-          commonToast('failed_to_delete_order'.tr);
+          commonToast(type: AppSnackBarType.error, 'failed_to_delete_order'.tr);
         },
       );
     } catch (e) {
-      commonToast('failed_to_delete_order'.tr);
+      commonToast(type: AppSnackBarType.error, 'failed_to_delete_order'.tr);
       print('❌ deleteOrderData Error: $e');
     } finally {
       isDeletingOrder.value = false;
