@@ -10,6 +10,7 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import '../../../utils/colors.dart';
 
 class StatisticsTheme {
@@ -36,8 +37,8 @@ class StatisticsTheme {
   // DASHBOARD ACCENTS
   static Color primary = AppColor.blueColor;
   static const secondary = Color(0xFF3BF6A8);
-  static const warning = Color(0xFFF59E0B);
-  static const danger = Color(0xFFEF4444);
+  static const warning = Color(0x99F5F10B);
+  static const danger = Color(0xFFD00A67);
 }
 
 class Glass {
@@ -577,117 +578,117 @@ class StatisticsCard extends StatelessWidget {
 // TOP URL ITEM
 // ============================================================
 
-Widget topUrlWidget({
-  required BuildContext context,
-  required String title,
-  required String subTitle,
-  required String total,
-  required String digit,
-  required Function() shareFun,
-}) {
-  final rankColors = [
-    const Color(0xFFD4A72C),
-    const Color(0xFF9CA3AF),
-    const Color(0xFFB7794B),
-  ];
-
-  final rankIndex = int.tryParse(digit) ?? 99;
-  final rankColor = rankIndex >= 1 && rankIndex <= 3
-      ? rankColors[rankIndex - 1]
-      : Glass.textSecondary(context);
-
-  return Container(
-    margin: const EdgeInsets.only(bottom: 9),
-    decoration: BoxDecoration(
-      color: Glass.surface(context),
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: Glass.border(context)),
-    ),
-    child: Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: shareFun,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-          child: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: rankColor.withOpacity(.10),
-                  borderRadius: BorderRadius.circular(9),
-                  border: Border.all(color: rankColor.withOpacity(.25)),
-                ),
-                child: Text('#$digit', style: pBold12.copyWith(color: rankColor)),
-              ),
-              horizontalSpace(11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.link_rounded, size: 11, color: Glass.textMuted(context)),
-                        horizontalSpace(4),
-                        Expanded(
-                          child: Text(
-                            title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: pRegular10.copyWith(color: Glass.textMuted(context)),
-                          ),
-                        ),
-                      ],
-                    ),
-                    verticalSpace(3),
-                    Text(
-                      subTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: pSemiBold12.copyWith(color: Glass.textPrimary(context)),
-                    ),
-                  ],
-                ),
-              ),
-              horizontalSpace(8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                decoration: BoxDecoration(
-                  color: StatisticsTheme.primary.withOpacity(.10),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(total, style: pBold12.copyWith(color: StatisticsTheme.primary)),
-              ),
-              horizontalSpace(6),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: shareFun,
-                  child: Container(
-                    width: 31,
-                    height: 31,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Glass.surfaceStrong(context),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Glass.border(context)),
-                    ),
-                    child: Icon(Icons.ios_share_rounded, size: 15, color: StatisticsTheme.primary),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
+// Widget topUrlWidget({
+//   required BuildContext context,
+//   required String title,
+//   required String subTitle,
+//   required String total,
+//   required String digit,
+//   required Function() shareFun,
+// }) {
+//   final rankColors = [
+//     const Color(0xFFD4A72C),
+//     const Color(0xFF9CA3AF),
+//     const Color(0xFFB7794B),
+//   ];
+//
+//   final rankIndex = int.tryParse(digit) ?? 99;
+//   final rankColor = rankIndex >= 1 && rankIndex <= 3
+//       ? rankColors[rankIndex - 1]
+//       : Glass.textSecondary(context);
+//
+//   return Container(
+//     margin: const EdgeInsets.only(bottom: 9),
+//     decoration: BoxDecoration(
+//       color: Glass.surface(context),
+//       borderRadius: BorderRadius.circular(14),
+//       border: Border.all(color: Glass.border(context)),
+//     ),
+//     child: Material(
+//       color: Colors.transparent,
+//       borderRadius: BorderRadius.circular(14),
+//       child: InkWell(
+//         borderRadius: BorderRadius.circular(14),
+//         onTap: shareFun,
+//         child: Padding(
+//           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+//           child: Row(
+//             children: [
+//               Container(
+//                 width: 32,
+//                 height: 32,
+//                 alignment: Alignment.center,
+//                 decoration: BoxDecoration(
+//                   color: rankColor.withOpacity(.10),
+//                   borderRadius: BorderRadius.circular(9),
+//                   border: Border.all(color: rankColor.withOpacity(.25)),
+//                 ),
+//                 child: Text('#$digit', style: pBold12.copyWith(color: rankColor)),
+//               ),
+//               horizontalSpace(11),
+//               Expanded(
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Row(
+//                       children: [
+//                         Icon(Icons.link_rounded, size: 11, color: Glass.textMuted(context)),
+//                         horizontalSpace(4),
+//                         Expanded(
+//                           child: Text(
+//                             title,
+//                             maxLines: 1,
+//                             overflow: TextOverflow.ellipsis,
+//                             style: pRegular10.copyWith(color: Glass.textMuted(context)),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     verticalSpace(3),
+//                     Text(
+//                       subTitle,
+//                       maxLines: 1,
+//                       overflow: TextOverflow.ellipsis,
+//                       style: pSemiBold12.copyWith(color: Glass.textPrimary(context)),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               horizontalSpace(8),
+//               Container(
+//                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+//                 decoration: BoxDecoration(
+//                   color: StatisticsTheme.primary.withOpacity(.10),
+//                   borderRadius: BorderRadius.circular(8),
+//                 ),
+//                 child: Text(total, style: pBold12.copyWith(color: StatisticsTheme.primary)),
+//               ),
+//               horizontalSpace(6),
+//               Material(
+//                 color: Colors.transparent,
+//                 child: InkWell(
+//                   borderRadius: BorderRadius.circular(8),
+//                   onTap: shareFun,
+//                   child: Container(
+//                     width: 31,
+//                     height: 31,
+//                     alignment: Alignment.center,
+//                     decoration: BoxDecoration(
+//                       color: Glass.surfaceStrong(context),
+//                       borderRadius: BorderRadius.circular(8),
+//                       border: Border.all(color: Glass.border(context)),
+//                     ),
+//                     child: Icon(Icons.ios_share_rounded, size: 15, color: StatisticsTheme.primary),
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     ),
+//   );
+// }
 
 // ============================================================
 // OLD VISITOR GRAPH - KEPT FOR COMPATIBILITY
@@ -923,42 +924,89 @@ class GlassVisitorChart extends StatelessWidget {
 class PlatformBarChart extends StatefulWidget {
   final List<PlatformData> list;
 
-  const PlatformBarChart({super.key, required this.list});
+  const PlatformBarChart({
+    super.key,
+    required this.list,
+  });
 
   @override
   State<PlatformBarChart> createState() => _PlatformBarChartState();
 }
 
-class _PlatformBarChartState extends State<PlatformBarChart> {
+class _PlatformBarChartState extends State<PlatformBarChart>
+    with SingleTickerProviderStateMixin {
   List<BarChartData> chartData = [];
+
+  late final AnimationController _platformController;
 
   @override
   void initState() {
     super.initState();
+
     _loadData();
+
+    _platformController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
   }
 
   @override
   void didUpdateWidget(covariant PlatformBarChart oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (oldWidget.list != widget.list) {
       _loadData();
     }
   }
 
+  @override
+  void dispose() {
+    _platformController.dispose();
+    super.dispose();
+  }
+
   void _loadData() {
-    if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+    if (widget.list.isEmpty) {
       chartData = [
-        BarChartData('Windows', 5, const Color(0xFF64748B)),
-        BarChartData('OS X', 10, const Color(0xFF3B82F6)),
-        BarChartData('Linux', 12, const Color(0xFF22C55E)),
-        BarChartData('iOS', 14, const Color(0xFF8B5CF6)),
-        BarChartData('AndroidOS', 12, const Color(0xFFF59E0B)),
-        BarChartData('Other', 15, const Color(0xFF94A3B8)),
+        BarChartData(
+          'Windows',
+          5,
+          const Color(0xFF64748B),
+        ),
+        BarChartData(
+          'OS X',
+          10,
+          const Color(0xFF3B82F6),
+        ),
+        BarChartData(
+          'Linux',
+          12,
+          const Color(0xFF22C55E),
+        ),
+        BarChartData(
+          'iOS',
+          14,
+          const Color(0xFF8B5CF6),
+        ),
+        BarChartData(
+          'AndroidOS',
+          12,
+          const Color(0xFFF59E0B),
+        ),
+        BarChartData(
+          'Other',
+          15,
+          const Color(0xFF94A3B8),
+        ),
       ];
     } else {
       chartData = widget.list.map((data) {
-        return BarChartData(data.platform ?? '', data.data ?? 0, HexColor(data.colour ?? '#64748B'));
+        return BarChartData(
+          data.platform ?? '',
+          data.data ?? 0,
+          HexColor(data.colour ?? '#64748B'),
+        );
       }).toList();
     }
 
@@ -967,47 +1015,69 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
     }
   }
 
+  void _startAnimation() {
+    if (_platformController.status ==
+        AnimationStatus.dismissed) {
+      _platformController.forward();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
-      title: 'Platforms'.tr,
-      subtitle: 'Visitors by operating system'.tr,
-      icon: Icons.devices_other_rounded,
+    if (chartData.isEmpty) {
+      return Container(
+        height: 205,
+        alignment: Alignment.center,
+        child: Text(
+          'No data',
+          style: pMedium12.copyWith(
+            color: Glass.textMuted(context),
+          ),
+        ),
+      );
+    }
+
+    return VisibilityDetector(
+      key: const Key('platform-bar-chart'),
+      onVisibilityChanged: (info) {
+        // يبدأ فقط لما يصير جزء واضح من الشارت ظاهر.
+        if (info.visibleFraction > 0.15) {
+          _startAnimation();
+        }
+      },
       child: Column(
         children: [
-          _buildPlatformLegend(context),
-          verticalSpace(12),
-          SizedBox(
-            height: 205,
-            child: chartData.isEmpty
-                ? Center(
-              child: Text(
-                'No data'.tr,
-                style: pRegular10.copyWith(color: Glass.textMuted(context)),
-              ),
-            )
-                : _buildChart(context),
-          ),
+          _buildLegend(context),
+          const SizedBox(height: 10),
+          _buildChart(context),
         ],
       ),
     );
   }
 
-  Widget _buildPlatformLegend(BuildContext context) {
+  Widget _buildLegend(BuildContext context) {
     return Wrap(
       spacing: 14,
-      runSpacing: 9,
-      children: chartData.map((data) {
+      runSpacing: 8,
+      children: chartData.map((item) {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 8,
               height: 8,
-              decoration: BoxDecoration(color: data.color, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: item.color,
+                shape: BoxShape.circle,
+              ),
             ),
-            horizontalSpace(6),
-            Text(data.x, style: pMedium8.copyWith(color: Glass.textSecondary(context))),
+            const SizedBox(width: 5),
+            Text(
+              item.x,
+              style: pMedium8.copyWith(
+                color: Glass.textMuted(context),
+              ),
+            ),
           ],
         );
       }).toList(),
@@ -1017,51 +1087,230 @@ class _PlatformBarChartState extends State<PlatformBarChart> {
   Widget _buildChart(BuildContext context) {
     return Container(
       height: 205,
-      padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
+      padding: const EdgeInsets.fromLTRB(
+        8,
+        12,
+        8,
+        0,
+      ),
       decoration: BoxDecoration(
         color: Glass.surfaceStrong(context),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Glass.border(context)),
+        border: Border.all(
+          color: Glass.border(context),
+        ),
       ),
-      child: SfCartesianChart(
-        plotAreaBorderWidth: 0,
-        enableAxisAnimation: false,
-        margin: const EdgeInsets.fromLTRB(4, 8, 4, 4),
-        legend: const Legend(isVisible: false),
-        primaryXAxis: CategoryAxis(
-          interval: 1,
-          borderWidth: 0,
-          majorGridLines: const MajorGridLines(width: 0),
-          majorTickLines: const MajorTickLines(width: 0),
-          axisLine: const AxisLine(width: 0),
-          labelStyle: pMedium8.copyWith(color: Glass.textMuted(context)),
-        ),
-        primaryYAxis: NumericAxis(
-          borderWidth: 0,
-          majorGridLines: MajorGridLines(color: Glass.chartGrid(context)),
-          majorTickLines: const MajorTickLines(width: 0),
-          axisLine: const AxisLine(width: 0),
-          labelStyle: pMedium8.copyWith(color: Glass.textMuted(context)),
-        ),
-        tooltipBehavior: TooltipBehavior(enable: false),
-        series: <CartesianSeries<BarChartData, String>>[
-          ColumnSeries<BarChartData, String>(
-            dataSource: chartData,
-            xValueMapper: (data, _) => data.x,
-            yValueMapper: (data, _) => data.desktop,
-            pointColorMapper: (data, _) => data.color,
-            width: 0.55,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
-            animationDuration: 700,
-            dataLabelSettings: const DataLabelSettings(isVisible: false),
+      child: Stack(
+        children: [
+          // المحاور والـlabels ثابتة.
+          IgnorePointer(
+            child: SfCartesianChart(
+              plotAreaBorderWidth: 0,
+              enableAxisAnimation: false,
+              margin: const EdgeInsets.fromLTRB(
+                4,
+                8,
+                4,
+                4,
+              ),
+              legend: const Legend(
+                isVisible: false,
+              ),
+              primaryXAxis: CategoryAxis(
+                interval: 1,
+                borderWidth: 0,
+                majorGridLines: const MajorGridLines(
+                  width: 0,
+                ),
+                majorTickLines: const MajorTickLines(
+                  width: 0,
+                ),
+                axisLine: const AxisLine(
+                  width: 0,
+                ),
+                labelStyle: pMedium8.copyWith(
+                  color: Glass.textMuted(context),
+                ),
+              ),
+              primaryYAxis: NumericAxis(
+                borderWidth: 0,
+                minimum: 0,
+                maximum: _getMaxValue(),
+                majorGridLines: MajorGridLines(
+                  color: Glass.chartGrid(context),
+                ),
+                majorTickLines: const MajorTickLines(
+                  width: 0,
+                ),
+                axisLine: const AxisLine(
+                  width: 0,
+                ),
+                labelStyle: pMedium8.copyWith(
+                  color: Glass.textMuted(context),
+                ),
+              ),
+              tooltipBehavior: TooltipBehavior(
+                enable: false,
+              ),
+              series: const [],
+            ),
+          ),
+
+          // الأعمدة المتحركة.
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _platformController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: _PlatformBarPainter(
+                    data: chartData,
+                    progress: _platformController.value,
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
+
+  double _getMaxValue() {
+    if (chartData.isEmpty) {
+      return 10;
+    }
+
+    double max = 0;
+
+    for (final item in chartData) {
+      max = math.max(
+        max,
+        item.desktop.toDouble(),
+      );
+    }
+
+    return max <= 0 ? 10 : max * 1.25;
+  }
 }
 
-// ============================================================
+class _PlatformBarPainter extends CustomPainter {
+  final List<BarChartData> data;
+  final double progress;
+
+  const _PlatformBarPainter({
+    required this.data,
+    required this.progress,
+  });
+
+  @override
+  void paint(
+      Canvas canvas,
+      Size size,
+      ) {
+    if (data.isEmpty) return;
+
+    const double left = 42;
+    const double right = 14;
+    const double top = 18;
+    const double bottom = 34;
+
+    final double chartWidth =
+        size.width - left - right;
+
+    final double chartHeight =
+        size.height - top - bottom;
+
+    if (chartWidth <= 0 || chartHeight <= 0) {
+      return;
+    }
+
+    double maxValue = 0;
+
+    for (final item in data) {
+      maxValue = math.max(
+        maxValue,
+        item.desktop.toDouble(),
+      );
+    }
+
+    if (maxValue <= 0) return;
+
+    maxValue *= 1.25;
+
+    final double slotWidth =
+        chartWidth / data.length;
+
+    // الحركة من 0 إلى الارتفاع الحقيقي.
+    final double animation =
+    Curves.easeOutCubic.transform(progress);
+
+    for (int index = 0; index < data.length; index++) {
+      final item = data[index];
+
+      final double value =
+      item.desktop.toDouble();
+
+      final double fullHeight =
+          (value / maxValue) * chartHeight;
+
+      // يبدأ من الصفر ويطلع للأعلى.
+      final double barHeight =
+          fullHeight * animation;
+
+      final double centerX =
+          left +
+              (slotWidth * index) +
+              (slotWidth / 2);
+
+      final double barWidth =
+          slotWidth * 0.55;
+
+      final double barLeft =
+          centerX - (barWidth / 2);
+
+      final double barRight =
+          centerX + (barWidth / 2);
+
+      final double barBottom =
+          top + chartHeight;
+
+      final double barTop =
+          barBottom - barHeight;
+
+      final Rect rect = Rect.fromLTRB(
+        barLeft,
+        barTop,
+        barRight,
+        barBottom,
+      );
+
+      final RRect roundedRect =
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: const Radius.circular(7),
+        topRight: const Radius.circular(7),
+      );
+
+      final Paint paint = Paint()
+        ..color = item.color
+        ..style = PaintingStyle.fill
+        ..isAntiAlias = true;
+
+      canvas.drawRRect(
+        roundedRect,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(
+      covariant _PlatformBarPainter oldDelegate,
+      ) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.data != data;
+  }
+}// ============================================================
 // BROWSER / DEVICE
 // ============================================================
 
@@ -1097,12 +1346,10 @@ class _BrowsersGraphState extends State<BrowsersGraph> {
 
   void _loadData() {
     final palette = <Color>[
-      StatisticsTheme.primary,
-      StatisticsTheme.secondary,
-      const Color(0xFF6366F1),
-      const Color(0xFF8B5CF6),
-      const Color(0xFF64748B),
-      const Color(0xFF94A3B8),
+    AppColor.blueColor,
+    Color(0xFF3BF6A8),
+    Color(0x99F5F10B),
+    Color(0xFFD00A67),
     ];
 
     if (widget.isDevice) {

@@ -22,6 +22,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   late final AnimationController _sectionController;
   late final AnimationController _chartController;
   late final AnimationController _lineOpacityController;
+  final ScrollController _scrollController = ScrollController();
+
+  final GlobalKey _platformChartKey = GlobalKey();
 
   bool _showTopUrls = true;
 
@@ -39,13 +42,11 @@ class _StatisticsScreenState extends State<StatisticsScreen>
       duration: const Duration(milliseconds: 4500),
     );
 
-    // مدة رسم الخط - عدّل هالرقم لتغيير سرعة الرسم (أكبر = أبطأ)
     _chartController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 30),
     );
 
-    // كنترولر التعتيم (fade) المستخدم لإخفاء/إظهار الخط بين كل دورة رسم والثانية
     _lineOpacityController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 350),
@@ -69,39 +70,27 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     _sectionController.dispose();
     _chartController.dispose();
     _lineOpacityController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  /// دورة الأنيميشن الكاملة لرسم الخط:
-  /// 1) الخط يترسم من الصفر للكامل (يمشي أفقيًا من اليسار لليمين)
-  /// 2) يضل ظاهر شوي (مدة الانتظار)
-  /// 3) يختفي تدريجيًا (fade-out) - بدون أي حركة "عكسية"
-  /// 4) يترجّع لنقطة البداية وهو غير ظاهر أصلاً (ما حدا بيشوف القفزة)
-  /// 5) يظهر تدريجيًا (fade-in) ويبلش يترسم من جديد
-  /// وتتكرر الدورة
   Future<void> _runChartCycle() async {
     if (!mounted) return;
 
-    // 1) ترسم الخط
     await _chartController.forward(from: 0);
     if (!mounted) return;
 
-    // 2) يضل ظاهر لحظة
     await Future.delayed(const Duration(milliseconds: 900));
     if (!mounted) return;
 
-    // 3) يختفي بهدوء
     await _lineOpacityController.reverse();
     if (!mounted) return;
 
-    // 4) يترجع لنقطة الصفر وهو غير ظاهر (opacity = 0 حاليًا)
     _chartController.value = 0;
 
-    // 5) يظهر بهدوء
     await _lineOpacityController.forward();
     if (!mounted) return;
 
-    // إعادة الدورة من جديد
     _runChartCycle();
   }
 
@@ -111,7 +100,6 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
     _sectionController.forward(from: 0);
 
-    // نبلش دورة رسم الخط (بتعيد نفسها تلقائيًا لحالها لآخر الدورات)
     _runChartCycle();
   }
 
