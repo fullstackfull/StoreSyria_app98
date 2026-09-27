@@ -1,12 +1,8 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:store_go_app/utils/colors.dart';
-import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 
 simpleAppBar({
@@ -47,10 +43,10 @@ simpleAppBar({
                       ),
                   )
                   : SizedBox(),
-              horizontalSpace(isBack == true ? 15 : 0),
+              horizontalSpace(isBack == true ? 10 : 0),
               Text(
                 title,
-                style: isBold ? pBold18.copyWith(color: textColor,fontSize: 21.sp) : pMedium18.copyWith(color: textColor),
+                style: isBold ? pBold18.copyWith(color: textColor,fontSize: 20.sp) : pMedium18.copyWith(color: textColor),
               ),
             ],
           ),
@@ -82,7 +78,7 @@ simpleAppBar({
                       label,
                       style: TextStyle(
                         fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: accent,
                       ),
                     ),

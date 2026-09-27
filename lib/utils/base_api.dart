@@ -122,4 +122,11 @@ class API {
   static String updateCustomerUrl = '/update-customer';
   static String searchCustomerUrl = '/searchCustomerByName';
 
+  // Delivery Boys
+  static String deliveryBoysUrl = '/deliveryboysIndex';
+  static String addDeliveryBoyUrl = '/deliveryboyStore';
+  static String updateDeliveryBoyUrl = '/deliveryboysUpdate';
+  static String deleteDeliveryBoyUrl = '/deliveryboysDestroy';
+  static String deliveryBoyIdUrl = '/';
+
 }

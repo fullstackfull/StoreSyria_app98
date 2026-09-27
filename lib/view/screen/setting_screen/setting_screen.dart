@@ -89,6 +89,16 @@ class SettingScreen extends StatelessWidget {
 
                     settingCard(
                       isDark: isDark,
+                      icon: DefaultImages.deliveryManIcn,
+                      title: 'delivery_men'.tr,
+                      subtitle: 'manage_delivery_men'.tr,
+                      function: () {
+                        Get.toNamed(AppRoutes.deliveryBoys);
+                      },
+                    ),
+
+                    settingCard(
+                      isDark: isDark,
                       icon: DefaultImages.couponIcn,
                       title: 'coupon'.tr,
                       subtitle: 'manage_coupons'.tr,

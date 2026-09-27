@@ -413,13 +413,13 @@ class AppButton extends StatelessWidget {
           ),
           padding: EdgeInsets.symmetric(
             horizontal: 16.w,
-            vertical: 12.h,
+            vertical: 10.h,
           ),
         ),
         child: isLoading
             ? SizedBox(
           width: 20.w,
-          height: 20.w,
+          height: 40.w,
           child: CircularProgressIndicator(
             strokeWidth: 2.w,
             valueColor:

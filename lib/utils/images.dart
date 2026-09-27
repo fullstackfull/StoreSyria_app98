@@ -30,6 +30,7 @@ class DefaultImages {
   static String gridIcn = "assets/svg/grid_icn.svg";
   static String cartIcn = "assets/svg/cart_icn.svg";
   static String paymentIcn = "assets/svg/payment_methods.svg";
+  static String deliveryManIcn = "assets/svg/delivery-man.svg";
   static String arrowDownIcn = "assets/svg/arrow_down.svg";
   static String arrowUpIcn = "assets/svg/arrow_up.svg";
   static String copyIcn = "assets/svg/copy.svg";
