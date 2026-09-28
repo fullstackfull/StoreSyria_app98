@@ -9,7 +9,8 @@ import 'package:store_go_app/view/new_widgets/category_widget.dart';
 import 'package:store_go_app/view/screen/home_screen/add_category_bottomsheet.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
+
+import '../../new_widgets/shimmer.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final bool isBack;
@@ -110,7 +111,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                 child: Obx(() {
                   // Loading State
                   if (categoryController.isLoading.value && categoryController.currantPage.value == 1) {
-                    return const Center(child: LoadingWidget());
+                    return const ShimmerList(
+                      leading: ShimmerLeading.square,
+                      lines: 1,
+                    );
                   }
 
                   // Error State

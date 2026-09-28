@@ -6,9 +6,9 @@ import 'package:store_go_app/core/model/coupon_model.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../utils/helper.dart';
 import '../../new_widgets/coupon_widget.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/common_appbar_widget.dart';
 import 'coupon_detail_screen.dart';
 import 'new_coupon_bottomsheet.dart';
@@ -139,15 +139,15 @@ class _CouponScreenState extends State<CouponScreen>
 
   void _deleteCoupon(CouponData coupon) {
     AppDialog.showCustomDialog(
-      message: "deleteCupon",
-      lottieAsset: 'assets/lottie/delete_icon.json',
-      iconColor: AppColor.cRedText,
-      confirmColor: AppColor.cRedText,
-      context: context,
-      onConfirm: () =>
-        couponController.deleteCouponData(
-          couponId: coupon.id.toString(),
-        )
+        message: "deleteCupon",
+        lottieAsset: 'assets/lottie/delete_icon.json',
+        iconColor: AppColor.cRedText,
+        confirmColor: AppColor.cRedText,
+        context: context,
+        onConfirm: () =>
+            couponController.deleteCouponData(
+              couponId: coupon.id.toString(),
+            )
     );
   }
 
@@ -185,8 +185,8 @@ class _CouponScreenState extends State<CouponScreen>
 
                   if (couponController.isLoading.value &&
                       couponController.couponsList.isEmpty) {
-                    return const Center(
-                      child: LoadingWidget(),
+                    return const ShimmerList(
+                      leading: ShimmerLeading.square,
                     );
                   }
 

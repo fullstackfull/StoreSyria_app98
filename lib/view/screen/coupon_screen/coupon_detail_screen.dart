@@ -8,7 +8,7 @@ import 'package:store_go_app/core/model/view_used_coupon_model.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/common_appbar_widget.dart';
 
 class CouponDetailScreen extends StatefulWidget {
@@ -60,86 +60,84 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
           onNewLabelTap: () {  },
         ),
         body: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 20.w,
-            vertical: 16.h,
-          ),
-          child:Obx(() {
-            final list = couponController.viewCouponsList;
+            padding: EdgeInsets.symmetric(
+              horizontal: 20.w,
+              vertical: 16.h,
+            ),
+            child:Obx(() {
+              final list = couponController.viewCouponsList;
 
-            // 1. Loading
-            if (couponController.isUsedCouponLoading.value &&
-                list.isEmpty) {
-              return const Center(
-                child: LoadingWidget(),
-              );
-            }
+              // 1. Loading
+              if (couponController.isUsedCouponLoading.value &&
+                  list.isEmpty) {
+                return const ShimmerList(leading: ShimmerLeading.none);
+              }
 
-            // 2. Data Not Found
-            if (couponController.usedCouponEmptyMessage.isNotEmpty &&
-                list.isEmpty) {
-              return RefreshIndicator(
-                onRefresh: _fetchData,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * .6,
-                      child: Center(
-                        child: EmptyState(
-                          message: couponController
-                              .usedCouponEmptyMessage
-                              .value,
-                          icon: Icons.receipt_long_outlined,
+              // 2. Data Not Found
+              if (couponController.usedCouponEmptyMessage.isNotEmpty &&
+                  list.isEmpty) {
+                return RefreshIndicator(
+                  onRefresh: _fetchData,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * .6,
+                        child: Center(
+                          child: EmptyState(
+                            message: couponController
+                                .usedCouponEmptyMessage
+                                .value,
+                            icon: Icons.receipt_long_outlined,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            }
+                    ],
+                  ),
+                );
+              }
 
-            // 3. Real Error
-            if (couponController.usedCouponErrorMessage.isNotEmpty &&
-                list.isEmpty) {
-              return RefreshIndicator(
-                onRefresh: _fetchData,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * .6,
-                      child: Center(
-                        child: ErrorState(
-                          message: couponController
-                              .usedCouponErrorMessage
-                              .value,
-                          onRetry: _fetchData,
+              // 3. Real Error
+              if (couponController.usedCouponErrorMessage.isNotEmpty &&
+                  list.isEmpty) {
+                return RefreshIndicator(
+                  onRefresh: _fetchData,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * .6,
+                        child: Center(
+                          child: ErrorState(
+                            message: couponController
+                                .usedCouponErrorMessage
+                                .value,
+                            onRetry: _fetchData,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                );
+              }
+
+              // 4. Data
+              return RefreshIndicator(
+                onRefresh: _fetchData,
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    final data = list[index];
+
+                    return _buildUsageCard(
+                      data: data,
+                      isDark: isDark,
+                    );
+                  },
                 ),
               );
-            }
-
-            // 4. Data
-            return RefreshIndicator(
-              onRefresh: _fetchData,
-              child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  final data = list[index];
-
-                  return _buildUsageCard(
-                    data: data,
-                    isDark: isDark,
-                  );
-                },
-              ),
-            );
-          })
+            })
         ),
       ),
     );

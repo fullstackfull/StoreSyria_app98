@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     color: AppColor.cWhite,
                     springAnimationDurationInMilliseconds: 500,
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(20, 35, 20, 32),
+                      padding: const EdgeInsets.fromLTRB(18, 40, 18, 32),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             dateFormatted(date: DateTime.now().toString(),
                                 formatType: formatForDateTime(FormatType.date)),
                           ),
-                          verticalSpace(22),
+                          verticalSpace(20),
 
                           buildProfileTitle(
                             profileImage: '${homeController.imageBaseUrl
@@ -168,51 +168,80 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
                             return GestureDetector(
                               onTap: () => homeController.isStore.toggle(),
-                              child: Container(
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
                                 width: double.infinity,
-                                height: 68.h,
                                 decoration: BoxDecoration(
                                   color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
-                                  borderRadius: BorderRadius.circular(18),
+                                  borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                      color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5), width: 1),
+                                      color: isStoreOpen
+                                          ? AppColor.themeGreenColor.withOpacity(0.6)
+                                          : (isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+                                      width: 1.2),
                                   boxShadow: [
                                     BoxShadow(
                                       color: AppColor.cShadow,
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 3),
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 6),
                                     ),
                                   ],
                                 ),
-                                padding: const EdgeInsets.symmetric(horizontal: 15),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        assetSvdImageWidget(
-                                            image: DefaultImages.sLogoIcn,
-                                            height: 25.h),
-                                        horizontalSpace(15.h),
-                                        Column(
-                                          mainAxisAlignment: MainAxisAlignment
-                                              .center,
-                                          crossAxisAlignment: CrossAxisAlignment
-                                              .start,
-                                          children: [
-                                            Text(storeName, style: pMedium14),
-                                            Text(Prefs.getString(
-                                                AppConstant.emailId) ?? "",
-                                                style: pRegular8),
-                                          ],
-                                        ),
-                                      ],
+                                    Container(
+                                      width: 44.w,
+                                      height: 44.w,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: AppColor.themeGreenColor.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: assetSvdImageWidget(
+                                          image: DefaultImages.sLogoIcn,
+                                          height: 22.h),
                                     ),
-                                    assetSvdImageWidget(
-                                      image: DefaultImages.dropDownIcn,
-                                      colorFilter: ColorFilter.mode(
-                                          AppColor.cLabel, BlendMode.srcIn),
-                                    )
+                                    horizontalSpace(12),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(storeName,
+                                              style: pSemiBold14.copyWith(
+                                                  color: isDark ? Colors.white : AppColor.cLabel),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis),
+                                          verticalSpace(2),
+                                          Text(Prefs.getString(
+                                              AppConstant.emailId) ?? "",
+                                              style: pRegular10.copyWith(
+                                                  color: isDark ? Colors.white60 : AppColor.cDarkGreyFont),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis),
+                                        ],
+                                      ),
+                                    ),
+                                    horizontalSpace(8),
+                                    Container(
+                                      width: 32.w,
+                                      height: 32.w,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: isDark ? DarkThemeColor.cBorder : AppColor.cLight,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: AnimatedRotation(
+                                        turns: isStoreOpen ? 0.5 : 0,
+                                        duration: const Duration(milliseconds: 200),
+                                        child: assetSvdImageWidget(
+                                          image: DefaultImages.dropDownIcn,
+                                          colorFilter: ColorFilter.mode(
+                                              isDark ? Colors.white : AppColor.cLabel, BlendMode.srcIn),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -222,11 +251,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           Obx(() =>
                           homeController.isStore.value
                               ? Container(
-                            margin: const EdgeInsets.only(top: 10),
+                            margin: const EdgeInsets.only(top: 8),
                             decoration: BoxDecoration(
                               color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
                               border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
                                   color: AppColor.cShadow,
@@ -235,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 ),
                               ],
                             ),
-                            padding: const EdgeInsets.all(14),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                             child: ListView.builder(
                               itemCount: homeController.dashboardData?.store
                                   ?.length ?? 0,
@@ -251,11 +280,30 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                         storeId: store.id.toString());
                                     homeController.isStore.value = false;
                                   },
+                                  borderRadius: BorderRadius.circular(14),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 8),
-                                    child: Text(store.name?.trim() ?? "",
-                                        style: pSemiBold12),
+                                        horizontal: 8, vertical: 10),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 8,
+                                          height: 8,
+                                          decoration: BoxDecoration(
+                                            color: AppColor.themeGreenColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                        horizontalSpace(12),
+                                        Expanded(
+                                          child: Text(store.name?.trim() ?? "",
+                                              style: pSemiBold12.copyWith(
+                                                  color: isDark ? Colors.white : AppColor.cLabel),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 );
                               },
@@ -331,7 +379,26 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                   "",
                               title: homeController.dashboardData?.qrcode?.name ??
                                   ""),
-                          verticalSpace(15),
+                          verticalSpace(24),
+                          Row(
+                            children: [
+                              Container(
+                                width: 4,
+                                height: 18,
+                                decoration: BoxDecoration(
+                                  color: AppColor.themeGreenColor,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              horizontalSpace(8),
+                              Text(
+                                'Overview'.tr,
+                                style: pBold16.copyWith(
+                                    color: isDark ? Colors.white : AppColor.themeNavyBlueColor),
+                              ),
+                            ],
+                          ),
+                          verticalSpace(12),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -339,29 +406,32 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 child: totalProductWidget(image: DefaultImages.gridIcn,
                                     title: "Total".tr,
                                     subTitle: "Products".tr,
+                                    accentColor: AppColor.themeGreenColor,
                                     total: homeController.dashboardData?.products
                                         ?.toString() ?? "0"),
                               ),
-                              horizontalSpace(12),
+                              horizontalSpace(10),
                               Expanded(
                                 child: totalProductWidget(image: DefaultImages.listIcn,
                                     title: "Total".tr,
                                     subTitle: "Sales".tr,
+                                    accentColor: AppColor.blueColor,
                                     total: homeController.dashboardData?.sales
                                         ?.toString() ?? "0"),
                               ),
-                              horizontalSpace(12),
+                              horizontalSpace(10),
                               Expanded(
                                 child: totalProductWidget(image: DefaultImages.cartIcn,
                                     title: "Total".tr,
                                     subTitle: "Orders".tr,
+                                    accentColor: AppColor.cRed,
                                     total: homeController.dashboardData?.order
                                         ?.toString() ?? "0"),
                               ),
                             ],
                           ),
 
-                          verticalSpace(30),
+                          verticalSpace(24),
                           GlassVisitorChart(
                             visitorChart: homeController.dashboardData?.visitorchart ??
                                 <VisitorChartData>[],
@@ -468,7 +538,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           //   },
                           // ),
                           // verticalSpace(10),
-                      ],
+                        ],
                       ),
                     ),
                   ),

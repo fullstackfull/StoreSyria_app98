@@ -6,13 +6,13 @@ import 'package:store_go_app/routes/routes.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/controller/customers/customer_controller.dart';
 import '../../../core/controller/order_controller/order_controller.dart';
 import '../../../core/model/customer_orders_model.dart';
 import '../../new_widgets/app_snackbar.dart';
 import '../../new_widgets/customer_contact.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../new_widgets/top_orders.dart';
 import '../../widget/app_dialog.dart';
 import '../order_screen/order_detail_screen.dart';
@@ -184,7 +184,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       body: SafeArea(
         child: Obx(() {
           if (customerController.isCustomerOrdersLoading.value && customerController.customerOrdersList.isEmpty) {
-            return const Center(child: LoadingWidget());
+            return const ShimmerDetails(sections: 2);
           }
           if (customerController.customerOrdersErrorMessage.isNotEmpty && customerController.customerOrdersList.isEmpty) {
             return RefreshIndicator(
@@ -210,7 +210,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
           final hasOrders = customerController.customerOrdersList.isNotEmpty;
 
           if (customer == null) {
-            return const Center(child: LoadingWidget());
+            return const ShimmerDetails(sections: 2);
           }
 
           return RefreshIndicator(
