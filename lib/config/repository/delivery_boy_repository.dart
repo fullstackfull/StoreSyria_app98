@@ -41,6 +41,20 @@ class DeliveryBoyRepository {
     return response;
   }
 
+  Future<dynamic> updatePassDeliveryBoyData({
+    required Map<String, dynamic> data,
+    required String deliveryBoyId,
+  }) async {
+    String endPoint = '${API.updatePassDeliveryBoyUrl}${API.deliveryBoyIdUrl}$deliveryBoyId${API.storeIdUrl}${Prefs.getStoreID()}';
+
+    var response = await NetworkHttps.postRequest(
+      endPoint,
+      data,
+    );
+
+    return response;
+  }
+
   Future<dynamic> deleteDeliveryBoyData({
     required String deliveryBoyId,
   }) async {

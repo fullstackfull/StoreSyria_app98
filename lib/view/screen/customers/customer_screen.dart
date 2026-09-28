@@ -204,9 +204,9 @@ class _CustomerScreenState extends State<CustomerScreen>
                             Text(
                               "${isSearchMode ? customers.length : (customerController.customerModel?.data?.pagination?.total ?? customers.length)} ${'items'.tr}",
                               style: TextStyle(
-                                fontSize: 12.sp,
+                                fontSize: 14.sp,
                                 color: isDark
-                                    ? Colors.grey.shade400
+                                    ? Colors.grey.shade500
                                     : AppColor.cDarkGreyFont,
                                 fontWeight: FontWeight.w500,
                               ),

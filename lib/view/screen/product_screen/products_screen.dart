@@ -523,27 +523,21 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                         height: 44.h,
                         width: 44.h,
                         decoration: BoxDecoration(
-                          color: hasFilter ?
-                          isDark
-                              ? DarkThemeColor.cCardBackground
-                              : AppColor.themeNavyBlueColor :
-                          isDark
-                              ? DarkThemeColor.cCardBackground
-                              : AppColor.cWhite,
-                          borderRadius: BorderRadius.circular(30.r),
-                          border: hasFilter
-                              ? Border.all(
-                              color: AppColor.themeNavyBlueColor,
-                              width: 1.2)
-                              : null,
+                          color: hasFilter
+                              ? AppColor.themeNavyBlueColor
+                              : (isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite),
+                          borderRadius: BorderRadius.circular(22.r),
+                          border: Border.all(
+                            color: hasFilter
+                                ? AppColor.themeNavyBlueColor
+                                : (isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(.5)),
+                          ),
                         ),
                         child: Icon(
                           Icons.filter_list,
                           color: hasFilter
                               ? AppColor.cWhite
-                              : (isDark
-                              ? Colors.grey.shade400
-                              : AppColor.cFont),
+                              : (isDark ? Colors.grey.shade400 : AppColor.cFont),
                         ),
                       ),
                     );
@@ -731,9 +725,9 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                               childCount: products.length,                            ),
                             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 220.w,
-                              crossAxisSpacing: 12.w,
-                              mainAxisSpacing: 12.h,
-                              mainAxisExtent: 270.h,
+                              crossAxisSpacing: 14.w,
+                              mainAxisSpacing: 16.h,
+                              mainAxisExtent: 290.h,
                             ),
                           ),
                         ),

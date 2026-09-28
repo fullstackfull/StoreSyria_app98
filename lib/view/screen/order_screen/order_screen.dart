@@ -360,6 +360,7 @@ class _OrderScreenState extends State<OrderScreen>
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.w700,
+                                    color: AppColor.themeNavyBlueColor
                                   ),
                                 ),
                               ),

@@ -147,9 +147,9 @@ class _DeliveryBoyScreenState extends State<DeliveryBoyScreen>
                               Text(
                                 "${deliveryBoys.length} ${'items'.tr}",
                                 style: TextStyle(
-                                  fontSize: 12.sp,
+                                  fontSize: 14.sp,
                                   color: isDark
-                                      ? Colors.grey.shade400
+                                      ? Colors.grey.shade500
                                       : AppColor.cDarkGreyFont,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -173,6 +173,17 @@ class _DeliveryBoyScreenState extends State<DeliveryBoyScreen>
                                   bottom: 12.h,
                                 ),
                                 child: deliveryBoyWidget(
+                                  changeText2: "change_password".tr,
+                                  changeFun2: () {
+                                    Get.bottomSheet(
+                                      AddNewDeliveryBoyWidget(
+                                        isChangePassword: true,
+                                        deliveryBoyId: deliveryBoy.id.toString(),
+                                      ),
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                    );
+                                  },
                                   changeFun: () {
                                     Get.bottomSheet(
                                       AddNewDeliveryBoyWidget(

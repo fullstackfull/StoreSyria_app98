@@ -264,6 +264,86 @@ class DeliveryBoyController extends GetxController implements StoreAware {
   }
 
   // =========================
+  // UPDATE Password DELIVERY BOY
+  // =========================
+
+  Future<bool> updatePassDeliveryBoyData({
+    required String deliveryBoyId,
+    required String password,
+    required String passwordConfirm,
+  }) async {
+    if (isDataAvailable.value) return false;
+
+    isDataAvailable.value = true;
+
+    try {
+      final Map<String, dynamic> data = {
+        'password': password,
+        'password_confirmation' : passwordConfirm
+      };
+
+      final response = await deliveryBoyRepository.updatePassDeliveryBoyData(
+        deliveryBoyId: deliveryBoyId,
+        data: data,
+      );
+
+      bool success = false;
+
+      await response.fold(
+        onSuccess: (data) async {
+          if (data['status'] == 'success' || data['status'] == 1) {
+            success = true;
+
+            CacheService.clear(_cacheDeliveryBoyKey);
+
+            deliveryBoyList.clear();
+            errorMessage.value = '';
+            Get.back();
+            commonToast(type: AppSnackBarType.success,
+              data['message']?.toString() ??
+                  'Delivery Boy Password updated successfully',
+            );
+
+            await getDeliveryBoysData();
+
+          } else {
+            commonToast(
+              type: AppSnackBarType.error,
+              data['message']?.toString() ??
+                  'Error',
+            );
+          }
+        },
+        onFailure: (
+            reason,
+            message,
+            validationErrors,
+            ) {
+          errorMessage.value = message;
+
+          commonToast(
+            type: AppSnackBarType.error,
+            message,
+          );
+        },
+      );
+
+      return success;
+    } catch (e) {
+      errorMessage.value = e.toString();
+
+      commonToast(
+        type: AppSnackBarType.error,
+        'error',
+      );
+
+      return false;
+    } finally {
+      isDataAvailable.value = false;
+    }
+  }
+
+  // =========================
   // DELETE DELIVERY BOY
   // =========================
 

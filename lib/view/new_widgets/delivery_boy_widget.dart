@@ -15,6 +15,8 @@ Widget deliveryBoyWidget({
   DeliveryBoyData? deliveryBoy,
   VoidCallback? onTap,
   VoidCallback? changeFun,
+  String? changeText2,
+  VoidCallback? changeFun2,
   VoidCallback? deleteFun,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -92,6 +94,8 @@ Widget deliveryBoyWidget({
                   ),
                 ),
                 AppPopupMenu(
+                  changeFun2: changeFun2,
+                  changeText2: changeText2,
                   changeFun: changeFun,
                   deleteFun: deleteFun,
                   changeText: 'change'.tr,

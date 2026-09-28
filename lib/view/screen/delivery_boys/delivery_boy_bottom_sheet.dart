@@ -11,6 +11,7 @@ class AddNewDeliveryBoyWidget extends StatefulWidget {
   final bool isUpdate;
   final String? deliveryBoyId;
   final String? name;
+  final bool isChangePassword;
   final String? email;
   final String? contact;
   final String? commissionPercentage;
@@ -25,6 +26,7 @@ class AddNewDeliveryBoyWidget extends StatefulWidget {
     this.contact,
     this.commissionPercentage,
     this.isCommissionEnabled,
+    this.isChangePassword = false,
   });
 
   @override
@@ -39,6 +41,7 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
   late TextEditingController _emailController;
   late TextEditingController _contactController;
   late TextEditingController _passwordController;
+  late TextEditingController _confirmPasswordController;
   late TextEditingController _commissionPercentageController;
   bool _isCommissionEnabled = true;
   bool _isLoading = false;
@@ -58,6 +61,8 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
     _emailController = TextEditingController(text: widget.email ?? '');
     _contactController = TextEditingController(text: widget.contact ?? '');
     _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
     _commissionPercentageController = TextEditingController(text: widget.commissionPercentage ?? '0');
     _isCommissionEnabled = widget.isCommissionEnabled == null || widget.isCommissionEnabled == '1';
   }
@@ -68,6 +73,7 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
     _emailController.dispose();
     _contactController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _commissionPercentageController.dispose();
     super.dispose();
   }
@@ -87,23 +93,36 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
+
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
+
     if (_isLoading) return;
+
     setState(() {
       _isLoading = true;
     });
+
     try {
       bool success;
-      if (widget.isUpdate) {
+
+      if (widget.isChangePassword) {
+        success = await deliveryBoyController.updatePassDeliveryBoyData(
+          passwordConfirm: _confirmPasswordController.text.trim(),
+          deliveryBoyId: widget.deliveryBoyId!,
+          password: _passwordController.text.trim(),
+        );
+      } else if (widget.isUpdate) {
         success = await deliveryBoyController.updateDeliveryBoyData(
           deliveryBoyId: widget.deliveryBoyId!,
           name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           contact: _contactController.text.trim(),
-          commissionPercentage: _commissionPercentageController.text.trim(),
-          isCommissionEnabled: _isCommissionEnabled ? '1' : '0',
+          commissionPercentage:
+          _commissionPercentageController.text.trim(),
+          isCommissionEnabled:
+          _isCommissionEnabled ? '1' : '0',
         );
       } else {
         success = await deliveryBoyController.addDeliveryBoyData(
@@ -111,14 +130,18 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
           contact: _contactController.text.trim(),
-          commissionPercentage: _commissionPercentageController.text.trim(),
-          isCommissionEnabled: _isCommissionEnabled ? '1' : '0',
+          commissionPercentage:
+          _commissionPercentageController.text.trim(),
+          isCommissionEnabled:
+          _isCommissionEnabled ? '1' : '0',
         );
       }
+
       if (success && mounted) {
         Navigator.of(context).pop();
       }
     } catch (e) {
+      // handle error
     } finally {
       if (mounted) {
         setState(() {
@@ -204,8 +227,12 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.isUpdate ? 'edit_delivery_man'.tr : 'add_delivery_man'.tr,
-                style: TextStyle(
+          widget.isChangePassword
+          ? 'change_password'.tr
+              : widget.isUpdate
+          ? 'edit_delivery_man'.tr
+              : 'add_delivery_man'.tr,
+          style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: textColor,
@@ -213,9 +240,11 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
               ),
               const SizedBox(height: 4),
               Text(
-                widget.isUpdate
-                    ? 'update_delivery_man_data'.tr
-                    : 'enter_delivery_man_data'.tr,
+                  widget.isChangePassword
+                      ? 'change_delivery_man_password'.tr
+                      : widget.isUpdate
+                      ? 'update_delivery_man_data'.tr
+                      : 'enter_delivery_man_data'.tr,
                 style: TextStyle(fontSize: 12, color: secondaryTextColor),
               ),
             ],
@@ -241,6 +270,68 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
   }
 
   Widget _buildForm() {
+    if (widget.isChangePassword) {
+      return SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.only(
+          top: 4,
+          bottom: 8 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppTextField(
+                title: 'password'.tr,
+                hint: 'enter_password'.tr,
+                controller: _passwordController,
+                icon: Icons.lock_outline_rounded,
+                validator: (value) {
+                  final password = value ?? '';
+
+                  if (password.trim().isEmpty) {
+                    return 'password_required'.tr;
+                  }
+
+                  if (password.length < 8) {
+                    return 'password_min_8_characters'.tr;
+                  }
+
+                  return Validator.validatePassword(password);
+                },
+                textInputAction: TextInputAction.next,
+              ),
+
+              const SizedBox(height: 16),
+
+              AppTextField(
+                title: 'confirm_password'.tr,
+                hint: 'confirm_password'.tr,
+                controller: _confirmPasswordController,
+                icon: Icons.lock_reset_outlined,
+                validator: (value) {
+                  final confirmPassword = value ?? '';
+
+                  if (confirmPassword.trim().isEmpty) {
+                    return 'confirm_password_required'.tr;
+                  }
+
+                  if (confirmPassword != _passwordController.text) {
+                    return 'passwords_do_not_match'.tr;
+                  }
+
+                  return null;
+                },
+                textInputAction: TextInputAction.done,
+              ),
+
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      );
+    }
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.only(
@@ -397,15 +488,21 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
                   : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    widget.isUpdate
-                        ? Icons.save_outlined
-                        : Icons.add_rounded,
-                    size: 19,
-                  ),
+                    Icon(
+                      widget.isChangePassword
+                          ? Icons.lock_reset_outlined
+                          : widget.isUpdate
+                          ? Icons.save_outlined
+                          : Icons.add_rounded,
+                      size: 19,
+                    ),
                   const SizedBox(width: 8),
                   Text(
-                    widget.isUpdate ? 'update'.tr : 'create'.tr,
+                     widget.isChangePassword
+                     ? 'confirm'.tr
+                         : widget.isUpdate
+                     ? 'update'.tr
+                         : 'create'.tr,
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,

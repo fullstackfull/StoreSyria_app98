@@ -303,60 +303,87 @@ Widget sectionHeaderWithFilterWidget({
   VoidCallback? onFilterTap,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final titleColor = isDark ? Colors.white : Colors.black;
+  final titleColor = isDark ? Colors.white : const Color(0xFF111827);
+  final subColor = isDark ? const Color(0xFF9297A1) : const Color(0xFF8A8F98);
   final accent = AppColor.themeNavyBlueColor;
 
   return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       Expanded(
-        child: Row(
-          children: [
-            Text(
-              num.toString(),
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColor.themeNavyBlueColor,
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: titleColor),
-            ),
-          ],
-        ),
-      ),
-      SizedBox(width: 8.w),
-      isFilter ?
-      GestureDetector(
-        onTap: onFilterTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30.r),
-            border: Border.all(color: accent.withOpacity(0.4)),
-          ),
+        child: IntrinsicHeight(
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(Icons.calendar_today_outlined, size: 14.sp, color: accent),
-              SizedBox(width: 6.w),
               Flexible(
-                child: Text(
-                  filterLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: accent),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 17.sp,
+                        height: 1.2,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -.3,
+                        color: accent,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      '$num ${'items'.tr}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        height: 1.2,
+                        fontWeight: FontWeight.w500,
+                        color: subColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-      ) : SizedBox(),
+      ),
+
+      if (isFilter) ...[
+        SizedBox(width: 8.w),
+        GestureDetector(
+          onTap: onFilterTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30.r),
+              border: Border.all(color: accent.withOpacity(0.4)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.calendar_today_outlined, size: 14.sp, color: accent),
+                SizedBox(width: 6.w),
+                Flexible(
+                  child: Text(
+                    filterLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w600,
+                      color: accent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     ],
   );
 }

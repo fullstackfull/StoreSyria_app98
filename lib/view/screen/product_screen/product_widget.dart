@@ -33,385 +33,315 @@ Widget allProductsListItemWidget({
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  final cardColor = isDark
-      ? const Color(0xFF1E1E1E)
-      : Colors.white;
-
-  final textColor = isDark
-      ? Colors.white
-      : const Color(0xFF1F1F1F);
-
-  final subTextColor = isDark
-      ? const Color(0xFF9CA3AF)
-      : const Color(0xFF6B7280);
-
-  final imageBackground = isDark
-      ? Colors.white.withOpacity(.05)
-      : const Color(0xFFF3F4F6);
+  final cardColor = isDark ? const Color(0xFF1B1C20) : Colors.white;
+  final textColor = isDark ? Colors.white : const Color(0xFF111827);
+  final subTextColor =
+  isDark ? const Color(0xFF9297A1) : const Color(0xFF8A8F98);
+  final imageBg = isDark ? const Color(0xFF25272C) : const Color(0xFFF6F7F9);
+  final dividerColor =
+  isDark ? Colors.white.withOpacity(.07) : const Color(0xFFEEF0F3);
 
   final accentColor = AppColor.themeGreenColor;
-
   const dangerColor = Color(0xFFEF4444);
-  const warningColor = Colors.orange;
-
+  const warningColor = Color(0xFFF59E0B);
 
   final variant = hasVariant == true;
-
   final isHidden = status == 0;
 
   final stockValue = stockStatus ?? '';
-
   final isInStock = stockValue == 'in_stock';
-
   final isBackorder = stockValue == 'on_backorder';
+  final isOutOfStock = stockValue == 'out_of_stock' || stockValue == '0';
 
-  final isOutOfStock =
-      stockValue == 'out_of_stock' || stockValue == '0';
+  final displayPrice = parsePriceSafe(price);
 
-  final finalPrice = parsePriceSafe(price);
-  final displayPrice = finalPrice;
+  final isValidImageUrl = imageUrl.trim().isNotEmpty &&
+      (imageUrl.startsWith('http') || imageUrl.startsWith('assets'));
 
+  final Color statusColor = (variant || isInStock)
+      ? accentColor
+      : isBackorder
+      ? warningColor
+      : dangerColor;
 
-  final isValidImageUrl =
-      imageUrl.trim().isNotEmpty &&
-          (
-              imageUrl.startsWith('http') ||
-                  imageUrl.startsWith('assets')
-          );
+  final String statusText = isInStock
+      ? 'in_stock'.tr
+      : isBackorder
+      ? 'on_backorder'.tr
+      : 'out_of_stock'.tr;
 
-  Color stockColor() {
-    if (variant || !trackStock) {
-      return subTextColor;
-    }
+  final String stockText =
+  (variant || !trackStock) ? '${'stock'.tr}: -' : '${'stock'.tr}: $stock';
 
-    if (isInStock) {
-      return accentColor;
-    }
-
-    if (isBackorder) {
-      return warningColor;
-    }
-
-    return dangerColor;
+  // نص لا يُقطع: يصغّر تلقائياً إذا ضاق المكان
+  Widget fitText(
+      String text,
+      TextStyle style, {
+        Alignment alignment = Alignment.centerLeft,
+      }) {
+    return Align(
+      alignment: alignment,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: alignment,
+        child: Text(text, maxLines: 1, softWrap: false, style: style),
+      ),
+    );
   }
-
-  Color statusColor() {
-    if (variant) {
-      return accentColor;
-    }
-
-    if (isInStock) {
-      return accentColor;
-    }
-
-    if (isBackorder) {
-      return warningColor;
-    }
-
-    return dangerColor;
-  }
-
-  Color statusBackgroundColor() {
-    if (variant) {
-      return accentColor.withOpacity(.10);
-    }
-
-    if (isInStock) {
-      return accentColor.withOpacity(.10);
-    }
-
-    if (isBackorder) {
-      return warningColor.withOpacity(.10);
-    }
-
-    return dangerColor.withOpacity(.10);
-  }
-
-  final hasMenu =
-      viewFun != null ||
-          (showChangeAction && changeFun != null) ||
-          deleteFun != null;
 
   return Material(
     color: Colors.transparent,
     child: InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10.r),
+      borderRadius: BorderRadius.circular(22.r),
       child: Container(
         decoration: BoxDecoration(
-          // border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
           color: cardColor,
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(22.r),
           boxShadow: isDark
               ? null
               : [
             BoxShadow(
-              color: Colors.black.withOpacity(.025),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
+              color: const Color(0xFF111827).withOpacity(.06),
+              blurRadius: 22,
+              spreadRadius: -6,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
-        clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AspectRatio(
-              aspectRatio: 1.18,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Hero(
-                    tag: 'product_image_$productId',
-                    child: isValidImageUrl
-                        ? productNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.contain,
-                      backgroundColor: imageBackground,
-                      iconColor: subTextColor,
-                      loadingColor: accentColor,
-                    )
-                        : Container(
-                      color: imageBackground,
-                      child: Icon(
-                        Icons.image_outlined,
-                        color: subTextColor,
-                        size: 24.sp,
-                      ),
-                    ),
-                  ),
-                  if (isHidden)
-                    Positioned(
-                      top: 7.h,
-                      left: 7.w,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 7.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(.72),
-                          borderRadius:
-                          BorderRadius.circular(12.r),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
+            // ===================== IMAGE =====================
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(8.w, 8.w, 8.w, 0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16.r),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(color: imageBg),
 
-                            Icon(
-                              Icons.visibility_off_outlined,
-                              size: 11.sp,
-                              color: Colors.white,
-                            ),
-
-                            SizedBox(width: 4.w),
-
-                            Text(
-                              'hidden'.tr,
-                              style: TextStyle(
-                                fontSize: 7.sp,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  if (isOutOfStock)
-                    Positioned.fill(
-                      child: Container(
-                        color: Colors.black.withOpacity(.25),
-                        child: Center(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8.w,
-                              vertical: 5.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(.72),
-                              borderRadius:
-                              BorderRadius.circular(15.r),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-
-                                Container(
-                                  width: 5.w,
-                                  height: 5.w,
-                                  decoration:
-                                  const BoxDecoration(
-                                    color: dangerColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-
-                                SizedBox(width: 4.w),
-
-                                Text(
-                                  'out_of_stock'.tr,
-                                  style: TextStyle(
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
+                      Opacity(
+                        opacity: isOutOfStock ? .45 : 1,
+                        child: Padding(
+                          padding: EdgeInsets.all(8.w),
+                          child: Hero(
+                            tag: 'product_image_$productId',
+                            child: isValidImageUrl
+                                ? productNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.contain,
+                              backgroundColor: Colors.transparent,
+                              iconColor: subTextColor,
+                              loadingColor: accentColor,
+                            )
+                                : Icon(Icons.image_outlined,
+                                color: subTextColor, size: 28.sp),
                           ),
                         ),
                       ),
-                    ),
 
-                  if (viewFun != null ||
-                      (showChangeAction && changeFun != null) ||
-                      deleteFun != null)
-                    Positioned(
-                      top: 6.h,
-                      right: 6.w,
-                      child: AppPopupMenu(
-                        color: Colors.white,
-                        viewFun: viewFun,
-                        changeFun: showChangeAction
-                            ? changeFun
-                            : null,
-                        deleteFun: deleteFun,
+                      // ===== OUT OF STOCK (center of image) =====
+                      if (isOutOfStock)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10.w, vertical: 3.h),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(.78),
+                                      borderRadius:
+                                      BorderRadius.circular(30.r),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(.18),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 6.w,
+                                          height: 6.w,
+                                          decoration: const BoxDecoration(
+                                            color: dangerColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                        SizedBox(width: 7.w),
+                                        Text(
+                                          'out_of_stock'.tr,
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: TextStyle(
+                                            fontSize: 9.sp,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // hidden (top-left)
+                      if (isHidden)
+                        Positioned(
+                          top: 8.h,
+                          left: 8.w,
+                          child: _overlayChip(
+                            label: 'hidden'.tr,
+                            icon: Icons.visibility_off_outlined,
+                          ),
+                        ),
+
+                      // menu (top-right)
+                      if (viewFun != null ||
+                          (showChangeAction && changeFun != null) ||
+                          deleteFun != null)
+                        Positioned(
+                          top: 4.h,
+                          right: 4.w,
+                          child: AppPopupMenu(
+                            color: Colors.white,
+                            viewFun: viewFun,
+                            changeFun: showChangeAction ? changeFun : null,
+                            deleteFun: deleteFun,
+                          ),
+                        ),
+
+                      // rating (bottom-left)
+                      Positioned(
+                        left: 8.w,
+                        bottom: 8.h,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 7.w, vertical: 3.h),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(.95),
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.star_rounded,
+                                  size: 13.sp, color: Colors.amber),
+                              SizedBox(width: 3.w),
+                              Text(
+                                (rating ?? 0).toStringAsFixed(1),
+                                style: TextStyle(
+                                  fontSize: 10.5.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF111827),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                ],
+                    ],
+                  ),
+                ),
               ),
             ),
 
+            // ===================== CONTENT =====================
             Padding(
-              padding: EdgeInsets.fromLTRB(
-                9.w,
-                7.h,
-                9.w,
-                8.h,
-              ),
+              padding: EdgeInsets.fromLTRB(13.w, 11.h, 13.w, 12.h),
               child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (categoryName.trim().isNotEmpty)
-                    Text(
-                      categoryName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w600,
-                        color: subTextColor,
-                      ),
-                    ),
-
-                  SizedBox(height: 2.h),
-
-                  Text(
-                    productName.trim().isNotEmpty
-                        ? productName
-                        : 'no_product_name'.tr,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      height: 1.15,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
-                    ),
-                  ),
-
-                  SizedBox(height: 5.h),
-                  Row(
-                    children: [
-
-                      Icon(
-                        Icons.star_rounded,
-                        size: 14.sp,
-                        color: Colors.amber,
-                      ),
-
-                      SizedBox(width: 2.w),
-
-                      Text(
-                        (rating ?? 0).toStringAsFixed(1),
-                        style: TextStyle(
-                          fontSize: 10.sp,
+                  // 1) category
+                  if (categoryName.trim().isNotEmpty) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: fitText(
+                        categoryName.trim().toUpperCase(),
+                        TextStyle(
+                          fontSize: 9.sp,
+                          letterSpacing: .9,
                           fontWeight: FontWeight.w600,
                           color: subTextColor,
                         ),
                       ),
-                    ],
+                    ),
+                    SizedBox(height: 3.h),
+                  ],
+
+                  // 2) name
+                  SizedBox(
+                    width: double.infinity,
+                    child: fitText(
+                      productName.trim().isNotEmpty
+                          ? productName
+                          : 'no_product_name'.tr,
+                      TextStyle(
+                        fontSize: 14.sp,
+                        height: 1.2,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -.2,
+                        color: textColor,
+                      ),
+                    ),
                   ),
 
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 9.h),
+                  Divider(height: 1, color: dividerColor),
+                  SizedBox(height: 9.h),
 
+                  // 3) price | status pill
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: Row(
-                          children: [
-
-                            Icon(
-                              Icons.inventory_2_outlined,
-                              size: 12.sp,
-                              color: stockColor(),
-                            ),
-
-                            SizedBox(width: 4.w),
-
-                            Expanded(
-                              child: Text(
-                                variant
-                                    ? '${'stock'.tr}: -'
-                                    : !trackStock
-                                    ? '${'stock'.tr}: -'
-                                    : '${'stock'.tr}: $stock',
-                                maxLines: 1,
-                                overflow:
-                                TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 9.5.sp,
-                                  fontWeight:
-                                  FontWeight.w500,
-                                  color: subTextColor,
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: fitText(
+                          variant
+                              ? 'multiple_variants'.tr
+                              : (displayPrice > 0 ? price : '—'),
+                          TextStyle(
+                            fontSize: variant ? 10.5.sp : 15.sp,
+                            fontWeight:
+                            variant ? FontWeight.w500 : FontWeight.w800,
+                            letterSpacing: variant ? 0 : -.3,
+                            color: variant ? subTextColor : textColor,
+                          ),
                         ),
                       ),
-
-                      SizedBox(width: 5.w),
-
+                      SizedBox(width: 6.w),
                       Flexible(
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 6.w,
-                            vertical: 3.h,
-                          ),
+                              horizontal: 8.w, vertical: 3.h),
                           decoration: BoxDecoration(
-                            color:
-                            statusBackgroundColor(),
-                            borderRadius:
-                            BorderRadius.circular(5.r),
+                            color: statusColor.withOpacity(.10),
+                            borderRadius: BorderRadius.circular(20.r),
                           ),
-                          child: Text(
-                            isInStock
-                                ? 'in_stock'.tr
-                                : isBackorder
-                                ? 'on_backorder'.tr
-                                : 'out_of_stock'.tr,
-                            maxLines: 1,
-                            overflow:
-                            TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 8.sp,
-                              fontWeight:
-                              FontWeight.w700,
-                              color: statusColor(),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              statusText,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: TextStyle(
+                                fontSize: 9.5.sp,
+                                fontWeight: FontWeight.w700,
+                                color: statusColor,
+                              ),
                             ),
                           ),
                         ),
@@ -419,91 +349,81 @@ Widget allProductsListItemWidget({
                     ],
                   ),
 
-                  if (!trackStock) ...[
-                    SizedBox(height: 5.h),
+                  SizedBox(height: 8.h),
 
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 6.w,
-                        vertical: 4.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                        subTextColor.withOpacity(.08),
-                        borderRadius:
-                        BorderRadius.circular(5.r),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-
-                          Icon(
-                            trackStock
-                                ? Icons.track_changes_rounded
-                                : Icons.do_not_disturb_on_outlined,
-                            size: 11.sp,
+                  // 4) stock qty | not tracked
+                  Row(
+                    children: [
+                      Icon(Icons.inventory_2_outlined,
+                          size: 13.sp, color: subTextColor),
+                      SizedBox(width: 5.w),
+                      Expanded(
+                        child: fitText(
+                          stockText,
+                          TextStyle(
+                            fontSize: 10.5.sp,
+                            fontWeight: FontWeight.w500,
                             color: subTextColor,
                           ),
-
-                          SizedBox(width: 4.w),
-
-                          Text(
-                            trackStock ?
-                            'tracked'.tr :
-                            'not_tracked'.tr,
-                            maxLines: 1,
-                            overflow:
-                            TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 8.sp,
-                              fontWeight:
-                              FontWeight.w600,
-                              color: subTextColor,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                  if (!variant && displayPrice > 0) ...[
-                    SizedBox(height: 7.h),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          price,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w700,
-                            color: textColor,
+                      if (!trackStock) ...[
+                        SizedBox(width: 4.w),
+                        Flexible(
+                          child: fitText(
+                            'not_tracked'.tr,
+                            TextStyle(
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w600,
+                              color: subTextColor.withOpacity(.8),
+                            ),
+                            alignment: Alignment.centerRight,
                           ),
                         ),
                       ],
-                    ),
-                  ],
-
-                  if (variant) ...[
-                    SizedBox(height: 5.h),
-
-                    Text(
-                      'multiple_variants'.tr,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.w500,
-                        color: subTextColor,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
+    ),
+  );
+}
+
+Widget _overlayChip({
+  required String label,
+  IconData? icon,
+  Color? dotColor,
+}) {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
+    decoration: BoxDecoration(
+      color: Colors.black.withOpacity(.72),
+      borderRadius: BorderRadius.circular(20.r),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null) Icon(icon, size: 12.sp, color: Colors.white),
+        if (dotColor != null)
+          Container(
+            width: 6.w,
+            height: 6.w,
+            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+          ),
+        SizedBox(width: 5.w),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+      ],
     ),
   );
 }

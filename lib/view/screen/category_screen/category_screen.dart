@@ -174,7 +174,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                                 Text(
                                   "${categoryController.categoriesModel?.data?.total ?? 0} ${'items'.tr}",
                                   style: TextStyle(
-                                    fontSize: 12.sp,
+                                    fontSize: 14.sp,
+                                    height: 1.2,
                                     color: isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -196,8 +197,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                             ),
                             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 220.w,
-                              crossAxisSpacing: 12.w,
-                              mainAxisSpacing: 12.h,
+                              crossAxisSpacing: 14.w,
+                              mainAxisSpacing: 14.h,
                               mainAxisExtent: 235.h,
                             ),
                           ),

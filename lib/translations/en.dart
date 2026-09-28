@@ -608,4 +608,10 @@ const Map<String, String> en = {
   'sale': 'Sale',
   'refund': 'Refund',
   'adjustment': 'Adjustment',
+  "change_password": "Change Password",
+  "change_delivery_man_password": "Change delivery man's password",
+  "confirm_password": "Confirm Password",
+  "confirm_password_required": "Please confirm your password",
+  "passwords_do_not_match": "Passwords do not match",
+  "password_changed_successfully": "Password changed successfully"
 };

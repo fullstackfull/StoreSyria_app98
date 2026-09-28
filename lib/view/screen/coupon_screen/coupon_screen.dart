@@ -268,9 +268,9 @@ class _CouponScreenState extends State<CouponScreen>
                                 Text(
                                   "${couponController.couponModel?.data?.total ?? 0} ${'items'.tr}",
                                   style: TextStyle(
-                                    fontSize: 12.sp,
+                                    fontSize: 14.sp,
                                     color: isDark
-                                        ? Colors.grey.shade400
+                                        ? Colors.grey.shade500
                                         : AppColor.cDarkGreyFont,
                                     fontWeight:
                                     FontWeight.w500,

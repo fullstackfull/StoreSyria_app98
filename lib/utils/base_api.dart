@@ -126,6 +126,7 @@ class API {
   static String deliveryBoysUrl = '/deliveryboysIndex';
   static String addDeliveryBoyUrl = '/deliveryboyStore';
   static String updateDeliveryBoyUrl = '/deliveryboysUpdate';
+  static String updatePassDeliveryBoyUrl = '/deliveryboysReset-password';
   static String deleteDeliveryBoyUrl = '/deliveryboysDestroy';
   static String deliveryBoyIdUrl = '/';
 

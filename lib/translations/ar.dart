@@ -608,4 +608,10 @@ const Map<String, String> ar = {
   'sale': 'بيع',
   'refund': 'استرجاع',
   'adjustment': 'تسوية',
+  "change_password": "تغيير كلمة المرور",
+  "change_delivery_man_password": "تغيير كلمة مرور مندوب التوصيل",
+  "confirm_password": "تأكيد كلمة المرور",
+  "confirm_password_required": "يرجى تأكيد كلمة المرور",
+  "passwords_do_not_match": "كلمتا المرور غير متطابقتين",
+  "password_changed_successfully": "تم تغيير كلمة المرور بنجاح"
 };

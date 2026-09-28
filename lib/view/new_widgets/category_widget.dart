@@ -16,81 +16,50 @@ Widget buildCategoryWidget({
   required CategoryData category,
   required CategoryController categoryController,
 }) {
-  final bool isDark =
-      Theme.of(context).brightness == Brightness.dark;
+  final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-  // =========================================================
-  // COLORS
-  // =========================================================
-
-  final Color cardColor =
-  isDark ? const Color(0xFF1B1C20) : Colors.white;
-
+  // ------------------------------ COLORS ------------------------------
+  final Color cardColor = isDark ? const Color(0xFF1B1C20) : Colors.white;
   final Color surfaceColor =
-  isDark ? const Color(0xFF23252A) : const Color(0xFFF7F8FA);
-
-  final Color primaryText =
-  isDark ? Colors.white : const Color(0xFF15171A);
-
+  isDark ? const Color(0xFF25272C) : const Color(0xFFF5F6F8);
+  final Color primaryText = isDark ? Colors.white : const Color(0xFF15171A);
   final Color secondaryText =
   isDark ? const Color(0xFF9297A1) : const Color(0xFF777D87);
-
   final Color borderColor =
-  isDark
-      ? Colors.white.withOpacity(.07)
-      : const Color(0xFFE8EAEE);
-
-  final Color accent =
-      AppColor.themeNavyBlueColor;
+  isDark ? Colors.white.withOpacity(.07) : const Color(0xFFE8EAEE);
+  final Color accent = AppColor.themeNavyBlueColor;
 
   const Color success = Color(0xFF16A34A);
   const Color danger = Color(0xFFEF4444);
   const Color warning = Color(0xFFF59E0B);
 
-  // =========================================================
-  // DATA
-  // =========================================================
-
-  final String name =
-  category.name?.trim().isNotEmpty == true
+  // ------------------------------- DATA -------------------------------
+  final String name = category.name?.trim().isNotEmpty == true
       ? category.name!.trim()
       : 'no_name'.tr;
 
-  final String imageUrl =
-      category.imagePathFullUrl?.trim() ?? '';
+  final String imageUrl = category.imagePathFullUrl?.trim() ?? '';
+  final String iconUrl = category.iconPathFullUrl?.trim() ?? '';
 
-  final String iconUrl =
-      category.iconPathFullUrl?.trim() ?? '';
+  final bool hasImage = imageUrl.isNotEmpty && imageUrl.startsWith('http');
+  final bool hasIcon = iconUrl.isNotEmpty && iconUrl.startsWith('http');
 
-  final bool hasImage =
-      imageUrl.isNotEmpty && imageUrl.startsWith('http');
-
-  final bool hasIcon =
-      iconUrl.isNotEmpty && iconUrl.startsWith('http');
-
-  final bool isTrending =
-      category.trending == 1;
-
-  final bool isActive =
-      category.status == 1;
-
-  final int totalProducts =
-      category.totalProduct ?? 0;
+  final bool isTrending = category.trending == 1;
+  final bool isActive = category.status == 1;
+  final int totalProducts = category.totalProduct ?? 0;
 
   return Container(
     decoration: BoxDecoration(
       color: cardColor,
-      // border: Border.all(
-      //   color: AppColor.themeNavyBlueColor.withOpacity(0.3),
-      // ),
-      borderRadius: BorderRadius.circular(22.r),
+      borderRadius: BorderRadius.circular(20.r),
+      border: Border.all(color: borderColor),
       boxShadow: isDark
           ? null
           : [
         BoxShadow(
-          color: Colors.black.withOpacity(.055),
-          blurRadius: 20,
-          spreadRadius: -5,
+          color: Colors.black.withOpacity(.05),
+          blurRadius: 18,
+          spreadRadius: -4,
           offset: Offset(0, 8),
         ),
       ],
@@ -99,38 +68,24 @@ Widget buildCategoryWidget({
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
-        // =====================================================
-        // IMAGE
-        // =====================================================
-
-        AspectRatio(
-          aspectRatio: 1.22,
+        // ========================== IMAGE ==========================
+        Expanded(
           child: Stack(
             fit: StackFit.expand,
             children: [
-
               hasImage
                   ? CachedNetworkImage(
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
-                fadeInDuration:
-                Duration(milliseconds: 250),
+                fadeInDuration: Duration(milliseconds: 250),
                 placeholder: (_, __) =>
-                    _imageLoading(
-                      isDark: isDark,
-                      accent: accent,
-                    ),
+                    _imageLoading(isDark: isDark, accent: accent),
                 errorWidget: (_, __, ___) =>
-                    _imagePlaceholder(
-                      isDark: isDark,
-                    ),
+                    _imagePlaceholder(isDark: isDark),
               )
-                  : _imagePlaceholder(
-                isDark: isDark,
-              ),
+                  : _imagePlaceholder(isDark: isDark),
 
-              // IMAGE GRADIENT
+              // soft gradient (top + bottom) for readable chips
               Positioned.fill(
                 child: IgnorePointer(
                   child: DecoratedBox(
@@ -139,106 +94,147 @@ Widget buildCategoryWidget({
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withOpacity(.30),
+                          Colors.black.withOpacity(.28),
                           Colors.transparent,
-                          Colors.black.withOpacity(.72),
+                          Colors.black.withOpacity(.22),
                         ],
-                        stops: [
-                          0,
-                          .48,
-                          1,
-                        ],
+                        stops: [0, .45, 1],
                       ),
                     ),
                   ),
                 ),
               ),
 
-              // MENU
+              // STATUS chip (top-start)
               Positioned(
                 top: 9.h,
-                right: 9.w,
+                left: 9.w,
+                child: _chip(
+                  label: isActive ? 'Active'.tr : 'Inactive'.tr,
+                  color: isActive ? success : danger,
+                  dot: true,
+                ),
+              ),
+
+              // MENU (top-end)
+              Positioned(
+                top: 6.h,
+                right: 6.w,
                 child: _categoryMenu(
                   context: context,
                   category: category,
-                  categoryController:
-                  categoryController,
+                  categoryController: categoryController,
                   isDark: isDark,
                   accent: accent,
                   danger: danger,
                 ),
               ),
 
-              // NAME + ICON
-              Positioned(
-                left: 13.w,
-                right: 13.w,
-                bottom: 12.h,
-                child: Row(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.end,
-                  children: [
+              // TRENDING chip (bottom-start) - only when trending
+              if (isTrending)
+                Positioned(
+                  left: 9.w,
+                  bottom: 9.h,
+                  child: _chip(
+                    label: 'Trending'.tr,
+                    color: warning,
+                    icon: Icons.trending_up_rounded,
+                  ),
+                ),
+            ],
+          ),
+        ),
 
-                    // ICON
-                    Container(
-                      width: 42.w,
-                      height: 42.w,
-                      padding: EdgeInsets.all(7.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius:
-                        BorderRadius.circular(13.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                            Colors.black.withOpacity(.18),
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: hasIcon
-                          ? CachedNetworkImage(
-                        imageUrl: iconUrl,
-                        fit: BoxFit.contain,
-                        errorWidget:
-                            (_, __, ___) =>
-                            Icon(
-                              Icons.category_outlined,
-                              color: secondaryText,
-                              size: 22.sp,
-                            ),
-                      )
-                          : Icon(
+        // ========================== CONTENT ==========================
+        Padding(
+          padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ICON + NAME
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 34.w,
+                    height: 34.w,
+                    padding: EdgeInsets.all(6.w),
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(11.r),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: hasIcon
+                        ? CachedNetworkImage(
+                      imageUrl: iconUrl,
+                      fit: BoxFit.contain,
+                      errorWidget: (_, __, ___) => Icon(
                         Icons.category_outlined,
                         color: secondaryText,
-                        size: 22.sp,
+                        size: 18.sp,
+                      ),
+                    )
+                        : Icon(
+                      Icons.category_outlined,
+                      color: secondaryText,
+                      size: 18.sp,
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: primaryText,
+                        fontSize: 13.sp,
+                        height: 1.2,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -.2,
                       ),
                     ),
+                  ),
+                ],
+              ),
 
-                    SizedBox(width: 10.w),
+              SizedBox(height: 9.h),
 
-                    // FULL CATEGORY NAME
+              // PRODUCTS BAR
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
+                decoration: BoxDecoration(
+                  color: accent.withOpacity(isDark ? .18 : .07),
+                  borderRadius: BorderRadius.circular(11.r),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.inventory_2_outlined,
+                      size: 15.sp,
+                      color: isDark ? Colors.white70 : accent,
+                    ),
+                    SizedBox(width: 6.w),
                     Expanded(
                       child: Text(
-                        name,
-                        softWrap: true,
-                        maxLines: 2,
-                        overflow: TextOverflow.visible,
+                        'Products'.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16.sp,
-                          fontWeight:
-                          FontWeight.w800,
-                          letterSpacing: -.3,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black
-                                  .withOpacity(.35),
-                              blurRadius: 8,
-                            ),
-                          ],
+                          color: secondaryText,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
                         ),
+                      ),
+                    ),
+                    Text(
+                      totalProducts.toString(),
+                      style: TextStyle(
+                        color: isDark ? Colors.white : accent,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -247,96 +243,44 @@ Widget buildCategoryWidget({
             ],
           ),
         ),
+      ],
+    ),
+  );
+}
 
-        // =====================================================
-        // CONTENT
-        // =====================================================
+// =============================================================
+// CHIP (status / trending)
+// =============================================================
 
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            10.w,
-            13.h,
-            10.w,
-            13.h,
+Widget _chip({
+  required String label,
+  required Color color,
+  bool dot = false,
+  IconData? icon,
+}) {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(.94),
+      borderRadius: BorderRadius.circular(20.r),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (dot)
+          Container(
+            width: 7.w,
+            height: 7.w,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          child: Row(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
-            children: [
-
-              // PRODUCTS
-              Expanded(
-                child: _dashboardStat(
-                  icon:
-                  Icons.inventory_2_outlined,
-                  label:
-                  'Products'.tr,
-                  value:
-                  totalProducts.toString(),
-                  color: accent,
-                  primaryText:
-                  primaryText,
-                  secondaryText:
-                  secondaryText,
-                  surfaceColor:
-                  surfaceColor,
-                ),
-              ),
-
-              _verticalDivider(
-                color: borderColor,
-              ),
-
-              // TRENDING
-              Expanded(
-                child: _dashboardStat(
-                  icon: isTrending
-                      ? Icons.trending_up_outlined
-                      : Icons.trending_flat_rounded,
-                  label:
-                  'Trending'.tr,
-                  value: isTrending
-                      ? 'Yes'.tr
-                      : 'No'.tr,
-                  color: isTrending
-                      ? warning
-                      : secondaryText,
-                  primaryText:
-                  primaryText,
-                  secondaryText:
-                  secondaryText,
-                  surfaceColor:
-                  surfaceColor,
-                ),
-              ),
-
-              _verticalDivider(
-                color: borderColor,
-              ),
-
-              // STATUS
-              Expanded(
-                child: _dashboardStat(
-                  icon: isActive
-                      ? Icons.verified_outlined
-                      : Icons.block_outlined,
-                  label:
-                  'Status'.tr,
-                  value: isActive
-                      ? 'Active'.tr
-                      : 'Inactive'.tr,
-                  color: isActive
-                      ? success
-                      : danger,
-                  primaryText:
-                  primaryText,
-                  secondaryText:
-                  secondaryText,
-                  surfaceColor:
-                  surfaceColor,
-                ),
-              ),
-            ],
+        if (icon != null) Icon(icon, size: 13.sp, color: color),
+        SizedBox(width: 5.w),
+        Text(
+          label,
+          style: TextStyle(
+            color: const Color(0xFF15171A),
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -361,15 +305,12 @@ Widget _categoryMenu({
     changeFun: () {
       showModalBottomSheet(
         context: context,
-        backgroundColor: isDark
-            ? DarkThemeColor.cCardBackground
-            : AppColor.cWhite,
+        backgroundColor:
+        isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
         barrierColor: Colors.black54,
         isScrollControlled: true,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(25.r),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25.r)),
         ),
         builder: (_) {
           return AddNewCategoriesWidget(
@@ -384,7 +325,6 @@ Widget _categoryMenu({
         },
       );
     },
-
     deleteFun: () {
       AppDialog.showCustomDialog(
         context: context,
@@ -403,103 +343,16 @@ Widget _categoryMenu({
 }
 
 // =============================================================
-// DASHBOARD STAT
+// IMAGE PLACEHOLDER / LOADING
 // =============================================================
 
-Widget _dashboardStat({
-  required IconData icon,
-  required String label,
-  required String value,
-  required Color color,
-  required Color primaryText,
-  required Color secondaryText,
-  required Color surfaceColor,
-}) {
-  return Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-
-      // ICON
-      Container(
-        width: 36.w,
-        height: 36.w,
-        decoration: BoxDecoration(
-          color: color.withOpacity(.09),
-          borderRadius:
-          BorderRadius.circular(11.r),
-        ),
-        child: Icon(
-          icon,
-          size: 17.sp,
-          color: color,
-        ),
-      ),
-
-      SizedBox(height: 6.h),
-
-      // VALUE
-      Text(
-        value,
-        softWrap: true,
-        textAlign: TextAlign.center,
-        overflow: TextOverflow.visible,
-        style: TextStyle(
-          color: primaryText,
-          fontSize: 9.sp,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-
-      SizedBox(height: 3.h),
-
-      // FULL LABEL
-      Text(
-        label,
-        softWrap: true,
-        textAlign: TextAlign.center,
-        overflow: TextOverflow.visible,
-        style: TextStyle(
-          color: secondaryText,
-          fontSize: 7.5.sp,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    ],
-  );
-}
-
-// =============================================================
-// VERTICAL DIVIDER
-// =============================================================
-
-Widget _verticalDivider({
-  required Color color,
-}) {
+Widget _imagePlaceholder({required bool isDark}) {
   return Container(
-    width: 1,
-    height: 55.h,
-    color: color,
-    margin: EdgeInsets.symmetric(
-      horizontal: 4.w,
-    ),
-  );
-}
-
-// =============================================================
-// IMAGE PLACEHOLDER
-// =============================================================
-
-Widget _imagePlaceholder({
-  required bool isDark,
-}) {
-  return Container(
-    color: isDark
-        ? const Color(0xFF202125)
-        : const Color(0xFFF0F2F5),
+    color: isDark ? const Color(0xFF202125) : const Color(0xFFF0F2F5),
     child: Center(
       child: Container(
-        width: 54.w,
-        height: 54.w,
+        width: 52.w,
+        height: 52.w,
         decoration: BoxDecoration(
           color: isDark
               ? Colors.white.withOpacity(.05)
@@ -508,32 +361,22 @@ Widget _imagePlaceholder({
         ),
         child: Icon(
           Icons.category_outlined,
-          size: 29.sp,
-          color: isDark
-              ? const Color(0xFF686C75)
-              : const Color(0xFFB2B7BF),
+          size: 28.sp,
+          color: isDark ? const Color(0xFF686C75) : const Color(0xFFB2B7BF),
         ),
       ),
     ),
   );
 }
 
-// =============================================================
-// IMAGE LOADING
-// =============================================================
-
-Widget _imageLoading({
-  required bool isDark,
-  required Color accent,
-}) {
+Widget _imageLoading({required bool isDark, required Color accent}) {
   return Container(
-    color: isDark
-        ? const Color(0xFF202125)
-        : const Color(0xFFF0F2F5),
+    color: isDark ? const Color(0xFF202125) : const Color(0xFFF0F2F5),
     child: Center(
       child: SizedBox(
-        width: 24.w,
-        height: 24.w,
+        width: 22.w,
+        height: 22.w,
+        child: CircularProgressIndicator(strokeWidth: 2, color: accent),
       ),
     ),
   );

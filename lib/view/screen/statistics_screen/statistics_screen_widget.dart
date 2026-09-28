@@ -37,7 +37,7 @@ class StatisticsTheme {
   // DASHBOARD ACCENTS
   static Color primary = AppColor.blueColor;
   static const secondary = Color(0xFF3BF6A8);
-  static const warning = Color(0x99F5F10B);
+  static const warning = Color(0x99EDF50B);
   static const danger = Color(0xFFD00A67);
 }
 
