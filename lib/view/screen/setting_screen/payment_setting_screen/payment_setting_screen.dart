@@ -10,7 +10,7 @@ import 'package:store_go_app/view/new_widgets/status_pill.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
+import '../../../new_widgets/shimmer.dart';
 
 class PaymentSettingScreen extends StatefulWidget {
   const PaymentSettingScreen({super.key});
@@ -66,8 +66,10 @@ class _PaymentSettingScreenState
           child: Obx(() {
             if (paymentSettingController.isLoading.value &&
                 paymentSettingController.paymentMethods.isEmpty) {
-              return const Center(
-                child: LoadingWidget(),
+              return const ShimmerList(
+                itemCount: 5,
+                leading: ShimmerLeading.square,
+                lines: 1,
               );
             }
             if (paymentSettingController.errorMessage.isNotEmpty &&

@@ -11,10 +11,10 @@ import '../../../core/model/order_model.dart';
 import '../../new_widgets/filter_tabs.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/search_widget.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../new_widgets/top_orders.dart';
 import '../../widget/common_appbar_widget.dart';
 import '../../widget/error_empty_state.dart';
-import '../../widget/loading_widget.dart';
 import '../../new_widgets/date_filter.dart';
 import 'create_order_screen.dart';
 
@@ -258,8 +258,9 @@ class _OrderScreenState extends State<OrderScreen>
 
                   if ((isLoadingOrders || isSearchingOrders) &&
                       orderList.isEmpty) {
-                    return const Center(
-                      child: LoadingWidget(),
+                    return const ShimmerList(
+                      leading: ShimmerLeading.none,
+                      lines: 3,
                     );
                   }
                   // ==================================================
@@ -358,9 +359,9 @@ class _OrderScreenState extends State<OrderScreen>
                                 child: Text(
                                   "top_orders".tr,
                                   style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColor.themeNavyBlueColor
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColor.themeNavyBlueColor
                                   ),
                                 ),
                               ),
@@ -631,4 +632,3 @@ class _OrderScreenState extends State<OrderScreen>
     ]);
   }
 }
-

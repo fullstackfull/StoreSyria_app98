@@ -14,7 +14,7 @@ import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/app_dialog.dart';
 
 class TaxScreen extends StatefulWidget {
@@ -143,7 +143,7 @@ class _TaxScreenState extends State<TaxScreen> {
   Widget _buildBody(bool isDark) {
     /// First Loading
     if (taxController.isLoading.value && taxController.currantPage.value == 1) {
-      return const Center(child: LoadingWidget());
+      return const ShimmerTable();
     }
 
     /// Error State
@@ -212,16 +212,16 @@ class _TaxScreenState extends State<TaxScreen> {
             tax: tax,
             onEdit: () => _showTaxBottomSheet(isUpdate: true, tax: tax),
             onDelete: () {
-                AppDialog.showCustomDialog(
+              AppDialog.showCustomDialog(
                   message: "deleteTax".tr,
-                    lottieAsset: 'assets/lottie/delete_icon.json',
-                    iconColor: AppColor.cRedText,
-                    confirmColor: AppColor.cRedText,
-                    context: context,
-                    onConfirm: () =>
-                        taxController.deleteTaxData(
-                            taxId: tax.id.toString())
-                );
+                  lottieAsset: 'assets/lottie/delete_icon.json',
+                  iconColor: AppColor.cRedText,
+                  confirmColor: AppColor.cRedText,
+                  context: context,
+                  onConfirm: () =>
+                      taxController.deleteTaxData(
+                          taxId: tax.id.toString())
+              );
             },
           );
         },

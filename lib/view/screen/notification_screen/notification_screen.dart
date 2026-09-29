@@ -8,8 +8,8 @@ import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/core/model/notification_model.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/screen/order_screen/order_detail_screen.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/error_empty_state.dart';
-import '../../widget/loading_widget.dart';
 
 class NotificationScreen extends StatefulWidget {
   final bool isBack;
@@ -50,12 +50,15 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Scaffold(
         backgroundColor:
-            isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
+        isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
         appBar: _buildAppBar(isDark),
         body: SafeArea(
           child: Obx(() {
             if (notificationController.isLoading.value) {
-              return Center(child: LoadingWidget());
+              return ShimmerList(
+                trailing: false,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              );
             }
 
             if (notificationController.notificationList.isEmpty) {
@@ -68,18 +71,18 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
             return RefreshIndicator(
               color: AppColor.themeGreenColor,
               backgroundColor:
-                  isDark ? DarkThemeColor.cCardBackground : Colors.white,
+              isDark ? DarkThemeColor.cCardBackground : Colors.white,
               onRefresh: () async {
                 await notificationController.getNotifications();
               },
               child: ListView.builder(
                 padding:
-                    EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 itemCount:
-                    notificationController.notificationList.length,
+                notificationController.notificationList.length,
                 itemBuilder: (context, index) {
                   final notification =
-                      notificationController.notificationList[index];
+                  notificationController.notificationList[index];
                   return _buildNotificationCard(notification, isDark);
                 },
               ),
@@ -93,7 +96,7 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
   PreferredSizeWidget _buildAppBar(bool isDark) {
     return AppBar(
       backgroundColor:
-          isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
+      isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
       elevation: 0,
       scrolledUnderElevation: 0,
       leading: widget.isBack
@@ -150,11 +153,11 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
         Obx(() {
           // إظهار الزر فقط إذا كانت هناك إشعارات غير مضغوطة
           final hasUntapped = notificationController.notificationList.any(
-            (n) => !notificationController.isNotificationTapped(n.id ?? -1)
+                  (n) => !notificationController.isNotificationTapped(n.id ?? -1)
           );
-          
+
           if (!hasUntapped) return SizedBox();
-          
+
           return TextButton.icon(
             onPressed: () {
               // فقط يجعل الإشعارات تبدو مضغوطة بصرياً
@@ -164,15 +167,15 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
             icon: Icon(
               Icons.done_all,
               size: 20.sp,
-              color: isDark 
-                  ? DarkThemeColor.cText 
+              color: isDark
+                  ? DarkThemeColor.cText
                   : AppColor.themeGreenColor,
             ),
             label: Text(
               "mark_all_tapped".tr,
               style: pMedium14.copyWith(
-                color: isDark 
-                    ? DarkThemeColor.cText 
+                color: isDark
+                    ? DarkThemeColor.cText
                     : AppColor.themeGreenColor,
               ),
             ),
@@ -196,8 +199,8 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
       final cardBg = isTapped
           ? (isDark ? DarkThemeColor.cCardBackground : Colors.white)
           : (isDark
-              ? DarkThemeColor.cCardBackground
-              : typeColor.withValues(alpha: 0.06));
+          ? DarkThemeColor.cCardBackground
+          : typeColor.withValues(alpha: 0.06));
 
       return GestureDetector(
         onTap: () {
@@ -212,7 +215,7 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
           // الانتقال لتفاصيل الطلب إذا كان reference_type == 'order'
           if (isOrderNotif && notification.data?.orderId != null) {
             Get.to(
-              () => OrderDetailScreen(
+                  () => OrderDetailScreen(
                 orderId: notification.data!.orderId.toString(),
               ),
               transition: Transition.rightToLeft,
@@ -235,19 +238,19 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
             boxShadow: isTapped
                 ? []
                 : [
-                    BoxShadow(
-                      color: typeColor.withValues(alpha: 0.1),
-                      blurRadius: 14,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
+              BoxShadow(
+                color: typeColor.withValues(alpha: 0.1),
+                blurRadius: 14,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             children: [
               // ── Header Row ──
               Padding(
                 padding:
-                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -362,13 +365,13 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
         gradient: LinearGradient(
           colors: dimmed
               ? [
-                  color.withValues(alpha: 0.08),
-                  color.withValues(alpha: 0.14),
-                ]
+            color.withValues(alpha: 0.08),
+            color.withValues(alpha: 0.14),
+          ]
               : [
-                  color.withValues(alpha: 0.18),
-                  color.withValues(alpha: 0.32),
-                ],
+            color.withValues(alpha: 0.18),
+            color.withValues(alpha: 0.32),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -388,10 +391,10 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
 
 
   Widget _buildOrderDetailsFooter(
-    NotificationDataDetails details,
-    bool isDark,
-    Color accentColor,
-  ) {
+      NotificationDataDetails details,
+      bool isDark,
+      Color accentColor,
+      ) {
     final footerBg = isDark
         ? Colors.black.withValues(alpha: 0.25)
         : accentColor.withValues(alpha: 0.04);
@@ -460,7 +463,7 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
             label,
             style: pRegular12.copyWith(
               color:
-                  isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont,
+              isDark ? DarkThemeColor.cSecondaryText : AppColor.cFont,
               fontWeight: FontWeight.w500,
             ),
             overflow: TextOverflow.ellipsis,

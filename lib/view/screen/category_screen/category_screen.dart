@@ -111,10 +111,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                 child: Obx(() {
                   // Loading State
                   if (categoryController.isLoading.value && categoryController.currantPage.value == 1) {
-                    return const ShimmerList(
-                      leading: ShimmerLeading.square,
-                      lines: 1,
-                    );
+                    return const ShimmerGrid();
                   }
 
                   // Error State

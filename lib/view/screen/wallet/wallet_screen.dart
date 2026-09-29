@@ -9,10 +9,10 @@ import '../../../utils/text_style.dart';
 import '../../new_widgets/balance_card.dart';
 import '../../new_widgets/date_filter.dart';
 import '../../new_widgets/search_widget.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../new_widgets/transactions_widget.dart';
 import '../../widget/common_appbar_widget.dart';
 import '../../widget/error_empty_state.dart';
-import '../../widget/loading_widget.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -77,7 +77,7 @@ class _WalletScreenState extends State<WalletScreen> {
           child: Obx(() {
             if (controller.isLoading.value &&
                 controller.transactions.isEmpty) {
-              return const LoadingWidget();
+              return const ShimmerDetails(sections: 5, rowsPerSection: 4);
             }
 
             if (controller.errorMessage.value.isNotEmpty &&
@@ -134,9 +134,11 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                   if (controller.isSearchingTransactions.value &&
                       transactions.isEmpty)
-                    const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(child: LoadingWidget()),
+                    const SliverToBoxAdapter(
+                      child: ShimmerDetails(
+                          sections: 2,
+                          rowsPerSection: 4
+                      )
                     )
                   else if (transactions.isEmpty)
                     SliverToBoxAdapter(

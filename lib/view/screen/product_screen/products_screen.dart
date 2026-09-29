@@ -11,10 +11,10 @@ import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/model/create_product_model.dart';
 import '../../new_widgets/date_filter.dart';
 import '../../new_widgets/search_widget.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/common_appbar_widget.dart';
 import 'product_detail_screen.dart';
 
@@ -98,20 +98,20 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
     productController.currantPage.value = 1;
 
     if (mode == ProductListMode.search &&
-    searchQuery.isNotEmpty) {
-    productController.isScroll.value = false;
+        searchQuery.isNotEmpty) {
+      productController.isScroll.value = false;
 
-    await productController.searchProductName(searchQuery);
-    return;
+      await productController.searchProductName(searchQuery);
+      return;
     }
 
     if (mode == ProductListMode.category &&
-    categoryId.isNotEmpty) {
-    productController.isScroll.value = false;
-    productController.productList.clear();
+        categoryId.isNotEmpty) {
+      productController.isScroll.value = false;
+      productController.productList.clear();
 
-    await productController.searchProductData(categoryId);
-    return;
+      await productController.searchProductData(categoryId);
+      return;
     }
 
     productController.listMode.value = ProductListMode.normal;
@@ -168,7 +168,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     verticalSpace(10.h),
-              
+
                     Container(
                       width: 42.w,
                       height: 4.h,
@@ -177,9 +177,9 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                     ),
-              
+
                     verticalSpace(18.h),
-              
+
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20.w),
                       child: Row(
@@ -198,9 +198,9 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                               size: 22.sp,
                             ),
                           ),
-              
+
                           horizontalSpace(12.w),
-              
+
                           Expanded(
                             child: Text(
                               'filter_by_category'.tr,
@@ -211,7 +211,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                               ),
                             ),
                           ),
-              
+
                           TextButton(
                             onPressed: () {
                               selectedCategoryId = '';
@@ -258,16 +258,16 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                         ],
                       ),
                     ),
-              
+
                     verticalSpace(16.h),
-              
+
                     Divider(
                       height: 1,
                       color: borderColor.withOpacity(.6),
                     ),
-              
+
                     verticalSpace(8.h),
-              
+
                     Flexible(
                       child: ListView.separated(
                         shrinkWrap: true,
@@ -284,21 +284,21 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                         itemBuilder: (context, index) {
                           final cat =
                           addProductController.categoryTypeList[index];
-              
+
                           final categoryId =
                               cat.id?.toString() ?? '';
-              
+
                           final isSelected =
                               selectedCategoryId == categoryId;
-              
+
                           return InkWell(
                             borderRadius:
                             BorderRadius.circular(14.r),
                             onTap: () {
                               selectedCategoryId = categoryId;
-              
+
                               setModalState(() {});
-              
+
                               Navigator.pop(
                                 sheetContext,
                                 cat,
@@ -348,9 +348,9 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                                           : secondaryText,
                                     ),
                                   ),
-              
+
                                   horizontalSpace(12.w),
-              
+
                                   Expanded(
                                     child: Text(
                                       cat.name ?? '',
@@ -366,7 +366,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                                       ),
                                     ),
                                   ),
-              
+
                                   AnimatedSwitcher(
                                     duration:
                                     const Duration(milliseconds: 180),
@@ -493,7 +493,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
           title: "products".tr,
           label: "new_product".tr,
           onNewLabelTap: () => Get.to(
-               () => const AddNewProductScreen(isUpdate: false)),
+                  () => const AddNewProductScreen(isUpdate: false)),
         ),
         backgroundColor: isDark  ? DarkThemeColor.cBackGround : AppColor.cLight,
         body: Padding(
@@ -557,16 +557,15 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                       : productController.productList;
 
                   if (productController.isDataAvailable2.value) {
-                    return const Center(
-                      child: LoadingWidget(),
+                    return const ShimmerList(
+                      leading: ShimmerLeading.square,
+                      lines: 3,
                     );
                   }
 
                   if (productController.isLoading.value &&
                       productController.currantPage.value == 1) {
-                    return const Center(
-                      child: LoadingWidget(),
-                    );
+                    return const ShimmerGrid();
                   }
 
                   if (productController.errorMessage.isNotEmpty &&
@@ -650,7 +649,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                           sliver: SliverGrid(
                             delegate: SliverChildBuilderDelegate(
                                   (context, index) {
-                                    final product = products[index];
+                                final product = products[index];
 
                                 return allProductsListItemWidget(
                                   productId: product.id.toString(),
@@ -736,15 +735,15 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                         if (productController.listMode.value ==
                             ProductListMode.normal &&
                             productController.isScroll.value)                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20.h),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: AppColor.themeNavyBlueColor,
-                                ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20.h),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: AppColor.themeNavyBlueColor,
                               ),
                             ),
                           ),
+                        ),
                       ],
                     ),
                   );

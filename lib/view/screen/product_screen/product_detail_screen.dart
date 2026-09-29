@@ -8,7 +8,6 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/add_rating_screen.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/controller/product_controller/product_detail_controller.dart';
@@ -16,6 +15,7 @@ import 'package:store_go_app/core/controller/product_controller/add_review_contr
 import '../../../core/model/product_model.dart';
 import '../../../utils/helper.dart';
 import '../../new_widgets/convert_to_ago.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/app_dialog.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -127,9 +127,7 @@ class _ProductDetailScreenState
             final ProductData? product = controller.product;
 
             if (product == null) {
-              return const Center(
-                child: LoadingWidget(),
-              );
+              return const ShimmerDetails(bigImage: true);
             }
 
             return RefreshIndicator(
@@ -353,89 +351,89 @@ class _ProductDetailScreenState
       backgroundColor: cardColor,
       borderColor: borderColor,
       child: Column(
-        children: [
-          _infoRow(
-            label: 'name'.tr,
-            value: product.name ?? '-',
-            primaryTextColor:
-            primaryTextColor,
-            secondaryTextColor:
-            secondaryTextColor,
-            leadingIcon:
-            Icons.person_outline,
-          ),
+          children: [
+            _infoRow(
+              label: 'name'.tr,
+              value: product.name ?? '-',
+              primaryTextColor:
+              primaryTextColor,
+              secondaryTextColor:
+              secondaryTextColor,
+              leadingIcon:
+              Icons.person_outline,
+            ),
 
-          _thinDivider(borderColor),
-
-          _infoRow(
-            label: 'price'.tr,
-            value: '$price $currency',
-            primaryTextColor: primaryTextColor,
-            secondaryTextColor: secondaryTextColor,
-            leadingIcon: Icons.price_change,
-          ),
-
-          if (salePrice.trim().isNotEmpty) ...[
             _thinDivider(borderColor),
 
             _infoRow(
-              label: 'sale_price'.tr,
-              value: '$salePrice $currency',
+              label: 'price'.tr,
+              value: '$price $currency',
               primaryTextColor: primaryTextColor,
               secondaryTextColor: secondaryTextColor,
-              leadingIcon: Icons.price_change_outlined,
+              leadingIcon: Icons.price_change,
             ),
-          ],
 
-          _thinDivider(borderColor),
+            if (salePrice.trim().isNotEmpty) ...[
+              _thinDivider(borderColor),
 
-          _infoRow(
-            label: 'cost_price'.tr,
-            value: '$costPrice $currency',
-            primaryTextColor: primaryTextColor,
-            secondaryTextColor: secondaryTextColor,
-            leadingIcon: Icons.monetization_on,
-          ),
+              _infoRow(
+                label: 'sale_price'.tr,
+                value: '$salePrice $currency',
+                primaryTextColor: primaryTextColor,
+                secondaryTextColor: secondaryTextColor,
+                leadingIcon: Icons.price_change_outlined,
+              ),
+            ],
 
-          _thinDivider(borderColor),
+            _thinDivider(borderColor),
 
-          _infoRow(
-            label: 'final_price'.tr,
-            value: '$finalPrice $currency',
-            primaryTextColor: primaryTextColor,
-            secondaryTextColor: secondaryTextColor,
-            leadingIcon: Icons.price_check,
-          ),
+            _infoRow(
+              label: 'cost_price'.tr,
+              value: '$costPrice $currency',
+              primaryTextColor: primaryTextColor,
+              secondaryTextColor: secondaryTextColor,
+              leadingIcon: Icons.monetization_on,
+            ),
 
-          _thinDivider(borderColor),
+            _thinDivider(borderColor),
 
-          _infoRow(
-            label: 'product_stock'.tr,
-            value: productStock,
-            primaryTextColor:
-            primaryTextColor,
-            secondaryTextColor:
-            secondaryTextColor,
-            leadingIcon:
-            Icons.inventory_2_outlined,
-          ),
+            _infoRow(
+              label: 'final_price'.tr,
+              value: '$finalPrice $currency',
+              primaryTextColor: primaryTextColor,
+              secondaryTextColor: secondaryTextColor,
+              leadingIcon: Icons.price_check,
+            ),
 
-          _thinDivider(borderColor),
+            _thinDivider(borderColor),
 
-          _infoRow(
-            label: 'created_at'.tr,
-            value: dateFormatted(
-               date: product.createdAt ?? '',
-               formatType: formatForDateTime(
-               FormatType.dateTime2)),
-            primaryTextColor:
-            primaryTextColor,
-            secondaryTextColor:
-            secondaryTextColor,
-            leadingIcon:
-            Icons.date_range,
-          ),
-      ]),
+            _infoRow(
+              label: 'product_stock'.tr,
+              value: productStock,
+              primaryTextColor:
+              primaryTextColor,
+              secondaryTextColor:
+              secondaryTextColor,
+              leadingIcon:
+              Icons.inventory_2_outlined,
+            ),
+
+            _thinDivider(borderColor),
+
+            _infoRow(
+              label: 'created_at'.tr,
+              value: dateFormatted(
+                  date: product.createdAt ?? '',
+                  formatType: formatForDateTime(
+                      FormatType.dateTime2)),
+              primaryTextColor:
+              primaryTextColor,
+              secondaryTextColor:
+              secondaryTextColor,
+              leadingIcon:
+              Icons.date_range,
+            ),
+          ]),
     );
   }
 
@@ -627,7 +625,7 @@ class _ProductDetailScreenState
                     ? Colors.grey
                     : Colors.grey.shade800,
               ),
-                _statusChip(
+              _statusChip(
                 icon: isTrending
                     ? Icons.local_fire_department
                     : Icons.local_fire_department_outlined,

@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
 import '../../../core/controller/plan/my_plan_controller.dart';
 import '../../new_widgets/my_plan_widget.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/common_appbar_widget.dart';
-import '../../widget/loading_widget.dart';
 import '../../widget/error_empty_state.dart';
 
 class MyPlanScreen extends StatefulWidget {
@@ -47,7 +47,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
         child: Obx(() {
           if (controller.isLoading.value &&
               controller.currentPlanResponse == null) {
-            return const LoadingWidget();
+            return const ShimmerDetails(sections: 4, rowsPerSection: 4);
           }
 
           if (controller.errorMessage.value.isNotEmpty &&

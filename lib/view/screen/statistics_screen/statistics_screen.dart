@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/home_controller/statistic_controller.dart';
 import 'package:store_go_app/core/model/static_model.dart';
+import 'package:store_go_app/view/new_widgets/shimmer.dart';
 import 'package:store_go_app/view/screen/statistics_screen/statistics_screen_widget.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
@@ -182,9 +183,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                       statisticsController.staticsDataModel == null;
 
                   if (isLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2.4),
-                    );
+                    return const ShimmerList();
                   }
                   return _buildContent(context);
                 }),

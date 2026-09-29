@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart'; // للترجمة
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:open_file/open_file.dart';
@@ -15,7 +14,8 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/screen/order_screen/invoice.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
+
+import '../../new_widgets/shimmer.dart';
 
 class InvoicePdfViewScreen extends StatefulWidget {
   final List<Product> productList;
@@ -105,18 +105,26 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
           actions: actions,
           canChangeOrientation: false,
           canDebug: false,
-          loadingWidget: Center(child: LoadingWidget()),
+          loadingWidget: AppShimmer(
+            child: Padding(
+              padding: EdgeInsets.all(16.w),
+              child: AspectRatio(
+                aspectRatio: 1 / 1.414, // A4
+                child: ShimmerBox(width: double.infinity, radius: 4.r),
+              ),
+            ),
+          ),
           onPrinted: _showPrintedToast,
           onShared: _showSharedToast,
           build: (PdfPageFormat format) {
             return generateInvoice(
-                format,
-                _data,
-                widget.productList,
-                widget.orderDetailData,
-                widget.tax,
-                widget.deliveryCharge,
-                widget.couponAmount,
+              format,
+              _data,
+              widget.productList,
+              widget.orderDetailData,
+              widget.tax,
+              widget.deliveryCharge,
+              widget.couponAmount,
               widget.orderDetailData.currencySymbol ?? "",
             );
           },

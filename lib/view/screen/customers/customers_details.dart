@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:store_go_app/routes/routes.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
@@ -9,7 +8,6 @@ import 'package:store_go_app/view/widget/error_empty_state.dart';
 import '../../../core/controller/customers/customer_controller.dart';
 import '../../../core/controller/order_controller/order_controller.dart';
 import '../../../core/model/customer_orders_model.dart';
-import '../../new_widgets/app_snackbar.dart';
 import '../../new_widgets/customer_contact.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/shimmer.dart';

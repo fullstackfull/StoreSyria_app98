@@ -8,11 +8,11 @@ import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/view/screen/order_screen/invoice_pdf_view.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../core/model/order_detail_model.dart';
 import '../../new_widgets/customer_contact.dart';
 import '../../new_widgets/order_status_badge.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/app_dialog.dart';
 import '../../widget/common_snak_bar_widget.dart';
 import '../../widget/error_empty_state.dart';
@@ -76,9 +76,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       body: SafeArea(
         child: Obx(() {
           if (orderController.isLoadingOrderDetails.value) {
-            return const Center(
-              child: LoadingWidget(),
-            );
+            return const ShimmerDetails(sections: 3, rowsPerSection: 4);
           }
 
           if (orderController.errorMessage.isNotEmpty &&

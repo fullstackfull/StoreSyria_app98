@@ -8,11 +8,11 @@ import '../../../core/controller/setting_controller/store_setting_controller.dar
 import '../../../utils/colors.dart';
 import '../../../utils/validator.dart';
 import '../../new_widgets/app_txt_field.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../new_widgets/social_widget.dart';
 import '../../widget/app_dialog.dart';
 import '../../widget/error_empty_state.dart';
 import '../../widget/icon_and_image.dart';
-import '../../widget/loading_widget.dart';
 
 class StoreInfoScreen extends StatefulWidget {
   const StoreInfoScreen({super.key});
@@ -56,7 +56,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
         child: Obx(() {
           if (controller.isLoading.value &&
               controller.storeInfoData.value == null) {
-            return const LoadingWidget();
+            return const ShimmerDetails(sections: 3, rowsPerSection: 3);
           }
 
           if (controller.errorMessage.value.isNotEmpty &&
