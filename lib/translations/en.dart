@@ -613,5 +613,6 @@ const Map<String, String> en = {
   "confirm_password": "Confirm Password",
   "confirm_password_required": "Please confirm your password",
   "passwords_do_not_match": "Passwords do not match",
-  "password_changed_successfully": "Password changed successfully"
+  "password_changed_successfully": "Password changed successfully",
+  'order_not_found_desc': 'This order no longer exists. It may have been deleted.',
 };

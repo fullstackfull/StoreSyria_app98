@@ -7,6 +7,7 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import '../../../utils/helper.dart';
 import '../../../utils/images.dart';
+import '../../../utils/text_style.dart';
 import '../../new_widgets/network_image_widget.dart';
 import '../../new_widgets/pop_up_menu.dart';
 import '../../widget/icon_and_image.dart';
@@ -428,7 +429,7 @@ Widget _overlayChip({
   );
 }
 
-class AddProductTextField extends StatefulWidget {
+class AddProductTextField extends StatelessWidget {
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
@@ -443,7 +444,8 @@ class AddProductTextField extends StatefulWidget {
   final bool? readOnly;
   final String? labelText;
   final String? hintText;
-  final String? prefix;
+  final String? prefix; // نص بادئة (مثل رمز العملة) إذا ما في icon
+  final IconData? icon; // أيقونة البادئة بنفس تصميم AppTextField
   final Widget? suffix;
   final String? obscuringCharacter;
   final int? maxLines;
@@ -468,6 +470,7 @@ class AddProductTextField extends StatefulWidget {
     this.labelText,
     this.hintText,
     this.prefix,
+    this.icon,
     this.suffix,
     this.focusNode,
     this.maxLines,
@@ -475,74 +478,48 @@ class AddProductTextField extends StatefulWidget {
     this.htmlContent,
   }) : super(key: key);
 
-  @override
-  State<AddProductTextField> createState() => _AddProductTextFieldState();
-}
-
-class _AddProductTextFieldState extends State<AddProductTextField> {
-  final TextAlign textAlign = TextAlign.start;
-  final FocusNode _focus = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    _focus.addListener(_onFocusChange);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _focus.removeListener(_onFocusChange);
-    _focus.dispose();
-  }
-
-  void _onFocusChange() {
-    setState(() {});
-  }
+  static const Color navyBlue = Color(0xFF172C4E);
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Colors
-    final bgColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-    final borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5);
-    final hintColor = isDark ? Colors.grey.shade500 : AppColor.cFont;
-    final textColor = isDark ? Colors.white : AppColor.cText;
-    final accentColor = AppColor.themeNavyBlueColor;
+    final backgroundColor = isDark ? const Color(0xFF182331) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF172C4E);
+    final secondaryTextColor = isDark ? Colors.white70 : const Color(0xFF687386);
+    final borderColor = isDark ? Colors.white12 : const Color(0xFFE2E6EC);
+
+    OutlineInputBorder border(Color color, [double width = 1]) {
+      return OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: color, width: width),
+      );
+    }
+
+    final hasLabel = widget_isNotEmpty(labelText);
+    final showHtml = isEditMode && widget_isNotEmpty(htmlContent);
 
     return Padding(
       padding: EdgeInsets.only(bottom: 10.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // Label
-          if (widget.labelText != null && widget.labelText!.isNotEmpty)
-            Text(
-              widget.labelText!,
-              style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.grey.shade300 : AppColor.cDarkGreyFont
-              ),
-            ),
+          if (hasLabel) ...[
+            Text(labelText!, style: pSemiBold14),
+            const SizedBox(height: 8),
+          ],
 
-          if (widget.labelText != null && widget.labelText!.isNotEmpty)
-            verticalSpace(15.h),
-
-          if (widget.isEditMode && widget.htmlContent != null && widget.htmlContent!.isNotEmpty)
-
+          if (showHtml)
             Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
               decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(12.r),
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: borderColor),
               ),
               child: Html(
-                data: widget.htmlContent,
+                data: htmlContent,
                 style: {
                   "body": Style(
                     fontSize: FontSize(14.sp),
@@ -558,89 +535,75 @@ class _AddProductTextFieldState extends State<AddProductTextField> {
               ),
             )
           else
-
-          // Manual FormField wrapper: we render the error text ourselves
-          // (instead of relying on TextFormField's built-in errorText),
-          // using the exact same horizontal inset as the field's own
-          // content padding. This guarantees the error message lines up
-          // perfectly under the input text instead of looking shifted.
-            FormField<String>(
-              initialValue: widget.controller?.text,
-              validator: widget.validator,
+            TextFormField(
+              controller: controller,
+              focusNode: focusNode,
+              autofocus: autofocus ?? false,
+              readOnly: readOnly ?? false,
+              onTap: onTap,
+              onChanged: onChanged,
+              validator: validator,
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              builder: (FormFieldState<String> field) {
-                final hasError = field.hasError;
-                final activeBorderColor = hasError ? AppColor.cRedText : borderColor;
+              keyboardType: keyboardType,
+              textInputAction: textInputAction,
+              textCapitalization: textCapitalization ?? TextCapitalization.none,
+              autocorrect: autocorrect ?? true,
+              obscureText: obscureText ?? false,
+              obscuringCharacter: obscuringCharacter ?? '•',
+              maxLines: (obscureText ?? false) ? 1 : (maxLines ?? 1),
+              cursorColor: navyBlue,
+              style: TextStyle(fontSize: 16, color: textColor),
+              decoration: InputDecoration(
+                hintText: hintText,
+                hintStyle: TextStyle(fontSize: 13, color: secondaryTextColor),
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: widget.controller,
-                      cursorColor: accentColor,
-                      autofocus: widget.autofocus ?? false,
-                      focusNode: _focus,
-                      maxLines: widget.maxLines ?? 1,
-                      readOnly: widget.readOnly ?? false,
-                      onChanged: (value) {
-                        field.didChange(value);
-                        widget.onChanged?.call(value);
-                      },
-                      onTap: widget.onTap,
-                      obscureText: widget.obscureText ?? false,
-                      obscuringCharacter: widget.obscuringCharacter ?? '•',
-                      keyboardType: widget.keyboardType,
-                      textCapitalization: widget.textCapitalization ?? TextCapitalization.none,
-                      textInputAction: widget.textInputAction,
-                      autocorrect: widget.autocorrect ?? true,
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: textColor),
-                      decoration: InputDecoration(
-                        fillColor: bgColor,
-                        filled: true,
-                        hintText: widget.hintText, // يظهر الهينت هنا
-                        hintStyle: TextStyle(fontSize: 14.sp, color: hintColor),
-                        suffixIcon: widget.suffix,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(color: activeBorderColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(color: activeBorderColor),
-                        ),
-                        disabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(color: borderColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(
-                            color: hasError ? AppColor.cRedText : accentColor,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
+                prefixIcon: icon != null
+                    ? Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(11.r),
+                      color: navyBlue.withOpacity(0.07),
                     ),
-                    if (hasError)
-                      Padding(
-                        padding: EdgeInsetsDirectional.only(start: 20.w, top: 6.h),
-                        child: Text(
-                          field.errorText ?? '',
-                          style: TextStyle(fontSize: 12.sp, color: AppColor.cRedText, height: 1.3),
-                        ),
-                      ),
-                  ],
-                );
-              },
+                    child: Icon(icon, color: navyBlue, size: 22.w),
+                  ),
+                )
+                    : null,
+
+                // نص بادئة إذا ما في أيقونة
+                prefixText: (icon == null && widget_isNotEmpty(prefix)) ? prefix : null,
+                prefixStyle: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: secondaryTextColor,
+                ),
+
+                suffixIcon: suffix,
+
+                filled: true,
+                fillColor: backgroundColor,
+                counterText: '',
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 15,
+                ),
+                errorStyle: const TextStyle(fontSize: 11, color: Colors.red),
+
+                border: border(borderColor),
+                enabledBorder: border(borderColor),
+                disabledBorder: border(borderColor),
+                focusedBorder: border(navyBlue, 1.5),
+                errorBorder: border(Colors.red),
+                focusedErrorBorder: border(Colors.red, 1.5),
+              ),
             ),
         ],
       ),
     );
   }
-}
 
+  static bool widget_isNotEmpty(String? s) => s != null && s.isNotEmpty;
+}
 DottedBorder addAttachmentWidget(String name) {
   return DottedBorder(
     options: RoundedRectDottedBorderOptions(

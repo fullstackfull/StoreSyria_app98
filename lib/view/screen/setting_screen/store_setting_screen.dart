@@ -58,7 +58,7 @@ class StoreSettingScreen extends StatelessWidget {
                   settingCard(
                     isDark: isDark,
                     icon: DefaultImages.language2Icn,
-                    title: 'language_and_currencies'.tr,
+                    title: 'store_language_and_currencies'.tr,
                     subtitle: "manage_your_store_details".tr,
                     function: () => Get.toNamed(AppRoutes.lang),
                   ),

@@ -231,18 +231,11 @@ class AuthController extends GetxController {
 
     // Clear notifications
     if (Get.isRegistered<NotificationController>()) {
-      Get.find<NotificationController>()
-          .clearNotificationData();
+      Get.find<NotificationController>().clearNotificationData();
     }
 
-    // Clear authentication data
-    await Prefs.remove(Prefs.KEY_TOKEN);
-    await Prefs.remove(Prefs.USER_ID);
-    await Prefs.remove(Prefs.storeId);
-
-    // Clear user information
-    await Prefs.remove(AppConstant.name);
-    await Prefs.remove(AppConstant.emailId);
+    // Clear ALL local storage
+    await Prefs.clear();
 
     // Clear controllers
     clear();

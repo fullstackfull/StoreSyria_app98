@@ -24,6 +24,8 @@ class ProfileController extends GetxController {
   RxBool isConfirmPassword = true.obs;
 
   RxString selectedImagePath = ''.obs;
+  RxBool isLoading = false.obs;
+  RxBool isLoading2 = false.obs;
 
   Future<void> pickImage() async {
     final String? path =
@@ -35,18 +37,83 @@ class ProfileController extends GetxController {
     }
   }
 
+  Future<void> updatePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final String endPoint = API.updatePasswordUrl;
+
+      final result = await NetworkHttps.postRequest(
+        endPoint,
+        {
+          'store_id': Prefs.getStoreID(),
+          'user_id': Prefs.getUserID(),
+          'old_password': oldPassword,
+          'password': newPassword,
+          'password_confirmation': confirmPassword,
+        },
+      );
+
+      result.fold(
+        onSuccess: (data) {
+          if (data['status'] == 1 ||
+              data['success'] == true) {
+            commonToast(
+              type: AppSnackBarType.success,
+              data['data']?['message'] ??
+                  data['message'] ??
+                  "Password Updated Successfully",
+            );
+
+            oldPasswordController.clear();
+            passwordController.clear();
+            confirmPasswordController.clear();
+
+            Get.back();
+          } else {
+            commonToast(
+              type: AppSnackBarType.error,
+              data['data']?['message'] ??
+                  data['message'] ??
+                  "Failed to update password",
+            );
+          }
+        },
+        onFailure: (
+            reason,
+            message,
+            validationErrors,
+            ) {
+          commonToast(
+            type: AppSnackBarType.error,
+            message,
+          );
+        },
+      );
+    } catch (e) {
+      print("Error in updatePassword: $e");
+
+      commonToast(
+        type: AppSnackBarType.error,
+        "Failed to update password. Check your connection.",
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
   Future<void> editProfile({
     required String name,
     required String email,
     required String imagePath,
   }) async {
-    Loader.showLoader();
+    isLoading2.value = true;
 
     try {
-      final String url =
-          API.baseUrl + API.editProfileUrl;
-
-      print(" URL===> $url");
+      final String url = API.baseUrl + API.editProfileUrl;
 
       final request = http.MultipartRequest(
         'POST',
@@ -70,33 +137,21 @@ class ProfileController extends GetxController {
       }
 
       request.headers.addAll({
-        "Authorization":
-        'Bearer ${Prefs.getToken()}',
+        "Authorization": 'Bearer ${Prefs.getToken()}',
         "Cache-Control": "no-cache",
       });
 
-      final http.StreamedResponse response =
-      await request.send();
+      final response = await request.send();
 
-      final responseData =
-      await response.stream.bytesToString();
-
-      final decodedData =
-      jsonDecode(responseData);
-
-      print(
-        "Response Status: ${response.statusCode}",
-      );
-
-      print(
-        "Response Body: $decodedData",
-      );
+      final responseData = await response.stream.bytesToString();
+      final decodedData = jsonDecode(responseData);
 
       if (response.statusCode == 200 ||
           response.statusCode == 201) {
         if (decodedData['status'] == 1 ||
             decodedData['success'] == true) {
-          commonToast(type: AppSnackBarType.success, 
+          commonToast(
+            type: AppSnackBarType.success,
             decodedData['data']?['message'] ??
                 decodedData['message'] ??
                 "Profile Updated Successfully",
@@ -104,7 +159,8 @@ class ProfileController extends GetxController {
 
           selectedImagePath.value = '';
         } else {
-          commonToast(type: AppSnackBarType.error, 
+          commonToast(
+            type: AppSnackBarType.error,
             decodedData['data']?['message'] ??
                 decodedData['message'] ??
                 "Update Failed",
@@ -113,86 +169,25 @@ class ProfileController extends GetxController {
       } else if (response.statusCode == 401) {
         await Prefs.clear();
 
-        Get.offAll(
-              () => NormalLoginWidget(),
-        );
+        Get.offAll(() => NormalLoginWidget());
       } else {
-        commonToast(type: AppSnackBarType.error, 
+        commonToast(
+          type: AppSnackBarType.error,
           decodedData['data']?['message'] ??
               decodedData['message'] ??
               "Something went wrong",
         );
       }
     } catch (e) {
-      print(
-        "Error in editProfile: $e",
-      );
+      print("Error in editProfile: $e");
 
-      commonToast(type: AppSnackBarType.error, 
+      commonToast(
+        type: AppSnackBarType.error,
         "Failed to update profile. Check your connection.",
       );
     } finally {
-      Loader.hideLoader();
+      isLoading2.value = false;
     }
-  }
-
-  Future<void> updatePassword({
-    required String oldPassword,
-    required String newPassword,
-    required String confirmPassword,
-  }) async {
-    Loader.showLoader();
-
-    final String endPoint =
-        API.updatePasswordUrl;
-
-    final result =
-    await NetworkHttps.postRequest(
-      endPoint,
-      {
-        'store_id': Prefs.getStoreID(),
-        'user_id': Prefs.getUserID(),
-        'old_password': oldPassword,
-        'password': newPassword,
-        'password_confirmation': confirmPassword,
-      },
-    );
-
-    result.fold(
-      onSuccess: (data) {
-        Loader.hideLoader();
-
-        if (data['status'] == 1 ||
-            data['success'] == true) {
-          commonToast(type: AppSnackBarType.success, 
-            data['data']?['message'] ??
-                data['message'] ??
-                "Password Updated Successfully",
-          );
-
-          oldPasswordController.clear();
-          passwordController.clear();
-          confirmPasswordController.clear();
-
-          Get.back();
-        } else {
-          commonToast(type: AppSnackBarType.error, 
-            data['data']?['message'] ??
-                data['message'] ??
-                "Failed to update password",
-          );
-        }
-      },
-      onFailure: (
-          reason,
-          message,
-          validationErrors,
-          ) {
-        Loader.hideLoader();
-
-        commonToast(type: AppSnackBarType.error, message);
-      },
-    );
   }
 
   @override

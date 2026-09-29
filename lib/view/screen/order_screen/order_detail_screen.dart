@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/helper.dart';
+import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/order_screen/invoice_pdf_view.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
@@ -76,7 +77,30 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       body: SafeArea(
         child: Obx(() {
           if (orderController.isLoadingOrderDetails.value) {
-            return const ShimmerDetails(sections: 3, rowsPerSection: 4);
+            return const ShimmerDetails(sections: 4, rowsPerSection: 4);
+          }
+
+          if (orderController.orderNotFound.value) {
+            return EmptyState(
+              message: "order_not_found_desc".tr,
+              icon: Icons.receipt_long_outlined,
+              actionWidget: TextButton.icon(
+                onPressed: () => Get.back(),
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: 24.sp,
+                  color: AppColor.themeNavyBlueColor,
+                ),
+                label: Text(
+                  "back".tr,
+                  style: pSemiBold14.copyWith(fontSize: 18.sp),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColor.themeNavyBlueColor,
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                ),
+              ),
+            );
           }
 
           if (orderController.errorMessage.isNotEmpty &&

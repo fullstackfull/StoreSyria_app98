@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../core/model/create_product_model.dart';
+import '../../new_widgets/app_txt_field.dart';
 import '../../widget/app_dialog.dart';
 import 'product_widget.dart';
 import 'package:get/get.dart';
@@ -345,20 +347,19 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     );
   }
 
-  // --- Basic info ---
+// --- Basic info ---
   Widget _buildBasicInfoSection(Color textColor, Color hintColor,
       Color borderColor, Color cardColor, Color softBg, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _requiredLabel("product_name_required".tr, textColor),
-        AddProductTextField(
+        AppTextField(
           controller: addProductController.productName.value,
-          labelText: null,
-          hintText: 'enter_product_name'.tr,
-          validator: (value) {
-            return Validator.validateRequired(value ?? '');
-          },
+          hint: 'enter_product_name'.tr,
+          icon: Icons.inventory_2_outlined,
+          textCapitalization: TextCapitalization.sentences,
+          validator: (value) => Validator.validateRequired(value ?? ''),
         ),
         verticalSpace(16.h),
         _requiredLabel('category'.tr, textColor),
@@ -377,8 +378,115 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
             }
           },
           validator: (cat) {
-            if (cat == null) {
-              return "please_select_category".tr;
+            if (cat == null) return "please_select_category".tr;
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+// --- Description ---
+  Widget _buildDescriptionSection(Color textColor, Color hintColor,
+      Color borderColor, Color cardColor, Color softBg, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label('product_description'.tr),
+        AppTextField(
+          controller: addProductController.productDescriptionController.value,
+          hint: 'enter_product_description'.tr,
+          maxLines: 6,
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
+          textCapitalization: TextCapitalization.sentences,
+        ),
+      ],
+    );
+  }
+
+// --- Pricing ---
+  Widget _buildPricingSection(Color textColor, Color hintColor,
+      Color borderColor, Color cardColor, Color softBg, bool isDark) {
+    final c = addProductController;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _requiredLabel('price'.tr, textColor),
+                  AppTextField(
+                    controller: c.priceController.value,
+                    hint: 'enter_price'.tr,
+                    keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                    validator: (value) {
+                      final requiredError =
+                      Validator.validateRequired(value ?? '');
+                      if (requiredError != null) return requiredError;
+                      if (double.tryParse((value ?? '').trim()) == null) {
+                        return 'invalid_price'.tr;
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            horizontalSpace(12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _label('sale_price'.tr),
+                  AppTextField(
+                    controller: c.salePriceController.value,
+                    hint: 'enter_sale_price'.tr,
+                    keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                    validator: (value) {
+                      // سعر الخصم اختياري
+                      if (value == null || value.trim().isEmpty) return null;
+
+                      final salePrice = double.tryParse(value.trim());
+                      if (salePrice == null) return 'invalid_price'.tr;
+
+                      final regularPrice =
+                      double.tryParse(c.priceController.value.text.trim());
+                      if (regularPrice != null && salePrice >= regularPrice) {
+                        return 'Must be less than price.';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        verticalSpace(16.h),
+        _requiredLabel('costPrice'.tr, textColor),
+        AppTextField(
+          controller: c.costPriceController.value,
+          hint: 'enter_cost_price'.tr,
+          icon: Icons.payments_outlined,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          validator: (value) {
+            final requiredError = Validator.validateRequired(value ?? '');
+            if (requiredError != null) return requiredError;
+
+            final costPrice = double.tryParse((value ?? '').trim());
+            if (costPrice == null) return 'invalid_price'.tr;
+
+            final price = double.tryParse(c.priceController.value.text.trim());
+            if (price != null && costPrice > price) {
+              return 'Cost price must be less than or equal to price.';
             }
             return null;
           },
@@ -387,26 +495,371 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     );
   }
 
-  // --- Description ---
-  Widget _buildDescriptionSection(Color textColor, Color hintColor,
-      Color borderColor, Color cardColor, Color softBg, bool isDark) {
+// --- Inventory ---
+  Widget _buildInventorySection(
+      Color textColor, Color softBg, Color borderColor) {
+    final c = addProductController;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label('product_description'.tr),
-        AddProductTextField(
-          controller: addProductController.productDescriptionController.value,
-          labelText: null,
-          hintText: 'enter_product_description'.tr,
-          maxLines: 6,
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
+          decoration: BoxDecoration(
+            color: softBg,
+            borderRadius: BorderRadius.circular(14.r),
+          ),
+          child: _toggleRow(
+            icon: Icons.inventory_2_outlined,
+            label: 'track_stock'.tr,
+            textColor: textColor,
+            value: c.trackStock.value == '1',
+            onChanged: (v) => c.trackStock.value = v ? '1' : '0',
+          ),
+        ),
+        verticalSpace(16.h),
+        _requiredLabel('stock'.tr, textColor),
+        AppTextField(
+          controller: c.stockQtyController.value,
+          hint: 'enter_stock'.tr,
+          icon: Icons.other_houses_outlined,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           validator: (value) {
-            return null;
+            if (c.trackStock.value != '1') return null;
+            return Validator.validateRequired(value ?? '');
           },
+        ),
+        verticalSpace(16.h),
+        _label('stock_status'.tr),
+        Wrap(
+          spacing: 8.w,
+          runSpacing: 4.h,
+          children: _stockStatusOptions.map((opt) {
+            return _choiceChip(
+              label: opt.tr,
+              selected: c.stockStatus.value == opt,
+              textColor: textColor,
+              borderColor: borderColor,
+              onTap: () => c.stockStatus.value = opt,
+            );
+          }).toList(),
         ),
       ],
     );
   }
 
+// --- Shipping & tax ---
+  Widget _buildShippingTaxSection(
+      Color textColor, Color softBg, Color borderColor) {
+    final c = addProductController;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _label('product_weight'.tr),
+                  AppTextField(
+                    controller: c.productWeightController.value,
+                    hint: 'enter_product_weight'.tr,
+                    keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return null;
+                      final w = double.tryParse(value.trim());
+                      if (w == null || w < 0) {
+                        return 'invalid_product_weight'.tr;
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            horizontalSpace(12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _label('shipping_id'.tr),
+                  AppTextField(
+                    controller: c.shippingIdController.value,
+                    hint: 'enter_shipping_id'.tr,
+                    keyboardType: TextInputType.text,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        verticalSpace(16.h),
+        _label('tax_status'.tr),
+        Wrap(
+          spacing: 8.w,
+          runSpacing: 4.h,
+          children: _taxOptions.map((opt) {
+            return _choiceChip(
+              label: opt.tr,
+              selected: c.taxStatus.value == opt,
+              textColor: textColor,
+              borderColor: borderColor,
+              onTap: () {
+                c.taxStatus.value = opt;
+                if (opt == 'none') c.taxIdController.value.clear();
+              },
+            );
+          }).toList(),
+        ),
+        if (c.taxStatus.value != 'none') ...[
+          verticalSpace(16.h),
+          _label('tax_id'.tr),
+          AppTextField(
+            controller: c.taxIdController.value,
+            hint: 'enter_tax_id'.tr,
+            icon: Icons.receipt_long_outlined,
+            keyboardType: TextInputType.text,
+          ),
+        ],
+      ],
+    );
+  }
+
+  // --- Labels ---
+  Widget _requiredLabel(String label, Color textColor) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: RichText(
+        text: TextSpan(
+          style: pMedium12.copyWith(
+              color: AppColor.cDarkGreyFont, fontSize: 14.sp),
+          children: [
+            TextSpan(text: label),
+            TextSpan(
+              text: ' *',
+              style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.sp),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _label(String label) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Text(
+        label,
+        style: pMedium12.copyWith(
+            color: AppColor.cDarkGreyFont, fontSize: 14.sp),
+      ),
+    );
+  }
+
+  Widget _uploadPlaceholder(Color textColor) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.cloud_upload_outlined,
+            size: 30.sp, color: AppColor.themeNavyBlueColor),
+        verticalSpace(6.h),
+        Text(
+          "drop_files_upload".tr,
+          style: pSemiBold12.copyWith(color: textColor),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _removeImageButton({required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: Colors.black54,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4),
+          ],
+        ),
+        child: Icon(Icons.close, size: 14.sp, color: Colors.white),
+      ),
+    );
+  }
+
+  // --- Choice chip (مخصص بالكامل، ما بيتأثر بألوان ثيم التطبيق) ---
+  Widget _choiceChip({
+    required String label,
+    required bool selected,
+    required Color textColor,
+    required Color borderColor,
+    required VoidCallback onTap,
+  }) {
+    final navy = AppColor.themeNavyBlueColor;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: selected ? navy.withOpacity(0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: selected ? navy : borderColor),
+        ),
+        child: Text(
+          label,
+          style: pMedium12.copyWith(
+            fontSize: 12.sp,
+            color: selected ? navy : textColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --- Settings (trending / variant / status) ---
+  Widget _buildSettingsSection(
+      Color textColor, Color softBg, Color borderColor) {
+    final c = addProductController;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: softBg,
+        borderRadius: BorderRadius.circular(14.r),
+      ),
+      child: Column(
+        children: [
+          _toggleRow(
+            icon: Icons.check_circle_outline_rounded,
+            label: "status".tr,
+            textColor: textColor,
+            value: c.isStatus.value,
+            onChanged: (value) {
+              c.isStatus.value = value;
+              c.status.value = value ? '1' : '0';
+            },
+          ),
+          Divider(color: borderColor, height: 1),
+          _toggleRow(
+            icon: Icons.trending_up_rounded,
+            label: "trending".tr,
+            textColor: textColor,
+            value: c.isTrending.value,
+            onChanged: (value) {
+              c.isTrending.value = value;
+              c.trending.value = value ? '1' : '0';
+            },
+          ),
+          Divider(color: borderColor, height: 1),
+          _toggleRow(
+            icon: Icons.tune_rounded,
+            label: "variant_type".tr,
+            textColor: textColor,
+            value: c.isVariant.value,
+            onChanged: (value) {
+              c.isVariant.value = value;
+              c.variantType.value = value ? '1' : '0';
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _toggleRow({
+    required IconData icon,
+    required String label,
+    required Color textColor,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16.sp, color: AppColor.themeNavyBlueColor),
+              horizontalSpace(8.w),
+              Text(
+                label,
+                style: pRegular12.copyWith(color: textColor, fontSize: 13.sp),
+              ),
+            ],
+          ),
+          CupertinoSwitch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppColor.themeNavyBlueColor,
+            thumbColor: AppColor.cWhite,
+            trackColor: AppColor.cFont,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        AppButton(
+          text: 'close'.tr,
+          onPressed: () {
+            Get.back();
+          },
+          width: 90.w,
+          height: 44.h,
+          backgroundColor: AppColor.cBorder,
+          textColor: AppColor.cDarkGreyFont,
+        ),
+        AppButton(
+          isLoading: addProductController.isAddLoading.value,
+          text: widget.isUpdate ? "update".tr : 'create'.tr,
+          onPressed: () {
+            final isFormValid = formKey.currentState?.validate() ?? false;
+            if (!isFormValid) return;
+
+            final hasCover =
+                addProductController.coverImage.value.isNotEmpty ||
+                    addProductController.existingCoverImageUrl.value.isNotEmpty;
+
+            if (!hasCover) {
+              commonToast(type: AppSnackBarType.info, "please_add_cover_image".tr);
+              return;
+            }
+
+            final hasSubImages =
+                addProductController.selectedSubImages.isNotEmpty ||
+                    addProductController.existingSubImages.isNotEmpty;
+
+            if (!hasSubImages) {
+              commonToast(type: AppSnackBarType.info, "please_add_sub_image".tr);
+              return;
+            }
+
+            _submitProductData();
+          },
+          width: 190.w,
+          height: 44.h,
+        ),
+      ],
+    );
+  }
   // --- Images ---
   Widget _buildImagesSection(
       Color textColor, Color hintColor, Color borderColor, Color softBg) {
@@ -618,472 +1071,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
               ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  // --- Labels ---
-  Widget _requiredLabel(String label, Color textColor) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: RichText(
-        text: TextSpan(
-          style: pMedium12.copyWith(
-              color: AppColor.cDarkGreyFont, fontSize: 14.sp),
-          children: [
-            TextSpan(text: label),
-            TextSpan(
-              text: ' *',
-              style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.sp),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _label(String label) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Text(
-        label,
-        style: pMedium12.copyWith(
-            color: AppColor.cDarkGreyFont, fontSize: 14.sp),
-      ),
-    );
-  }
-
-  Widget _uploadPlaceholder(Color textColor) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.cloud_upload_outlined,
-            size: 30.sp, color: AppColor.themeNavyBlueColor),
-        verticalSpace(6.h),
-        Text(
-          "drop_files_upload".tr,
-          style: pSemiBold12.copyWith(color: textColor),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  Widget _removeImageButton({required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(4.w),
-        decoration: BoxDecoration(
-          color: Colors.black54,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4),
-          ],
-        ),
-        child: Icon(Icons.close, size: 14.sp, color: Colors.white),
-      ),
-    );
-  }
-
-  // --- Pricing ---
-  Widget _buildPricingSection(Color textColor, Color hintColor,
-      Color borderColor, Color cardColor, Color softBg, bool isDark) {
-    final c = addProductController;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _requiredLabel('price'.tr, textColor),
-                  AddProductTextField(
-                    controller: c.priceController.value,
-                    labelText: null,
-                    hintText: 'enter_price'.tr,
-                    validator: (value) {
-                      final requiredError =
-                      Validator.validateRequired(value ?? '');
-                      if (requiredError != null) return requiredError;
-                      if (double.tryParse((value ?? '').trim()) == null) {
-                        return 'invalid_price'.tr;
-                      }
-                      return null;
-                    },
-                    keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true),
-                  ),
-                ],
-              ),
-            ),
-            horizontalSpace(12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _label('sale_price'.tr),
-                  AddProductTextField(
-                    controller: c.salePriceController.value,
-                    labelText: null,
-                    hintText: 'enter_sale_price'.tr,
-                    validator: (value) {
-                      // سعر الخصم اختياري
-                      if (value == null || value.trim().isEmpty) return null;
-
-                      final salePrice = double.tryParse(value.trim());
-                      if (salePrice == null) return 'invalid_price'.tr;
-
-                      final regularPrice =
-                      double.tryParse(c.priceController.value.text.trim());
-                      if (regularPrice != null && salePrice >= regularPrice) {
-                        return 'Must be less than price.';
-                      }
-                      return null;
-                    },
-                    keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        verticalSpace(16.h),
-        _requiredLabel('costPrice'.tr, textColor),
-        AddProductTextField(
-          controller: c.costPriceController.value,
-          labelText: null,
-          hintText: 'enter_cost_price'.tr,
-          validator: (value) {
-            final requiredError = Validator.validateRequired(value ?? '');
-            if (requiredError != null) return requiredError;
-
-            final costPrice = double.tryParse((value ?? '').trim());
-            if (costPrice == null) {
-              return 'invalid_price'.tr;
-            }
-
-            final price = double.tryParse(
-              c.priceController.value.text.trim(),
-            );
-
-            if (price != null && costPrice > price) {
-              return 'Cost price must be less than or equal to price.';
-            }
-
-            return null;
-          },
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: true,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // --- Inventory ---
-  Widget _buildInventorySection(
-      Color textColor, Color softBg, Color borderColor) {
-    final c = addProductController;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
-          decoration: BoxDecoration(
-            color: softBg,
-            borderRadius: BorderRadius.circular(14.r),
-          ),
-          child: _toggleRow(
-            icon: Icons.inventory_2_outlined,
-            label: 'track_stock'.tr,
-            textColor: textColor,
-            value: c.trackStock.value == '1',
-            onChanged: (v) => c.trackStock.value = v ? '1' : '0',
-          ),
-        ),
-          verticalSpace(16.h),
-          _requiredLabel('stock'.tr, textColor),
-          AddProductTextField(
-            controller: c.stockQtyController.value,
-            labelText: null,
-            hintText: 'enter_stock'.tr,
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (c.trackStock.value != '1') return null;
-              return Validator.validateRequired(value ?? '');
-            },
-          ),
-        verticalSpace(16.h),
-        _label('stock_status'.tr),
-        Wrap(
-          spacing: 8.w,
-          runSpacing: 4.h,
-          children: _stockStatusOptions.map((opt) {
-            return _choiceChip(
-              label: opt.tr,
-              selected: c.stockStatus.value == opt,
-              textColor: textColor,
-              borderColor: borderColor,
-              onTap: () => c.stockStatus.value = opt,
-            );
-          }).toList(),
-        ),
-   ] );
-  }
-
-  // --- Shipping & tax ---
-  Widget _buildShippingTaxSection(
-      Color textColor, Color softBg, Color borderColor) {
-    final c = addProductController;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _label('product_weight'.tr),
-                  AddProductTextField(
-                    controller: c.productWeightController.value,
-                    labelText: null,
-                    hintText: 'enter_product_weight'.tr,
-                    keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) return null;
-                      final w = double.tryParse(value.trim());
-                      if (w == null || w < 0) {
-                        return 'invalid_product_weight'.tr;
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-              ),
-            ),
-            horizontalSpace(12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _label('shipping_id'.tr),
-                  AddProductTextField(
-                    controller: c.shippingIdController.value,
-                    labelText: null,
-                    hintText: 'enter_shipping_id'.tr,
-                    keyboardType: TextInputType.text,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        verticalSpace(16.h),
-        _label('tax_status'.tr),
-        Wrap(
-          spacing: 8.w,
-          runSpacing: 4.h,
-          children: _taxOptions.map((opt) {
-            return _choiceChip(
-              label: opt.tr,
-              selected: c.taxStatus.value == opt,
-              textColor: textColor,
-              borderColor: borderColor,
-              onTap: () {
-                c.taxStatus.value = opt;
-                if (opt == 'none') c.taxIdController.value.clear();
-              },
-            );
-          }).toList(),
-        ),
-        if (c.taxStatus.value != 'none') ...[
-          verticalSpace(16.h),
-          _label('tax_id'.tr),
-          AddProductTextField(
-            controller: c.taxIdController.value,
-            labelText: null,
-            hintText: 'enter_tax_id'.tr,
-            keyboardType: TextInputType.text,
-          ),
-        ],
-      ],
-    );
-  }
-
-  // --- Choice chip (مخصص بالكامل، ما بيتأثر بألوان ثيم التطبيق) ---
-  Widget _choiceChip({
-    required String label,
-    required bool selected,
-    required Color textColor,
-    required Color borderColor,
-    required VoidCallback onTap,
-  }) {
-    final navy = AppColor.themeNavyBlueColor;
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: selected ? navy.withOpacity(0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: selected ? navy : borderColor),
-        ),
-        child: Text(
-          label,
-          style: pMedium12.copyWith(
-            fontSize: 12.sp,
-            color: selected ? navy : textColor,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- Settings (trending / variant / status) ---
-  Widget _buildSettingsSection(
-      Color textColor, Color softBg, Color borderColor) {
-    final c = addProductController;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: softBg,
-        borderRadius: BorderRadius.circular(14.r),
-      ),
-      child: Column(
-        children: [
-          _toggleRow(
-            icon: Icons.check_circle_outline_rounded,
-            label: "status".tr,
-            textColor: textColor,
-            value: c.isStatus.value,
-            onChanged: (value) {
-              c.isStatus.value = value;
-              c.status.value = value ? '1' : '0';
-            },
-          ),
-          Divider(color: borderColor, height: 1),
-          _toggleRow(
-            icon: Icons.trending_up_rounded,
-            label: "trending".tr,
-            textColor: textColor,
-            value: c.isTrending.value,
-            onChanged: (value) {
-              c.isTrending.value = value;
-              c.trending.value = value ? '1' : '0';
-            },
-          ),
-          Divider(color: borderColor, height: 1),
-          _toggleRow(
-            icon: Icons.tune_rounded,
-            label: "variant_type".tr,
-            textColor: textColor,
-            value: c.isVariant.value,
-            onChanged: (value) {
-              c.isVariant.value = value;
-              c.variantType.value = value ? '1' : '0';
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _toggleRow({
-    required IconData icon,
-    required String label,
-    required Color textColor,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16.sp, color: AppColor.themeNavyBlueColor),
-              horizontalSpace(8.w),
-              Text(
-                label,
-                style: pRegular12.copyWith(color: textColor, fontSize: 13.sp),
-              ),
-            ],
-          ),
-          CupertinoSwitch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppColor.themeNavyBlueColor,
-            thumbColor: AppColor.cWhite,
-            trackColor: AppColor.cFont,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        AppButton(
-          text: 'close'.tr,
-          onPressed: () {
-            Get.back();
-          },
-          width: 90.w,
-          height: 44.h,
-          backgroundColor: AppColor.cBorder,
-          textColor: AppColor.cDarkGreyFont,
-        ),
-        AppButton(
-          isLoading: addProductController.isAddLoading.value,
-          text: widget.isUpdate ? "update".tr : 'create'.tr,
-          onPressed: () {
-            final isFormValid = formKey.currentState?.validate() ?? false;
-            if (!isFormValid) return;
-
-            final hasCover =
-                addProductController.coverImage.value.isNotEmpty ||
-                    addProductController.existingCoverImageUrl.value.isNotEmpty;
-
-            if (!hasCover) {
-              commonToast(type: AppSnackBarType.info, "please_add_cover_image".tr);
-              return;
-            }
-
-            final hasSubImages =
-                addProductController.selectedSubImages.isNotEmpty ||
-                    addProductController.existingSubImages.isNotEmpty;
-
-            if (!hasSubImages) {
-              commonToast(type: AppSnackBarType.info, "please_add_sub_image".tr);
-              return;
-            }
-
-            _submitProductData();
-          },
-          width: 190.w,
-          height: 44.h,
         ),
       ],
     );

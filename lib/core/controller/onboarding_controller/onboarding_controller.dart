@@ -19,19 +19,19 @@ OnboardingController extends GetxController {
       title: 'onboarding_title_1',
       description: 'onboarding_desc_1',
       lottiePath: 'assets/lottie/onboarding_1.json',
-      backgroundColor: '#00B4D8',
+      backgroundColor: '#F2F6FA',
     ),
     OnboardingModel(
       title: 'onboarding_title_2',
       description: 'onboarding_desc_2',
       lottiePath: 'assets/lottie/onboarding_2.json',
-      backgroundColor: '#1E293B',
+      backgroundColor: '#F2F6FA',
     ),
     OnboardingModel(
       title: 'onboarding_title_3',
       description: 'onboarding_desc_3',
       lottiePath: 'assets/lottie/onboarding_3.json',
-      backgroundColor: '#172C4E',
+      backgroundColor: '#F2F6FA',
     ),
   ];
 

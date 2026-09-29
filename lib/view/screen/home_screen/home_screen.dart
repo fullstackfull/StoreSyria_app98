@@ -1,5 +1,4 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -97,9 +96,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     key: _refreshIndicatorKey,
                     onRefresh: getData,
                     showChildOpacityTransition: false,
-                    backgroundColor: AppColor.themeGreenColor,
-                    color: AppColor.cWhite,
-                    springAnimationDurationInMilliseconds: 500,
+                    backgroundColor: AppColor.themeNavyBlueColor,
+                    color: bgColor,
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(18, 40, 18, 32),
                       child: Column(
@@ -119,42 +117,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 "StoreSyria Admin",
                             onValue: (_) => getData(),
                           ),
-                          // verticalSpace(16),
-                          //
-                          // Container(
-                          //   width: double.infinity,
-                          //   padding: const EdgeInsets.all(14),
-                          //   decoration: BoxDecoration(
-                          //     color: isDark
-                          //         ? DarkThemeColor.cCardBackground
-                          //         : AppColor.themeGreenColor.withOpacity(0.08),
-                          //     borderRadius: BorderRadius.circular(16),
-                          //   ),
-                          //   child: Row(
-                          //     crossAxisAlignment: CrossAxisAlignment.start,
-                          //     children: [
-                          //       Icon(Icons.lightbulb_outline_rounded,
-                          //           size: 18, color: AppColor.themeGreenColor),
-                          //       horizontalSpace(10),
-                          //       Expanded(
-                          //         child: Text.rich(
-                          //           TextSpan(
-                          //             text: 'Have a nice day! '.tr,
-                          //             style: pBold12.copyWith(color: AppColor.cDarkGreyFont),
-                          //             children: <TextSpan>[
-                          //               TextSpan(
-                          //                 text: 'Did you know that you can quickly add your favorite product or category to the store?'
-                          //                     .tr,
-                          //                 style: pRegular12.copyWith(
-                          //                     color: AppColor.cDarkGreyFont),
-                          //               ),
-                          //             ],
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
+
                           verticalSpace(16),
 
                           Obx(() {

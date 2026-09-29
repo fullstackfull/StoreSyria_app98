@@ -84,7 +84,7 @@ Widget settingCard({
               style: pSemiBold16.copyWith(
                 color: AppColor.themeNavyBlueColor,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
 

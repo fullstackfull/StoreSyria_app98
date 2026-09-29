@@ -63,6 +63,7 @@ class OrderController extends GetxController implements StoreAware {
   RxBool isSearching = false.obs;
   RxBool isDetailLoading = false.obs;
   RxString errorMessage = ''.obs;
+  RxBool orderNotFound = false.obs;
   RxList<OrderData> topOrderList = <OrderData>[].obs;
   RxBool isLoadingTopOrders = false.obs;
 
@@ -572,12 +573,17 @@ class OrderController extends GetxController implements StoreAware {
     orderDetail = null;
     extTax.value = 0.0;
     errorMessage.value = '';
+    orderNotFound.value = false;
 
     try {
       final result = await orderDetailRepository.getOrderDetailData(orderId);
 
       result.fold(
         onSuccess: (data) {
+          if (data['status'] != 1 || data['data'] is! Map || data['data']['id'] == null) {
+            orderNotFound.value = true;
+            return;
+          }
           orderDetailModel = OrderDetailModel.fromJson(data);
           orderDetail = orderDetailModel?.data;
           currencySymbol.value = orderDetail?.currencySymbol ?? currencySymbol.value;

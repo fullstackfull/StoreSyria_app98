@@ -17,7 +17,7 @@ class PoweredByLynomia extends StatelessWidget {
       child: Text(
         "Powered by Lynomia".tr,
         textAlign: TextAlign.center,
-        style: pRegular12.copyWith(color: Colors.grey),
+        style: pRegular14.copyWith(color: Colors.grey),
       ),
     );
   }

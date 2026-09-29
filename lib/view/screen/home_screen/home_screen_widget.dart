@@ -170,48 +170,51 @@ Widget buildProfileTitle({String? profileImage, String? name, String? task, Func
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
             child: Row(
               children: [
-                Container(
-                  padding: EdgeInsets.all(3.w),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColor.themeGreenColor,
-                        Colors.white.withOpacity(0.6),
-                      ],
-                    ),
-                  ),
+                Hero(
+                  tag: "123",
                   child: Container(
-                    padding: EdgeInsets.all(2.w),
+                    padding: EdgeInsets.all(3.w),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColor.themeNavyBlueColor,
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColor.themeGreenColor,
+                          Colors.white.withOpacity(0.6),
+                        ],
+                      ),
                     ),
-                    child: CircleAvatar(
-                      radius: 28,
-                      backgroundColor: AppColor.themeGreenColor,
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: getImageUrl(profileImage),
-                          width: 56,
-                          height: 56,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
-                          errorWidget: (context, url, error) {
-                            return Image.network(
-                              DefaultImages.profileImg,
-                              width: 56,
-                              height: 56,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) {
-                                return Icon(
-                                  Icons.person,
-                                  size: 30,
-                                  color: Colors.white,
-                                );
-                              },
-                            );
-                          },
+                    child: Container(
+                      padding: EdgeInsets.all(2.w),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColor.themeNavyBlueColor,
+                      ),
+                      child: CircleAvatar(
+                        radius: 28,
+                        backgroundColor: AppColor.themeGreenColor,
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: getImageUrl(profileImage),
+                            width: 56,
+                            height: 56,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                            errorWidget: (context, url, error) {
+                              return Image.network(
+                                DefaultImages.profileImg,
+                                width: 56,
+                                height: 56,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) {
+                                  return Icon(
+                                    Icons.person,
+                                    size: 30,
+                                    color: Colors.white,
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
