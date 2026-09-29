@@ -17,6 +17,8 @@ class CustomerContactActions extends StatelessWidget {
     required this.isDark,
   });
 
+  static const Color _whatsappGreen = Color(0xFF1FA855);
+
   bool _hasValue(String? value) {
     return value != null && value.trim().isNotEmpty;
   }
@@ -86,140 +88,88 @@ class CustomerContactActions extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final cardColor = isDark
-        ? DarkThemeColor.cCardBackground
-        : Colors.white;
+    final labelColor = isDark ? Colors.white : const Color(0xFF172C4E);
 
-    final borderColor = isDark
-        ? DarkThemeColor.cBorder
-        : const Color(0xFFE8EAF0);
-
-    final textColor = isDark
-        ? Colors.white
-        : AppColor.cText;
-
-    final iconBackground = isDark
-        ? Colors.white.withOpacity(.06)
-        : const Color(0xFFF5F6F8);
-
-    return Container(
-      padding: EdgeInsets.all(8.w),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color: borderColor,
+    final actions = <Widget>[
+      if (hasPhone)
+        _action(
+          icon: Icons.call_rounded,
+          label: 'call'.tr,
+          accent: AppColor.themeGreenColor,
+          labelColor: labelColor,
+          onTap: _callCustomer,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(
-              isDark ? .08 : .035,
-            ),
-            blurRadius: 16,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          if (hasPhone)
-            Expanded(
-              child: _action(
-                icon: Icons.call_outlined,
-                label: 'call'.tr,
-                textColor: textColor,
-                iconBackground: iconBackground,
-                onTap: _callCustomer,
-              ),
-            ),
+      if (hasPhone)
+        _action(
+          icon: Icons.chat_rounded,
+          label: 'whatsapp'.tr,
+          accent: _whatsappGreen,
+          labelColor: labelColor,
+          onTap: _whatsappCustomer,
+        ),
+      if (hasEmail)
+        _action(
+          icon: Icons.mail_rounded,
+          label: 'email2'.tr,
+          accent: AppColor.themeNavyBlueColor,
+          labelColor: labelColor,
+          onTap: _emailCustomer,
+        ),
+    ];
 
-          if (hasPhone && (hasEmail))
-            Container(
-              width: 1.w,
-              height: 38.h,
-              color: borderColor,
-            ),
+    // فراغ ثابت بين الأزرار
+    final children = <Widget>[];
+    for (var i = 0; i < actions.length; i++) {
+      if (i > 0) children.add(SizedBox(width: 8.w));
+      children.add(Expanded(child: actions[i]));
+    }
 
-          if (hasPhone)
-            Expanded(
-              child: _action(
-                icon: Icons.chat_bubble_outline_rounded,
-                label: 'whatsapp'.tr,
-                textColor: textColor,
-                iconBackground: iconBackground,
-                onTap: _whatsappCustomer,
-              ),
-            ),
-
-          if (hasPhone && hasEmail)
-            Container(
-              width: 1.w,
-              height: 38.h,
-              color: borderColor,
-            ),
-
-          if (hasEmail)
-            Expanded(
-              child: _action(
-                icon: Icons.mail_outline_rounded,
-                label: 'email2'.tr,
-                textColor: textColor,
-                iconBackground: iconBackground,
-                onTap: _emailCustomer,
-              ),
-            ),
-        ],
-      ),
-    );
+    return Row(children: children);
   }
 
   Widget _action({
     required IconData icon,
     required String label,
-    required Color textColor,
-    required Color iconBackground,
+    required Color accent,
+    required Color labelColor,
     required VoidCallback onTap,
   }) {
+    // الكحلي غامق كتير على الخلفية الداكنة، فنفتّحه شوي
+    final isNavy = accent == AppColor.themeNavyBlueColor;
+    final tone = isDark && isNavy ? const Color(0xFF8FB0E0) : accent;
+
+    // زر كبسولة أفقي: أيقونة ونص جنب بعض بلون الإجراء
     return Material(
-      color: Colors.transparent,
+      color: tone.withOpacity(isDark ? 0.14 : 0.10),
+      shape: const StadiumBorder(),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14.r),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 8.h,
-            horizontal: 4.w,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36.w,
-                height: 36.w,
-                decoration: BoxDecoration(
-                  color: iconBackground,
-                  borderRadius: BorderRadius.circular(11.r),
+        splashColor: tone.withOpacity(0.18),
+        highlightColor: tone.withOpacity(0.08),
+        child: SizedBox(
+          height: 42.h,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 18.sp, color: tone),
+                SizedBox(width: 6.w),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? tone : Color.lerp(tone, labelColor, 0.25),
+                    ),
+                  ),
                 ),
-                child: Icon(
-                  icon,
-                  size: 18.sp,
-                  color: AppColor.themeNavyBlueColor,
-                ),
-              ),
-
-              SizedBox(height: 6.h),
-
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

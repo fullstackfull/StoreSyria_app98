@@ -184,21 +184,37 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                       ),
                                     ),
                                     horizontalSpace(8),
-                                    Container(
-                                      width: 32.w,
-                                      height: 32.w,
+                                    AnimatedContainer(
+                                      duration: const Duration(milliseconds: 250),
+                                      width: 34.w,
+                                      height: 34.w,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        color: isDark ? DarkThemeColor.cBorder : AppColor.cLight,
-                                        borderRadius: BorderRadius.circular(10),
+                                        color: isStoreOpen
+                                            ? AppColor.themeGreenColor.withOpacity(0.12)
+                                            : (isDark
+                                            ? DarkThemeColor.cBorder
+                                            : AppColor.cLight),
+                                        borderRadius: BorderRadius.circular(12.r),
+                                        border: Border.all(
+                                          color: isStoreOpen
+                                              ? AppColor.themeGreenColor.withOpacity(0.35)
+                                              : Colors.transparent,
+                                          width: 1,
+                                        ),
                                       ),
                                       child: AnimatedRotation(
+                                        duration: const Duration(milliseconds: 300),
+                                        curve: Curves.easeOutBack,
                                         turns: isStoreOpen ? 0.5 : 0,
-                                        duration: const Duration(milliseconds: 200),
-                                        child: assetSvdImageWidget(
-                                          image: DefaultImages.dropDownIcn,
-                                          colorFilter: ColorFilter.mode(
-                                              isDark ? Colors.white : AppColor.cLabel, BlendMode.srcIn),
+                                        child: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          size: 23.sp,
+                                          color: isStoreOpen
+                                              ? AppColor.themeGreenColor
+                                              : (isDark
+                                              ? Colors.white
+                                              : AppColor.cLabel),
                                         ),
                                       ),
                                     ),
