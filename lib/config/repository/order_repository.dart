@@ -1,12 +1,25 @@
 import 'package:intl/intl.dart';
-import 'package:store_go_app/network_dio/network_dio.dart';
+import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
-
 import '../../core/model/create_order_model.dart';
-import '../../network_dio/result.dart';
+import '../../network/result.dart';
 
 class OrderRepository {
+
+  Future<dynamic> assignOrderToDelivery({
+    required Map<String, dynamic> data,
+  }) async {
+    String endPoint = '${API.assignOrderUrl}${API.storeIdUrl}${Prefs.getStoreID()}';
+
+    var response = await NetworkHttps.postRequest(
+      endPoint,
+      data,
+    );
+
+    return response;
+  }
+
   getOrderData(
       int page,
       {int? deliveredStatus,

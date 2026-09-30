@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/config/repository/product_repository.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
-import '../../../network_dio/result.dart';
+
+import '../../../network/result.dart';
 
 enum ProductListMode {
   normal,
@@ -45,6 +45,9 @@ class ProductController extends GetxController implements StoreAware {
   RxString errorMessage = ''.obs;
   final RxList<ProductData> searchResults = <ProductData>[].obs;
   Timer? _productSearchDebounce;
+
+  bool _isNotFound(Object? m) =>
+      m is String && m.toLowerCase().contains('not found');
 
 
   @override
@@ -106,10 +109,7 @@ class ProductController extends GetxController implements StoreAware {
     if (isLoading.value) return;
 
     isLoading.value = true;
-
-    if (page == 1) {
-      Loader.showLoader();
-    }
+    errorMessage.value = '';
 
     try {
       final response = await productRepository.getProductData(page);
@@ -137,16 +137,28 @@ class ProductController extends GetxController implements StoreAware {
             final lastPage = productModel?.data?.lastPage ?? page;
 
             isScroll.value = page < lastPage;
-          } else {
-            commonToast(type: AppSnackBarType.error, 
-              data['data']?['message'] ??
-                  data['message'] ??
-                  'Error',
-            );
+            return;
+          }
 
-            if (page > 1 && currantPage.value == page) {
-              currantPage.value = page - 1;
+          final message = (data['data'] is Map ? data['data']['message'] : null) ??
+              data['message'] ??
+              'Error';
+
+          // The API answers 200 + status 0 + "Product Data not found." when the
+          // store has no products (or the page is past the end): treat as empty.
+          if (_isNotFound(message)) {
+            if (page == 1) {
+              productList.clear();
+              currantPage.value = 1;
             }
+            isScroll.value = false;
+            return;
+          }
+
+          commonToast(type: AppSnackBarType.error, message.toString());
+
+          if (page > 1 && currantPage.value == page) {
+            currantPage.value = page - 1;
           }
         },
         onFailure: (reason, message, validationErrors) {
@@ -160,9 +172,6 @@ class ProductController extends GetxController implements StoreAware {
         },
       );
     } finally {
-      if (page == 1) {
-      }
-
       isLoading.value = false;
     }
   }

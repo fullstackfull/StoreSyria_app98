@@ -1,5 +1,5 @@
 import 'dart:io';
-import '../../network_dio/network_dio.dart';
+import '../../network/network.dart';
 import '../../utils/base_api.dart';
 import '../../utils/prefer.dart';
 

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -23,14 +22,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   late final AnimationController _sectionController;
   late final AnimationController _chartController;
   late final AnimationController _lineOpacityController;
-  final ScrollController _scrollController = ScrollController();
-
-  final GlobalKey _platformChartKey = GlobalKey();
-
-  bool _showTopUrls = true;
 
   bool _animationsStarted = false;
-  Timer? _animationTimer;
 
   @override
   void initState() {
@@ -40,12 +33,12 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
     _sectionController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 4500),
+      duration: const Duration(milliseconds: 1100),
     );
 
     _chartController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 30),
+      duration: const Duration(milliseconds: 1400),
     );
 
     _lineOpacityController = AnimationController(
@@ -56,52 +49,24 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       statisticsController.getStaticData();
-
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          _startAnimation();
-        }
-      });
     });
   }
 
   @override
   void dispose() {
-    _animationTimer?.cancel();
     _sectionController.dispose();
     _chartController.dispose();
     _lineOpacityController.dispose();
-    _scrollController.dispose();
     super.dispose();
-  }
-
-  Future<void> _runChartCycle() async {
-    if (!mounted) return;
-
-    await _chartController.forward(from: 0);
-    if (!mounted) return;
-
-    await Future.delayed(const Duration(milliseconds: 900));
-    if (!mounted) return;
-
-    await _lineOpacityController.reverse();
-    if (!mounted) return;
-
-    _chartController.value = 0;
-
-    await _lineOpacityController.forward();
-    if (!mounted) return;
-
-    _runChartCycle();
   }
 
   void _startAnimation() {
     if (!mounted || _animationsStarted) return;
     _animationsStarted = true;
 
+    // Plays once, when the data is on screen (not on a loop).
     _sectionController.forward(from: 0);
-
-    _runChartCycle();
+    _chartController.forward(from: 0);
   }
 
   Animation<double> _sectionAnimation(int index) {
@@ -126,7 +91,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(0, (1 - value) * 22),
+            offset: Offset(0, (1 - value) * 16),
             child: Transform.scale(
               scale: 0.97 + (0.03 * value),
               child: child,
@@ -169,21 +134,19 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           isBack: true,
           onNewLabelTap: () {},
         ),
-        backgroundColor:
-        isDark ? StatisticsTheme.darkBackground : StatisticsTheme.lightBackground,
-        extendBodyBehindAppBar: true,
+        backgroundColor: Glass.background(context),
         body: Stack(
           children: [
             const Positioned.fill(child: GlassBackdrop()),
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 6, 20, 20),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Obx(() {
                   final isLoading = statisticsController.isDataAvailable.value ||
                       statisticsController.staticsDataModel == null;
 
                   if (isLoading) {
-                    return const ShimmerList();
+                    return const ShimmerDashboard(padding: EdgeInsets.zero);
                   }
                   return _buildContent(context);
                 }),
@@ -201,6 +164,11 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
     if (data == null) {
       return const SizedBox.shrink();
+    }
+
+    // Start the entrance + chart animation once the data is actually shown.
+    if (!_animationsStarted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _startAnimation());
     }
 
     final visitorChart = data.visitorchart ?? [];
@@ -252,24 +220,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                 title: "Top URL".tr,
                 subtitle: "Most visited links".tr,
                 icon: Icons.emoji_events_rounded,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 260),
-                      curve: Curves.easeOutCubic,
-                      child: !_showTopUrls
-                          ? const SizedBox.shrink()
-                          : Padding(
-                        padding: const EdgeInsets.only(top: 0),
-                        child: TopUrlChart(
-                          list: topUrlList,
-                          animation: _chartController,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                child: TopUrlChart(list: topUrlList),
               ),
             ),
           ],
@@ -291,7 +242,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               BrowsersGraph(isDevice: true, device: deviceList),
             ),
           ],
-          verticalSpace(10),
+          verticalSpace(28),
         ],
       ),
     );

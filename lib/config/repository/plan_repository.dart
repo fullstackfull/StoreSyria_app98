@@ -1,4 +1,4 @@
-import 'package:store_go_app/network_dio/network_dio.dart';
+import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 

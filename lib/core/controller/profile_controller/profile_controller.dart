@@ -9,7 +9,7 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/screen/auth/login_widget.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
-import '../../../network_dio/network_dio.dart';
+import '../../../network/network.dart';
 import '../../../utils/pick_file.dart';
 
 class ProfileController extends GetxController {

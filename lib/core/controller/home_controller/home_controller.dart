@@ -22,7 +22,6 @@ class HomeController extends GetxController implements StoreAware {
   RxList<Coupons> couponsList = <Coupons>[].obs;
   RxString imageBaseUrl = ''.obs;
   RxBool isStore = false.obs;
-  RxBool isQuickAdd = false.obs;
   RxBool isDataAvailable = false.obs;
   DashboardData? dashboardData;
   ImageUrlData? imageUrlData;

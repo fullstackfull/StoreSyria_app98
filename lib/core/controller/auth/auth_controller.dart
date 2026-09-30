@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:store_go_app/network_dio/network_dio.dart';
+import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/routes/routes.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/constant.dart';

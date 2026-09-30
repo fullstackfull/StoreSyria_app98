@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'package:store_go_app/network_dio/result.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/screen/auth/login_widget.dart';
@@ -17,6 +18,13 @@ class NetworkHttps {
   // ===========================================================================
   // LOGGER
   // ===========================================================================
+
+  // ===========================================================================
+  // TIMEOUTS
+  // ===========================================================================
+
+  static const Duration _timeout = Duration(seconds: 30);
+  static const Duration _uploadTimeout = Duration(seconds: 60);
 
   static final Logger logger = Logger(
     printer: PrettyPrinter(
@@ -187,6 +195,7 @@ $error
     required dynamic error,
     required StackTrace stackTrace,
     String message = 'Connection failed. Please try again.',
+    FailureReason reason = FailureReason.network,
   }) {
     _logError(
       method: method,
@@ -196,7 +205,7 @@ $error
     );
 
     return Failure<T>(
-      FailureReason.network,
+      reason,
       message,
     );
   }
@@ -353,7 +362,7 @@ $error
       final response = await http.get(
         Uri.parse(getUrl),
         headers: headers,
-      );
+      ).timeout(_timeout);
 
       _logResponse(
         method: 'GET',
@@ -383,6 +392,17 @@ $error
     // -------------------------------------------------------------------------
     // SOCKET EXCEPTION
     // -------------------------------------------------------------------------
+
+    on TimeoutException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'GET',
+        url: getUrl,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'request_timeout'.tr,
+        reason: FailureReason.timeout,
+      );
+    }
 
     on SocketException catch (e, stackTrace) {
       return _networkFailure(
@@ -463,7 +483,7 @@ $error
         Uri.parse(postUrl),
         body: jsonEncode(data),
         headers: headers,
-      );
+      ).timeout(_timeout);
 
       _logResponse(
         method: 'POST',
@@ -494,6 +514,17 @@ $error
     // -------------------------------------------------------------------------
     // SOCKET EXCEPTION
     // -------------------------------------------------------------------------
+
+    on TimeoutException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'POST',
+        url: postUrl,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'request_timeout'.tr,
+        reason: FailureReason.timeout,
+      );
+    }
 
     on SocketException catch (e, stackTrace) {
       return _networkFailure(
@@ -574,7 +605,7 @@ $error
         Uri.parse(putUrl),
         body: jsonEncode(data),
         headers: headers,
-      );
+      ).timeout(_timeout);
 
       _logResponse(
         method: 'PUT',
@@ -605,6 +636,17 @@ $error
     // -------------------------------------------------------------------------
     // SOCKET EXCEPTION
     // -------------------------------------------------------------------------
+
+    on TimeoutException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'PUT',
+        url: putUrl,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'request_timeout'.tr,
+        reason: FailureReason.timeout,
+      );
+    }
 
     on SocketException catch (e, stackTrace) {
       return _networkFailure(
@@ -736,11 +778,11 @@ $error
       // SEND
       // -----------------------------------------------------------------------
 
-      final streamedResponse = await request.send();
+      final streamedResponse = await request.send().timeout(_uploadTimeout);
 
       final response = await http.Response.fromStream(
         streamedResponse,
-      );
+      ).timeout(_uploadTimeout);
 
       // -----------------------------------------------------------------------
       // LOG RESPONSE
@@ -775,6 +817,17 @@ $error
     // -------------------------------------------------------------------------
     // SOCKET EXCEPTION
     // -------------------------------------------------------------------------
+
+    on TimeoutException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'MULTIPART POST',
+        url: url,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'request_timeout'.tr,
+        reason: FailureReason.timeout,
+      );
+    }
 
     on SocketException catch (e, stackTrace) {
       return _networkFailure(
@@ -852,7 +905,7 @@ $error
       final response = await http.delete(
         Uri.parse(deleteUrl),
         headers: headers,
-      );
+      ).timeout(_timeout);
 
       _logResponse(
         method: 'DELETE',
@@ -885,6 +938,17 @@ $error
     // -------------------------------------------------------------------------
     // SOCKET EXCEPTION
     // -------------------------------------------------------------------------
+
+    on TimeoutException catch (e, stackTrace) {
+      return _networkFailure(
+        method: 'DELETE',
+        url: deleteUrl,
+        error: e,
+        stackTrace: stackTrace,
+        message: 'request_timeout'.tr,
+        reason: FailureReason.timeout,
+      );
+    }
 
     on SocketException catch (e, stackTrace) {
       return _networkFailure(

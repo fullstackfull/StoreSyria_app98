@@ -1,6 +1,6 @@
 import '../../core/model/store_info_model.dart';
-import '../../network_dio/network_dio.dart';
-import '../../network_dio/result.dart';
+import '../../network/network.dart';
+import '../../network/result.dart';
 import '../../utils/base_api.dart';
 import '../../utils/prefer.dart';
 

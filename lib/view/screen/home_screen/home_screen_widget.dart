@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors, avoid_print, must_be_immutable, prefer_const_constructors_in_immutables, avoid_function_literals_in_foreach_calls
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';

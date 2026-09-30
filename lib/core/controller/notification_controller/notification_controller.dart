@@ -3,7 +3,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/model/notification_model.dart';
-import 'package:store_go_app/network_dio/network_dio.dart';
+import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';

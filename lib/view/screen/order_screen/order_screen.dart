@@ -214,7 +214,6 @@ class _OrderScreenState extends State<OrderScreen>
                         selectedDateRange = null;
                       });
                     }
-
                     orderController.onOrderSearchChanged(value);
                   },
                   onClear: () {

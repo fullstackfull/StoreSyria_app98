@@ -128,6 +128,7 @@ class API {
   static String updateDeliveryBoyUrl = '/deliveryboysUpdate';
   static String updatePassDeliveryBoyUrl = '/deliveryboysReset-password';
   static String deleteDeliveryBoyUrl = '/deliveryboysDestroy';
+  static String assignOrderUrl = '/assignOrders';
   static String deliveryBoyIdUrl = '/';
 
 }

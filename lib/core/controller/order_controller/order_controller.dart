@@ -54,6 +54,7 @@ class OrderController extends GetxController implements StoreAware {
   RxList<OrderData> orderList = <OrderData>[].obs;
 
   RxBool isDataAvailable = false.obs;
+  RxBool isAssigningDelivery = false.obs;
   RxDouble extTax = 0.0.obs;
   RxInt selectedStatus = 0.obs;
   RxInt currantPage = 1.obs;
@@ -132,6 +133,7 @@ class OrderController extends GetxController implements StoreAware {
     listMode.value = OrderListMode.normal;
     isScroll.value = true;
   }
+
 
   double get productsTotal {
     double total = 0;
@@ -363,6 +365,52 @@ class OrderController extends GetxController implements StoreAware {
         return 'shipped'.tr;
       default:
         return 'unknown'.tr;
+    }
+  }
+
+  Future<bool> assignOrderToDelivery({
+    required String deliveryBoyId,
+    required String orderId,
+  }) async {
+    if (isAssigningDelivery.value) return false;
+    isAssigningDelivery.value = true;
+
+    try {
+      final response = await orderRepository.assignOrderToDelivery(
+        data: {
+          'delivery_boy': deliveryBoyId,
+          'order_id': orderId,
+        },
+      );
+
+      bool success = false;
+
+      response.fold(
+        onSuccess: (data) {
+          if (data['status'] == 'success' || data['status'] == 1) {
+            success = true;
+            commonToast(
+              type: AppSnackBarType.success,
+              data['message']?.toString() ?? 'order_assigned_successfully'.tr,
+            );
+          } else {
+            commonToast(
+              type: AppSnackBarType.error,
+              data['message']?.toString() ?? 'something_went_wrong'.tr,
+            );
+          }
+        },
+        onFailure: (reason, message, validationErrors) {
+          commonToast(type: AppSnackBarType.error, message);
+        },
+      );
+
+      return success;
+    } catch (e) {
+      commonToast(type: AppSnackBarType.error, 'something_went_wrong'.tr);
+      return false;
+    } finally {
+      isAssigningDelivery.value = false;
     }
   }
 

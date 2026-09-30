@@ -9,8 +9,10 @@ import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/order_screen/invoice_pdf_view.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
+import '../../../core/controller/delivery_boy/delivery_boy_controller.dart';
 import '../../../core/model/order_detail_model.dart';
 import '../../new_widgets/customer_contact.dart';
+import '../../new_widgets/delivery_boy_bottom_sheet.dart';
 import '../../new_widgets/order_status_badge.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/shimmer.dart';
@@ -32,12 +34,19 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   final OrderController orderController = Get.find<OrderController>();
+  final DeliveryBoyController deliveryBoyController =
+  Get.isRegistered<DeliveryBoyController>()
+      ? Get.find<DeliveryBoyController>()
+      : Get.put(DeliveryBoyController());
 
   @override
   void initState() {
     super.initState();
     orderController.extTax.value = 0.0;
     WidgetsBinding.instance.addPostFrameCallback((_) => getData());
+    if (deliveryBoyController.deliveryBoyList.isEmpty) {
+      deliveryBoyController.getDeliveryBoysData();
+    }
   }
 
   void getData() {
@@ -46,7 +55,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme
+        .of(context)
+        .brightness == Brightness.dark;
 
     final bgColor =
     isDark ? DarkThemeColor.cBackGround : const Color(0xFFF7F8FA);
@@ -97,7 +108,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColor.themeNavyBlueColor,
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 20.w, vertical: 12.h),
                 ),
               ),
             );
@@ -220,7 +232,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             "city".tr:
                             detail.deliveryInformations?.city ?? "",
                             "address".tr:
-                            "${detail.deliveryInformations?.state ?? ""} - ${detail.deliveryInformations?.country ?? ""}",
+                            "${detail.deliveryInformations?.state ??
+                                ""} - ${detail.deliveryInformations?.country ??
+                                ""}",
                           },
                           isDark: isDark,
                           secondaryText: secondaryText,
@@ -300,6 +314,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     required Color secondaryText,
     required Color accentColor,
   }) {
+    final deliveryId = detail.deliveryId?.toString().trim();
+    final isAssigned = deliveryId != null && deliveryId.isNotEmpty &&
+        deliveryId != '0';
+    const unassignedColor = Color(0xFFE65100);
+    final assignedId = isAssigned ? int.tryParse(deliveryId) : null;
+    final assignedName = deliveryBoyController.deliveryBoyList
+        .firstWhereOrNull((d) => d.id == assignedId)
+        ?.name;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(18.w),
@@ -357,7 +380,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     Text(
                       "order_id".tr,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
                         color: secondaryText,
                       ),
@@ -473,7 +496,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       Text(
                         "delivery_status".tr,
                         style: TextStyle(
-                          fontSize: 9.sp,
+                          fontSize: 12.sp,
                           color: secondaryText,
                         ),
                       ),
@@ -518,6 +541,120 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       },
                     );
                   },
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 16.h),
+
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(
+              horizontal: 12.w,
+              vertical: 10.h,
+            ),
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(.045),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: accentColor.withOpacity(.09),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 30.w,
+                  height: 30.w,
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(.09),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.person,
+                    size: 16.sp,
+                    color: accentColor,
+                  ),
+                ),
+
+                SizedBox(width: 9.w),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "delivery_boy".tr,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: secondaryText,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        isAssigned ? (assignedName ?? '#$deliveryId') : "not_assigned".tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w700,
+                          color: isAssigned ? primaryText : unassignedColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                GestureDetector(
+                    onTap: () async {
+                      if (orderController.isAssigningDelivery.value) return;
+
+                      final picked = await DeliveryBoyPickerBottomSheet.show(
+                        context,
+                        selectedId: assignedId,
+                      );
+                      if (picked?.id == null || picked!.id == assignedId) return;
+
+                      final ok = await orderController.assignOrderToDelivery(
+                        deliveryBoyId: picked.id.toString(),
+                        orderId: detail.id.toString(),
+                      );
+                      if (ok) getData();
+                    },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 10.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: (isAssigned ? accentColor : unassignedColor)
+                          .withOpacity(.10),
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: Border.all(
+                        color: (isAssigned ? accentColor : unassignedColor)
+                            .withOpacity(.25),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isAssigned ? Icons.swap_horiz_rounded : Icons
+                              .person_add_alt_1_rounded,
+                          size: 14.sp,
+                          color: isAssigned ? accentColor : unassignedColor,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          isAssigned ? "change".tr : "assign".tr,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                            color: isAssigned ? accentColor : unassignedColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -610,7 +747,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 9.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                   color: secondaryText,
                 ),
@@ -653,17 +790,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         borderRadius: BorderRadius.circular(16.r),
         onTap: () {
           Get.to(
-                () => InvoicePdfViewScreen(
-              productList: detail.product!,
-              orderDetailData: detail,
-              tax: orderController.extTax.value.toString(),
-              deliveryCharge:
-              parsePriceSafe(detail.deliveredCharge),
-              couponAmount:
-              parsePriceSafe(
-                detail.couponInfo?.discountAmount,
-              ),
-            ),
+                () =>
+                InvoicePdfViewScreen(
+                  productList: detail.product!,
+                  orderDetailData: detail,
+                  tax: orderController.extTax.value.toString(),
+                  deliveryCharge:
+                  parsePriceSafe(detail.deliveredCharge),
+                  couponAmount:
+                  parsePriceSafe(
+                    detail.couponInfo?.discountAmount,
+                  ),
+                ),
           );
         },
         child: Container(
@@ -715,7 +853,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     Text(
                       "invoice".tr,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 12.sp,
                         color: Colors.white.withOpacity(.75),
                       ),
                     ),
@@ -777,7 +915,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   child: Text(
                     "product".tr,
                     style: TextStyle(
-                      fontSize: 10.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: secondaryText,
                     ),
@@ -789,7 +927,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     "qty".tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 10.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: secondaryText,
                     ),
@@ -801,7 +939,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     "price".tr,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      fontSize: 10.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: secondaryText,
                     ),
@@ -832,21 +970,24 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 name: product.name ?? "-",
                 quantity: product.qty?.toString() ?? "0",
                 price:
-                '${product.finalPrice ?? "0"} ${orderController.currencySymbol.value}',
+                '${product.finalPrice ?? "0"} ${orderController.currencySymbol
+                    .value}',
                 total:
-                '${total.toStringAsFixed(2)} ${orderController.currencySymbol.value}',
+                '${total.toStringAsFixed(2)} ${orderController.currencySymbol
+                    .value}',
                 secondaryText: secondaryText,
                 primaryText: primaryText,
                 accentColor: accentColor,
               );
             },
-            separatorBuilder: (_, __) => Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Divider(
-                height: 1.h,
-                color: borderColor,
-              ),
-            ),
+            separatorBuilder: (_, __) =>
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Divider(
+                    height: 1.h,
+                    color: borderColor,
+                  ),
+                ),
           ),
         ],
       ),
@@ -881,7 +1022,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             child: Text(
               "$index",
               style: TextStyle(
-                fontSize: 10.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w700,
                 color: accentColor,
               ),
@@ -987,7 +1128,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 child: Icon(
                   Icons.account_balance_wallet_outlined,
                   color: Colors.white,
-                  size: 19.sp,
+                  size: 22.sp,
                 ),
               ),
               horizontalSpace(10.w),
@@ -1035,7 +1176,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ),
           _summaryRow(
             "shipping".tr,
-            '${detail.deliveredCharge ?? "0"} ${orderController.currencySymbol.value}',
+            '${detail.deliveredCharge ?? "0"} ${orderController.currencySymbol
+                .value}',
           ),
           _summaryRow(
             "tax".tr,
@@ -1043,7 +1185,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ),
           _summaryRow(
             "coupon".tr,
-            '- ${detail.couponInfo?.discountAmount ?? "0"} ${orderController.currencySymbol.value}',
+            '- ${detail.couponInfo?.discountAmount ?? "0"} ${orderController
+                .currencySymbol.value}',
           ),
 
           Padding(
@@ -1070,7 +1213,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      '${detail.finalPrice ?? "0"} ${orderController.currencySymbol.value}',
+                      '${detail.finalPrice ?? "0"} ${orderController
+                          .currencySymbol.value}',
                       style: TextStyle(
                         fontSize: 21.sp,
                         fontWeight: FontWeight.w800,
@@ -1092,7 +1236,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 child: Text(
                   "${"paid_by".tr} ${detail.paymnetType ?? "-"}",
                   style: TextStyle(
-                    fontSize: 10.sp,
+                    fontSize: 12.sp,
                     color: Colors.white70,
                   ),
                 ),
@@ -1104,10 +1248,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget _summaryRow(
-      String label,
-      String value,
-      ) {
+  Widget _summaryRow(String label,
+      String value,) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 5.h),
       child: Row(
@@ -1226,34 +1368,35 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           SizedBox(height: 13.h),
 
           ...data.entries.map(
-                (e) => Padding(
-              padding: EdgeInsets.only(bottom: 9.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    e.key,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 9.sp,
-                      color: secondaryText,
-                    ),
+                (e) =>
+                Padding(
+                  padding: EdgeInsets.only(bottom: 9.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        e.key,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: secondaryText,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        e.value.isEmpty ? "-" : e.value,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                          color: primaryText,
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    e.value.isEmpty ? "-" : e.value,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w500,
-                      color: primaryText,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
           ),
         ],
       ),
@@ -1264,16 +1407,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 // NOTES
 // ═══════════════════════════════════════════
 
-  Widget _buildNotesSection(
-      BuildContext context,
+  Widget _buildNotesSection(BuildContext context,
       OrderDetailData detail,
       bool isDark,
       Color secondaryText,
       Color primaryText,
       Color accentColor,
       Color borderColor,
-      Color cardBg,
-      ) {
+      Color cardBg,) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1310,7 +1451,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     Text(
                       'add_note'.tr,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
@@ -1377,27 +1518,28 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 primaryText: primaryText,
                 secondaryText: secondaryText,
                 accentColor: accentColor,
-                onDelete: () => AppDialog.showCustomDialog(
-                  context: context,
-                  title: 'delete'.tr,
-                  message: 'deleteCategory'.tr,
-                  lottieAsset:
-                  'assets/lottie/delete_icon.json',
-                  confirmColor: AppColor.cRedText,
-                  onConfirm: () async {
-                    Get.back();
+                onDelete: () =>
+                    AppDialog.showCustomDialog(
+                      context: context,
+                      title: 'delete'.tr,
+                      message: 'deleteCategory'.tr,
+                      lottieAsset:
+                      'assets/lottie/delete_icon.json',
+                      confirmColor: AppColor.cRedText,
+                      onConfirm: () async {
+                        Get.back();
 
-                    final success =
-                    await orderController.deleteOrderNote(
-                      orderId: detail.id!,
-                      noteId: note.id!,
-                    );
+                        final success =
+                        await orderController.deleteOrderNote(
+                          orderId: detail.id!,
+                          noteId: note.id!,
+                        );
 
-                    if (success) {
-                      getData();
-                    }
-                  },
-                ),
+                        if (success) {
+                          getData();
+                        }
+                      },
+                    ),
               );
             },
           ),
@@ -1409,12 +1551,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 // ADD NOTE
 // ═══════════════════════════════════════════
 
-  void _showAddNoteBottomSheet(
-      BuildContext context,
-      OrderDetailData detail,
-      ) {
+  void _showAddNoteBottomSheet(BuildContext context,
+      OrderDetailData detail,) {
     final isDark =
-        Theme.of(context).brightness == Brightness.dark;
+        Theme
+            .of(context)
+            .brightness == Brightness.dark;
 
     final noteController = TextEditingController();
     String selectedType = 'private_note';
@@ -1438,7 +1580,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           return Container(
             constraints: BoxConstraints(
               maxHeight:
-              MediaQuery.of(context).size.height * .7,
+              MediaQuery
+                  .of(context)
+                  .size
+                  .height * .7,
             ),
             decoration: BoxDecoration(
               color: isDark
@@ -1533,7 +1678,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               child: GestureDetector(
                                 onTap: () {
                                   setState(
-                                        () => selectedType =
+                                        () =>
+                                    selectedType =
                                     type['value'] as String,
                                   );
                                 },
@@ -1665,42 +1811,43 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         verticalSpace(24.h),
 
                         Obx(
-                              () => AppButton(
-                            text: 'add_note'.tr,
-                            isLoading: orderController
-                                .isCreatingOrderNote.value,
-                            onPressed: orderController
-                                .isCreatingOrderNote.value
-                                ? null
-                                : () async {
-                              if (noteController.text
-                                  .trim()
-                                  .isEmpty) {
-                                commonToast(
-                                  type:
-                                  AppSnackBarType.info,
-                                  'note_cannot_be_empty'
-                                      .tr,
-                                );
-                                return;
-                              }
+                              () =>
+                              AppButton(
+                                text: 'add_note'.tr,
+                                isLoading: orderController
+                                    .isCreatingOrderNote.value,
+                                onPressed: orderController
+                                    .isCreatingOrderNote.value
+                                    ? null
+                                    : () async {
+                                  if (noteController.text
+                                      .trim()
+                                      .isEmpty) {
+                                    commonToast(
+                                      type:
+                                      AppSnackBarType.info,
+                                      'note_cannot_be_empty'
+                                          .tr,
+                                    );
+                                    return;
+                                  }
 
-                              Get.back();
+                                  Get.back();
 
-                              final success =
-                              await orderController
-                                  .createOrderNote(
-                                orderId: detail.id!,
-                                noteType: selectedType,
-                                note: noteController.text
-                                    .trim(),
-                              );
+                                  final success =
+                                  await orderController
+                                      .createOrderNote(
+                                    orderId: detail.id!,
+                                    noteType: selectedType,
+                                    note: noteController.text
+                                        .trim(),
+                                  );
 
-                              if (success) {
-                                getData();
-                              }
-                            },
-                          ),
+                                  if (success) {
+                                    getData();
+                                  }
+                                },
+                              ),
                         ),
                       ],
                     ),
@@ -1708,7 +1855,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
                 SizedBox(
                   height:
-                  MediaQuery.of(context).padding.bottom,
+                  MediaQuery
+                      .of(context)
+                      .padding
+                      .bottom,
                 ),
               ],
             ),
@@ -1785,7 +1935,7 @@ class _NoteCard extends StatelessWidget {
                       : isPrivate
                       ? Icons.lock_outline_rounded
                       : Icons.public_rounded,
-                  size: 19.sp,
+                  size: 112.sp,
                   color: noteColor,
                 ),
               ),
@@ -1821,7 +1971,7 @@ class _NoteCard extends StatelessWidget {
                         ),
                       ),
                       style: TextStyle(
-                        fontSize: 9.sp,
+                        fontSize: 12.sp,
                         color: secondaryText,
                       ),
                     ),

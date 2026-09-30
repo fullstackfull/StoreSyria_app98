@@ -508,7 +508,9 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                       controller: productController.searchController,
                       hint: 'search'.tr,
                       onChanged: productController.onProductSearchChanged,
-                      onClear: productController.clearSearch,
+                      onClear: () {
+                        productController.clearSearch();
+                      },
                     ),
                   ),
 

@@ -45,6 +45,7 @@ class OrderDetailData {
   String? paymnet;
   String? paymentStatus;
   String? delivery;
+  String? deliveryId;
   String? deliveredCharge;
   String? currencySymbol;
   CouponInfo? couponInfo;
@@ -61,6 +62,7 @@ class OrderDetailData {
       this.taxPrice,
       this.orderId,
       this.deliveryDate,
+      this.deliveryId,
       this.orderRewardPoint,
       this.returnPrice,
       this.returnStatusMessage,
@@ -90,6 +92,7 @@ class OrderDetailData {
     isGuest = json['is_guest'];
     orderId = json['order_id'];
     deliveryDate = json['delivery_date'];
+    deliveryId = json['delivery_Id'];
     orderRewardPoint = json['order_reward_point'] != null ? double.tryParse(json['order_reward_point'].toString()) : null;
     returnPrice = json['return_price'];
     returnStatusMessage = json['return_status_message'];
@@ -130,6 +133,7 @@ class OrderDetailData {
     paymnet = json['paymnet'];
     paymentStatus = json['payment_status'];
     delivery = json['delivery'];
+    deliveryId = json['delivery_id']?.toString();
     deliveredCharge = json['delivered_charge'];
     couponInfo = json['coupon_info'] != null ? CouponInfo.fromJson(json['coupon_info']) : null;
     if (json['tax'] != null && json['tax'] is List) {
@@ -153,6 +157,7 @@ class OrderDetailData {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;
     data['is_guest'] = this.isGuest;
+    data['delivery_id'] = this.deliveryId;
     data['order_id'] = this.orderId;
     data['currency_symbol'] = this.currencySymbol;
     data['delivery_date'] = this.deliveryDate;
