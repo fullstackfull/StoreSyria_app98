@@ -292,11 +292,11 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
 
   final style = _styles[widget.type]!;
 
-  final backgroundColor = isDark ? const Color(0xFF1E222B) : Colors.white;
+  final backgroundColor = isDark ? const Color(0xFF18263F) : Colors.white;
 
-  final titleColor = isDark ? Colors.white : const Color(0xFF171717);
+  final titleColor = isDark ? Colors.white : const Color(0xFF0F1A2E);
 
-  final messageColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+  final messageColor = isDark ? const Color(0xFFA9B8D0) : const Color(0xFF6B7280);
 
   return Positioned(
    top: MediaQuery.of(context).padding.top + 12,
@@ -408,7 +408,7 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
              Icons.close_rounded,
              size: 18,
              color: isDark
-                 ? const Color(0xFF9CA3AF)
+                 ? const Color(0xFFA9B8D0)
                  : const Color(0xFF9CA3AF),
             ),
            ),

@@ -125,7 +125,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
   Future<void> _showCategoryFilterBottomSheet() async {
     if (addProductController.categoryTypeList.isEmpty) return;
 
-    final isDark = Get.isDarkMode;
+        final isDark = Theme.of(context).brightness == Brightness.dark;;
 
     final cardBg =
     isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;

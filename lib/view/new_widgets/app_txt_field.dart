@@ -4,6 +4,8 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:store_go_app/utils/text_style.dart';
 
+import '../../utils/colors.dart';
+
 class AppTextField extends StatelessWidget {
   // ── الأساسيات ──
   final String? title;
@@ -76,7 +78,7 @@ class AppTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final backgroundColor = isDark ? const Color(0xFF182331) : Colors.white;
+    final backgroundColor = isDark ? const Color(0xFF18263F) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF172C4E);
     final secondaryTextColor = isDark ? Colors.white70 : const Color(0xFF687386);
     final borderColor = isDark ? Colors.white12 : const Color(0xFFE2E6EC);
@@ -176,7 +178,7 @@ class AppTextField extends StatelessWidget {
                     borderRadius: BorderRadius.circular(11.r),
                     color: navyBlue.withOpacity(0.07),
                   ),
-                  child: Icon(icon, color: navyBlue, size: 22.w),
+                  child: Icon(icon, color: isDark ? Colors.white : AppColor.themeNavyBlueColor, size: 22.w),
                 ),
               )
                   : null,

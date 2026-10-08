@@ -121,7 +121,7 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
                       child: SizedBox(
                         width: 250.w,
                         child: assetImageWidget(
-                          image: DefaultImages.storeGoLogo,
+                          image: isDark ? DefaultImages.storeGoLogoDark : DefaultImages.storeGoLogo,
                         ),
                       ),
                     ),

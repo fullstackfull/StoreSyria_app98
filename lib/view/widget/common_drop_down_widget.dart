@@ -19,8 +19,8 @@ Widget commonDropdownButtonWidget<T>({
 }) {
   return Builder(builder: (context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fieldBg = isDark ? const Color(0xFF1E2530) : AppColor.cWhite;
-    final borderColor = isDark ? const Color(0xFF2E3542) : AppColor.cBorder;
+    final fieldBg = isDark ? const Color(0xFF18263F) : AppColor.cWhite;
+    final borderColor = isDark ? const Color(0xFF2E4266) : AppColor.cBorder;
     final textColor = isDark ? Colors.white : AppColor.themeNavyBlueColor;
     final labelColor = isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont;
     final hintColor = isDark ? Colors.grey.shade500 : AppColor.cHintFont;

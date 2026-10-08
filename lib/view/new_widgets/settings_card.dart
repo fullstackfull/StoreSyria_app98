@@ -19,7 +19,7 @@ Widget settingCard({
       borderRadius: BorderRadius.circular(18),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColor.cBackGround,
+          color: isDark ? DarkThemeColor.cCardBackground : AppColor.cBackGround,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(

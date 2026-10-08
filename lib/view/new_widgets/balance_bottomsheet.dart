@@ -19,16 +19,16 @@ void showBalanceSheet({
   final formKey = GlobalKey<FormState>();
 
   final Color cardColor =
-  isDark ? const Color(0xFF1B1C20) : Colors.white;
+  isDark ? const Color(0xFF18263F) : Colors.white;
 
   final Color surfaceColor =
-  isDark ? const Color(0xFF23252A) : const Color(0xFFF7F8FA);
+  isDark ? const Color(0xFF213252) : const Color(0xFFF7F8FA);
 
   final Color primaryText =
-  isDark ? Colors.white : const Color(0xFF15171A);
+  isDark ? Colors.white : const Color(0xFF0F1A2E);
 
   final Color secondaryText =
-  isDark ? const Color(0xFF9297A1) : const Color(0xFF777D87);
+  isDark ? const Color(0xFFA9B8D0) : const Color(0xFF777D87);
 
   final Color accent = AppColor.themeNavyBlueColor;
 

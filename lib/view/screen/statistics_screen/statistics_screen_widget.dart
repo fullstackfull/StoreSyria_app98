@@ -30,10 +30,10 @@ class StatisticsTheme {
   static const lightGrid = Color(0xFFEDEFF3);
 
   // DARK (same values as DarkThemeColor)
-  static const darkBackground = Color(0xFF0A0A13);
-  static const darkCard = Color(0xFF1E222B);
+  static const darkBackground = Color(0xFF0F1A2E);
+  static const darkCard = Color(0xFF18263F);
   static const darkCardStrong = Color(0xFF232833);
-  static const darkBorder = Color(0xFF2D3342);
+  static const darkBorder = Color(0xFF2E4266);
   static const darkSecondary = Color(0xFFA0A0A0);
   static const darkMuted = Color(0xFF7B8190);
   static const darkGrid = Color(0xFF2A2F3B);
@@ -41,7 +41,7 @@ class StatisticsTheme {
   // Brand primary, stepped lighter for dark mode so lines/bars keep
   // >= 3:1 contrast on the dark card.
   static const primaryLight = Color(0xFF2C57A2); // AppColor.blueColor
-  static const primaryDark = Color(0xFF5B8BD9);
+  static const primaryDark = Color(0xFF10AFC0);
 
   // Categorical order for browsers / devices. Validated for colour-blind
   // separation and contrast against the card in each mode. Keep the order:
@@ -54,7 +54,7 @@ class StatisticsTheme {
     Color(0xFFE87BA4), // magenta
   ];
   static const categoricalDark = <Color>[
-    Color(0xFF5B8BD9),
+    Color(0xFF10AFC0),
     Color(0xFFD95926),
     Color(0xFF199E70),
     Color(0xFFC98500),

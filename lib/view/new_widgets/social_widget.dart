@@ -22,7 +22,7 @@ class SocialMediaSection extends StatelessWidget {
             .brightness == Brightness.dark;
 
     final Color cardColor =
-    isDark ? const Color(0xFF182331) : Colors.white;
+    isDark ? const Color(0xFF18263F) : Colors.white;
 
     final Color titleColor =
     isDark ? Colors.white : const Color(0xFF172C4E);

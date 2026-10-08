@@ -21,9 +21,10 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/screen/notification_screen/notification_screen.dart';
 
-Widget buildAppTitleRow(String date) {
+
+Widget buildAppTitleRow(String date,BuildContext context) {
   final NotificationController notificationController = Get.find<NotificationController>();
-  final isDark = Get.isDarkMode;
+      final isDark = Theme.of(context).brightness == Brightness.dark;;
 
   return Row(
     crossAxisAlignment: CrossAxisAlignment.center,
@@ -108,7 +109,8 @@ Widget buildAppTitleRow(String date) {
   );
 }
 
-Widget buildProfileTitle({String? profileImage, String? name, String? task, Function(dynamic)? onValue}) {
+Widget buildProfileTitle(BuildContext context,{String? profileImage, String? name, String? task, Function(dynamic)? onValue}) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;;
   return GestureDetector(
     onTap: () {
       Get.to(() => ProfileScreen(
@@ -126,7 +128,7 @@ Widget buildProfileTitle({String? profileImage, String? name, String? task, Func
           end: AlignmentDirectional.bottomEnd,
           colors: [
             AppColor.themeNavyBlueColor,
-            AppColor.blueColor,
+            isDark ? AppColor.cBackGround : AppColor.blueColor,
           ],
         ),
         borderRadius: BorderRadius.circular(24.r),
@@ -263,8 +265,8 @@ Widget buildProfileTitle({String? profileImage, String? name, String? task, Func
   );
 }
 
-Widget qrCodeWidget({String? qrString, String? title}) {
-  final isDark = Get.isDarkMode;
+Widget qrCodeWidget(BuildContext context,{String? qrString, String? title}) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;;
   return Container(
     width: double.infinity,
     decoration: BoxDecoration(
@@ -345,7 +347,7 @@ Widget qrCodeWidget({String? qrString, String? title}) {
                     gradient: LinearGradient(
                       colors: [
                         AppColor.themeNavyBlueColor,
-                        AppColor.blueColor,
+                        isDark ? AppColor.cBackGround : AppColor.blueColor,
                       ],
                     ),
                     borderRadius: BorderRadius.circular(30),
@@ -375,14 +377,14 @@ Widget qrCodeWidget({String? qrString, String? title}) {
   );
 }
 
-Widget totalProductWidget({
+Widget totalProductWidget(BuildContext context,{
   String? image,
   String? title,
   String? subTitle,
   String? total,
   Color? accentColor,
 }) {
-  final isDark = Get.isDarkMode;
+      final isDark = Theme.of(context).brightness == Brightness.dark;;
   final Color accent = accentColor ?? AppColor.themeGreenColor;
   return Container(
     width: double.infinity,

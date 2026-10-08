@@ -21,6 +21,7 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
   AuthController authController = Get.find<AuthController>();
   GlobalKey<FormState> formKey = GlobalKey();
 
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +31,7 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -75,7 +77,7 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
 
                             /// Logo
                             assetImageWidget(
-                              image: DefaultImages.storeGoLogo,
+                              image: isDark ? DefaultImages.storeGoLogoDark : DefaultImages.storeGoLogo,
                               width: 180.w,
                               height: 100.h,
                             ),

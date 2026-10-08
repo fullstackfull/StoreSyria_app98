@@ -34,11 +34,11 @@ Widget allProductsListItemWidget({
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  final cardColor = isDark ? const Color(0xFF1B1C20) : Colors.white;
+  final cardColor = isDark ? const Color(0xFF18263F) : Colors.white;
   final textColor = isDark ? Colors.white : const Color(0xFF111827);
   final subTextColor =
-  isDark ? const Color(0xFF9297A1) : const Color(0xFF8A8F98);
-  final imageBg = isDark ? const Color(0xFF25272C) : const Color(0xFFF6F7F9);
+  isDark ? const Color(0xFFA9B8D0) : const Color(0xFF8A8F98);
+  final imageBg = isDark ? const Color(0xFF213252) : const Color(0xFFF6F7F9);
   final dividerColor =
   isDark ? Colors.white.withOpacity(.07) : const Color(0xFFEEF0F3);
 
@@ -484,7 +484,7 @@ class AddProductTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final backgroundColor = isDark ? const Color(0xFF182331) : Colors.white;
+    final backgroundColor = isDark ? const Color(0xFF18263F) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF172C4E);
     final secondaryTextColor = isDark ? Colors.white70 : const Color(0xFF687386);
     final borderColor = isDark ? Colors.white12 : const Color(0xFFE2E6EC);

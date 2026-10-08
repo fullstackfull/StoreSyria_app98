@@ -56,7 +56,7 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
       final Color bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
       final Color navBgColor = isDark ? DarkThemeColor.cBottomNavyBlueColor : LightThemeColor.cBottomNavyBlueColor;
       final Color navInactiveColor = isDark ? Colors.white54 : AppColor.cDarkGreyFont;
-      final Color navActiveColor = isDark ? AppColor.themeGreenColor : AppColor.cWhite;
+      final Color navActiveColor = isDark ? DarkThemeColor.cPrimary : AppColor.cWhite;
 
       return PopScope(
         canPop: false,

@@ -137,10 +137,10 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
       Theme.of(context).brightness == Brightness.dark;
 
   Color get backgroundColor =>
-      isDark ? const Color(0xFF101820) : const Color(0xFFF7F8FA);
+      isDark ? const Color(0xFF0F1A2E) : const Color(0xFFF7F8FA);
 
   Color get cardColor =>
-      isDark ? const Color(0xFF182331) : Colors.white;
+      isDark ? const Color(0xFF18263F) : Colors.white;
 
   Color get textColor =>
       isDark ? Colors.white : const Color(0xFF172C4E);

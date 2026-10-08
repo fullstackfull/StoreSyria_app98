@@ -146,8 +146,8 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF10141B) : const Color(0xFFF4F6F9);
-    final cardColor = isDark ? const Color(0xFF1B222C) : Colors.white;
+    final bgColor = isDark ? const Color(0xFF0F1A2E) : const Color(0xFFF4F6F9);
+    final cardColor = isDark ? const Color(0xFF18263F) : Colors.white;
     final textColor = isDark ? Colors.white : AppColor.cText;
     final hintColor = isDark ? Colors.grey.shade400 : AppColor.cFont;
     final borderColor =

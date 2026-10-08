@@ -130,12 +130,12 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
 
   Color get backgroundColor =>
       isDark
-          ? const Color(0xFF101820)
+          ? const Color(0xFF0F1A2E)
           : const Color(0xFFF7F8FA);
 
   Color get cardColor =>
       isDark
-          ? const Color(0xFF182331)
+          ? const Color(0xFF18263F)
           : Colors.white;
 
   Color get textColor =>

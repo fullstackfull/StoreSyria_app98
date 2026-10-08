@@ -98,6 +98,17 @@ class _SnackBarContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Get.isDarkMode;
+    final Color bg = isDark ? const Color(0xFF213252) : Colors.white;
+    final Color borderColor =
+        isDark ? const Color(0xFF2E4266) : const Color(0xFFE8E8E8);
+    final Color titleColor =
+        isDark ? const Color(0xFFF1F5FB) : const Color(0xFF202124);
+    final Color messageColor =
+        isDark ? const Color(0xFFA9B8D0) : const Color(0xFF6B6F76);
+    final Color closeColor =
+        isDark ? const Color(0xFFA9B8D0) : const Color(0xFF9A9DA3);
+
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -105,15 +116,15 @@ class _SnackBarContent extends StatelessWidget {
           minHeight: 72,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: bg,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: const Color(0xFFE8E8E8),
+            color: borderColor,
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withOpacity(isDark ? 0.35 : 0.08),
               blurRadius: 18,
               offset: const Offset(0, 7),
             ),
@@ -135,7 +146,7 @@ class _SnackBarContent extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.10),
+                    color: color.withOpacity(isDark ? 0.20 : 0.10),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -160,8 +171,8 @@ class _SnackBarContent extends StatelessWidget {
                           title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Color(0xFF202124),
+                          style: TextStyle(
+                            color: titleColor,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             height: 1.2,
@@ -172,8 +183,8 @@ class _SnackBarContent extends StatelessWidget {
                           message,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Color(0xFF6B6F76),
+                          style: TextStyle(
+                            color: messageColor,
                             fontSize: 12.5,
                             fontWeight: FontWeight.w400,
                             height: 1.35,
@@ -192,10 +203,10 @@ class _SnackBarContent extends StatelessWidget {
                     minWidth: 44,
                     minHeight: 44,
                   ),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.close_rounded,
                     size: 18,
-                    color: Color(0xFF9A9DA3),
+                    color: closeColor,
                   ),
                 ),
 

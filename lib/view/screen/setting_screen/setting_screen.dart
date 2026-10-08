@@ -117,7 +117,7 @@ class SettingScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColor.cBackGround,
+                    color: isDark ? DarkThemeColor.cCardBackground : AppColor.cBackGround,
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(

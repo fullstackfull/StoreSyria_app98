@@ -170,7 +170,7 @@ class AppPopupMenu extends StatelessWidget {
     if (!hasAnyAction) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? const Color(0xFF182331) : Colors.white;
+    final cardColor = isDark ? const Color(0xFF18263F) : Colors.white;
     final subTextColor = isDark ? Colors.white70 : const Color(0xFF687386);
 
     return PopupMenuButton<String>(

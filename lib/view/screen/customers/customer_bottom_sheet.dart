@@ -64,8 +64,8 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
   bool _isActive = true;
   bool _isLoading = false;
   static const Color navyBlue = Color(0xFF172C4E);
-  static const Color darkBg = Color(0xFF101820);
-  static const Color darkCard = Color(0xFF182331);
+  static const Color darkBg = Color(0xFF0F1A2E);
+  static const Color darkCard = Color(0xFF18263F);
   static const Color lightBg = Color(0xFFF7F8FA);
   static const Color secondaryText = Color(0xFF687386);
   static const Color lightBorder = Color(0xFFE2E6EC);
@@ -680,9 +680,9 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
               color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.location_city_outlined,
-              color: navyBlue,
+              color: isDark ? Colors.white : navyBlue,
               size: 20,
             ),
           ),

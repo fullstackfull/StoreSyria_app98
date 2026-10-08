@@ -20,7 +20,7 @@ Widget customerWidget({
   isDark ? DarkThemeColor.cCardBackground : Colors.white;
 
   final textColor =
-  isDark ? DarkThemeColor.cText : const Color(0xFF171717);
+  isDark ? DarkThemeColor.cText : const Color(0xFF0F1A2E);
 
   final subTextColor =
   isDark ? DarkThemeColor.cSecondaryText : const Color(0xFF777777);

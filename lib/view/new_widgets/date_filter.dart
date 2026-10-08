@@ -304,7 +304,7 @@ Widget sectionHeaderWithFilterWidget({
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final titleColor = isDark ? Colors.white : const Color(0xFF111827);
-  final subColor = isDark ? const Color(0xFF9297A1) : const Color(0xFF8A8F98);
+  final subColor = isDark ? const Color(0xFFA9B8D0) : const Color(0xFF8A8F98);
   final accent = AppColor.themeNavyBlueColor;
 
   return Row(

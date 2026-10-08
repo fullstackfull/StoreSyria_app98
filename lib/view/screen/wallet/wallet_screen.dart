@@ -192,7 +192,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
   Widget _filterButton({required bool isDark}) {
     final Color surfaceColor =
-    isDark ? const Color(0xFF23252A) : AppColor.cLight;
+    isDark ? const Color(0xFF213252) : AppColor.cLight;
     final Color borderColor =
     isDark ? DarkThemeColor.cBorder : AppColor.cBorder;
     final Color textColor =
@@ -258,7 +258,7 @@ class _WalletScreenState extends State<WalletScreen> {
     final Color cardColor =
     isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
     final Color surfaceColor =
-    isDark ? const Color(0xFF23252A) : AppColor.cLight;
+    isDark ? const Color(0xFF213252) : AppColor.cLight;
     final Color textColor =
     isDark ? DarkThemeColor.cText : LightThemeColor.cText;
     final Color secondaryText =

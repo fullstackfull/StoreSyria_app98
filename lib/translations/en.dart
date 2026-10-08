@@ -621,8 +621,9 @@ const Map<String, String> en = {
   "delivery_boy" : "Delivery Boy",
   "order_id"  : "Order Id",
   "delivery_status"  : "Delivery Status",
-  'select_delivery_boy': 'اختر مندوب التوصيل',
-  'search_delivery_boy_hint': 'ابحث بالاسم أو رقم الهاتف',
-  'no_delivery_boys_found': 'لا يوجد مندوبين',
-  'order_assigned_successfully': 'تم تعيين المندوب بنجاح',
+  'assigned': 'Assigned',
+  'select_delivery_boy': 'Select Delivery Boy',
+  'search_delivery_boy_hint': 'Search by name or phone number',
+  'no_delivery_boys_found': 'No delivery boys found',
+  'order_assigned_successfully': 'Delivery boy assigned successfully',
 };

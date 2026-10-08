@@ -39,6 +39,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       ? Get.find<DeliveryBoyController>()
       : Get.put(DeliveryBoyController());
 
+
+  final RxnString pickedDeliveryId = RxnString();
+  final RxnString pickedDeliveryName = RxnString();
+
   @override
   void initState() {
     super.initState();
@@ -314,14 +318,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     required Color secondaryText,
     required Color accentColor,
   }) {
-    final deliveryId = detail.deliveryId?.toString().trim();
-    final isAssigned = deliveryId != null && deliveryId.isNotEmpty &&
-        deliveryId != '0';
+    final serverId = detail.deliveryId?.toString().trim();
+    final hasServerId =
+        serverId != null && serverId.isNotEmpty && serverId != '0';
+    final deliveryId = pickedDeliveryId.value ?? (hasServerId ? serverId : null);
+    final isAssigned = deliveryId != null;
     const unassignedColor = Color(0xFFE65100);
     final assignedId = isAssigned ? int.tryParse(deliveryId) : null;
-    final assignedName = deliveryBoyController.deliveryBoyList
-        .firstWhereOrNull((d) => d.id == assignedId)
+    // Compare as strings: the id can come back as int or "6".
+    final listName = deliveryBoyController.deliveryBoyList
+        .firstWhereOrNull((d) => d.id?.toString() == deliveryId)
         ?.name;
+    final assignedName = (listName != null && listName.trim().isNotEmpty)
+        ? listName
+        : pickedDeliveryName.value;
 
     return Container(
       width: double.infinity,
@@ -607,21 +617,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
 
                 GestureDetector(
-                    onTap: () async {
-                      if (orderController.isAssigningDelivery.value) return;
+                  onTap: () async {
+                    if (orderController.isAssigningDelivery.value) return;
 
-                      final picked = await DeliveryBoyPickerBottomSheet.show(
-                        context,
-                        selectedId: assignedId,
-                      );
-                      if (picked?.id == null || picked!.id == assignedId) return;
+                    final picked = await DeliveryBoyPickerBottomSheet.show(
+                      context,
+                      selectedId: assignedId,
+                    );
+                    if (picked?.id == null || picked!.id == assignedId) return;
 
-                      final ok = await orderController.assignOrderToDelivery(
-                        deliveryBoyId: picked.id.toString(),
-                        orderId: detail.id.toString(),
-                      );
-                      if (ok) getData();
-                    },
+                    final ok = await orderController.assignOrderToDelivery(
+                      deliveryBoyId: picked.id.toString(),
+                      orderId: detail.id.toString(),
+                    );
+                    if (ok) {
+                      pickedDeliveryId.value = picked.id.toString();
+                      pickedDeliveryName.value = picked.name;
+                      getData();
+                    }
+                  },
                   child: Container(
                     padding: EdgeInsets.symmetric(
                         horizontal: 10.w, vertical: 6.h),
@@ -638,14 +652,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isAssigned ? Icons.swap_horiz_rounded : Icons
+                          isAssigned ? Icons.check_circle_rounded : Icons
                               .person_add_alt_1_rounded,
                           size: 14.sp,
                           color: isAssigned ? accentColor : unassignedColor,
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          isAssigned ? "change".tr : "assign".tr,
+                          isAssigned ? "assigned".tr : "assign".tr,
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -1935,7 +1949,7 @@ class _NoteCard extends StatelessWidget {
                       : isPrivate
                       ? Icons.lock_outline_rounded
                       : Icons.public_rounded,
-                  size: 112.sp,
+                  size: 22.sp,
                   color: noteColor,
                 ),
               ),

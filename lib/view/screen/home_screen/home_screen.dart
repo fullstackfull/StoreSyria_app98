@@ -102,10 +102,12 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           buildAppTitleRow(
                             dateFormatted(date: DateTime.now().toString(),
                                 formatType: formatForDateTime(FormatType.date)),
+                            context,
                           ),
                           verticalSpace(20),
 
                           buildProfileTitle(
+                            context,
                             profileImage: '${homeController.imageBaseUrl
                                 .value}${homeController.dashboardData?.user
                                 ?.image ?? ''}',
@@ -310,6 +312,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
                           verticalSpace(15),
                           qrCodeWidget(
+                            context,
                               qrString: homeController.dashboardData?.qrcode?.url ??
                                   "",
                               title: homeController.dashboardData?.qrcode?.name ??
@@ -338,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: totalProductWidget(image: DefaultImages.gridIcn,
+                                child: totalProductWidget(context,image: DefaultImages.gridIcn,
                                     title: "Total".tr,
                                     subTitle: "Products".tr,
                                     accentColor: AppColor.themeGreenColor,
@@ -347,7 +350,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                               ),
                               horizontalSpace(10),
                               Expanded(
-                                child: totalProductWidget(image: DefaultImages.listIcn,
+                                child: totalProductWidget(context,image: DefaultImages.listIcn,
                                     title: "Total".tr,
                                     subTitle: "Sales".tr,
                                     accentColor: AppColor.blueColor,
@@ -356,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                               ),
                               horizontalSpace(10),
                               Expanded(
-                                child: totalProductWidget(image: DefaultImages.cartIcn,
+                                child: totalProductWidget(context,image: DefaultImages.cartIcn,
                                     title: "Total".tr,
                                     subTitle: "Orders".tr,
                                     accentColor: AppColor.cRed,

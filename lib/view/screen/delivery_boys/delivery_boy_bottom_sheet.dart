@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
 import '../../../core/controller/delivery_boy/delivery_boy_controller.dart';
@@ -46,8 +44,8 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
   bool _isCommissionEnabled = true;
   bool _isLoading = false;
   static const Color navyBlue = Color(0xFF172C4E);
-  static const Color darkBg = Color(0xFF101820);
-  static const Color darkCard = Color(0xFF182331);
+  static const Color darkBg = Color(0xFF0F1A2E);
+  static const Color darkCard = Color(0xFF18263F);
   static const Color lightBg = Color(0xFFF7F8FA);
   static const Color secondaryText = Color(0xFF687386);
   static const Color lightBorder = Color(0xFFE2E6EC);

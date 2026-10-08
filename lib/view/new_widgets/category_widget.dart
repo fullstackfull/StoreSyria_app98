@@ -19,12 +19,12 @@ Widget buildCategoryWidget({
   final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
   // ------------------------------ COLORS ------------------------------
-  final Color cardColor = isDark ? const Color(0xFF1B1C20) : Colors.white;
+  final Color cardColor = isDark ? const Color(0xFF18263F) : Colors.white;
   final Color surfaceColor =
-  isDark ? const Color(0xFF25272C) : const Color(0xFFF5F6F8);
-  final Color primaryText = isDark ? Colors.white : const Color(0xFF15171A);
+  isDark ? const Color(0xFF213252) : const Color(0xFFF5F6F8);
+  final Color primaryText = isDark ? Colors.white : const Color(0xFF0F1A2E);
   final Color secondaryText =
-  isDark ? const Color(0xFF9297A1) : const Color(0xFF777D87);
+  isDark ? const Color(0xFFA9B8D0) : const Color(0xFF777D87);
   final Color borderColor =
   isDark ? Colors.white.withOpacity(.07) : const Color(0xFFE8EAEE);
   final Color accent = AppColor.themeNavyBlueColor;
@@ -348,7 +348,7 @@ Widget _categoryMenu({
 
 Widget _imagePlaceholder({required bool isDark}) {
   return Container(
-    color: isDark ? const Color(0xFF202125) : const Color(0xFFF0F2F5),
+    color: isDark ? const Color(0xFF18263F) : const Color(0xFFF0F2F5),
     child: Center(
       child: Container(
         width: 52.w,
@@ -362,7 +362,7 @@ Widget _imagePlaceholder({required bool isDark}) {
         child: Icon(
           Icons.category_outlined,
           size: 28.sp,
-          color: isDark ? const Color(0xFF686C75) : const Color(0xFFB2B7BF),
+          color: isDark ? const Color(0xFFA9B8D0) : const Color(0xFFB2B7BF),
         ),
       ),
     ),
@@ -371,7 +371,7 @@ Widget _imagePlaceholder({required bool isDark}) {
 
 Widget _imageLoading({required bool isDark, required Color accent}) {
   return Container(
-    color: isDark ? const Color(0xFF202125) : const Color(0xFFF0F2F5),
+    color: isDark ? const Color(0xFF18263F) : const Color(0xFFF0F2F5),
     child: Center(
       child: SizedBox(
         width: 22.w,

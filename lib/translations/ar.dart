@@ -625,4 +625,6 @@ const Map<String, String> ar = {
   'search_delivery_boy_hint': 'ابحث بالاسم أو رقم الهاتف',
   'no_delivery_boys_found': 'لا يوجد مندوبين',
   'order_assigned_successfully': 'تم تعيين المندوب بنجاح',
+  'assigned': 'تم التعيين',
+  "add_delivery_man": "إضافة مندوب",
 };

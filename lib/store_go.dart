@@ -9,6 +9,7 @@ import 'bindings/app_binding.dart';
 import 'config/theme_light/dark_theme.dart';
 import 'config/theme_light/light_theme.dart';
 import 'package:store_go_app/core/controller/setting_controller/theme_controller.dart';
+import 'package:store_go_app/view/widget/theme_switch_overlay.dart';
 
 class StoreGoApp extends StatelessWidget {
   StoreGoApp({super.key});
@@ -50,10 +51,13 @@ class StoreGoApp extends StatelessWidget {
             // 3. تحديد الوضع النشط (فاتح أم داكن)
             themeMode: themeController.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
 
-            ),
+            // أنيميشن تبديل الثيم (دائرة كشف للثيم الجديد)
+            builder: (context, child) =>
+                ThemeSwitchOverlay(child: child ?? const SizedBox.shrink()),
+
+          ),
         );
       },
     );
   }
 }
-

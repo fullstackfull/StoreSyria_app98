@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,6 +28,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
 
   @override
   void initState() {
+
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -427,7 +427,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
             Brightness.dark;
 
     final Color cardColor = isDark
-        ? const Color(0xFF182331)
+        ? const Color(0xFF18263F)
         : Colors.white;
 
     final Color titleColor = isDark

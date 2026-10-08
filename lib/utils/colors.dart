@@ -31,15 +31,26 @@ class AppColor {
 }
 
 class DarkThemeColor {
-  static Color cBackGround = Color(0xFF0A0A13);
-  static Color cCardBackground = Color(0xFF1E222B);
-  static Color cBorder = Color(0xFF2D3342);
+  // خلفيات كحلية مريحة بدل الأسود الغامق
+  static Color cBackGround = Color(0xFF0F1A2E);
+  static Color cCardBackground = Color(0xFF18263F);
+  static Color cSurface = Color(0xFF213252); // حقول الإدخال والعناصر المرفوعة
+  static Color cBorder = Color(0xFF2E4266);
+  static Color cDivider = Color(0xFF26385A);
   static Color cWhiteFont = Colors.black;
   static Color cBlackFont = Colors.white;
-  static Color cText = Colors.white;
-  static Color cSecondaryText = Color(0xFFA0A0A0);
-  static Color cLabel = Colors.white;
-  static Color cBottomNavyBlueColor = Color(0xff222637);
+  static Color cText = Color(0xFFF1F5FB);
+  static Color cSecondaryText = Color(0xFFA9B8D0);
+  static Color cLabel = Color(0xFFF1F5FB);
+  static Color cBottomNavyBlueColor = Color(0xFF14213A);
+
+  // ألوان البراند بنسخة أقوى وأوضح على الخلفية الغامقة
+  static Color cPrimary = Color(0xFF10AFC0);
+  static Color cBlue = Color(0xFF6EA2FF);
+  static Color cAccent = Color(0xFF22C7EA);
+  static Color cRedText = Color(0xFFFF6B6B);
+  static Color cShadow = Color.fromRGBO(0, 0, 0, 0.35);
+  static Color cGreyOpacity = Color.fromRGBO(0, 0, 0, 0.65);
 }
 
 class LightThemeColor {
@@ -49,4 +60,17 @@ class LightThemeColor {
   static Color cText = Color(0xff1E222B);
   static Color cLabel = Color(0xff172C4E);
   static Color cBottomNavyBlueColor = Color(0xff172C4E);
+
+  static Color cPrimary = Color(0xFF172C4E);
+  static Color cBlue = Color(0xFF2C57A2);
+  static Color cAccent = Color(0xFF00B4D8);
+  static Color cFont = Color(0xff66728c);
+  static Color cDarkGreyFont = Color(0xff717887);
+  static Color cBorder = Color(0xffCFD9E3);
+  static Color cLight = Color(0xfff2f6fa);
+  static Color cButton = Color(0xffF0F1F5);
+  static Color cDivider = Color(0xffDCE2ED);
+  static Color cRedText = Color(0xffdc0303);
+  static Color cShadow = Color.fromRGBO(0, 0, 0, 0.04);
+  static Color cGreyOpacity = Color.fromRGBO(0, 0, 0, 0.52);
 }

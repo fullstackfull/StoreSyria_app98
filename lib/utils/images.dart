@@ -1,6 +1,7 @@
 class DefaultImages {
   ///SVG icons
   static String storeGoLogo = "assets/svg/loginLogo.png";
+  static String storeGoLogoDark = "assets/svg/loginLogoDark.png";
   static String envelopeIcn = 'assets/svg/envelope.svg';
   static String googleIcn = 'assets/svg/google.svg';
   static String facebookIcn = 'assets/svg/fb.svg';

@@ -176,13 +176,13 @@ Widget usageCard({
   required bool isDark,
 }) {
   final Color cardColor =
-  isDark ? const Color(0xFF1B1C20) : Colors.white;
+  isDark ? const Color(0xFF18263F) : Colors.white;
 
   final Color textColor =
-  isDark ? Colors.white : const Color(0xFF15171A);
+  isDark ? Colors.white : const Color(0xFF0F1A2E);
 
   final Color secondaryColor =
-  isDark ? const Color(0xFF9297A1) : const Color(0xFF777D87);
+  isDark ? const Color(0xFFA9B8D0) : const Color(0xFF777D87);
 
   final double progress =
   (percentage / 100).clamp(0.0, 1.0);
@@ -298,7 +298,7 @@ Widget detailsCard({
       vertical: 4.h,
     ),
     decoration: BoxDecoration(
-      color: isDark ? const Color(0xFF1B1C20) : Colors.white,
+      color: isDark ? const Color(0xFF18263F) : Colors.white,
       borderRadius: BorderRadius.circular(16.r),
       // border: Border.all(
       //   color: isDark
@@ -337,7 +337,7 @@ Widget detailRow({
             style: TextStyle(
               fontSize: 13.sp,
               color: isDark
-                  ? const Color(0xFF9297A1)
+                  ? const Color(0xFFA9B8D0)
                   : AppColor.themeNavyBlueColor,
             ),
           ),
@@ -409,7 +409,7 @@ Widget featuresCard({
     width: double.infinity,
     padding: EdgeInsets.all(16.w),
     decoration: BoxDecoration(
-      color: isDark ? const Color(0xFF1B1C20) : Colors.white,
+      color: isDark ? const Color(0xFF18263F) : Colors.white,
       borderRadius: BorderRadius.circular(16.r),
       // border: Border.all(
       //   color: isDark

@@ -339,9 +339,9 @@ void showEditExchangeRateSheet({
   final formKey = GlobalKey<FormState>();
 
   final Color cardColor = isDark ? DarkThemeColor.cCardBackground : Colors.white;
-  final Color surfaceColor = isDark ? const Color(0xFF23252A) : const Color(0xFFF7F8FA);
+  final Color surfaceColor = isDark ? const Color(0xFF213252) : const Color(0xFFF7F8FA);
   final Color primaryText = isDark ? DarkThemeColor.cText : AppColor.cText;
-  final Color secondaryText = isDark ? const Color(0xFF9297A1) : const Color(0xFF777D87);
+  final Color secondaryText = isDark ? const Color(0xFFA9B8D0) : const Color(0xFF777D87);
 
   showModalBottomSheet(
     context: context,

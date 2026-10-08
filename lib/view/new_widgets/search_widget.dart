@@ -24,7 +24,7 @@ Widget SearchRowWidget({
       icon: Icon(
         Icons.arrow_right_alt_outlined,
         size: 22.sp,
-        color: isDark ? Colors.white60 : AppColor.themeNavyBlueColor,
+        color: isDark ? Colors.white : AppColor.themeNavyBlueColor,
       ),
     ),
   );

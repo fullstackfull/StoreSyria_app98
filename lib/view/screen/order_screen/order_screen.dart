@@ -27,6 +27,7 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen>
     with AutomaticKeepAliveClientMixin {
+
   final OrderController orderController = Get.find<OrderController>();
 
   late ScrollController scrollController;
@@ -141,6 +142,7 @@ class _OrderScreenState extends State<OrderScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () {
@@ -155,7 +157,7 @@ class _OrderScreenState extends State<OrderScreen>
             Get.to(() => const CreateOrderScreen());
           },
         ),
-        backgroundColor: AppColor.cLight,
+        backgroundColor: isDark  ? DarkThemeColor.cBackGround : AppColor.cLight,
         body: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: 20.w,

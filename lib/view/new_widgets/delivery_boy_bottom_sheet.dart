@@ -66,7 +66,7 @@ class _DeliveryBoyPickerBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = isDark ? const Color(0xFF101820) : Colors.white;
+    final backgroundColor = isDark ? const Color(0xFF0F1A2E) : Colors.white;
     final textColor = isDark ? Colors.white : navyBlue;
     final secondaryTextColor =
     isDark ? Colors.white70 : const Color(0xFF687386);
@@ -139,7 +139,7 @@ class _DeliveryBoyPickerBottomSheetState
                       }),
                       filled: true,
                       fillColor: isDark
-                          ? const Color(0xFF182331)
+                          ? const Color(0xFF18263F)
                           : const Color(0xFFF7F8FA),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),

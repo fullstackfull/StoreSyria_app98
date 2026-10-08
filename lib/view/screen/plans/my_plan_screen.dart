@@ -36,7 +36,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
 
     return Scaffold(
       backgroundColor:
-      isDark ? const Color(0xFF101114) : AppColor.cLight,
+      isDark ? const Color(0xFF0F1A2E) : AppColor.cLight,
       appBar: simpleAppBar(
         title: 'MyPlan'.tr,
         label: null,

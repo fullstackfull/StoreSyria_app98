@@ -18,14 +18,14 @@ Widget transactionCard({
   final Color amountColor = tx.isCredit ? success : danger;
   final IconData icon = _iconForType(tx.type, tx.isCredit);
   final Color cardColor =
-  isDark ? const Color(0xFF1B1C20) : Colors.white;
+  isDark ? const Color(0xFF18263F) : Colors.white;
   final Color borderColor = isDark
       ? Colors.white.withOpacity(.07)
       : const Color(0xFFE8EAEE);
   final Color primaryText =
-  isDark ? Colors.white : const Color(0xFF15171A);
+  isDark ? Colors.white : const Color(0xFF0F1A2E);
   final Color secondaryText =
-  isDark ? const Color(0xFF9297A1) : const Color(0xFF777D87);
+  isDark ? const Color(0xFFA9B8D0) : const Color(0xFF777D87);
 
   return Container(
     padding: EdgeInsets.all(14.w),
