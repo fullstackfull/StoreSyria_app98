@@ -194,7 +194,7 @@ $error
     required String url,
     required dynamic error,
     required StackTrace stackTrace,
-    String message = 'Connection failed. Please try again.',
+    String? message,
     FailureReason reason = FailureReason.network,
   }) {
     _logError(
@@ -206,7 +206,7 @@ $error
 
     return Failure<T>(
       reason,
-      message,
+      message ?? 'connection_failed'.tr,
     );
   }
 
@@ -217,8 +217,7 @@ $error
   static Failure<T> _handleErrorResponse<T>(
       http.Response response,
       ) {
-    String message = 'An error occurred';
-
+    String message = 'error_occurred'.tr;
     Map<String, dynamic>? validationErrors;
 
     FailureReason reason = FailureReason.unknown;
@@ -263,7 +262,7 @@ $error
         }
       }
     } catch (_) {
-      message = 'Server error: ${response.statusCode}';
+      message = 'server_error'.tr;
     }
 
     // -------------------------------------------------------------------------
@@ -295,9 +294,9 @@ $error
       case 404:
         reason = FailureReason.notFound;
 
-        if (message == 'An error occurred' ||
+        if (message == 'error_occurred'.tr ||
             message == 'Unknown error') {
-          message = 'Resource not found';
+          message = 'resource_not_found'.tr;
         }
 
         break;
@@ -308,7 +307,7 @@ $error
 
       case 500:
         reason = FailureReason.unknown;
-        message = 'Server internal error';
+        message = 'server_internal_error'.tr;
         break;
 
     // -----------------------------------------------------------------------
@@ -410,7 +409,7 @@ $error
         url: getUrl,
         error: e,
         stackTrace: stackTrace,
-        message: 'No Internet connection.',
+        message: 'no_internet_connection'.tr,
       );
     }
 
@@ -454,7 +453,7 @@ $error
 
       return Failure(
         FailureReason.unknown,
-        'Unexpected error: ${e.toString()}',
+        'unexpected_error'.tr,
       );
     }
   }
@@ -532,7 +531,7 @@ $error
         url: postUrl,
         error: e,
         stackTrace: stackTrace,
-        message: 'No Internet connection.',
+        message: 'no_internet_connection'.tr,
       );
     }
 
@@ -576,7 +575,7 @@ $error
 
       return Failure(
         FailureReason.unknown,
-        'Unexpected error: ${e.toString()}',
+        'unexpected_error'.tr,
       );
     }
   }
@@ -654,7 +653,7 @@ $error
         url: putUrl,
         error: e,
         stackTrace: stackTrace,
-        message: 'No Internet connection.',
+        message: 'no_internet_connection'.tr,
       );
     }
 
@@ -698,7 +697,7 @@ $error
 
       return Failure(
         FailureReason.unknown,
-        'Unexpected error: ${e.toString()}',
+        'unexpected_error'.tr,
       );
     }
   }
@@ -835,7 +834,7 @@ $error
         url: url,
         error: e,
         stackTrace: stackTrace,
-        message: 'No Internet connection.',
+        message: 'no_internet_connection'.tr,
       );
     }
 
@@ -879,7 +878,7 @@ $error
 
       return Failure(
         FailureReason.unknown,
-        'Unexpected error: ${e.toString()}',
+        'unexpected_error'.tr,
       );
     }
   }
@@ -956,7 +955,7 @@ $error
         url: deleteUrl,
         error: e,
         stackTrace: stackTrace,
-        message: 'No Internet connection.',
+        message: 'no_internet_connection'.tr,
       );
     }
 
@@ -1000,7 +999,7 @@ $error
 
       return Failure(
         FailureReason.unknown,
-        'Unexpected error: ${e.toString()}',
+        'unexpected_error'.tr,
       );
     }
   }
