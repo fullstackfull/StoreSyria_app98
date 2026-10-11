@@ -626,4 +626,13 @@ const Map<String, String> en = {
   'search_delivery_boy_hint': 'Search by name or phone number',
   'no_delivery_boys_found': 'No delivery boys found',
   'order_assigned_successfully': 'Delivery boy assigned successfully',
+  'login_success': 'Login successful',
+  'logout_success': 'Logout successful',
+  'login_failed': 'Login failed. \n Check your email and password',
+  'logout_failed': 'Logout failed. Please try again',
+  'logout_error': 'Unable to log out. Please try again',
+  'server_error': 'Server error. Please try again later',
+  'unexpected_error': 'An unexpected error occurred. Please try again',
+  'assign_delivery_boy': 'Assign delivery boy',
+  'paid_by2': 'Paid by @method',
 };

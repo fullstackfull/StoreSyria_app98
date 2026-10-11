@@ -120,6 +120,7 @@ class OrderData {
   String? productPrice;
   String? couponPrice;
   String? deliveryPrice;
+  String? deliveryBoyId;
   String? taxPrice;
   String? finalPrice;
   String? currencySymbol;
@@ -162,6 +163,7 @@ class OrderData {
         this.deliveryId,
         this.deliveryComment,
         this.deliveredStatus,
+        this.deliveryBoyId,
         this.deliveryDate,
         this.returnStatus,
         this.returnDate,
@@ -193,6 +195,7 @@ class OrderData {
     finalPrice = formatPriceRaw(json['final_price']);
     returnPrice = formatPriceRaw(json['return_price']);
     paymentComment = json['payment_comment'];
+    deliveryBoyId = json['deliveryboy_id']?.toString();
     paymentType = json['payment_type'];
     paymentStatus = json['payment_status'];
     deliveryId = json['delivery_id'];
@@ -224,6 +227,7 @@ class OrderData {
     data['is_guest'] = this.isGuest;
     data['product_json'] = this.productJson;
     data['product_id'] = this.productId;
+    data['deliveryboy_id'] = this.deliveryBoyId;
     data['product_price'] = this.productPrice;
     data['coupon_price'] = this.couponPrice;
     data['delivery_price'] = this.deliveryPrice;

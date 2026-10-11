@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:store_go_app/core/model/top_order_model.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
@@ -15,6 +16,7 @@ Widget topOrderCardWidget({
   required String price,
   int? primaryBadgeLabel,
   String? secondaryBadgeLabel,
+  String? deliveryBoyName,
   VoidCallback? onTap,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -122,6 +124,7 @@ Widget topOrderCardWidget({
 
           SizedBox(height: 14.h),
 
+
           /// ================= DATE =================
 
           Align(
@@ -204,6 +207,10 @@ Widget allOrdersListItemWidget({
   VoidCallback? changeFun2,
   bool showChangeAction = false,
   bool showChangeAction2 = false,
+  bool? isAssigned,
+  String? deliveryBoyName,
+  String? changeText3,
+  VoidCallback? changeFun3,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
@@ -249,6 +256,10 @@ Widget allOrdersListItemWidget({
                         ),
                       ),
                     ),
+                    if (isAssigned != null) ...[
+                      SizedBox(width: 6.w),
+                      deliveryAssignChip(isAssigned: isAssigned,name: deliveryBoyName),
+                    ],
                   ],
                 ),
               ),
@@ -257,9 +268,11 @@ Widget allOrdersListItemWidget({
                 viewFun: viewFun,
                 changeFun: changeFun,
                 changeFun2: changeFun2,
+                changeFun3: changeFun3,
                 deleteFun: deleteFun,
                 changeText: changeText,
                 changeText2: changeText2,
+                changeText3: changeText3,
               ),
             ],
           ),
@@ -312,6 +325,7 @@ Widget allOrdersListItemWidget({
 
           SizedBox(height: 12.h),
 
+
           /// Badges
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -346,6 +360,55 @@ Widget allOrdersListItemWidget({
           ),
         ],
       ),
+    ),
+  );
+}
+
+Widget deliveryAssignChip({
+  String? name,
+  required bool isAssigned,
+}) {
+  final color = isAssigned
+      ? AppColor.themeGreenColor
+      : const Color(0xFFE65100);
+
+  final trimmedName = name?.trim();
+
+  final String label = isAssigned
+      ? (trimmedName != null && trimmedName.isNotEmpty
+      ? trimmedName
+      : 'assigned'.tr)
+      : 'not_assigned'.tr;
+
+  return Container(
+    padding: EdgeInsets.symmetric(
+      horizontal: 6.w,
+      vertical: 2.h,
+    ),
+    decoration: BoxDecoration(
+      color: color.withOpacity(0.10),
+      borderRadius: BorderRadius.circular(10.r),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          isAssigned
+              ? Icons.delivery_dining_rounded
+              : Icons.person_off_outlined,
+          size: 10.sp,
+          color: color,
+        ),
+        SizedBox(width: 3.w),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
     ),
   );
 }

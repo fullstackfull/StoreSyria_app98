@@ -8,7 +8,9 @@ class AppPopupMenu extends StatelessWidget {
   final VoidCallback? changeFun;
   final VoidCallback? changeFun2;
   final VoidCallback? deleteFun;
+  final VoidCallback? changeFun3;
 
+  final String? changeText3;
   final String? changeText;
   final Color? color;
   final String? changeText2;
@@ -19,6 +21,8 @@ class AppPopupMenu extends StatelessWidget {
     super.key,
     this.viewFun,
     this.changeFun,
+    this.changeFun3,
+    this.changeText3,
     this.changeFun2,
     this.deleteFun,
     this.changeText,
@@ -36,9 +40,10 @@ class AppPopupMenu extends StatelessWidget {
   bool get canChange => changeFun != null;
   bool get canChange2 => changeFun2 != null;
   bool get canDelete => deleteFun != null;
+  bool get canChange3 => changeFun3 != null;
 
   bool get hasAnyAction =>
-      canView || canChange || canChange2 || canDelete;
+      canView || canChange || canChange2 || canChange3 || canDelete;
 
   // ============================================================
   // HELPERS
@@ -69,12 +74,12 @@ class AppPopupMenu extends StatelessWidget {
   }) {
     return PopupMenuItem<String>(
       value: value,
-      height: 42.h,
+      height: 32.h,
       child: Row(
         children: [
           Icon(
             icon,
-            size: 18.sp,
+            size: 15.sp,
             color: color,
           ),
           SizedBox(width: 10.w),
@@ -124,7 +129,7 @@ class AppPopupMenu extends StatelessWidget {
           value: 'change',
           icon: Icons.edit_outlined,
           label: changeText ?? 'change'.tr,
-          color: Colors.green,
+          color: secondaryTextColor,
           textColor: primaryTextColor,
         ),
       );
@@ -138,7 +143,20 @@ class AppPopupMenu extends StatelessWidget {
           value: 'change2',
           icon: Icons.edit_outlined,
           label: changeText2 ?? 'change2'.tr,
-          color: AppColor.themeGreenColor,
+          color: secondaryTextColor,
+          textColor: primaryTextColor,
+        ),
+      );
+    }
+
+    if (canChange3) {
+      if (items.isNotEmpty) items.add(_divider(context));
+      items.add(
+        _menuItem(
+          value: 'change3',
+          icon: Icons.delivery_dining_outlined,
+          label: changeText3 ?? 'assign_delivery_boy'.tr,
+          color: secondaryTextColor,
           textColor: primaryTextColor,
         ),
       );
@@ -180,18 +198,18 @@ class AppPopupMenu extends StatelessWidget {
       tooltip: 'more'.tr,
 
       icon: Container(
-        width: 34.w,
-        height: 34.h,
+        width: 28.w,
+        height: 28.h,
         decoration: BoxDecoration(
           color: isDark
               ? Colors.white.withOpacity(0.08)
               : color ?? Colors.black.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(10.r),
           border: Border.all(color: Colors.grey)
         ),
         child: Icon(
           Icons.more_vert_rounded,
-          size: 20.sp,
+          size: 17.sp,
           color: subTextColor,
         ),
       ),
@@ -220,6 +238,9 @@ class AppPopupMenu extends StatelessWidget {
             break;
           case 'change2':
             changeFun2?.call();
+            break;
+          case 'change3':
+            changeFun3?.call();
             break;
           case 'delete':
             deleteFun?.call();

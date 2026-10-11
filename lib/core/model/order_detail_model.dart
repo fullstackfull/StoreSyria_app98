@@ -46,6 +46,7 @@ class OrderDetailData {
   String? paymentStatus;
   String? delivery;
   String? deliveryId;
+  String? deliveryBoyId;
   String? deliveredCharge;
   String? currencySymbol;
   CouponInfo? couponInfo;
@@ -63,6 +64,7 @@ class OrderDetailData {
       this.orderId,
       this.deliveryDate,
       this.deliveryId,
+      this.deliveryBoyId,
       this.orderRewardPoint,
       this.returnPrice,
       this.returnStatusMessage,
@@ -92,7 +94,7 @@ class OrderDetailData {
     isGuest = json['is_guest'];
     orderId = json['order_id'];
     deliveryDate = json['delivery_date'];
-    deliveryId = json['delivery_Id'];
+    deliveryBoyId = json['deliveryboy_id']?.toString();
     orderRewardPoint = json['order_reward_point'] != null ? double.tryParse(json['order_reward_point'].toString()) : null;
     returnPrice = json['return_price'];
     returnStatusMessage = json['return_status_message'];
@@ -158,6 +160,7 @@ class OrderDetailData {
     data['id'] = this.id;
     data['is_guest'] = this.isGuest;
     data['delivery_id'] = this.deliveryId;
+    data['deliveryboy_id'] = this.deliveryBoyId;
     data['order_id'] = this.orderId;
     data['currency_symbol'] = this.currencySymbol;
     data['delivery_date'] = this.deliveryDate;

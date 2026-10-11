@@ -627,4 +627,12 @@ const Map<String, String> ar = {
   'order_assigned_successfully': 'تم تعيين المندوب بنجاح',
   'assigned': 'تم التعيين',
   "add_delivery_man": "إضافة مندوب",
+  'login_success': 'تم تسجيل الدخول بنجاح',
+  'logout_success': 'تم تسجيل الخروج بنجاح',
+  'login_failed': 'فشل تسجيل الدخول.\n تحقق من البريد الإلكتروني وكلمة المرور',
+  'logout_failed': 'فشل تسجيل الخروج، حاول مرة أخرى',
+  'logout_error': 'تعذر تسجيل الخروج، حاول مرة أخرى',
+  'server_error': 'حدث خطأ في الخادم، حاول لاحقًا',
+  'unexpected_error': 'حدث خطأ غير متوقع، حاول مرة أخرى',
+  'assign_delivery_boy': 'تعيين مندوب',
 };

@@ -111,26 +111,31 @@ class AuthController extends GetxController {
             decoded['success'] == true) {
           await _clearLocalSession();
 
-          commonToast(type: AppSnackBarType.success, 
-            decoded['message'] ??
-                decoded['data']?['message'] ??
-                'Logout Successfully',
+          commonToast(
+            type: AppSnackBarType.success,
+            'logout_success'.tr,
           );
 
           Get.offAllNamed(AppRoutes.login);
+
         } else {
-          commonToast(type: AppSnackBarType.error, 
-            decoded['message'] ??
-                decoded['data']?['message'] ??
-                'Logout failed',
+          commonToast(
+            type: AppSnackBarType.error,
+            'logout_failed'.tr,
           );
         }
       } else {
-        commonToast(type: AppSnackBarType.error, 'Logout failed');
+        commonToast(
+          type: AppSnackBarType.error,
+          'logout_failed'.tr,
+        );
       }
     } catch (e) {
       log('=== LOGOUT ERROR === $e');
-      commonToast(type: AppSnackBarType.error, 'An unexpected error occurred');
+      commonToast(
+        type: AppSnackBarType.error,
+        'logout_error'.tr,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -181,7 +186,10 @@ class AuthController extends GetxController {
 
           isLoading.value = false;
 
-          commonToast(type: AppSnackBarType.success, "$userName Login Successfully");
+          commonToast(
+            type: AppSnackBarType.success,
+            'login_success'.tr,
+          );
 
           _sendFcmTokenAfterLogin(storeId);
 
@@ -189,25 +197,27 @@ class AuthController extends GetxController {
 
         } else {
           isLoading.value = false;
-          String msg = decoded['message'] ?? decoded['data']?['message'] ?? "Login failed";
-          commonToast(type: AppSnackBarType.error, msg);
+          commonToast(
+            type: AppSnackBarType.error,
+            'login_failed'.tr,
+          );
         }
       } else {
         isLoading.value = false;
 
-        String errorMsg = "Server error occurred";
-        try {
-          var errorBody = jsonDecode(response.body);
-          errorMsg = errorBody['message'] ?? errorMsg;
-        } catch (e) {}
-
-        commonToast(type: AppSnackBarType.error, errorMsg);
+        commonToast(
+          type: AppSnackBarType.error,
+          'server_error'.tr,
+        );
       }
 
     } catch (e) {
       isLoading.value = false;
       print("===Exception============ $e");
-      commonToast(type: AppSnackBarType.error, "An unexpected error occurred. Please check logs.");
+      commonToast(
+        type: AppSnackBarType.error,
+        'unexpected_error'.tr,
+      );
     }
   }
 

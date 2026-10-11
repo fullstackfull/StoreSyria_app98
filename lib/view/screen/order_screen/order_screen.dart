@@ -7,7 +7,9 @@ import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/order_screen/order_detail_screen.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
+import '../../../core/controller/delivery_boy/delivery_boy_controller.dart';
 import '../../../core/model/order_model.dart';
+import '../../new_widgets/delivery_boy_bottom_sheet.dart';
 import '../../new_widgets/filter_tabs.dart';
 import '../../new_widgets/payment_status_bottom_sheet.dart';
 import '../../new_widgets/search_widget.dart';
@@ -34,6 +36,11 @@ class _OrderScreenState extends State<OrderScreen>
 
   bool _isFirstLoad = true;
 
+  final DeliveryBoyController deliveryBoyController =
+  Get.isRegistered<DeliveryBoyController>()
+      ? Get.find<DeliveryBoyController>()
+      : Get.put(DeliveryBoyController());
+
   DateTimeRange? selectedDateRange;
 
   @override
@@ -57,6 +64,9 @@ class _OrderScreenState extends State<OrderScreen>
         ]);
       }
     });
+    if (deliveryBoyController.deliveryBoyList.isEmpty) {
+      deliveryBoyController.getDeliveryBoysData();
+    }
   }
 
   @override
@@ -133,6 +143,41 @@ class _OrderScreenState extends State<OrderScreen>
           ? selectedDateRange?.end
           : null,
     );
+  }
+
+  int? _assignedId(OrderData order) {
+    final raw = order.deliveryBoyId?.toString().trim();
+    if (raw == null || raw.isEmpty || raw == '0') return null;
+    return int.tryParse(raw);
+  }
+
+  String? _deliveryBoyName(int? id) {
+    if (id == null) return null;
+    return deliveryBoyController.deliveryBoyList
+        .firstWhereOrNull((d) => d.id?.toString() == id.toString())
+        ?.name;
+  }
+
+  Future<void> _assignDelivery(OrderData order) async {
+    if (orderController.isAssigningDelivery.value) return;
+    final currentId = _assignedId(order);
+
+    final picked = await DeliveryBoyPickerBottomSheet.show(
+      context,
+      selectedId: currentId,
+    );
+    if (picked?.id == null || picked!.id == currentId) return;
+
+    final ok = await orderController.assignOrderToDelivery(
+      deliveryBoyId: picked.id.toString(),
+      orderId: order.id.toString(),
+    );
+    if (ok) {
+      order.deliveryBoyId = picked.id.toString();
+      orderController.orderList.refresh();
+      orderController.filteredOrderList.refresh();
+      orderController.searchResults.refresh();
+    }
   }
 
   // ============================================================
@@ -511,6 +556,10 @@ class _OrderScreenState extends State<OrderScreen>
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: allOrdersListItemWidget(
+                            isAssigned: _assignedId(order) != null,
+                            deliveryBoyName: _deliveryBoyName(_assignedId(order)),
+                            changeText3: 'assign_delivery_boy'.tr,
+                            changeFun3: () => _assignDelivery(order),
                             showChangeAction: true,
                             method: order.paymentType,
                             showChangeAction2: true,

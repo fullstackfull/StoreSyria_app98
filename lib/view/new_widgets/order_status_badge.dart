@@ -264,7 +264,10 @@ class CommonStatusBadge extends StatelessWidget {
       if (isPaid) {
         if (paymentMethod != null &&
             paymentMethod!.trim().isNotEmpty) {
-        return '${'paid'.tr} by ${paymentMethod!.trim()[0].toUpperCase()}${paymentMethod!.trim().substring(1)}';        }
+          return 'paid_by'.trParams({
+            'method': paymentMethod!.trim(),
+          });
+        }
 
         return 'paid'.tr;
       }

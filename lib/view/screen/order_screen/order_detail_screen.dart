@@ -318,8 +318,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     required Color secondaryText,
     required Color accentColor,
   }) {
-    final serverId = detail.deliveryId?.toString().trim();
-    final hasServerId =
+    final serverId = (detail.deliveryBoyId ?? detail.deliveryId)?.toString().trim();    final hasServerId =
         serverId != null && serverId.isNotEmpty && serverId != '0';
     final deliveryId = pickedDeliveryId.value ?? (hasServerId ? serverId : null);
     final isAssigned = deliveryId != null;
