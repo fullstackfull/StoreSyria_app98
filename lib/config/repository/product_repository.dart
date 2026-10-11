@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
 
-import 'package:store_go_app/network_dio/network_dio.dart';
-import 'package:store_go_app/network_dio/result.dart';
+import 'package:store_go_app/network/network.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 
@@ -10,6 +10,13 @@ class ProductRepository {
     String endPoint =
         "${API.productListUrl}${API.storeIdUrl}${Prefs.getStoreID()}${API.andPageUrl}$page";
     return await NetworkHttps.getRequest(endPoint);
+  }
+
+  Future<Result<Map<String, dynamic>>> searchProductByName(String name) async {
+    String endPoint =
+        "${API.searchProductUrl}${API.storeIdUrl}${Prefs.getStoreID()}";
+    final data = {"name" : name};
+    return await NetworkHttps.postRequest(endPoint,data);
   }
 
   Future<Result<Map<String, dynamic>>> getCreateProductData() async {
@@ -40,7 +47,7 @@ class ProductRepository {
     return await NetworkHttps.deleteRequest(endPoint);
   }
 
-  Future<Result<Map<String, dynamic>>> searchProductData({
+  Future<Result<Map<String, dynamic>>> searchProductByCategory({
     required String categoryId,
   }) async {
     return await NetworkHttps.postRequest(

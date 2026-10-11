@@ -16,6 +16,7 @@ String dateFormatted({required String date, required String formatType}) =>
 
 enum FormatType {
   dateTime,
+  dateTime2,
   date,
   time,
   ddMMMYYYY,
@@ -26,11 +27,15 @@ String formatForDateTime(FormatType formatType) {
   switch (formatType) {
     case FormatType.date:
       {
-        return "MMM dd,yyyy";
+        return "dd MMM yyyy";
       }
     case FormatType.dateTime:
       {
         return "dd-MM-yyyy hh:mm a";
+      }
+    case FormatType.dateTime2:
+      {
+        return "dd MMM hh:mm a";
       }
     case FormatType.time:
       {
@@ -46,12 +51,6 @@ String formatForDateTime(FormatType formatType) {
       }
   }
 }
-
-double parseWcPrice(String? price) => (double.tryParse(price ?? "0") ?? 0);
-
-enum SymbolPositionType { left, right }
-
-const SymbolPositionType appCurrencySymbolPosition = SymbolPositionType.left;
 
 class HexColor extends Color {
   static int _getColor(String hex) {
@@ -74,5 +73,27 @@ String getImageUrl(String? url) {
     cleanedPath = cleanedPath.substring(1);
   }
   return "https://storesyria.com/$cleanedPath";
+}
+
+double parsePriceSafe(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return 0.0;
+
+  String cleaned = raw.replaceAll(RegExp(r'[^\d.]'), '').trim();
+
+  if (cleaned.isEmpty) return 0.0;
+
+
+  final parts = cleaned.split('.');
+  if (parts.length > 2) {
+    final decimalPart = parts.removeLast();
+    cleaned = parts.join('') + '.' + decimalPart;
+  }
+
+  return double.tryParse(cleaned) ?? 0.0;
+}
+String formatPriceRaw(dynamic raw) {
+  if (raw == null) return '';
+  final value = raw.toString().trim();
+  return value;
 }
 

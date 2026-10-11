@@ -48,11 +48,11 @@ class EmailSettingController extends GetxController {
     isLoading.value = false;
     response.fold(
       onSuccess: (data) {
-        commonToast(data['data']['message'] ?? 'Success');
+        commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
       },
       onFailure: (reason,message,errors) {
         errorMessage.value = message ?? 'Error saving email setting';
-        commonToast(message ?? 'Error saving email setting');
+        commonToast(type: AppSnackBarType.error, message ?? 'Error saving email setting');
       },
     );
   }
@@ -75,12 +75,12 @@ class EmailSettingController extends GetxController {
           mailFromAddress.text = emailSetting?.mailFromAddress ?? '';
           mailFromName.text = emailSetting?.mailFromName ?? '';
         } else {
-          commonToast(data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
         }
       },
       onFailure: (reason,message,errors) {
         errorMessage.value = message ?? 'Error loading email setting';
-        commonToast(message ?? 'Error loading email setting');
+        commonToast(type: AppSnackBarType.error, message ?? 'Error loading email setting');
       },
     );
   }
@@ -91,11 +91,11 @@ class EmailSettingController extends GetxController {
     isLoading.value = false;
     response.fold(
       onSuccess: (data) {
-        commonToast(data['data']['message'] ?? 'Success');
+        commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
       },
       onFailure: (reason,message,errors) {
         errorMessage.value = message ?? 'Error sending email';
-        commonToast(message ?? 'Error sending email');
+        commonToast(type: AppSnackBarType.error, message ?? 'Error sending email');
       },
     );
   }

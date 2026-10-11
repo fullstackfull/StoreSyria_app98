@@ -16,7 +16,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 
 class EmailSettingScreen extends StatefulWidget {
-  EmailSettingScreen({Key? key}) : super(key: key);
+  const EmailSettingScreen({super.key});
 
   @override
   State<EmailSettingScreen> createState() => _EmailSettingScreenState();
@@ -33,7 +33,6 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       getData();
@@ -44,7 +43,11 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
-      appBar: simpleAppBar(title: "", date: ""),
+      appBar: simpleAppBar(
+          title: "Store Email Setting",
+          isBack: true,
+          label: null,
+          onNewLabelTap: () {  }),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -54,11 +57,6 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Store Email Setting",
-                    style: pRegular20,
-                  ),
-                  verticalSpace(20),
                   AddProductTextField(
                     controller: emailSettingController.mailDriver,
                     labelText: 'Mail Driver:',
@@ -228,7 +226,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                                                         if (emailSettingController.emailController.text.isNotEmpty) {
                                                           emailSettingController.sendTextEmailData(email: emailSettingController.emailController.text.trim());
                                                         } else {
-                                                          commonToast("Please fill email field");
+                                                          commonToast(type: AppSnackBarType.info, "Please fill email field");
                                                         }
                                                       },
                                                       width: 240,
@@ -255,7 +253,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
                               if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                commonToast(AppConstant.demoString);
+                                commonToast(type: AppSnackBarType.info, AppConstant.demoString);
                               } else {
                                 emailSettingController.saveEmailSettingData(
                                   mailDriver: emailSettingController.mailDriver.text.trim(),

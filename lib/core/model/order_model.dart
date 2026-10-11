@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_collection_literals, unnecessary_this
 
+import '../../utils/helper.dart';
+
 class OrderModel {
   int? status;
   String? message;
@@ -39,7 +41,20 @@ class OrderModelData {
   int? to;
   int? total;
 
-  OrderModelData({this.currentPage, this.data, this.firstPageUrl, this.from, this.lastPage, this.lastPageUrl, this.links, this.nextPageUrl, this.path, this.perPage, this.prevPageUrl, this.to, this.total});
+  OrderModelData({
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total});
 
   OrderModelData.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'];
@@ -98,16 +113,18 @@ class OrderData {
   int? isGuest;
   String? productJson;
   String? productId;
-  double? productPrice;
-  double? couponPrice;
-  double? deliveryPrice;
-  double? taxPrice;
-  double? finalPrice;
-  double? returnPrice;
   String? paymentComment;
   String? paymentType;
   String? paymentStatus;
   int? deliveryId;
+  String? productPrice;
+  String? couponPrice;
+  String? deliveryPrice;
+  String? deliveryBoyId;
+  String? taxPrice;
+  String? finalPrice;
+  String? currencySymbol;
+  String? returnPrice;
   String? deliveryComment;
   int? deliveredStatus;
   String? deliveryDate;
@@ -127,54 +144,58 @@ class OrderData {
 
   OrderData(
       {this.id,
-      this.productOrderId,
-      this.orderDate,
-      this.userId,
-      this.isGuest,
-      this.productJson,
-      this.productId,
-      this.productPrice,
-      this.couponPrice,
-      this.deliveryPrice,
-      this.taxPrice,
-      this.finalPrice,
-      this.returnPrice,
-      this.paymentComment,
-      this.paymentType,
-      this.paymentStatus,
-      this.deliveryId,
-      this.deliveryComment,
-      this.deliveredStatus,
-      this.deliveryDate,
-      this.returnStatus,
-      this.returnDate,
-      this.cancelDate,
-      this.rewardPoints,
-      this.themeId,
-      this.storeId,
-      this.createdAt,
-      this.updatedAt,
-      this.demoField,
-      this.deliveredStatusString,
-      this.deliveredImage,
-      this.orderIdString,
-      this.userName});
+        this.productOrderId,
+        this.orderDate,
+        this.userId,
+        this.currencySymbol,
+        this.isGuest,
+        this.productJson,
+        this.productId,
+        this.productPrice,
+        this.couponPrice,
+        this.deliveryPrice,
+        this.taxPrice,
+        this.finalPrice,
+        this.returnPrice,
+        this.paymentComment,
+        this.paymentType,
+        this.paymentStatus,
+        this.deliveryId,
+        this.deliveryComment,
+        this.deliveredStatus,
+        this.deliveryBoyId,
+        this.deliveryDate,
+        this.returnStatus,
+        this.returnDate,
+        this.cancelDate,
+        this.rewardPoints,
+        this.themeId,
+        this.storeId,
+        this.createdAt,
+        this.updatedAt,
+        this.demoField,
+        this.deliveredStatusString,
+        this.deliveredImage,
+        this.orderIdString,
+        this.userName});
 
   OrderData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     productOrderId = json['product_order_id'];
     orderDate = json['order_date'];
     userId = json['user_id'];
+    currencySymbol = json['currency_symbol'];
     isGuest = json['is_guest'];
     productJson = json['product_json'];
     productId = json['product_id'];
-    productPrice = json['product_price'] != null ? double.tryParse(json['product_price'].toString()) : null;
-    couponPrice = json['coupon_price'] != null ? double.tryParse(json['coupon_price'].toString()) : null;
-    deliveryPrice = json['delivery_price'] != null ? double.tryParse(json['delivery_price'].toString()) : null;
-    taxPrice = json['tax_price'] != null ? double.tryParse(json['tax_price'].toString()) : null;
-    finalPrice = json['final_price'] != null ? double.tryParse(json['final_price'].toString()) : null;
-    returnPrice = json['return_price'] != null ? double.tryParse(json['return_price'].toString()) : null;
+    productPrice = formatPriceRaw(json['product_price']);
+    couponPrice = formatPriceRaw(json['coupon_price']);
+    deliveryPrice = formatPriceRaw(json['delivery_price']);
+    taxPrice = formatPriceRaw(json['tax_price']);
+    finalPrice = formatPriceRaw(json['final_price']);
+    returnPrice = formatPriceRaw(json['return_price']);
     paymentComment = json['payment_comment'];
+    deliveryBoyId = json['deliveryboy_id']?.toString();
     paymentType = json['payment_type'];
     paymentStatus = json['payment_status'];
     deliveryId = json['delivery_id'];
@@ -200,11 +221,13 @@ class OrderData {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;
     data['product_order_id'] = this.productOrderId;
+    data['currency_symbol'] = this.currencySymbol;
     data['order_date'] = this.orderDate;
     data['user_id'] = this.userId;
     data['is_guest'] = this.isGuest;
     data['product_json'] = this.productJson;
     data['product_id'] = this.productId;
+    data['deliveryboy_id'] = this.deliveryBoyId;
     data['product_price'] = this.productPrice;
     data['coupon_price'] = this.couponPrice;
     data['delivery_price'] = this.deliveryPrice;

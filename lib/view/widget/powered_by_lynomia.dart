@@ -12,13 +12,12 @@ class PoweredByLynomia extends StatelessWidget {
     return GestureDetector(
       onTap:() async{
         final uri = Uri.parse("https://lynomia.com");
-        if (await canLaunchUrl(uri)) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
-        }},
+        },
       child: Text(
         "Powered by Lynomia".tr,
         textAlign: TextAlign.center,
-        style: pRegular12.copyWith(color: Colors.grey),
+        style: pRegular14.copyWith(color: Colors.grey),
       ),
     );
   }

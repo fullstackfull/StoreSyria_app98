@@ -61,7 +61,7 @@ class TaxController extends GetxController {
             isScroll.value = true;
           }
         } else {
-          commonToast(data['message'] ?? 'Something went wrong');
+          commonToast(type: AppSnackBarType.error, data['message'] ?? 'Something went wrong');
           if (page < (taxModel?.data?.lastPage ?? 1)) {
             isScroll.value = true;
           }
@@ -69,7 +69,7 @@ class TaxController extends GetxController {
       },
       onFailure: (reason, message, errors) {
         errorMessage.value = message ?? 'Connection error';
-        commonToast(message ?? 'Connection error');
+        commonToast(type: AppSnackBarType.error, message ?? 'Connection error');
         isScroll.value = true;
       },
     );
@@ -99,7 +99,7 @@ class TaxController extends GetxController {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          commonToast(data['data']['message'] ?? 'Success');
+          commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
           taxList.clear();
           currantPage.value = 1;
           isScroll.value = true;
@@ -107,12 +107,12 @@ class TaxController extends GetxController {
           clearTaxFields();
           Get.back();
         } else {
-          commonToast(data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
         }
       },
       onFailure: (reason, message, errors) {
         errorMessage.value = message ?? 'Error adding tax';
-        commonToast(message ?? 'Error adding tax');
+        commonToast(type: AppSnackBarType.error, message ?? 'Error adding tax');
       },
     );
   }
@@ -129,7 +129,7 @@ class TaxController extends GetxController {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          commonToast(data['data']['message'] ?? 'Deleted successfully');
+          commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Deleted successfully');
           taxList.clear();
           currantPage.value = 1;
           isScroll.value = true;
@@ -139,12 +139,12 @@ class TaxController extends GetxController {
             Get.back();
           }
         } else {
-          commonToast(data['data']['message'] ?? 'Failed to delete');
+          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed to delete');
         }
       },
       onFailure: (reason, message, errors) {
         errorMessage.value = message ?? 'Error deleting tax';
-        commonToast(message ?? 'Error deleting tax');
+        commonToast(type: AppSnackBarType.error, message ?? 'Error deleting tax');
       },
     );
   }

@@ -8,19 +8,97 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 
+import 'store_change_service.dart';
+import 'cahe.dart';
 
-class HomeController extends GetxController {
+class HomeController extends GetxController implements StoreAware {
+  // مفاتيح الكاش الخاصة بهاد الكنترولر
+  static const String _cacheDashboardKey = 'home_dashboard_data';
+  static const String _cacheImageUrlKey = 'home_image_url_data';
+
   DashboardRepository dashboardRepository = DashboardRepository();
   RxList<ProductData> topProductList = <ProductData>[].obs;
   RxList<RecentOrder> recentOrderList = <RecentOrder>[].obs;
   RxList<Coupons> couponsList = <Coupons>[].obs;
   RxString imageBaseUrl = ''.obs;
   RxBool isStore = false.obs;
-  RxBool isQuickAdd = false.obs;
   RxBool isDataAvailable = false.obs;
   DashboardData? dashboardData;
   ImageUrlData? imageUrlData;
   List<Store> myStoreList = [Store(name: 'Grocery', id: 3), Store(id: 7, name: "Babycare")];
+
+  @override
+  void onInit() {
+    super.onInit();
+    // نحمّل آخر بيانات محفوظة محلياً فوراً (لو موجودة) عشان الشاشة
+    // تفتح مباشرة بدون لودر. الطلب الحقيقي من السيرفر بيصير بعدها
+    // بالخلفية (زي ما هو مبرمج أصلاً بـ getData() بالشاشة) وبيحدّث
+    // نفس المتغيرات لما يوصل رد جديد.
+    _loadCachedDashboard();
+    _loadCachedImageUrl();
+
+    // نسجل هاد الكنترولر بالسيرفيس المركزي عشان ينعمله reset
+    // تلقائياً لما يتغير المتجر، بدون الحاجة لاستدعاء يدوي.
+    StoreChangeService.instance.register(() => this);
+  }
+
+  /// بتنستدعى تلقائياً من StoreChangeService لما يتغير المتجر.
+  @override
+  void resetForStoreChange() {
+    _resetDashboardData();
+    getDashboardData();
+  }
+
+  void _loadCachedDashboard() {
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheDashboardKey);
+    if (cached == null) return;
+    try {
+      dashboardData = DashboardData.fromJson(cached);
+      topProductList.value = dashboardData!.product ?? [];
+      recentOrderList.value = dashboardData!.recentOrder ?? [];
+      couponsList.value = dashboardData!.coupons ?? [];
+      topProductList.refresh();
+      recentOrderList.refresh();
+      couponsList.refresh();
+      update();
+    } catch (_) {
+      // لو تغير شكل البيانات وصار الكاش القديم غير متوافق، نتجاهله
+      // ونخلي الطلب العادي من السيرفر يعبّي البيانات كالمعتاد.
+      dashboardData = null;
+    }
+  }
+
+  void _loadCachedImageUrl() {
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheImageUrlKey);
+    if (cached == null) return;
+    try {
+      imageUrlData = ImageUrlData.fromJson(cached);
+      if (imageUrlData?.imageUrl != null) {
+        imageBaseUrl.value = imageUrlData!.imageUrl!;
+      }
+    } catch (_) {
+      imageUrlData = null;
+    }
+  }
+
+  /// بتمسح كل بيانات الداشبورد (القوائم + الكاش المحلي) فوراً.
+  /// بتنستدعى لما يتغير المتجر عشان ما تضل بيانات المتجر القديم
+  /// ظاهرة أو محفوظة بالكاش لحد ما يوصل رد المتجر الجديد.
+  void _resetDashboardData() {
+    dashboardData = null;
+
+    topProductList.clear();
+    recentOrderList.clear();
+    couponsList.clear();
+
+    topProductList.refresh();
+    recentOrderList.refresh();
+    couponsList.refresh();
+
+    update();
+
+    CacheService.clear(_cacheDashboardKey);
+  }
 
   getImageBaseUrl() async {
     isDataAvailable.value = true;
@@ -33,9 +111,10 @@ class HomeController extends GetxController {
         imageBaseUrl.value = imageUrlData!.imageUrl!;
         Prefs.setString(AppConstant.imageUrl, imageUrlData!.imageUrl!);
         Prefs.setString(AppConstant.paymentUrl, imageUrlData!.paymentUrl!);
+        CacheService.save(_cacheImageUrlKey, data['data']);
       },
       onFailure: (reason, message, errors) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
 
@@ -51,21 +130,24 @@ class HomeController extends GetxController {
       onSuccess: (data) {
         if (data['status'] == 1) {
           isStore.value = false;
-          commonToast(data['data']['message']);
-          
-          // تحديث Store ID محلياً
+          commonToast(type: AppSnackBarType.success, data['data']['message']);
+
           Prefs.setStoreID(storeId);
-          
-          // إرسال FCM Token للسيرفر مع المتجر الجديد
+
           _sendFcmTokenAfterStoreChange(storeId);
-          
-          getDashboardData();
+
+          // بدل ما ننادي getDashboardData() هون بس، منطلق حدث
+          // مركزي وكل الكنترولرز المسجلة (Home, Category, Product,
+          // Coupon, Order, Notification...) بتتصفر وتعيد التحميل
+          // لحالها تلقائياً، كل وحدة حسب الـ resetForStoreChange
+          // تبعها.
+          StoreChangeService.instance.notifyStoreChanged();
         } else {
-          commonToast(data['data']['message']);
+          commonToast(type: AppSnackBarType.error, data['data']['message']);
         }
       },
       onFailure: (reason, message, errors) {
-       // commonToast(message);
+        // commonToast(message);
       },
     );
 
@@ -89,9 +171,13 @@ class HomeController extends GetxController {
         couponsList.refresh();
 
         update();
+
+        // نخزن آخر رد ناجح محلياً عشان يستخدم كبيانات فورية
+        // بالمرة الجاية اللي المستخدم يفتح فيها الشاشة.
+        CacheService.save(_cacheDashboardKey, data['data']);
       },
       onFailure: (reason, message, errors) {
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
 

@@ -1,13 +1,18 @@
 class DefaultImages {
   ///SVG icons
   static String storeGoLogo = "assets/svg/loginLogo.png";
+  static String storeGoLogoDark = "assets/svg/loginLogoDark.png";
   static String envelopeIcn = 'assets/svg/envelope.svg';
   static String googleIcn = 'assets/svg/google.svg';
   static String facebookIcn = 'assets/svg/fb.svg';
+  static String language2Icn = 'assets/svg/language.svg';
+  static String currencyIcn = 'assets/svg/currency.svg';
+  static String currencyExIcn = 'assets/svg/currency_exchange.svg';
   static String appleIcn = 'assets/svg/apple.svg';
   static String lockIcn = 'assets/svg/lock.svg';
   static String userIcn = "assets/svg/user.svg";
   static String callIcn = "assets/svg/call.svg";
+  static String myPlanImg = "assets/svg/my_plan.svg";
   static String nextIcn = "assets/svg/next.svg";
   static String successIcn = "assets/svg/success.svg";
   static String ordersIcn = "assets/svg/orders.svg";
@@ -25,6 +30,8 @@ class DefaultImages {
   static String listIcn = "assets/svg/list_icn.svg";
   static String gridIcn = "assets/svg/grid_icn.svg";
   static String cartIcn = "assets/svg/cart_icn.svg";
+  static String paymentIcn = "assets/svg/payment_methods.svg";
+  static String deliveryManIcn = "assets/svg/delivery-man.svg";
   static String arrowDownIcn = "assets/svg/arrow_down.svg";
   static String arrowUpIcn = "assets/svg/arrow_up.svg";
   static String copyIcn = "assets/svg/copy.svg";
@@ -33,6 +40,7 @@ class DefaultImages {
   static String downloadIcn = "assets/svg/download.svg";
   static String eyeIcn = "assets/svg/eye.svg";
   static String changeIcn = "assets/svg/change.svg";
+  static String languageIcn = "assets/svg/lang.svg";
   static String deleteIcn = "assets/svg/delete.svg";
   static String backIcn = "assets/svg/back.svg";
   static String newProductIcn = "assets/svg/new_product.svg";
@@ -69,6 +77,8 @@ class DefaultImages {
   static String emptyNotification = "assets/svg/empty_notification.svg";
 
   static String welcomeImg = "assets/svg/welcome.svg";
+  static String groupImg = "assets/svg/group.svg";
+  static String walletImg = "assets/svg/wallet.svg";
   static String profileImg = "https://apps.rajodiya.com/ecommercego-saas/storage/uploads/profile/avatar.png";
   static String productImg = "https://apps.rajodiya.com/ecommercego-saas/themes/grocery/uploads/11_1684295865_1.png";
   static String codImg = "https://apps.rajodiya.com/ecommercego-flutter/storage/uploads/cod.png";

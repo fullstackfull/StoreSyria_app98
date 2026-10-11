@@ -7,10 +7,13 @@ import 'package:store_go_app/utils/helper.dart';
 Future<DateTimeRange?> showDateRangeBottomSheet({
   required BuildContext context,
   DateTimeRange? initialRange,
+  VoidCallback? onReset,
 }) async {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-  final textColor = isDark ? DarkThemeColor.cText : AppColor.cText;
+  final cardColor =
+  isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
+  final textColor =
+  isDark ? DarkThemeColor.cText : AppColor.cText;
   final accent = AppColor.themeNavyBlueColor;
 
   return await showModalBottomSheet<DateTimeRange>(
@@ -18,8 +21,12 @@ Future<DateTimeRange?> showDateRangeBottomSheet({
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (ctx) {
-      DateTime tempStart = initialRange?.start ?? DateTime.now().subtract(const Duration(days: 30));
-      DateTime tempEnd = initialRange?.end ?? DateTime.now();
+      DateTime tempStart =
+          initialRange?.start ??
+              DateTime.now().subtract(const Duration(days: 30));
+
+      DateTime tempEnd =
+          initialRange?.end ?? DateTime.now();
 
       return StatefulBuilder(
         builder: (context, setState) {
@@ -28,11 +35,14 @@ Future<DateTimeRange?> showDateRangeBottomSheet({
               left: 20.w,
               right: 20.w,
               top: 24.h,
-              bottom: MediaQuery.of(context).viewPadding.bottom + 20.h,
+              bottom:
+              MediaQuery.of(context).viewPadding.bottom + 20.h,
             ),
             decoration: BoxDecoration(
               color: cardColor,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(24.r),
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -48,12 +58,20 @@ Future<DateTimeRange?> showDateRangeBottomSheet({
                     ),
                   ),
                 ),
+
                 SizedBox(height: 20.h),
+
                 Text(
                   'date_filter.select_range'.tr,
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: textColor),
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w800,
+                    color: textColor,
+                  ),
                 ),
+
                 SizedBox(height: 20.h),
+
                 Row(
                   children: [
                     Expanded(
@@ -67,11 +85,18 @@ Future<DateTimeRange?> showDateRangeBottomSheet({
                             firstDate: DateTime(2020),
                             lastDate: tempEnd,
                           );
-                          if (picked != null) setState(() => tempStart = picked);
+
+                          if (picked != null) {
+                            setState(() {
+                              tempStart = picked;
+                            });
+                          }
                         },
                       ),
                     ),
+
                     SizedBox(width: 12.w),
+
                     Expanded(
                       child: _DatePickerField(
                         label: 'date_filter.to'.tr,
@@ -83,41 +108,106 @@ Future<DateTimeRange?> showDateRangeBottomSheet({
                             firstDate: tempStart,
                             lastDate: DateTime.now(),
                           );
-                          if (picked != null) setState(() => tempEnd = picked);
+
+                          if (picked != null) {
+                            setState(() {
+                              tempEnd = picked;
+                            });
+                          }
                         },
                       ),
                     ),
                   ],
                 ),
+
                 SizedBox(height: 24.h),
+
+                // Reset
+                if (initialRange != null)
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        onReset?.call();
+                      },
+                      icon: Icon(
+                        Icons.refresh,
+                        size: 18.sp,
+                        color: AppColor.cRedText,
+                      ),
+                      label: Text(
+                        'reset'.tr,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColor.cRedText,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                if (initialRange != null)
+                  SizedBox(height: 8.h),
+
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(ctx),
                         style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
-                          side: BorderSide(color: accent.withOpacity(0.4)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 14.h,
+                          ),
+                          side: BorderSide(
+                            color: accent.withOpacity(0.4),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius.circular(16.r),
+                          ),
                         ),
                         child: Text(
                           'common.cancel'.tr,
-                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: accent),
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: accent,
+                          ),
                         ),
                       ),
                     ),
+
                     SizedBox(width: 12.w),
+
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () => Navigator.pop(ctx, DateTimeRange(start: tempStart, end: tempEnd)),
+                        onPressed: () {
+                          Navigator.pop(
+                            ctx,
+                            DateTimeRange(
+                              start: tempStart,
+                              end: tempEnd,
+                            ),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: accent,
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 14.h,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius.circular(16.r),
+                          ),
                         ),
                         child: Text(
                           'common.apply'.tr,
-                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white),
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -207,50 +297,93 @@ class _DatePickerField extends StatelessWidget {
 Widget sectionHeaderWithFilterWidget({
   required BuildContext context,
   required String title,
+  required bool isFilter,
+  required int num,
   required String filterLabel,
   VoidCallback? onFilterTap,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final titleColor = isDark ? Colors.white : Colors.black;
+  final titleColor = isDark ? Colors.white : const Color(0xFF111827);
+  final subColor = isDark ? const Color(0xFFA9B8D0) : const Color(0xFF8A8F98);
   final accent = AppColor.themeNavyBlueColor;
 
   return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       Expanded(
-        child: Text(
-          title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: titleColor),
-        ),
-      ),
-      SizedBox(width: 8.w),
-      GestureDetector(
-        onTap: onFilterTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30.r),
-            border: Border.all(color: accent.withOpacity(0.4)),
-          ),
+        child: IntrinsicHeight(
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(Icons.calendar_today_outlined, size: 14.sp, color: accent),
-              SizedBox(width: 6.w),
               Flexible(
-                child: Text(
-                  filterLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: accent),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 17.sp,
+                        height: 1.2,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -.3,
+                        color: accent,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      '$num ${'items'.tr}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        height: 1.2,
+                        fontWeight: FontWeight.w500,
+                        color: subColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
       ),
+
+      if (isFilter) ...[
+        SizedBox(width: 8.w),
+        GestureDetector(
+          onTap: onFilterTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30.r),
+              border: Border.all(color: accent.withOpacity(0.4)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.calendar_today_outlined, size: 14.sp, color: accent),
+                SizedBox(width: 6.w),
+                Flexible(
+                  child: Text(
+                    filterLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w600,
+                      color: accent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     ],
   );
 }

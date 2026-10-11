@@ -15,6 +15,7 @@ class DashboardManagerController extends GetxController {
     {'icon': DefaultImages.dashboardIcn, 'title': 'Home'.tr},
     {'icon': DefaultImages.ordersIcn, 'title': 'Orders'.tr},
     {'icon': DefaultImages.productIcn, 'title': 'Products'.tr},
+    {'icon': DefaultImages.categoriesIcn, 'title': 'Categories'.tr},
     {'icon': DefaultImages.moreIcn, 'title': 'More'.tr},
   ].obs;
 
@@ -30,6 +31,7 @@ class DashboardManagerController extends GetxController {
       HomeScreen(key: const ValueKey('dashboard')),
       OrderScreen(key: const ValueKey('orders')),
       ProductsScreen(key: const ValueKey('products'), isBack: false),
+      CategoriesScreen(key: const ValueKey('category'), isBack: false,),
       SettingScreen(key: const ValueKey('settings'), isBack: false),
     ];
   }

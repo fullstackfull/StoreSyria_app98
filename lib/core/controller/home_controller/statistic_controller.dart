@@ -33,14 +33,14 @@ class StatisticsController extends GetxController {
           browserList.value = staticsDataModel?.data?.browser ?? [];
           deviceList.value = staticsDataModel?.data?.device ?? [];
         } else {
-          commonToast(data['message'] ?? '');
+          commonToast(type: AppSnackBarType.error, data['message'] ?? '');
         }
 
         isDataAvailable.value = false;
       },
       onFailure: (reason, message, errors) {
         isDataAvailable.value = false;
-        commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }

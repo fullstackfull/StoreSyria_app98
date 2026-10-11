@@ -1,15 +1,17 @@
 
 class API {
   static String baseUrl = "https://storesyria.com/api/admin";
+  //static String baseUrl = "https://designer-railway-lyrically.ngrok-free.dev/api/admin";
   static String loginUrl = '/adminlogin';
+  static String logoutUrl = '/adminlogout';
   static String dashboardUrl = '/dashboard';
 
   static String imageBaseUrl = '/base_url';
   static String storeIdUrl = '?store_id=';
+  static String andStoreIdUrl = '&store_id=';
   static const String andStatusUrl = "&delivered_status=";
   static const String andFromDateUrl = "&from_date=";
   static const String andToDateUrl = "&to_date=";
-
   static String categoryListUrl = '/categorylist';
   static String createProductUrl = '/createproduct';
   static String productListUrl = '/productlist';
@@ -57,14 +59,12 @@ class API {
   static String pageUrl = '?page=';
   static String andPageUrl = '&page=';
 
-  static String createReviewUrl = '/createreview';
+  // static String createReviewUrl = '/createreview';
   static String addReviewUrl = '/addreview';
   static String updateReviewUrl = '/updatereview';
   static String reviewListUrl = '/reviewlist';
-  static String reviewStatusUrl = '/reviewstatus';
-  static String deleteReviewUrl = '/deletereview';
-
-  static String reviewIdUrl = '&review_id=';
+  // static String reviewStatusUrl = '/reviewstatus';
+  static String deleteReviewUrl = '/deletereview/';
 
   static String staticsDataUrl = '/staticsdata';
   static String editProfileUrl = '/editprofile';
@@ -73,12 +73,12 @@ class API {
   static String getEmailSettingUrl = '/getemailsetting';
   static String getLoyaltySettingUrl = '/getloyalitysetting';
   static String loyaltySettingUrl = '/loyalitysetting';
-  static String getCodPaymentUrl = '/get-cod-payment';
-  static String codPaymentUrl = '/cod-payment';
-  static String getBankPaymentUrl = '/get-bank-payment';
-  static String bankPaymentUrl = '/bank-payment';
-  static String getStripePaymentUrl = '/get-stripe-payment';
-  static String stripePaymentUrl = '/stripe-payment';
+  // static String getCodPaymentUrl = '/get-cod-payment';
+  // static String codPaymentUrl = '/cod-payment';
+  // static String getBankPaymentUrl = '/get-bank-payment';
+  // static String bankPaymentUrl = '/bank-payment';
+  // static String getStripePaymentUrl = '/get-stripe-payment';
+  // static String stripePaymentUrl = '/stripe-payment';
   static String testMailUrl = '/testmail';
   static String changeStoreUrl = '/changestore';
   static String viewUsedCouponUrl = '/view-used-coupon';
@@ -86,4 +86,49 @@ class API {
   static String deleteStoreUrl = '/deletestore';
   static String fcmTokenUrl = '/store/fcm-token';
   static String notificationUrl = '/notification';
+
+  // new
+  static String customersUrl = '/customerlist';
+  static String addCustomerUrl = '/AddCustomer';
+  static String deleteCustomerUrl = '/destroyCustomer';
+  static String customerIdUrl = '?customer_id=';
+  static String customerOrdersUrl = '/customer/orders';
+
+  static String topOrdersUrl = '/Top_orders';
+  static String languagesUrl = '/getAvailableLanguages';
+  static String currenciesUrl = '/getCurrenciesApi';
+  static String createOrderUrl = '/createOrderViaApi';
+  static String changeLanguageUrl = '/updateStoreLanguage';
+  static String changeCurrencyUrl = '/updateCurrencyApi';
+  static String getStoreInfoUrl = '/getStoreInfo';
+  static String getStoreCurrencyLangUrl = '/getCurrentLanguageAndCurrency';
+  static String getCurrencyRatesUrl = '/get-currency-rates';
+  static String toggleCurrencyStatusUrl = '/toggle-currency-status';
+  static String updateCurrencyRateUrl = '/update-currency-rate';
+
+  //wallet
+  static String walletUrl = '/wallet/transactions';
+  static String addBalanceUrl = '/wallet/add-balance';
+  static String deductBalanceUrl = '/wallet/deduct-balance';
+
+  //plans
+  static String myPlanUrl = '/indexAllPlan';
+
+  //payments
+  static String paymentTypesUrl = '/getActivePaymentMethods';
+  static String searchProductUrl = '/searchProductsByName';
+  static String updateStoreInfoUrl = '/updateStoreOwnerInfo';
+  static String getStatesUrl = '/getStatesByCountry';
+  static String updateCustomerUrl = '/update-customer';
+  static String searchCustomerUrl = '/searchCustomerByName';
+
+  // Delivery Boys
+  static String deliveryBoysUrl = '/deliveryboysIndex';
+  static String addDeliveryBoyUrl = '/deliveryboyStore';
+  static String updateDeliveryBoyUrl = '/deliveryboysUpdate';
+  static String updatePassDeliveryBoyUrl = '/deliveryboysReset-password';
+  static String deleteDeliveryBoyUrl = '/deliveryboysDestroy';
+  static String assignOrderUrl = '/assignOrders';
+  static String deliveryBoyIdUrl = '/';
+
 }

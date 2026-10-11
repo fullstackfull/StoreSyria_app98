@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart'; // للترجمة
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:open_file/open_file.dart';
@@ -15,7 +14,8 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/screen/order_screen/invoice.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
+
+import '../../new_widgets/shimmer.dart';
 
 class InvoicePdfViewScreen extends StatefulWidget {
   final List<Product> productList;
@@ -63,7 +63,6 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
       ) async {
     final bytes = await build(pageFormat);
 
-    // تحديد مسار التحميل
     final directory = Directory('/storage/emulated/0/Download');
     if (!directory.existsSync()) {
       directory.createSync();
@@ -73,7 +72,7 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
     await file.writeAsBytes(bytes);
 
     if (mounted) {
-      commonToast("document_saved".tr); // ترجمة رسالة الحفظ
+      commonToast(type: AppSnackBarType.success, "document_saved".tr);
       await OpenFile.open(file.path);
     }
   }
@@ -81,7 +80,7 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround;
+    final bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
 
     final actions = <PdfPreviewAction>[
       if (!kIsWeb)
@@ -93,31 +92,40 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: simpleAppBar(title: 'invoice'.tr), // ترجمة عنوان الشاشة
+      appBar: simpleAppBar(title: 'invoice'.tr,isBack: true ,isBold: true,label: null, onNewLabelTap: () {  }),
       body: Padding(
         padding: EdgeInsets.only(top: 10.h),
         child: PdfPreview(
           maxPageWidth: 700,
           pdfPreviewPageDecoration: BoxDecoration(
-            color: Colors.grey.shade200, // خلفية محايدة لعرض الـ PDF
+            color: Colors.white,
             boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12)],
           ),
           scrollViewDecoration: BoxDecoration(color: bgColor),
           actions: actions,
           canChangeOrientation: false,
           canDebug: false,
-          loadingWidget: Center(child: LoadingWidget()),
+          loadingWidget: AppShimmer(
+            child: Padding(
+              padding: EdgeInsets.all(16.w),
+              child: AspectRatio(
+                aspectRatio: 1 / 1.414, // A4
+                child: ShimmerBox(width: double.infinity, radius: 4.r),
+              ),
+            ),
+          ),
           onPrinted: _showPrintedToast,
           onShared: _showSharedToast,
           build: (PdfPageFormat format) {
             return generateInvoice(
-                format,
-                _data,
-                widget.productList,
-                widget.orderDetailData,
-                widget.tax,
-                widget.deliveryCharge,
-                widget.couponAmount
+              format,
+              _data,
+              widget.productList,
+              widget.orderDetailData,
+              widget.tax,
+              widget.deliveryCharge,
+              widget.couponAmount,
+              widget.orderDetailData.currencySymbol ?? "",
             );
           },
         ),
@@ -126,10 +134,10 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
   }
 
   _showSharedToast(BuildContext context) {
-    commonToast("document_shared_success".tr); // ترجمة رسالة المشاركة
+    commonToast(type: AppSnackBarType.success, "document_shared_success".tr);
   }
 
   _showPrintedToast(BuildContext context) {
-    commonToast('document_printed_success'.tr); // ترجمة رسالة الطباعة
+    commonToast(type: AppSnackBarType.success, 'document_printed_success'.tr);
   }
 }

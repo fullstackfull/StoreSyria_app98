@@ -32,7 +32,6 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.isUpdate == true) {
       shippingController.nameController.text = widget.name!;
@@ -42,134 +41,143 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: Get.height / 1.5,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return SafeArea(
+      child: Container(
+        height: Get.height / 1.5,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+          color: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
         ),
-        color: AppColor.cBackGround,
-      ),
-      padding: EdgeInsets.all(24),
-      child: SingleChildScrollView(
-        child: Obx(() {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Get.back();
-                },
-                child: Row(
-                  children: [
-                    assetSvdImageWidget(
-                      image: DefaultImages.closeIcn,
-                      colorFilter: ColorFilter.mode(AppColor.cGreenFont, BlendMode.srcIn),
-                    ),
-                    horizontalSpace(8),
-                    Text(
-                      "Close",
-                      style: pSemiBold12.copyWith(
-                        color: AppColor.cGreenFont,
+        padding: EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Obx(() {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: Row(
+                    children: [
+                      assetSvdImageWidget(
+                        image: DefaultImages.closeIcn,
+                        colorFilter: ColorFilter.mode(AppColor.cGreenFont, BlendMode.srcIn),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              verticalSpace(8),
-              Text(
-                "Create",
-                style: pRegular12,
-              ),
-              verticalSpace(10),
-              Text(
-                "Add Shipping",
-                style: pRegular18.copyWith(
-                  color: AppColor.cGreenFont,
-                ),
-              ),
-              verticalSpace(10),
-              horizontalDivider(),
-              verticalSpace(10),
-              AddProductTextField(
-                controller: shippingController.nameController,
-                labelText: 'Name',
-                hintText: "Enter name",
-              ),
-              verticalSpace(10),
-              commonDropdownButtonWidget(
-                labelText: 'Charges Type',
-                hint: 'Select option',
-                value: shippingController.chargesType.value,
-                list: shippingController.chargesTypeList,
-                onChanged: (value) {
-                  shippingController.chargesType.value = value;
-                },
-              ),
-              verticalSpace(10),
-              AddProductTextField(
-                controller: shippingController.amountController,
-                labelText: 'Amount',
-                hintText: "Enter Amount",
-                keyboardType: TextInputType.number,
-              ),
-              verticalSpace(10),
-              AddProductTextField(
-                controller: shippingController.durationController,
-                labelText: 'Return Order Duration',
-                hintText: "Enter Return Order Duration",
-                keyboardType: TextInputType.number,
-              ),
-              verticalSpace(10),
-              Text(
-                "Image:",
-                style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
-              ),
-              verticalSpace(15),
-              GestureDetector(
-                onTap: () async {
-                  shippingController.imagePath.value = await shippingController.pickFile();
-                },
-                child: addAttachmentWidget(
-                  shippingController.imagePath.value == '' ? "Add attachment..." : shippingController.imagePath.value.split('/').last,
-                ),
-              ),
-              verticalSpace(10),
-              AddProductTextField(controller: shippingController.descriptionController, labelText: 'Description', hintText: "Enter Description", maxLines: 3),
-              verticalSpace(25),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: CommonIconButton(
-                        title: 'Close',
-                        iconData: DefaultImages.closeIcn,
-                        onPressed: () {
-                          Get.back();
-                        },
-                        width: 75,
-                        height: 35,
-                        btnColor: AppColor.cButton,
-                        textColor: AppColor.cDarkGreyFont),
+                      horizontalSpace(8),
+                      Text(
+                        "Close".tr,
+                        style: pSemiBold12.copyWith(
+                          color: AppColor.cGreenFont,
+                        ),
+                      ),
+                    ],
                   ),
-                  horizontalSpace(15),
-                  Expanded(
-                    flex: 2,
-                    child: CommonIconButton(
-                      title: widget.isUpdate == true ? "Update" : 'Create',
-                      iconData: DefaultImages.whiteDoneIcn,
-                      onPressed: () {
-                        if (shippingController.nameController.text.isNotEmpty &&
-                            shippingController.amountController.text.isNotEmpty &&
-                            shippingController.durationController.text.isNotEmpty &&
-                            shippingController.descriptionController.text.isNotEmpty &&
-                            shippingController.imagePath.isNotEmpty) {
-                          print("----->(${shippingController.imagePath.value})");
-                          if (widget.isUpdate == true) {
-                            if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                              commonToast(AppConstant.demoString);
+                ),
+                verticalSpace(8),
+                Text(
+                  "Create".tr,
+                  style: pRegular12,
+                ),
+                verticalSpace(10),
+                Text(
+                  "Add Shipping".tr,
+                  style: pRegular18.copyWith(
+                    color: AppColor.cGreenFont,
+                  ),
+                ),
+                verticalSpace(10),
+                horizontalDivider(),
+                verticalSpace(10),
+                AddProductTextField(
+                  controller: shippingController.nameController,
+                  labelText: 'name'.tr,
+                  hintText: "enter_category_name".tr,
+                ),
+                verticalSpace(10),
+                commonDropdownButtonWidget(
+                  labelText: 'Charges Type'.tr,
+                  hint: 'select_option'.tr,
+                  value: shippingController.chargesType.value,
+                  list: shippingController.chargesTypeList,
+                  onChanged: (value) {
+                    shippingController.chargesType.value = value;
+                  },
+                ),
+                verticalSpace(10),
+                AddProductTextField(
+                  controller: shippingController.amountController,
+                  labelText: 'Amount'.tr,
+                  hintText: "enter_discount_amount".tr,
+                  keyboardType: TextInputType.number,
+                ),
+                verticalSpace(10),
+                AddProductTextField(
+                  controller: shippingController.durationController,
+                  labelText: 'Return Order Duration'.tr,
+                  hintText: "Enter Return Order Duration".tr,
+                  keyboardType: TextInputType.number,
+                ),
+                verticalSpace(10),
+                Text(
+                  "Image:".tr,
+                  style: pMedium12.copyWith(color: AppColor.cDarkGreyFont),
+                ),
+                verticalSpace(15),
+                GestureDetector(
+                  onTap: () async {
+                    shippingController.imagePath.value = await shippingController.pickFile();
+                  },
+                  child: addAttachmentWidget(
+                    shippingController.imagePath.value == '' ? "Add attachment...".tr : shippingController.imagePath.value.split('/').last,
+                  ),
+                ),
+                verticalSpace(10),
+                AddProductTextField(controller: shippingController.descriptionController, labelText: 'description'.tr, hintText: "Enter Description".tr, maxLines: 3),
+                verticalSpace(25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: CommonIconButton(
+                          title: 'Close'.tr,
+                          iconData: DefaultImages.closeIcn,
+                          onPressed: () {
+                            Get.back();
+                          },
+                          width: 75,
+                          height: 35,
+                          btnColor: AppColor.cButton,
+                          textColor: AppColor.cDarkGreyFont),
+                    ),
+                    horizontalSpace(15),
+                    Expanded(
+                      flex: 2,
+                      child: CommonIconButton(
+                        title: widget.isUpdate == true ? "update".tr : 'Create'.tr,
+                        iconData: DefaultImages.whiteDoneIcn,
+                        onPressed: () {
+                          if (shippingController.nameController.text.isNotEmpty &&
+                              shippingController.amountController.text.isNotEmpty &&
+                              shippingController.durationController.text.isNotEmpty &&
+                              shippingController.descriptionController.text.isNotEmpty &&
+                              shippingController.imagePath.isNotEmpty) {
+                            print("----->(${shippingController.imagePath.value})");
+                            if (widget.isUpdate == true) {
+                              if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+                                commonToast(type: AppSnackBarType.info, AppConstant.demoString.tr);
+                              } else {
+                                shippingController.addShippingData(
+                                    isUpdate: widget.isUpdate,
+                                    shippingId: widget.shippingId ?? '',
+                                    name: shippingController.nameController.text.trim(),
+                                    description: shippingController.descriptionController.text.trim());
+                              }
                             } else {
                               shippingController.addShippingData(
                                   isUpdate: widget.isUpdate,
@@ -178,25 +186,19 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                                   description: shippingController.descriptionController.text.trim());
                             }
                           } else {
-                            shippingController.addShippingData(
-                                isUpdate: widget.isUpdate,
-                                shippingId: widget.shippingId ?? '',
-                                name: shippingController.nameController.text.trim(),
-                                description: shippingController.descriptionController.text.trim());
+                            commonToast(type: AppSnackBarType.info, "Please fill all field".tr);
                           }
-                        } else {
-                          commonToast("Please fill all field");
-                        }
-                      },
-                      width: 240,
-                      height: 35,
+                        },
+                        width: 240,
+                        height: 35,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        }),
+                  ],
+                ),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }

@@ -40,7 +40,6 @@
 //
 //   @override
 //   void initState() {
-//     // TODO: implement initState
 //     super.initState();
 //     if (widget.isCodEnable == "on") {
 //       codController.isStatus.value = true;
@@ -61,7 +60,10 @@
 //       },
 //       child: Scaffold(
 //         backgroundColor: AppColor.cBackGround,
-//         appBar: simpleAppBar(title: 'Cash on Delivery'),
+//         appBar: simpleAppBar(
+//             title: 'Cash on Delivery',
+//             isBack: true,
+//             label: null, onNewLabelTap: () {  }),
 //         body: SafeArea(
 //           child: Padding(
 //             padding: EdgeInsets.all(24),
@@ -122,10 +124,7 @@
 //                           ? CachedNetworkImage(
 //                               imageUrl: getImageUrl(codController.networkImage.value),
 //                               placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2)),
-//                               errorWidget: (context, url, error) => Image.network(
-//                                 DefaultImages.codImg,
-//                                 fit: BoxFit.cover,
-//                               ),
+//                               errorWidget: (context, url, error) => SizedBox(),
 //                               fit: BoxFit.cover,
 //                             )
 //                           : Image.file(File(codController.imagePath.value)),

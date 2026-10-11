@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'package:store_go_app/network_dio/network_dio.dart';
+import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 
@@ -13,6 +13,7 @@ class CouponRepository {
 
   addCouponData({
     required bool isUpdate,
+    required int status,
     required String couponId,
     required String couponName,
     required String couponType,
@@ -23,8 +24,8 @@ class CouponRepository {
   }) async {
     String endPoint = isUpdate == true ? API.updateCouponUrl : API.addCouponUrl;
     Map data = isUpdate == true
-        ? {'store_id': Prefs.getStoreID(), 'coupon_id': couponId, 'coupon_name': couponName, 'coupon_type': couponType, 'discount_amount': disAmount, 'coupon_limit': couponLimit, 'coupon_expiry_date': date, 'coupon_code': code}
-        : {'store_id': Prefs.getStoreID(), 'coupon_name': couponName, 'coupon_type': couponType, 'discount_amount': disAmount, 'coupon_limit': couponLimit, 'coupon_expiry_date': date, 'coupon_code': code};
+        ? {'store_id': Prefs.getStoreID(), 'coupon_id': couponId, 'coupon_name': couponName, 'coupon_type': couponType, 'discount_amount': disAmount, 'coupon_limit': couponLimit, 'coupon_expiry_date': date, 'coupon_code': code ,"status" : status}
+        : {'store_id': Prefs.getStoreID(), 'coupon_name': couponName, 'coupon_type': couponType, 'discount_amount': disAmount, 'coupon_limit': couponLimit, 'coupon_expiry_date': date, 'coupon_code': code ,"status" : status};
     var response = await NetworkHttps.postRequest(endPoint, data);
     return response;
   }

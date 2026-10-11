@@ -31,13 +31,12 @@
 // }
 //
 // class _BankTransferScreenState extends State<BankTransferScreen> {
-//   PaymentSettingController paymentSettingController = Get.find();
+//   PaymentSettingController paymentSettingController = Get.put(PaymentSettingController());
 //
 //   BankTransferController bankTransferController = Get.put(BankTransferController());
 //
 //   @override
 //   void initState() {
-//     // TODO: implement initState
 //     super.initState();
 //     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
 //       getData();
@@ -56,7 +55,11 @@
 //       },
 //       child: Scaffold(
 //         backgroundColor: AppColor.cBackGround,
-//         appBar: simpleAppBar(title: "Bank Transfer"),
+//         appBar: simpleAppBar(
+//             title: "Bank Transfer",
+//             isBack: true,
+//             label: null,
+//             onNewLabelTap: () {  }),
 //         body: SafeArea(
 //           child: Padding(
 //             padding: const EdgeInsets.all(24),
@@ -116,10 +119,7 @@
 //                           ? CachedNetworkImage(
 //                               imageUrl: getImageUrl(bankTransferController.networkImage.value),
 //                               placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2)),
-//                               errorWidget: (context, url, error) => Image.network(
-//                                 DefaultImages.bankTransferImg,
-//                                 fit: BoxFit.cover,
-//                               ),
+//                               errorWidget: (context, url, error) => SizedBox(),
 //                               fit: BoxFit.cover,
 //                             )
 //                           : Image.file(File(bankTransferController.imagePath.value)),

@@ -1,21 +1,17 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:store_go_app/network_dio/network_dio.dart';
+import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/routes/routes.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/utils/prefer.dart';
-import 'package:store_go_app/view/screen/dashboard_manager/dashboard_manager.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
+import '../notification_controller/notification_controller.dart';
 
 class AuthController extends GetxController {
   TextEditingController emailController = TextEditingController();
@@ -85,26 +81,65 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> logout() async {
+    isLoading.value = true;
 
-  // loginFunction(int index) {
-  //   switch (index) {
-  //     case 0:
-  //       break;
-  //     case 1:
-  //       // do something else
-  //       break;
-  //   }
-  // }
-  //
-  // signUpFunction(int index) {
-  //   switch (index) {
-  //     case 0:
-  //       break;
-  //     case 1:
-  //       // do something else
-  //       break;
-  //   }
-  // }
+    try {
+      final token = Prefs.getToken();
+
+      final url = Uri.parse(
+        API.baseUrl + API.logoutUrl,
+      );
+
+      log('=== LOGOUT URL === $url');
+
+      final response = await http.post(
+        url,
+        headers: {
+          ...NetworkHttps.baseHeaders,
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      log('=== LOGOUT STATUS === ${response.statusCode}');
+      log('=== LOGOUT BODY === ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+
+        if (decoded['status'] == 1 ||
+            decoded['success'] == true) {
+          await _clearLocalSession();
+
+          commonToast(
+            type: AppSnackBarType.success,
+            'logout_success'.tr,
+          );
+
+          Get.offAllNamed(AppRoutes.login);
+
+        } else {
+          commonToast(
+            type: AppSnackBarType.error,
+            'logout_failed'.tr,
+          );
+        }
+      } else {
+        commonToast(
+          type: AppSnackBarType.error,
+          'logout_failed'.tr,
+        );
+      }
+    } catch (e) {
+      log('=== LOGOUT ERROR === $e');
+      commonToast(
+        type: AppSnackBarType.error,
+        'logout_error'.tr,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
 
   Future<void> loginAuth({required String email, required String password}) async {
@@ -151,34 +186,38 @@ class AuthController extends GetxController {
 
           isLoading.value = false;
 
-          commonToast("$userName Login Successfully");
+          commonToast(
+            type: AppSnackBarType.success,
+            'login_success'.tr,
+          );
 
-          // إرسال FCM Token للسيرفر بعد تسجيل الدخول الناجح
           _sendFcmTokenAfterLogin(storeId);
 
           Get.offAllNamed(AppRoutes.dashboard);
 
         } else {
           isLoading.value = false;
-          String msg = decoded['message'] ?? decoded['data']?['message'] ?? "Login failed";
-          commonToast(msg);
+          commonToast(
+            type: AppSnackBarType.error,
+            'login_failed'.tr,
+          );
         }
       } else {
         isLoading.value = false;
 
-        String errorMsg = "Server error occurred";
-        try {
-          var errorBody = jsonDecode(response.body);
-          errorMsg = errorBody['message'] ?? errorMsg;
-        } catch (e) {}
-
-        commonToast(errorMsg);
+        commonToast(
+          type: AppSnackBarType.error,
+          'server_error'.tr,
+        );
       }
 
     } catch (e) {
       isLoading.value = false;
       print("===Exception============ $e");
-      commonToast("An unexpected error occurred. Please check logs.");
+      commonToast(
+        type: AppSnackBarType.error,
+        'unexpected_error'.tr,
+      );
     }
   }
 
@@ -190,6 +229,26 @@ class AuthController extends GetxController {
     } catch (e) {
       print('❌ خطأ في إرسال FCM Token بعد تسجيل الدخول: $e');
     }
+  }
+
+  Future<void> _clearLocalSession() async {
+    // Clear FCM token
+    try {
+      await FcmTokenService().clearFcmToken();
+    } catch (e) {
+      log('FCM clear error: $e');
+    }
+
+    // Clear notifications
+    if (Get.isRegistered<NotificationController>()) {
+      Get.find<NotificationController>().clearNotificationData();
+    }
+
+    // Clear ALL local storage
+    await Prefs.clear();
+
+    // Clear controllers
+    clear();
   }
 
   @override

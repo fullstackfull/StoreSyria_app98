@@ -1,10 +1,7 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
-import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/config/repository/search_repository.dart';
 import 'package:store_go_app/config/repository/category_repository.dart';
@@ -13,88 +10,211 @@ import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/core/model/categories_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
+import '../../../utils/pick_file.dart';
+import 'cahe.dart';
+import 'store_change_service.dart';
 
-class CategoryController extends GetxController{
-  TextEditingController categoryName=TextEditingController();
-  TextEditingController searchController=TextEditingController();
-  RxString filePath=''.obs;
-  RxString imagePath=''.obs;
-  RxString iconPath=''.obs;
-  RxString trending='1'.obs;
-  RxBool isTrending=true.obs;
-  RxInt currantPage=1.obs;
-  RxBool isScroll=true.obs;
+class CategoryController extends GetxController
+    implements StoreAware {
+  static const String _cacheCategoryKey = 'home_category_list_data';
+
+  TextEditingController categoryName = TextEditingController();
+
+  TextEditingController searchController = TextEditingController();
+
+  RxString filePath = ''.obs;
+  RxString imagePath = ''.obs;
+  RxString iconPath = ''.obs;
+
+  RxString trending = '1'.obs;
+
+  RxBool isTrending = true.obs;
+  RxBool isActive = true.obs;
+
+  RxInt currantPage = 1.obs;
+
+  RxBool isScroll = true.obs;
   RxBool isLoading = false.obs;
+
   RxString errorMessage = ''.obs;
 
+  CategoryRepository categoryRepository = CategoryRepository();
 
-  CategoryRepository categoryRepository=CategoryRepository();
-  SearchRepository searchRepository=SearchRepository();
+  SearchRepository searchRepository = SearchRepository();
 
   CategoriesModel? categoriesModel;
-  CategoryData? categoryData;
-  RxList<CategoryData> categoriesList=<CategoryData>[].obs;
 
-  pickFile() async{
-    FilePickerResult? result=await FilePicker.pickFiles();
-    if(result!=null){
-      File file=File(result.files.single.path!);
-      print(file.path);
-      return file.path;
-    }else{
-      commonToast('File not pick');
+  CategoryData? categoryData;
+
+  RxList<CategoryData> categoriesList = <CategoryData>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    _loadCachedCategories();
+
+    StoreChangeService.instance.register(() => this);
+  }
+
+  void _loadCachedCategories() {
+    final cached =
+    CacheService.get<Map<String, dynamic>>(
+      _cacheCategoryKey,
+    );
+
+    if (cached == null) return;
+
+    try {
+      categoriesModel =
+          CategoriesModel.fromJson(cached);
+
+      categoriesList.value =
+          categoriesModel?.data?.data ?? [];
+
+      categoriesList.refresh();
+
+      isScroll.value =
+          categoriesModel?.data?.currentPage !=
+              categoriesModel?.data?.lastPage;
+    } catch (_) {
+      categoriesModel = null;
     }
   }
 
-  getCategoryData(page) async{
+  @override
+  void resetForStoreChange() {
+    categoriesModel = null;
+
+    categoriesList.clear();
+    categoriesList.refresh();
+
+    currantPage.value = 1;
+    isScroll.value = true;
+
+    CacheService.clear(_cacheCategoryKey);
+
+    getCategoryData(1);
+  }
+
+  Future<String?> pickFile() async {
+    return await FileHelper.pickImage();
+  }
+
+  Future<void> getCategoryData(int page) async {
+    if (isLoading.value) return;
+
+    if (page > 1 && categoriesModel != null) {
+      if (page > (categoriesModel?.data?.lastPage ?? 1)) {
+        isScroll.value = false;
+        return;
+      }
+    }
+
     isLoading.value = true;
+
     Loader.showLoader();
-    final response=await categoryRepository.getCategoriesData(page);
+
+    final response = await categoryRepository.getCategoriesData(page);
+
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
+
+    isLoading.value = false;
+
     response.fold(
-      onSuccess:(data){
-        isLoading.value = false;
-        if(data['status']==1){
-          categoriesModel=CategoriesModel.fromJson(data);
-          categoriesList.value=categoriesModel?.data?.data??[];
-          categoriesList.refresh();
-          if(currantPage.value==categoriesModel?.data?.lastPage){
-            isScroll.value=false;
+      onSuccess: (data) {
+        if (data['status'] == 1) {
+          categoriesModel =
+              CategoriesModel.fromJson(data);
+
+          final newItems =
+              categoriesModel?.data?.data ?? [];
+
+          if (page == 1) {
+            categoriesList.value = newItems;
+
+            CacheService.save(
+              _cacheCategoryKey,
+              data,
+            );
+          } else {
+            categoriesList.addAll(newItems);
           }
-        }else{
-          commonToast(data['data']['message']??'');
+
+          categoriesList.refresh();
+
+          if (categoriesModel?.data?.currentPage ==
+              categoriesModel?.data?.lastPage) {
+            isScroll.value = false;
+          } else {
+            isScroll.value = true;
+          }
+        } else {
+          commonToast(type: AppSnackBarType.error, 
+            data['data']['message'] ?? '',
+          );
         }
       },
-      onFailure:(reason,message,errors){
+      onFailure: (reason,
+          message,
+          errors,) {
         errorMessage.value = message;
-        commonToast(message);
+
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
-    Get.back();
   }
 
-  searchCategoryData({required String name}) async{
+  Future<void> searchCategoryData({
+    required String name,
+  }) async {
     Loader.showLoader();
-    final response=await searchRepository.getSearchData(type:"category",name:name);
+
+    final response =
+    await searchRepository.getSearchData(
+      type: "category",
+      name: name,
+    );
+
     response.fold(
-      onSuccess:(data){
+      onSuccess: (data) {
         categoriesList.clear();
-        if(data['status']==1){
-          for(int i=0;i<data['data'].length;i++){
-            categoriesList.add(CategoryData.fromJson(data['data'][i]));
+
+        if (data['status'] == 1) {
+          for (
+          int i = 0;
+          i < data['data'].length;
+          i++
+          ) {
+            categoriesList.add(
+              CategoryData.fromJson(
+                data['data'][i],
+              ),
+            );
           }
+
           categoriesList.refresh();
-        }else{
-          commonToast(data['data']['message']??'');
+        } else {
+          commonToast(type: AppSnackBarType.error, 
+            data['data']['message'] ?? '',
+          );
         }
       },
-      onFailure:(reason,message,errors){
-        commonToast(message);
+      onFailure: (reason,
+          message,
+          errors,) {
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
-    Get.back();
+
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
   }
 
-  addCategoriesData({
+  Future<void> addCategoriesData({
     required bool isUpdate,
     required int categoryId,
     required String name,
@@ -102,56 +222,127 @@ class CategoryController extends GetxController{
     required String status,
     required String? imagePath,
     required String? iconImagePath,
-  }) async{
+  }) async {
     Loader.showLoader();
-    String url=isUpdate?API.baseUrl+API.updateCategoryUrl:API.baseUrl+API.addCategoryUrl;
-    var data=isUpdate?{
-      'store_id':Prefs.getStoreID(),
-      'category_id':categoryId.toString(),
-      'name':name,
-      'trending':trending,
-      'status':status
-    }:{
-      'store_id':Prefs.getStoreID(),
-      'name':name,
-      'trending':trending,
-      'status':status
+
+    final String url = isUpdate
+        ? API.baseUrl + API.updateCategoryUrl
+        : API.baseUrl + API.addCategoryUrl;
+
+    final Map<String, String> data = isUpdate
+        ? {
+      'store_id': Prefs.getStoreID(),
+      'category_id': categoryId.toString(),
+      'name': name,
+      'trending': trending,
+      'status': status,
+    }
+        : {
+      'store_id': Prefs.getStoreID(),
+      'name': name,
+      'trending': trending,
+      'status': status,
     };
-    var request=http.MultipartRequest('POST',Uri.parse(url));
+
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse(url),
+    );
+
     request.fields.addAll(data);
-    if(imagePath!=null&&imagePath.isNotEmpty){
-      request.files.add(await http.MultipartFile.fromPath('image',imagePath));
+
+    if (imagePath != null &&
+        imagePath.isNotEmpty) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'image',
+          imagePath,
+        ),
+      );
     }
-    if(iconImagePath!=null&&iconImagePath.isNotEmpty){
-      request.files.add(await http.MultipartFile.fromPath('icon_image',iconImagePath));
+
+    if (iconImagePath != null &&
+        iconImagePath.isNotEmpty) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'icon_image',
+          iconImagePath,
+        ),
+      );
     }
+
     request.headers.addAll({
-      "Authorization":'Bearer ${Prefs.getToken()}',
-      HttpHeaders.cacheControlHeader:"no-cache",
+      "Authorization":
+      'Bearer ${Prefs.getToken()}',
+      'Cache-Control': 'no-cache',
     });
-    http.StreamedResponse response=await request.send();
+
+    final http.StreamedResponse response =
+    await request.send();
+
     Loader.hideLoader();
-    if(response.statusCode==200){
-      var responseData=await response.stream.bytesToString();
-      var decodedData=jsonDecode(responseData);
-      commonToast(decodedData['data']['message']);
-      getCategoryData(currantPage.value);
-    }else{
-      commonToast(response.reasonPhrase??'');
+
+    if (response.statusCode == 200) {
+      getCategoryData(
+        currantPage.value,
+      );
+    } else {
+      commonToast(type: AppSnackBarType.error, 
+        response.reasonPhrase ?? '',
+      );
     }
   }
 
-  deleteCategoriesData({required int categoryId}) async{
-    Loader.showLoader();
-    final response=await categoryRepository.deleteCategoriesData(categoryId:categoryId);
+  Future<void> deleteCategoriesData({
+    required int categoryId,
+  }) async {
+    final response =
+    await categoryRepository.deleteCategoriesData(
+      categoryId: categoryId,
+    );
+
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
+
     response.fold(
-      onSuccess:(data){
-        commonToast(data['data']['message']??'');
-        getCategoryData(currantPage.value);
+      onSuccess: (data) {
+        if (data['status'] == 1) {
+          categoriesList.removeWhere(
+                (category) =>
+            category.id == categoryId,
+          );
+
+          if (categoriesModel?.data?.total != null &&
+              categoriesModel!.data!.total! > 0) {
+            categoriesModel!.data!.total =
+                categoriesModel!.data!.total! - 1;
+          }
+
+          commonToast(type: AppSnackBarType.success, 
+            data['data']['message'] ?? '',
+          );
+        } else {
+          commonToast(type: AppSnackBarType.error, 
+            data['data']['message'] ??
+                'Delete failed',
+          );
+        }
       },
-      onFailure:(reason,message,errors){
-        commonToast(message);
+      onFailure: (reason,
+          message,
+          errors,) {
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
   }
+
+  @override
+  void onClose() {
+    categoryName.dispose();
+    searchController.dispose();
+
+    super.onClose();
+  }
 }
+

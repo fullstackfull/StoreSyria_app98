@@ -3,47 +3,158 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
 import 'package:store_go_app/config/repository/coupon_repository.dart';
 import 'package:store_go_app/core/model/coupon_model.dart';
 import 'package:store_go_app/core/model/view_used_coupon_model.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
+import 'cahe.dart';
+import 'store_change_service.dart';
 
-class NewCouponController extends GetxController {
-  CouponRepository couponRepository = CouponRepository();
+class NewCouponController extends GetxController implements StoreAware {
+  // مفتاح الكاش الخاص بأول صفحة من الكوبونات
+  static const String _cacheCouponKey = 'home_coupon_list_data';
+
+  final CouponRepository couponRepository = CouponRepository();
 
   CouponModel? couponModel;
   ViewUsedCouponModel? viewUsedCouponModel;
 
-  RxList<CouponData> couponsList = <CouponData>[].obs;
-  RxList<ViewUsedCouponData> viewCouponsList = <ViewUsedCouponData>[].obs;
+  // ============================================================
+  // LISTS
+  // ============================================================
 
-  TextEditingController couponNameController = TextEditingController();
-  TextEditingController discountController = TextEditingController();
-  TextEditingController limitController = TextEditingController();
-  TextEditingController expDateController = TextEditingController();
-  TextEditingController couponController = TextEditingController();
-  TextEditingController searchController = TextEditingController();
+  final RxList<CouponData> couponsList =
+      <CouponData>[].obs;
 
-  RxBool isFlat = true.obs;
-  RxBool isStatus = true.obs;
+  final RxList<ViewUsedCouponData> viewCouponsList =
+      <ViewUsedCouponData>[].obs;
 
-  RxBool isLoading = false.obs;
-  RxBool isDeleteLoading = false.obs;
+  // ============================================================
+  // FORM CONTROLLERS
+  // ============================================================
 
-  RxBool isDataAvailable = false.obs;
+  final TextEditingController couponNameController =
+  TextEditingController();
 
-  RxString errorMessage = ''.obs;
+  final TextEditingController discountController =
+  TextEditingController();
 
-  RxString couponType = "flat".obs;
-  RxString status = "1".obs;
+  final TextEditingController limitController =
+  TextEditingController();
 
-  RxInt currantPage = 1.obs;
-  RxBool isScroll = true.obs;
+  final TextEditingController expDateController =
+  TextEditingController();
 
+  final TextEditingController couponController =
+  TextEditingController();
 
-  pickDate(BuildContext context) async {
+  final TextEditingController searchController =
+  TextEditingController();
+
+  // ============================================================
+  // FORM STATE
+  // ============================================================
+
+  final RxBool isFlat = true.obs;
+
+  final RxBool isStatus = true.obs;
+
+  final RxString couponType = "flat".obs;
+
+  final RxString status = "1".obs;
+
+  // ============================================================
+  // COUPON LIST LOADING
+  // ============================================================
+
+  final RxBool isLoading = false.obs;
+
+  final RxBool isLoadingMore = false.obs;
+
+  final RxBool isDeleteLoading = false.obs;
+
+  final RxBool isDataAvailable = false.obs;
+
+  // ============================================================
+  // COUPON LIST ERROR
+  // ============================================================
+
+  final RxString errorMessage = ''.obs;
+
+  // ============================================================
+  // PAGINATION
+  // ============================================================
+
+  final RxInt currentPage = 1.obs;
+
+  final RxInt lastPage = 1.obs;
+
+  final RxBool hasMore = true.obs;
+
+  // ============================================================
+  // USED COUPON DETAILS
+  // ============================================================
+
+  /// Loading خاص بتفاصيل الكوبون
+  final RxBool isUsedCouponLoading = false.obs;
+
+  /// خطأ حقيقي مثل مشكلة اتصال أو Server Error
+  final RxString usedCouponErrorMessage = ''.obs;
+
+  /// رسالة عندما لا يوجد بيانات للكوبون
+  final RxString usedCouponEmptyMessage = ''.obs;
+
+  // ============================================================
+  // LIFECYCLE
+  // ============================================================
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    // نحمّل آخر بيانات محفوظة محلياً (صفحة ١) فوراً عشان الشاشة
+    // تفتح مباشرة بدون ما تنتظر السيرفر. الطلب الحقيقي بيصير
+    // بعدها بالخلفية (زي ما هو مبرمج أصلاً بالشاشة).
+    _loadCachedCoupons();
+
+    // نسجل هاد الكنترولر بالسيرفيس المركزي عشان ينعمله reset
+    // تلقائياً لما يتغير المتجر.
+    StoreChangeService.instance.register(() => this);
+  }
+
+  void _loadCachedCoupons() {
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheCouponKey);
+    if (cached == null) return;
+    try {
+      couponModel = CouponModel.fromJson(cached);
+
+      final pagination = couponModel?.data;
+      couponsList.assignAll(pagination?.data ?? []);
+
+      currentPage.value = pagination?.currentPage ?? 1;
+      lastPage.value = pagination?.lastPage ?? 1;
+      hasMore.value = currentPage.value < lastPage.value;
+    } catch (_) {
+      couponModel = null;
+    }
+  }
+
+  /// بتنستدعى تلقائياً من StoreChangeService لما يتغير المتجر:
+  /// بتمسح القائمة + الكاش المحلي وترجع تجيب صفحة ١ من جديد
+  /// (بنفس منطق awaitRefresh() الموجود أصلاً).
+  @override
+  void resetForStoreChange() {
+    couponModel = null;
+    CacheService.clear(_cacheCouponKey);
+    awaitRefresh();
+  }
+
+  // ============================================================
+  // DATE
+  // ============================================================
+
+  Future<void> pickDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -66,129 +177,355 @@ class NewCouponController extends GetxController {
     if (pickedDate != null) {
       expDateController.text =
           DateFormat('yyyy-MM-dd').format(pickedDate);
+
       update();
     }
   }
 
+  // ============================================================
+  // GET COUPON DATA
+  // ============================================================
 
-  getCouponData(int page) async {
-
-    if(page == 1){
-      couponsList.clear();
-      isScroll.value = true;
+  Future<void> getCouponData(int page) async {
+    // منع تكرار الطلب
+    if (isLoading.value || isLoadingMore.value) {
+      return;
     }
 
-    isLoading.value = true;
-    isDataAvailable.value = true;
-    errorMessage.value = '';
+    // التأكد من وجود صفحة
+    if (page > lastPage.value && couponsList.isNotEmpty) {
+      hasMore.value = false;
+      return;
+    }
 
-    final response = await couponRepository.getCouponData(page);
+    // ==========================================================
+    // FIRST PAGE
+    // ==========================================================
 
-    isLoading.value = false;
-    isDataAvailable.value = false;
+    if (page == 1) {
+      isLoading.value = true;
+      isDataAvailable.value = true;
 
+      errorMessage.value = '';
 
-    response.fold(
-      onSuccess: (data){
+      currentPage.value = 1;
+      lastPage.value = 1;
+      hasMore.value = true;
 
-        if(data['status'] == 1){
+      couponsList.clear();
+    }
 
-          couponModel = CouponModel.fromJson(data);
+    // ==========================================================
+    // PAGINATION
+    // ==========================================================
 
-          final newData = couponModel?.data?.data ?? [];
+    else {
+      if (!hasMore.value) {
+        return;
+      }
 
-          if(newData.isNotEmpty){
-            couponsList.addAll(newData);
+      isLoadingMore.value = true;
+    }
+
+    try {
+      final response =
+      await couponRepository.getCouponData(page);
+
+      response.fold(
+        onSuccess: (data) {
+          if (data['status'] == 1) {
+            couponModel =
+                CouponModel.fromJson(data);
+
+            final pagination =
+                couponModel?.data;
+
+            final newItems =
+                pagination?.data ?? [];
+
+            // ==================================================
+            // ADD DATA
+            // ==================================================
+
+            if (page == 1) {
+              couponsList.assignAll(newItems);
+
+              // نخزن آخر رد ناجح لصفحة ١ محلياً عشان يستخدم كبيانات
+              // فورية بالمرة الجاية اللي المستخدم يفتح فيها الشاشة.
+              CacheService.save(_cacheCouponKey, data);
+            } else {
+              couponsList.addAll(newItems);
+            }
+
+            // ==================================================
+            // PAGINATION DATA
+            // ==================================================
+
+            currentPage.value =
+                pagination?.currentPage ?? page;
+
+            lastPage.value =
+                pagination?.lastPage ?? page;
+
+            hasMore.value =
+                currentPage.value < lastPage.value;
+
             couponsList.refresh();
+
+            log(
+              'Coupons => page: ${currentPage.value} '
+                  '/ lastPage: ${lastPage.value} '
+                  '/ hasMore: ${hasMore.value}',
+            );
+          } else {
+            commonToast(type: AppSnackBarType.error, 
+              data['message'] ??
+                  "Something went wrong",
+            );
           }
+        },
 
+        onFailure: (
+            reason,
+            message,
+            errors,
+            ) {
+          errorMessage.value =
+              message ?? "Connection error";
 
-          if(currantPage.value >=
-              (couponModel?.data?.lastPage ?? 1)){
-
-            isScroll.value = false;
-
-          }else{
-
-            isScroll.value = true;
-
-          }
-
-        }else{
-
-          commonToast(
-            data['message'] ?? "Something went wrong",
+          commonToast(type: AppSnackBarType.error, 
+            message ?? "Connection error",
           );
+        },
+      );
+    } catch (e) {
+      log(
+        "getCouponData error => $e",
+      );
 
-        }
+      errorMessage.value =
+      "Connection error";
 
-      },
-
-      onFailure: (reason,message,errors){
-
-        errorMessage.value =
-            message ?? "Connection error";
-
-        commonToast(
-            message ?? "Connection error"
-        );
-
-        isScroll.value = true;
-
-      },
-    );
+      commonToast(type: AppSnackBarType.error, 
+        "Connection error",
+      );
+    } finally {
+      isLoading.value = false;
+      isLoadingMore.value = false;
+      isDataAvailable.value = false;
+    }
   }
 
+  // ============================================================
+  // LOAD NEXT PAGE
+  // ============================================================
 
+  Future<void> loadNextPage() async {
+    if (!hasMore.value) {
+      return;
+    }
 
-  getUsedCouponData(int couponId) async {
+    if (isLoadingMore.value) {
+      return;
+    }
 
-    isLoading.value = true;
+    if (isLoading.value) {
+      return;
+    }
 
-    final response =
-    await couponRepository.getUsedCouponData(couponId);
+    final int nextPage =
+        currentPage.value + 1;
 
-    isLoading.value = false;
-
-
-    response.fold(
-      onSuccess: (data){
-
-        if(data['status'] == 1){
-
-          viewUsedCouponModel =
-              ViewUsedCouponModel.fromJson(data);
-
-          viewCouponsList.value =
-              viewUsedCouponModel?.data ?? [];
-
-          viewCouponsList.refresh();
-
-        }else{
-
-          commonToast(
-            data['data']['message'] ??
-                "No data found",
-          );
-
-        }
-
-      },
-
-      onFailure: (reason,message,errors){
-
-        commonToast(
-          message ?? "Error loading data",
-        );
-
-      },
-    );
+    await getCouponData(nextPage);
   }
 
+  // ============================================================
+  // REFRESH COUPONS
+  // ============================================================
 
+  Future<void> refreshCoupons() async {
+    currentPage.value = 1;
+    lastPage.value = 1;
+    hasMore.value = true;
 
-  generateCodeData() async {
+    couponsList.clear();
 
+    await getCouponData(1);
+  }
+
+  // ============================================================
+  // GET USED COUPON DATA
+  // ============================================================
+
+  Future<void> getUsedCouponData(int couponId) async {
+    // ==========================================================
+    // START LOADING
+    // ==========================================================
+
+    isUsedCouponLoading.value = true;
+
+    // مهم جداً
+    // نمسح بيانات الكوبون السابق
+    viewCouponsList.clear();
+
+    viewUsedCouponModel = null;
+
+    // نمسح الحالات السابقة
+    usedCouponErrorMessage.value = '';
+    usedCouponEmptyMessage.value = '';
+
+    log(
+      'Loading used coupon => couponId: $couponId',
+    );
+
+    try {
+      final response =
+      await couponRepository.getUsedCouponData(
+        couponId,
+      );
+
+      response.fold(
+        // ======================================================
+        // SUCCESS RESPONSE
+        // ======================================================
+
+        onSuccess: (data) {
+          log(
+            'Used coupon response => $data',
+          );
+
+          // ====================================================
+          // STATUS 1
+          // ====================================================
+
+          if (data['status'] == 1) {
+            viewUsedCouponModel =
+                ViewUsedCouponModel.fromJson(data);
+
+            final List<ViewUsedCouponData> result =
+                viewUsedCouponModel?.data ?? [];
+
+            // API success لكن data فاضية
+            if (result.isEmpty) {
+              usedCouponEmptyMessage.value =
+              'Data not found!';
+            } else {
+              viewCouponsList.assignAll(result);
+            }
+
+            return;
+          }
+
+          // ====================================================
+          // STATUS 0
+          //
+          // مثال:
+          //
+          // {
+          //   status: 0,
+          //   message: fail,
+          //   data: {
+          //      message: Data not found!
+          //   }
+          // }
+          // ====================================================
+
+          String message = 'Data not found!';
+
+          final dynamic responseData =
+          data['data'];
+
+          if (responseData is Map) {
+            final dynamic apiMessage =
+            responseData['message'];
+
+            if (apiMessage != null &&
+                apiMessage
+                    .toString()
+                    .trim()
+                    .isNotEmpty) {
+              message =
+                  apiMessage.toString();
+            }
+          }
+
+          log(
+            'Used coupon has no data => $message',
+          );
+
+          // مهم:
+          // لا نضعها داخل usedCouponErrorMessage
+          //
+          // لأنها ليست Error
+          // وإنما Empty State
+          usedCouponEmptyMessage.value =
+              message;
+        },
+
+        // ======================================================
+        // REAL FAILURE
+        // ======================================================
+
+        onFailure: (
+            reason,
+            message,
+            errors,
+            ) {
+          log(
+            'Used coupon API failure => $message',
+          );
+
+          usedCouponErrorMessage.value =
+              message ??
+                  'Something went wrong';
+
+          commonToast(type: AppSnackBarType.error, 
+            message ??
+                'Something went wrong',
+          );
+        },
+      );
+    } catch (e) {
+      // ========================================================
+      // EXCEPTION
+      // ========================================================
+
+      log(
+        'getUsedCouponData exception => $e',
+      );
+
+      usedCouponErrorMessage.value =
+      'Something went wrong';
+
+      commonToast(type: AppSnackBarType.error, 
+        'Something went wrong',
+      );
+    } finally {
+      isUsedCouponLoading.value = false;
+    }
+  }
+
+  // ============================================================
+  // CLEAR USED COUPON DATA
+  // ============================================================
+
+  void clearUsedCouponData() {
+    viewCouponsList.clear();
+
+    viewUsedCouponModel = null;
+
+    usedCouponErrorMessage.value = '';
+
+    usedCouponEmptyMessage.value = '';
+
+    isUsedCouponLoading.value = false;
+  }
+
+  // ============================================================
+  // GENERATE COUPON CODE
+  // ============================================================
+
+  Future<void> generateCodeData() async {
     isLoading.value = true;
 
     final response =
@@ -196,51 +533,53 @@ class NewCouponController extends GetxController {
 
     isLoading.value = false;
 
-
     response.fold(
-      onSuccess: (data){
+      onSuccess: (data) {
+        log(
+          "generate code response => $data",
+        );
 
-        log("response ---> $data");
-
-        if(data['status']==1){
+        if (data['status'] == 1) {
           couponController.text =
           data['data'];
         }
-
       },
 
-      onFailure: (reason,message,errors){
-
-        commonToast(
-          message ?? "Error generating code",
+      onFailure: (
+          reason,
+          message,
+          errors,
+          ) {
+        commonToast(type: AppSnackBarType.error, 
+          message ??
+              "Error generating code",
         );
-
       },
     );
   }
 
+  // ============================================================
+  // ADD / UPDATE COUPON
+  // ============================================================
 
-
-  addCoupon({
+  Future<void> addCoupon({
     required bool isUpdate,
     required String couponId,
     required String couponName,
     required String couponType,
     required String disAmount,
     required String couponLimit,
+    required int status,
     required String date,
     required String code,
-
   }) async {
-
-
     isLoading.value = true;
-
 
     final response =
     await couponRepository.addCouponData(
       isUpdate: isUpdate,
       couponId: couponId,
+      status: status,
       couponName: couponName,
       couponType: couponType,
       disAmount: disAmount,
@@ -249,154 +588,155 @@ class NewCouponController extends GetxController {
       code: code,
     );
 
-
     isLoading.value = false;
 
-
-
     response.fold(
-      onSuccess: (data){
+      onSuccess: (data) {
+        Get.back();
 
-        if(data['status']==1){
-
-          commonToast(
-            data['data']['message'] ??
+        if (data['status'] == 1) {
+          commonToast(type: AppSnackBarType.success, 
+            data['data']?['message'] ??
                 "Success",
           );
 
-
-          couponsList.clear();
-          currantPage.value = 1;
-          isScroll.value = true;
-
-          getCouponData(currantPage.value);
-
           clearCouponFields();
 
-          Get.back();
+          awaitRefresh();
 
-        }else{
-
-          commonToast(
-            data['data']['message'] ??
+        } else {
+          commonToast(type: AppSnackBarType.error, 
+            data['data']?['message'] ??
                 "Failed",
           );
-
         }
-
       },
 
-      onFailure: (reason,message,errors){
-
+      onFailure: (
+          reason,
+          message,
+          errors,
+          ) {
         errorMessage.value =
-            message ?? "Error adding coupon";
+            message ??
+                "Error adding coupon";
 
-        commonToast(
-            message ?? "Error adding coupon"
+        commonToast(type: AppSnackBarType.error, 
+          message ??
+              "Error adding coupon",
         );
-
       },
     );
   }
 
+  // ============================================================
+  // REFRESH AFTER ADD / UPDATE / DELETE
+  // ============================================================
 
+  Future<void> awaitRefresh() async {
+    currentPage.value = 1;
+    lastPage.value = 1;
+    hasMore.value = true;
 
-  deleteCouponData({
+    couponsList.clear();
+
+    await getCouponData(1);
+  }
+
+  // ============================================================
+  // DELETE COUPON
+  // ============================================================
+
+  Future<void> deleteCouponData({
     required String couponId,
   }) async {
-
-
     isDeleteLoading.value = true;
 
-
     final response =
-    await couponRepository.deleteCouponData(couponId);
-
-
+    await couponRepository.deleteCouponData(
+      couponId,
+    );
 
     isDeleteLoading.value = false;
 
-
-
     response.fold(
-      onSuccess: (data){
-
-        if(data['status']==1){
-
-          commonToast(
-              data['data']['message'] ??
-                  "Deleted successfully"
+      onSuccess: (data) {
+        if (data['status'] == 1) {
+          commonToast(type: AppSnackBarType.success, 
+            data['data']?['message'] ??
+                "Deleted successfully",
           );
 
+          awaitRefresh();
 
-          couponsList.clear();
-
-          currantPage.value = 1;
-
-          isScroll.value = true;
-
-          getCouponData(currantPage.value);
-
-
-
-          if(Get.isBottomSheetOpen ?? false){
+          if (Get.isBottomSheetOpen ?? false) {
             Get.back();
           }
-
-
-        }else{
-
-          commonToast(
-              data['data']['message'] ??
-                  "Failed"
+        } else {
+          commonToast(type: AppSnackBarType.error, 
+            data['data']?['message'] ??
+                "Failed",
           );
-
         }
-
       },
 
-
-      onFailure: (reason,message,errors){
-
+      onFailure: (
+          reason,
+          message,
+          errors,
+          ) {
         errorMessage.value =
-            message ?? "Delete error";
+            message ??
+                "Delete error";
 
-        commonToast(
-            message ?? "Delete error"
+        commonToast(type: AppSnackBarType.error, 
+          message ??
+              "Delete error",
         );
-
       },
     );
   }
 
+  // ============================================================
+  // CLEAR FORM
+  // ============================================================
 
-
-  void clearCouponFields(){
-
+  void clearCouponFields() {
     couponNameController.clear();
+
     discountController.clear();
+
     limitController.clear();
+
     expDateController.clear();
+
     couponController.clear();
 
     isFlat.value = true;
+
     isStatus.value = true;
 
     couponType.value = "flat";
-    status.value = "1";
 
+    status.value = "1";
   }
 
-
+  // ============================================================
+  // DISPOSE
+  // ============================================================
 
   @override
   void onClose() {
-
     couponNameController.dispose();
+
     discountController.dispose();
+
     limitController.dispose();
+
     expDateController.dispose();
+
     couponController.dispose();
+
     searchController.dispose();
 
     super.onClose();

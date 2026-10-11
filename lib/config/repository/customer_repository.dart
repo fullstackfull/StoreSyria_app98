@@ -1,0 +1,76 @@
+import '../../network/network.dart';
+import '../../utils/base_api.dart';
+import '../../utils/prefer.dart';
+
+class CustomerRepository {
+
+  Future<dynamic> getCustomersData(int page) async {
+    String endPoint = '${API.customersUrl}${API.pageUrl}$page';
+
+    var response = await NetworkHttps.getRequest(endPoint);
+    return response;
+  }
+
+  Future<dynamic> getStatesData() async {
+    String endPoint = '${API.getStatesUrl}?country_id=215';
+
+    var response = await NetworkHttps.getRequest(endPoint);
+    return response;
+  }
+
+  Future<dynamic> searchCustomerData(String name) async {
+    String endPoint = '${API.searchCustomerUrl}${API.storeIdUrl}${Prefs.getStoreID()}';
+
+    var response = await NetworkHttps.postRequest(endPoint, {"name": name},
+    );
+    return response;
+  }
+
+  Future<dynamic> addCustomerData({
+    required Map<String, dynamic> data,
+  }) async {
+    String endPoint = '${API.addCustomerUrl}${API.storeIdUrl}${Prefs.getStoreID()}';
+
+    var response = await NetworkHttps.postRequest(
+      endPoint,
+      data,
+    );
+
+    return response;
+  }
+
+  Future<dynamic> updateCustomerData({
+    required Map<String, dynamic> data,
+    required String customerId,
+  }) async {
+    String endPoint = '${API.updateCustomerUrl}${API.storeIdUrl}${Prefs.getStoreID()}&customer_id=$customerId';
+
+    var response = await NetworkHttps.postRequest(
+      endPoint,
+      data,
+    );
+
+    return response;
+  }
+
+  Future<dynamic> deleteCustomerData({
+    required String customerId,
+  }) async {
+    String endPoint = '${API.deleteCustomerUrl}${API.customerIdUrl}${customerId}${API.andStoreIdUrl}${Prefs.getStoreID()}';
+
+    var response = await NetworkHttps.deleteRequest(endPoint);
+
+    return response;
+  }
+
+  Future<dynamic> getCustomerOrdersData({
+    required String customerId,
+    required int page,
+  }) async {
+    String endPoint =
+        '${API.customerOrdersUrl}?id=$customerId${API.andStoreIdUrl}${Prefs.getStoreID()}${API.andPageUrl}$page&per_page=10';
+
+    var response = await NetworkHttps.getRequest(endPoint);
+    return response;
+  }
+}

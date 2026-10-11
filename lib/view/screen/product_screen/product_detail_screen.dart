@@ -1,733 +1,1472 @@
-// ignore_for_file: prefer_const_constructors, must_be_immutable, avoid_print, sized_box_for_whitespace
-
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:store_go_app/utils/colors.dart';
-import 'package:store_go_app/utils/constant.dart';
-import 'package:store_go_app/utils/helper.dart';
-import 'package:store_go_app/utils/prefer.dart';
-import 'package:store_go_app/utils/text_style.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:store_go_app/view/widget/icon_and_image.dart';
+import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
-import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/add_rating_screen.dart';
-import 'package:store_go_app/core/controller/product_controller/add_review_controller.dart';
+import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/core/controller/product_controller/product_detail_controller.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
+import 'package:store_go_app/core/controller/product_controller/add_review_controller.dart';
+import '../../../core/model/product_model.dart';
+import '../../../utils/helper.dart';
+import '../../new_widgets/convert_to_ago.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/app_dialog.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String categoryId;
+  final ProductData product;
   final String productId;
   final String id;
 
-  const ProductDetailScreen({super.key, required this.categoryId, required this.productId, required this.id});
+  const ProductDetailScreen({
+    super.key,
+    required this.categoryId,
+    required this.productId,
+    required this.id,
+    required this.product,
+  });
 
   @override
-  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  State<ProductDetailScreen> createState() =>
+      _ProductDetailScreenState();
 }
 
-class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  final ProductDetailController productDetailController = Get.put(ProductDetailController());
-  final AddReviewController reviewController = Get.put(AddReviewController());
+class _ProductDetailScreenState
+    extends State<ProductDetailScreen> {
+  final ProductDetailController productDetailController =
+  Get.put(ProductDetailController());
 
-  String? _originalCoverImage;
+  final AddReviewController reviewController =
+  Get.put(AddReviewController());
 
-  bool _hasCurrentUserReview() {
-    final currentUserId = reviewController.userId.value.toString();
+  final PageController _pageController = PageController();
 
-    return reviewController.reviewList.any(
-          (review) => review.userId?.toString() == currentUserId,
-    );
-  }
+  int _currentImageIndex = 0;
 
   @override
   void initState() {
     super.initState();
+
+    productDetailController.setProduct(widget.product);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getData();
-      if (productDetailController.product != null) {
-        _originalCoverImage = _getFullImageUrl(productDetailController.product!.coverImagePath);
-        if (_originalCoverImage == null || _originalCoverImage!.isEmpty) {
-          final model = productDetailController.productDetailModel;
-          if (model?.data?.subImage != null && model!.data!.subImage!.isNotEmpty) {
-            _originalCoverImage = model.data!.subImage![0].imagePathFullUrl;
-          }
-        }
-      }
+      _loadData();
     });
   }
 
-  void getData() {
-    reviewController.getReviewData(widget.productId);
-    productDetailController.getProductDetail(widget.productId);
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
-  String _getFullImageUrl(String? relativePath) {
-    if (relativePath == null || relativePath.isEmpty) return '';
-    if (relativePath.startsWith('http')) return relativePath;
+  Future<void> _loadData() async {
+    await productDetailController.getProductDetail(
+      widget.productId,
+    );
 
-    final baseUrl = Prefs.getString(AppConstant.imageUrl);
-    if (baseUrl != null && baseUrl.isNotEmpty && baseUrl.startsWith('http')) {
-      final cleanBase = baseUrl.endsWith('/') ? baseUrl : '$baseUrl/';
-      final cleanPath = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
-      return '$cleanBase$cleanPath';
+    await reviewController.getReviewData(
+      widget.productId,
+    );
+
+    if (mounted) {
+      setState(() {});
     }
-    return getImageUrl(relativePath);
   }
 
-  void _resetToOriginalImage() {
-    if (_originalCoverImage != null && _originalCoverImage!.isNotEmpty) {
-      productDetailController.productImage.value = _originalCoverImage!;
-    }
+  bool _hasCurrentUserReview() {
+    final currentUserId =
+    reviewController.userId.value.toString();
+
+    return reviewController.reviewList.any(
+          (review) =>
+      review.userId?.toString() == currentUserId,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround;
-    final cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-    final borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5);
-    final primaryTextColor = isDark ? Colors.white : AppColor.cText;
-    final secondaryTextColor = isDark ? Colors.grey.shade400 : AppColor.cFont;
-    final accentColor = AppColor.cGreenFont;
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
+    final backgroundColor = isDark
+        ? DarkThemeColor.cBackGround
+        : AppColor.cLight;
+
+    final cardColor = isDark
+        ? DarkThemeColor.cCardBackground
+        : Colors.white;
+
+    final borderColor = isDark
+        ? DarkThemeColor.cBorder
+        : const Color(0xFFE9EAEE);
+
+    final primaryTextColor =
+    isDark ? Colors.white : AppColor.cText;
+
+    final secondaryTextColor =
+    isDark ? Colors.grey.shade400 : AppColor.cFont;
 
     return Scaffold(
-      backgroundColor: bgColor,
-      appBar: simpleAppBar(title: "product_details".tr),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: 90.h),
+      appBar: simpleAppBar(
+        title: 'product_details'.tr,
+        label: null,
+        isBack: true,
+        onNewLabelTap: () {  },
+      ),
+      backgroundColor: backgroundColor,
+      body: SafeArea(
         child: GetBuilder<ProductDetailController>(
           builder: (controller) {
-            final model = controller.productDetailModel;
-            final product = controller.product;
+            final ProductData? product = controller.product;
 
-            if (model == null || product == null) {
-              return SizedBox(height: 600.h, child: const Center(child: LoadingWidget()));
+            if (product == null) {
+              return const ShimmerDetails(bigImage: true);
             }
 
-            if (_originalCoverImage == null || _originalCoverImage!.isEmpty) {
-              _originalCoverImage = _getFullImageUrl(product.coverImagePath);
-            }
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildImageGallery(product, model, cardColor, borderColor, isDark),
-
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      verticalSpace(24.h),
-
-                      if (product.categoryName != null && product.categoryName!.isNotEmpty)
-                        Text(
-                          product.categoryName!,
-                          style: pRegular12.copyWith(color: accentColor, fontWeight: FontWeight.w600),
-                        ),
-                      verticalSpace(6.h),
-                      Text(
-                        product.name ?? "no_name".tr,
-                        style: pSemiBold23.copyWith(fontSize: 22.sp, color: primaryTextColor),
-                        maxLines: 2,
-                      ),
-
-                      verticalSpace(12.h),
-
-                      Row(
-                        children: [
-                          RatingBar.builder(
-                            initialRating: double.tryParse(product.averageRating?.toString() ?? "0") ?? 0.0,
-                            minRating: 1,
-                            direction: Axis.horizontal,
-                            allowHalfRating: true,
-                            itemCount: 5,
-                            itemSize: 16.sp,
-                            unratedColor: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-                            itemBuilder: (_, __) => Icon(Icons.star_rate_rounded, color: const Color(0xFFFFC107)),
-                            onRatingUpdate: (rating) {},
-                          ),
-                          horizontalSpace(8.w),
-                          Text(
-                            "${product.averageRating ?? "0.0"} | ${reviewController.reviewList.length} Reviews",
-                            style: pRegular12.copyWith(color: secondaryTextColor),
-                          ),
-                        ],
-                      ),
-
-                      verticalSpace(20.h),
-
-                      _buildPriceCard(product, cardColor, borderColor, isDark, accentColor),
-
-                      verticalSpace(16.h),
-
-                      _buildStockChip(product, isDark),
-
-                      verticalSpace(24.h),
-
-                      _buildDescriptionSections(product, cardColor, borderColor, isDark),
-
-                      verticalSpace(24.h),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("ratings".tr, style: pSemiBold18.copyWith(fontSize: 18.sp, color: primaryTextColor)),
-                          Obx(() {
-                            final hasMyReview = _hasCurrentUserReview();
-
-                            return GestureDetector(
-                              onTap: hasMyReview
-                                  ? null
-                                  : () {
-                                Get.to(() => AddRatingScreen(
-                                  id: widget.id,
-                                  categoryId: widget.categoryId,
-                                  productId: widget.productId,
-                                  isUpdate: false,
-                                ));
-                              },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12.w,
-                                  vertical: 7.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: hasMyReview
-                                      ? Colors.grey.withOpacity(0.12)
-                                      : AppColor.themeGreenColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20.r),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      hasMyReview
-                                          ? Icons.check_circle_outline
-                                          : Icons.rate_review_outlined,
-                                      size: 16.sp,
-                                      color: hasMyReview
-                                          ? Colors.grey
-                                          : AppColor.themeGreenColor,
-                                    ),
-                                    horizontalSpace(5.w),
-                                    Text(
-                                      hasMyReview
-                                          ? "Already Reviewed".tr
-                                          : "write_review".tr,
-                                      style: pMedium12.copyWith(
-                                        color: hasMyReview
-                                            ? Colors.grey
-                                            : AppColor.themeGreenColor,
-                                        fontSize: 12.sp,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
-                      verticalSpace(12.h),
-
-                      _buildReviewsList(cardColor, borderColor, primaryTextColor, secondaryTextColor, isDark),
-
-                      verticalSpace(20.h),
-                    ],
-                  ),
+            return RefreshIndicator(
+              onRefresh: _loadData,
+              child: SingleChildScrollView(
+                physics:
+                const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  16.w,
+                  10.h,
+                  16.w,
+                  30.h,
                 ),
-              ],
+                child: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: [
+                    _buildImageSlider(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      isDark: isDark,
+                    ),
+
+                    verticalSpace(18.h),
+
+                    _buildBasicInfoCard(
+                      product: product,
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      primaryTextColor:
+                      primaryTextColor,
+                      secondaryTextColor:
+                      secondaryTextColor,
+                      isDark: isDark,
+                    ),
+
+                    verticalSpace(16.h),
+
+                    _buildPropertiesCard(
+                      product: product,
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      primaryTextColor:
+                      primaryTextColor,
+                      secondaryTextColor:
+                      secondaryTextColor,
+                      isDark: isDark,
+                    ),
+
+                    verticalSpace(16.h),
+
+                    _buildStatusCard(
+                      product: product,
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      primaryTextColor:
+                      primaryTextColor,
+                      secondaryTextColor:
+                      secondaryTextColor,
+                      isDark: isDark,
+                    ),
+
+                    verticalSpace(16.h),
+
+                    _buildReviewsCard(
+                      cardColor: cardColor,
+                      borderColor: borderColor,
+                      primaryTextColor:
+                      primaryTextColor,
+                      secondaryTextColor:
+                      secondaryTextColor,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         ),
       ),
     );
   }
-
-  // --- UI Components ---
-
-  Widget _buildImageGallery(dynamic product, dynamic model, Color cardColor, Color subtleBorder, bool isDark) {
-    return Container(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: Obx(() {
-        final currentImage = productDetailController.productImage.value;
-
-        final bool isOriginal = _originalCoverImage != null &&
-            (currentImage == _originalCoverImage ||
-                (_originalCoverImage!.isNotEmpty && currentImage.contains(_originalCoverImage!.split('/').last)));
-
-        return Stack(
-          children: [
-            Column(
-              children: [
-                Container(
-                  height: 320.h,
-                  width: double.infinity,
-                  color: cardColor,
-                  child: buildCachedNetworkImage(
-                    imageUrl: _getFullImageUrl(currentImage),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-
-                if (model.data?.subImage != null && model.data!.subImage!.isNotEmpty)
-                  SizedBox(
-                    height: 70.h,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      itemCount: model.data!.subImage!.length,
-                      itemBuilder: (context, index) {
-                        final subImg = model.data!.subImage![index];
-                        final isSelected = currentImage == subImg.imagePathFullUrl;
-
-                        return GestureDetector(
-                          onTap: () {
-                            productDetailController.productImage.value = subImg.imagePathFullUrl ?? '';
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 60.w,
-                            height: 60.h,
-                            margin: EdgeInsets.only(right: 10.w),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: isSelected ? AppColor.themeGreenColor : subtleBorder,
-                                width: isSelected ? 2 : 1,
-                              ),
-                              color: cardColor,
-                            ),
-                            padding: EdgeInsets.all(4.w),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.r),
-                              child: CachedNetworkImage(
-                                imageUrl: _getFullImageUrl(subImg.imagePathFullUrl),
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(color: isDark ? Colors.grey[800] : Colors.grey[100]),
-                                errorWidget: (context, url, error) => Icon(Icons.image_not_supported, size: 20, color: Colors.grey),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-              ],
-            ),
-
-            // زر الرجوع للصورة الأصلية
-            if (!isOriginal && _originalCoverImage != null && _originalCoverImage!.isNotEmpty)
-              Positioned(
-                top: 20.h,
-                left: 20.w,
-                child: GestureDetector(
-                  onTap: _resetToOriginalImage,
-                  child: Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                        color: isDark ? Colors.black54 : Colors.white.withOpacity(0.9),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          )
-                        ]
-                    ),
-                    child: Icon(
-                        Icons.image,
-                        color: AppColor.themeGreenColor,
-                        size: 20.sp
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-      }),
-    );
-  }
-  Widget _buildPriceCard(dynamic product, Color cardColor, Color borderColor, bool isDark, Color accentColor) {
-    final double? finalPrice = double.tryParse(product.finalPrice?.toString() ?? "0");
-    final double? originalPrice = double.tryParse(product.originalPrice?.toString() ?? "0");
-
-    bool hasDiscount = originalPrice != null && originalPrice > 0 && finalPrice != null && finalPrice < originalPrice;
-    double discountPercentage = 0;
-    if (hasDiscount) {
-      discountPercentage = ((originalPrice - finalPrice) / originalPrice) * 100;
-    }
-
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "\$${product.finalPrice ?? "0"}",
-                style: pSemiBold23.copyWith(fontSize: 26.sp, color: accentColor),
-              ),
-              if (hasDiscount)
-                Text(
-                  "\$${product.originalPrice}",
-                  style: pRegular14.copyWith(
-                    decoration: TextDecoration.lineThrough,
-                    color: Colors.grey[500],
-                    fontSize: 14.sp,
-                  ),
-                ),
-            ],
-          ),
-          if (hasDiscount)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [const Color(0xFFFF6B6B), const Color(0xFFEE5A24)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Text(
-                "-${discountPercentage.toStringAsFixed(0)}%",
-                style: pBold12.copyWith(color: Colors.white, fontSize: 13.sp),
-              ),
-            ),
-        ],
-      ),
+  Widget _buildSvgImage(String url, Color background) {
+    return SvgPicture.network(
+      url,
+      fit: BoxFit.contain,
+      placeholderBuilder: (context) {
+        return Container(color: background);
+      },
     );
   }
 
-  Widget _buildStockChip(dynamic product, bool isDark) {
-    final int stock = int.tryParse(product.productStock?.toString() ?? "0") ?? 0;
-    final bool isInStock = stock > 0;
+  Widget _buildImageSlider({
+    required Color cardColor,
+    required Color borderColor,
+    required bool isDark,
+  }) {
+    final images = productDetailController.getProductImages();
 
-    final bgColor = isInStock
-        ? (isDark ? const Color(0xFF1B3A1E) : const Color(0xFFE8F5E9))
-        : (isDark ? const Color(0xFF3A1414) : const Color(0xFFFFEBEE));
-    final fgColor = isInStock
-        ? (isDark ? const Color(0xFF81C784) : const Color(0xFF2E7D32))
-        : (isDark ? const Color(0xFFE57373) : const Color(0xFFC62828));
+    final imageBackground = isDark
+        ? Colors.white.withOpacity(.05)
+        : const Color(0xFFF3F4F6);
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isInStock ? Icons.check_circle_outline : Icons.cancel_outlined,
-            color: fgColor,
-            size: 18.sp,
-          ),
-          horizontalSpace(6.w),
-          Text(
-            isInStock ? "In Stock ($stock)" : "Out of Stock",
-            style: pMedium12.copyWith(color: fgColor, fontSize: 13.sp),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDescriptionSections(dynamic product, Color cardColor, Color borderColor, bool isDark) {
-    List<Widget> widgets = [];
-
-    if (product.description != null && product.description!.isNotEmpty) {
-      widgets.add(_buildInfoCard("description".tr, product.description!, cardColor, borderColor, isDark));
-    }
-
-    if (product.otherDescriptionArray != null) {
-      for (var item in product.otherDescriptionArray!) {
-        if (item.title != null && item.title!.isNotEmpty) {
-          widgets.add(_buildInfoCard(item.title!, item.description ?? "", cardColor, borderColor, isDark));
-        }
-      }
-    }
-
-    if (widgets.isEmpty) return const SizedBox.shrink();
-
-    return Column(children: widgets);
-  }
-
-  Widget _buildInfoCard(String title, String content, Color cardColor, Color borderColor, bool isDark) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 12.h),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: borderColor),
+    if (images.isEmpty) {
+      return SizedBox(
+        width: double.infinity,
+        height: 250.h,
+        child: Icon(
+          Icons.image_not_supported_outlined,
+          size: 55.sp,
+          color: Colors.grey.shade400,
         ),
-        child: Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            tilePadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-            childrenPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-            title: Text(
-              title,
-              style: pSemiBold14.copyWith(fontSize: 15.sp, color: isDark ? Colors.white : AppColor.cText),
-            ),
-            iconColor: AppColor.themeGreenColor,
-            collapsedIconColor: isDark ? Colors.grey[500] : Colors.grey[400],
-            children: [
-              Text(
-                content,
-                style: pRegular12.copyWith(
-                  color: isDark ? Colors.grey[400] : AppColor.cFont,
-                  height: 1.6,
-                  fontSize: 13.sp,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildReviewsList(Color cardColor, Color borderColor, Color primaryTextColor, Color secondaryTextColor, bool isDark) {
-    return Obx(() {
-      if (reviewController.reviewList.isEmpty) {
-        return Container(
+    return Column(
+      children: [
+        Container(
           width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 40.h),
+          height: 260.h,
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+            borderRadius: BorderRadius.circular(14.r),
+            // border: Border.all(color: borderColor),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14.r),
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: images.length,
+              onPageChanged: (index) {
+                if (!mounted) return;
+                setState(() {
+                  _currentImageIndex = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                final imageUrl = images[index];
+                final isSvg = imageUrl.toLowerCase().trim().endsWith('.svg');
+
+                return Hero(
+                  tag: 'product_image_${widget.productId}_$index',
+                  child: isSvg
+                      ? _buildSvgImage(imageUrl, imageBackground)
+                      : CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.contain,
+                    placeholder: (context, url) {
+                      return Container(color: imageBackground);
+                    },
+                    errorWidget: (context, url, error) {
+                      return Center(
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          size: 50.sp,
+                          color: Colors.grey.shade400,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+
+        if (images.length > 1)
+          Padding(
+            padding: EdgeInsets.only(top: 10.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                images.length,
+                    (index) {
+                  final isActive = _currentImageIndex == index;
+
+                  return AnimatedContainer(
+                    curve: Curves.easeInOut,
+                    duration: const Duration(milliseconds: 250),
+                    margin: EdgeInsets.symmetric(horizontal: 3.w),
+                    width: isActive ? 11.w : 7.w,
+                    height: isActive ? 11.w : 7.w,
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? AppColor.themeNavyBlueColor
+                          : Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // BASIC INFO CARD
+  // ============================================================
+
+  Widget _buildBasicInfoCard({
+    required ProductData product,
+    required Color cardColor,
+    required Color borderColor,
+    required Color primaryTextColor,
+    required Color secondaryTextColor,
+    required bool isDark,
+  }) {
+    final String price = product.price?.toString() ?? '';
+    final String salePrice = product.salePrice?.toString() ?? '';
+    final String costPrice = product.costPrice?.toString() ?? '';
+    final String finalPrice = product.finalPrice?.toString() ?? '';
+    final String currency = productDetailController.currencySymbol.value;
+
+    final String productStock =
+        product.productStock?.toString() ?? '0';
+
+
+    return productInfoContainer(
+      backgroundColor: cardColor,
+      borderColor: borderColor,
+      child: Column(
+          children: [
+            _infoRow(
+              label: 'name'.tr,
+              value: product.name ?? '-',
+              primaryTextColor:
+              primaryTextColor,
+              secondaryTextColor:
+              secondaryTextColor,
+              leadingIcon:
+              Icons.person_outline,
+            ),
+
+            _thinDivider(borderColor),
+
+            _infoRow(
+              label: 'price'.tr,
+              value: '$price $currency',
+              primaryTextColor: primaryTextColor,
+              secondaryTextColor: secondaryTextColor,
+              leadingIcon: Icons.price_change,
+            ),
+
+            if (salePrice.trim().isNotEmpty) ...[
+              _thinDivider(borderColor),
+
+              _infoRow(
+                label: 'sale_price'.tr,
+                value: '$salePrice $currency',
+                primaryTextColor: primaryTextColor,
+                secondaryTextColor: secondaryTextColor,
+                leadingIcon: Icons.price_change_outlined,
+              ),
+            ],
+
+            _thinDivider(borderColor),
+
+            _infoRow(
+              label: 'cost_price'.tr,
+              value: '$costPrice $currency',
+              primaryTextColor: primaryTextColor,
+              secondaryTextColor: secondaryTextColor,
+              leadingIcon: Icons.monetization_on,
+            ),
+
+            _thinDivider(borderColor),
+
+            _infoRow(
+              label: 'final_price'.tr,
+              value: '$finalPrice $currency',
+              primaryTextColor: primaryTextColor,
+              secondaryTextColor: secondaryTextColor,
+              leadingIcon: Icons.price_check,
+            ),
+
+            _thinDivider(borderColor),
+
+            _infoRow(
+              label: 'product_stock'.tr,
+              value: productStock,
+              primaryTextColor:
+              primaryTextColor,
+              secondaryTextColor:
+              secondaryTextColor,
+              leadingIcon:
+              Icons.inventory_2_outlined,
+            ),
+
+            _thinDivider(borderColor),
+
+            _infoRow(
+              label: 'created_at'.tr,
+              value: dateFormatted(
+                  date: product.createdAt ?? '',
+                  formatType: formatForDateTime(
+                      FormatType.dateTime2)),
+              primaryTextColor:
+              primaryTextColor,
+              secondaryTextColor:
+              secondaryTextColor,
+              leadingIcon:
+              Icons.date_range,
+            ),
+          ]),
+    );
+  }
+
+  // ============================================================
+  // PROPERTIES CARD
+  // ============================================================
+
+  Widget _buildPropertiesCard({
+    required ProductData product,
+    required Color cardColor,
+    required Color borderColor,
+    required Color primaryTextColor,
+    required Color secondaryTextColor,
+    required bool isDark,
+  }) {
+    final String categoryName =
+        product.categoryName?.trim() ?? '';
+
+    final String weight =
+        product.productWeight?.toString().trim() ?? '';
+
+    final String description =
+        product.description?.trim() ?? '';
+
+    return productInfoContainer(
+      backgroundColor: cardColor,
+      borderColor: borderColor,
+      child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+        children: [
+          Text(
+            'additional_properties'.tr,
+            style: pSemiBold14.copyWith(
+              fontSize: 16.sp,
+              color: primaryTextColor,
+            ),
+          ),
+
+          verticalSpace(5.h),
+
+          _propertyRow(
+            icon: Icons.grid_view_rounded,
+            title: 'category'.tr,
+            subtitle: categoryName.isEmpty
+                ? '-'
+                : categoryName,
+            primaryTextColor:
+            primaryTextColor,
+            secondaryTextColor:
+            secondaryTextColor,
+          ),
+
+          _propertyRow(
+            icon: Icons.scale,
+            title: 'product_weight'.tr,
+            subtitle: weight.isEmpty
+                ? '-'
+                : '$weight kg',
+            primaryTextColor:
+            primaryTextColor,
+            secondaryTextColor:
+            secondaryTextColor,
+          ),
+
+          _propertyRow(
+            icon: Icons.description,
+            title: 'description'.tr,
+            subtitle: description.isEmpty
+                ? '-'
+                : description,
+            primaryTextColor:
+            primaryTextColor,
+            secondaryTextColor:
+            secondaryTextColor,
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // STATUS CARD
+  // ============================================================
+
+  Widget _buildStatusCard({
+    required ProductData product,
+    required Color cardColor,
+    required Color borderColor,
+    required Color primaryTextColor,
+    required Color secondaryTextColor,
+    required bool isDark,
+  }) {
+    final String status =
+        product.status?.toString() ?? '0';
+
+    final String trending =
+        product.trending?.toString() ?? '0';
+
+    final String stockStatus =
+        product.stockStatus
+            ?.toString()
+            .toLowerCase()
+            .trim() ??
+            'in_stock';
+
+    final String trackStock =
+        product.trackStock?.toString() ?? '0';
+
+    final bool isVisible = status == '1';
+    final bool isTrending = trending == '1';
+
+    final bool isInStock =
+        stockStatus == 'in_stock';
+
+    final bool isOutOfStock =
+        stockStatus == 'out_of_stock';
+
+    final bool isOnBackorder =
+        stockStatus == 'on_backorder';
+
+    final bool isTrackStock =
+        trackStock == '1' ||
+            trackStock.toLowerCase() == 'true';
+
+    IconData stockIcon;
+    String stockLabel;
+    Color stockColor;
+
+    if (isInStock) {
+      stockIcon =
+          Icons.inventory_2_outlined;
+      stockLabel = 'in_stock'.tr;
+      stockColor =
+      const Color(0xFF2E7D32);
+    } else if (isOutOfStock) {
+      stockIcon =
+          Icons.remove_shopping_cart_outlined;
+      stockLabel = 'out_of_stock'.tr;
+      stockColor =
+      const Color(0xFFD32F2F);
+    } else if (isOnBackorder) {
+      stockIcon =
+          Icons.schedule_outlined;
+      stockLabel = 'on_backorder'.tr;
+      stockColor =
+      const Color(0xFFEF6C00);
+    } else {
+      stockIcon =
+          Icons.help_outline_rounded;
+      stockLabel = stockStatus.isEmpty
+          ? 'unknown'.tr
+          : stockStatus;
+      stockColor = Colors.grey;
+    }
+
+    return productInfoContainer(
+      backgroundColor: cardColor,
+      borderColor: borderColor,
+      child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+        children: [
+          Text(
+            'product_status'.tr,
+            style: pSemiBold14.copyWith(
+              fontSize: 16.sp,
+              color: primaryTextColor,
+            ),
+          ),
+
+          verticalSpace(14.h),
+
+          Wrap(
+            spacing: 4.w,
+            runSpacing: 8.h,
+            children: [
+              _statusChip(
+                icon: isVisible
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                label: isVisible
+                    ? 'visible'.tr
+                    : 'hidden'.tr,
+                color: isVisible
+                    ? const Color(0xFF2E7D32)
+                    : isDark
+                    ? Colors.grey
+                    : Colors.grey.shade800,
+              ),
+              _statusChip(
+                icon: isTrending
+                    ? Icons.local_fire_department
+                    : Icons.local_fire_department_outlined,
+                label: isTrending
+                    ? 'trending'.tr
+                    : 'not trending'.tr,
+                color: isTrending
+                    ? const Color(0xFFF19210)
+                    : isDark
+                    ? Colors.grey
+                    : Colors.grey.shade800,
+              ),
+
+              _statusChip(
+                icon: stockIcon,
+                label: stockLabel,
+                color: stockColor,
+              ),
+
+              _statusChip(
+                icon: isTrackStock
+                    ? Icons.track_changes_rounded
+                    : Icons.do_not_disturb_on_outlined,
+                label: isTrackStock
+                    ? 'tracked'.tr
+                    : 'not_tracked'.tr,
+                color: isTrackStock
+                    ? AppColor.themeGreenColor
+                    : isDark
+                    ? Colors.grey
+                    : Colors.grey.shade800,
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // REVIEWS CARD
+  // ============================================================
+
+  Widget _buildReviewsCard({
+    required Color cardColor,
+    required Color borderColor,
+    required Color primaryTextColor,
+    required Color secondaryTextColor,
+    required bool isDark,
+  }) {
+    return productInfoContainer(
+      backgroundColor: cardColor,
+      borderColor: borderColor,
+      child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment:
+            MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[800] : Colors.grey[100],
-                  shape: BoxShape.circle,
+              Text(
+                'ratings'.tr,
+                style: pSemiBold14.copyWith(
+                  fontSize: 16.sp,
+                  color: primaryTextColor,
                 ),
-                child: Icon(Icons.rate_review_outlined, size: 40.sp, color: isDark ? Colors.grey[400] : Colors.grey[400]),
               ),
-              verticalSpace(16.h),
-              Text("no_reviews_yet".tr, style: pSemiBold14.copyWith(color: secondaryTextColor)),
-              verticalSpace(4.h),
-              Text("Be the first to review this product", style: pRegular12.copyWith(color: secondaryTextColor.withOpacity(0.7))),
+
+              Obx(() {
+                final hasReview =
+                _hasCurrentUserReview();
+
+                return GestureDetector(
+                  onTap: hasReview
+                      ? null
+                      : () {
+                    Get.to(
+                          () => AddRatingScreen(
+                        id: widget.id,
+                        categoryId:
+                        widget.categoryId,
+                        productId:
+                        widget.productId,
+                        isUpdate: false,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding:
+                    EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 7.h,
+                    ),
+                    decoration:
+                    BoxDecoration(
+                      color: hasReview
+                          ? Colors.grey
+                          .withOpacity(0.12)
+                          : AppColor
+                          .themeGreenColor
+                          .withOpacity(0.1),
+                      borderRadius:
+                      BorderRadius.circular(
+                        20.r,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize:
+                      MainAxisSize.min,
+                      children: [
+                        Icon(
+                          hasReview
+                              ? Icons
+                              .check_circle_outline
+                              : Icons
+                              .rate_review_outlined,
+                          size: 16.sp,
+                          color: hasReview
+                              ? Colors.grey
+                              : AppColor
+                              .themeGreenColor,
+                        ),
+
+                        horizontalSpace(5.w),
+
+                        Text(
+                          hasReview
+                              ? 'Already Reviewed'.tr
+                              : 'write_review'.tr,
+                          style:
+                          pMedium12.copyWith(
+                            color: hasReview
+                                ? Colors.grey
+                                : AppColor
+                                .themeGreenColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
             ],
+          ),
+
+          verticalSpace(14.h),
+
+          _buildReviewsList(
+            primaryTextColor:
+            primaryTextColor,
+            secondaryTextColor:
+            secondaryTextColor,
+            borderColor: borderColor,
+            isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // REVIEWS LIST
+  // ============================================================
+
+  Widget _buildReviewsList({
+    required Color primaryTextColor,
+    required Color secondaryTextColor,
+    required Color borderColor,
+    required bool isDark,
+  }) {
+    return Obx(() {
+      if (reviewController.reviewList.isEmpty) {
+        return Padding(
+          padding:
+          EdgeInsets.symmetric(vertical: 30.h),
+          child: Center(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.rate_review_outlined,
+                  size: 42.sp,
+                  color: Colors.grey.shade400,
+                ),
+                verticalSpace(12.h),
+                Text(
+                  'no_reviews_yet'.tr,
+                  style: pSemiBold14.copyWith(
+                    color: secondaryTextColor,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }
 
       return ListView.separated(
         shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: reviewController.reviewList.length,
-        separatorBuilder: (_, __) => verticalSpace(16.h),
+        physics:
+        const NeverScrollableScrollPhysics(),
+        itemCount:
+        reviewController.reviewList.length,
+        separatorBuilder: (_, __) =>
+            verticalSpace(14.h),
         itemBuilder: (context, index) {
-          final review = reviewController.reviewList[index];
-          final time1 = DateTime.tryParse(review.createdAt ?? "") ?? DateTime.now();
+          final review =
+          reviewController.reviewList[index];
+
+          final currentUserId =
+          reviewController.userId.value
+              .toString();
+
+          final isMyReview =
+              review.userId?.toString() ==
+                  currentUserId;
+
+          final time =
+              DateTime.tryParse(
+                review.createdAt ?? '',
+              ) ??
+                  DateTime.now();
+
+          final rating =
+              double.tryParse(
+                review.ratingNo?.toString() ??
+                    '0',
+              ) ??
+                  0;
+
+          final reviewStatus =
+              review.status?.toString() ?? '0';
+
+          final isReviewVisible =
+              reviewStatus == '1';
 
           return Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: cardColor,
-              border: Border.all(color: borderColor),
-              borderRadius: BorderRadius.circular(16.r),
+              color: isDark
+                  ? DarkThemeColor
+                  .cCardBackground
+                  : Colors.white,
+              borderRadius:
+              BorderRadius.circular(16.r),
+              // border: Border.all(
+              //   color: borderColor,
+              // ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withOpacity(
+                    isDark ? 0 : 0.03,
+                  ),
+                  blurRadius: 10,
+                  offset:
+                  const Offset(0, 4),
                 ),
               ],
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
                   children: [
-                    // Avatar with better fallback
                     Container(
-                      width: 44.w,
-                      height: 44.w,
-                      decoration: BoxDecoration(
+                      width: 42.w,
+                      height: 42.w,
+                      decoration:
+                      BoxDecoration(
+                        color: AppColor
+                            .themeGreenColor
+                            .withOpacity(0.12),
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [AppColor.themeGreenColor.withOpacity(0.3), AppColor.themeGreenColor.withOpacity(0.1)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
                       ),
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: _getFullImageUrl(review.productImagePath),
-                          width: 44.w,
-                          height: 44.w,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Center(child: Icon(Icons.person, size: 20.sp, color: AppColor.themeGreenColor)),
-                          errorWidget: (context, url, error) => Center(child: Icon(Icons.person, size: 20.sp, color: AppColor.themeGreenColor)),
+                      alignment:
+                      Alignment.center,
+                      child: Text(
+                        (review.userName != null &&
+                            review.userName!
+                                .trim()
+                                .isNotEmpty)
+                            ? review.userName!
+                            .trim()[0]
+                            .toUpperCase()
+                            : '?',
+                        style:
+                        pBold14.copyWith(
+                          color: AppColor
+                              .themeGreenColor,
+                          fontSize: 16.sp,
                         ),
                       ),
                     ),
-                    horizontalSpace(12.w),
+
+                    horizontalSpace(10.w),
+
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                        CrossAxisAlignment
+                            .start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(review.userName ?? "User", style: pSemiBold12.copyWith(fontSize: 14.sp, color: primaryTextColor)),
+                              Expanded(
+                                child: Text(
+                                  review.userName ??
+                                      'User',
+                                  style:
+                                  pSemiBold12
+                                      .copyWith(
+                                    color:
+                                    primaryTextColor,
+                                    fontSize:
+                                    13.5.sp,
+                                  ),
+                                  maxLines: 1,
+                                  overflow:
+                                  TextOverflow
+                                      .ellipsis,
+                                ),
+                              ),
+
                               RatingBar.builder(
-                                initialRating: double.tryParse(review.ratingNo?.toString() ?? "0") ?? 0.0,
-                                itemSize: 14.sp,
+                                initialRating:
+                                rating,
                                 itemCount: 5,
-                                ignoreGestures: true,
-                                itemBuilder: (_, __) => Icon(Icons.star_rate_rounded, color: const Color(0xFFFFC107)),
-                                onRatingUpdate: (rating) {},
+                                itemSize: 13.sp,
+                                ignoreGestures:
+                                true,
+                                itemBuilder:
+                                    (_, __) =>
+                                const Icon(
+                                  Icons
+                                      .star_rounded,
+                                  color: Color(
+                                    0xFFFFC107,
+                                  ),
+                                ),
+                                onRatingUpdate:
+                                    (_) {},
                               ),
                             ],
                           ),
-                          verticalSpace(2.h),
-                          Text(reviewController.convertToAgo(time1), style: pRegular10.copyWith(color: secondaryTextColor, fontSize: 11.sp)),
+
+                          verticalSpace(4.h),
+
+                          Row(
+                            children: [
+                              Icon(
+                                Icons
+                                    .access_time_rounded,
+                                size: 11.sp,
+                                color:
+                                secondaryTextColor,
+                              ),
+
+                              horizontalSpace(
+                                  3.w),
+
+                              Text(
+                                convertToAgo(
+                                    time),
+                                style:
+                                pRegular10
+                                    .copyWith(
+                                  color:
+                                  secondaryTextColor,
+                                ),
+                              ),
+
+                              horizontalSpace(
+                                  8.w),
+
+                              Container(
+                                padding:
+                                EdgeInsets
+                                    .symmetric(
+                                  horizontal:
+                                  8.w,
+                                  vertical:
+                                  3.h,
+                                ),
+                                decoration:
+                                BoxDecoration(
+                                  color: (isReviewVisible
+                                      ? const Color(
+                                    0xFF2E7D32,
+                                  )
+                                      : Colors
+                                      .grey)
+                                      .withOpacity(
+                                      0.1),
+                                  borderRadius:
+                                  BorderRadius
+                                      .circular(
+                                    20.r,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize:
+                                  MainAxisSize
+                                      .min,
+                                  children: [
+                                    Icon(
+                                      isReviewVisible
+                                          ? Icons
+                                          .visibility_outlined
+                                          : Icons
+                                          .visibility_off_outlined,
+                                      size: 10.sp,
+                                      color: isReviewVisible
+                                          ? const Color(
+                                        0xFF2E7D32,
+                                      )
+                                          : Colors
+                                          .grey
+                                          .shade700,
+                                    ),
+
+                                    horizontalSpace(
+                                        3.w),
+
+                                    Text(
+                                      isReviewVisible
+                                          ? 'visible'.tr
+                                          : 'hidden'.tr,
+                                      style:
+                                      pMedium12
+                                          .copyWith(
+                                        fontSize:
+                                        9.5.sp,
+                                        color: isReviewVisible
+                                            ? const Color(
+                                          0xFF2E7D32,
+                                        )
+                                            : Colors
+                                            .grey
+                                            .shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
 
-                if (review.title != null && review.title!.isNotEmpty) ...[
-                  verticalSpace(12.h),
-                  Text(review.title!, style: pSemiBold12.copyWith(fontSize: 14.sp, color: primaryTextColor)),
+                if (review.title != null &&
+                    review.title!
+                        .isNotEmpty) ...[
+                  verticalSpace(10.h),
+                  Text(
+                    review.title!,
+                    style:
+                    pSemiBold12.copyWith(
+                      color:
+                      primaryTextColor,
+                      fontSize: 13.sp,
+                    ),
+                  ),
                 ],
 
-                if (review.description != null && review.description!.isNotEmpty) ...[
+                if (review.description != null &&
+                    review.description!
+                        .isNotEmpty) ...[
                   verticalSpace(6.h),
                   Text(
                     review.description!,
-                    style: pRegular12.copyWith(color: secondaryTextColor, height: 1.6, fontSize: 13.sp),
+                    style:
+                    pRegular12.copyWith(
+                      color:
+                      secondaryTextColor,
+                      height: 1.5,
+                    ),
                   ),
                 ],
 
-                // Admin Actions Section
-                if (Prefs.getBool(AppConstant.isDemoMode) != true)
-                  Padding(
-                    padding: EdgeInsets.only(top: 16.h),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[800] : Colors.grey[50],
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          // Status Switch with Label
-                          Row(
-                            children: [
-                              Text("Active", style: pRegular10.copyWith(color: secondaryTextColor)),
-                              horizontalSpace(4.w),
-                              Transform.scale(
-                                scale: 0.8,
-                                child: CupertinoSwitch(
-                                  value: review.status == 1,
-                                  onChanged: (value) {
-                                    reviewController.changeReviewData(review.id!, productId: widget.productId);
-                                  },
-                                  activeColor: AppColor.themeGreenColor,
-                                ),
-                              ),
-                            ],
-                          ),
+                if (isMyReview) ...[
+                  verticalSpace(10.h),
 
-                          Spacer(),
-
-                          // Edit Button
-                          GestureDetector(
-                            onTap: () async {
-                              Get.to(() => AddRatingScreen(
-                                id: widget.id,
-                                categoryId: widget.categoryId,
-                                productId: widget.productId,
-                                isUpdate: true,
-                                reviewId: review.id.toString(),
-                                rate: double.tryParse(review.ratingNo?.toString() ?? "0") ?? 0.0,
-                                title: review.title,
-                                description: review.description,
-                                user: review.userName,
-                                status: review.status.toString(),
-                              ));
-                              await reviewController.getReviewData(widget.productId);
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(8.w),
-                              decoration: BoxDecoration(
-                                color: AppColor.themeNavyBlueColor.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.edit_outlined, size: 16.sp, color: AppColor.themeNavyBlueColor),
-                            ),
-                          ),
-
-                          horizontalSpace(8.w),
-
-                          // Delete Button
-                          GestureDetector(
-                            onTap: () {
-                              AppDialog.showCustomDialog(
-                                  iconColor: AppColor.cRedText,
-                                  confirmColor: AppColor.cRedText,
-                                  context: context,
-                                  onConfirm: () async {
-                                    await reviewController.deleteReviewData(
-                                      reviewId: review.id.toString(),
-                                      productId: widget.productId,
-                                    );
-                                  });
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(8.w),
-                              decoration: BoxDecoration(
-                                color: AppColor.cRedText.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.delete_outline, size: 16.sp, color: AppColor.cRedText),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: borderColor,
                   ),
+
+                  verticalSpace(6.h),
+
+                  Row(
+                    mainAxisAlignment:
+                    MainAxisAlignment.end,
+                    children: [
+                      _reviewActionButton(
+                        icon:
+                        Icons.edit_outlined,
+                        label: 'edit'.tr,
+                        color: AppColor
+                            .themeGreenColor,
+                        onTap: () {
+                          Get.to(
+                                () =>
+                                AddRatingScreen(
+                                  id: widget.id,
+                                  categoryId:
+                                  widget.categoryId,
+                                  productId:
+                                  widget.productId,
+                                  reviewId:
+                                  review.id
+                                      .toString(),
+                                  isUpdate: true,
+                                  rate: rating,
+                                  title:
+                                  review.title,
+                                  description:
+                                  review.description,
+                                  status:
+                                  reviewStatus,
+                                ),
+                          );
+                        },
+                      ),
+
+                      horizontalSpace(10.w),
+
+                      _reviewActionButton(
+                        icon:
+                        Icons.delete_outline,
+                        label: 'delete'.tr,
+                        color: Colors.red,
+                        onTap: () {
+                          AppDialog
+                              .showCustomDialog(
+                            context: context,
+                            title:
+                            'delete'.tr,
+                            message:
+                            'are_you_sure_delete_review'
+                                .tr,
+                            lottieAsset:
+                            'assets/lottie/delete_icon.json',
+                            confirmColor:
+                            Colors.red,
+                            onConfirm:
+                                () async {
+                              await reviewController
+                                  .deleteReviewData(
+                                reviewId:
+                                review.id
+                                    .toString(),
+                                productId:
+                                widget.productId,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           );
         },
       );
     });
-  }}
+  }
+
+  // ============================================================
+  // REVIEW ACTION BUTTON
+  // ============================================================
+
+  Widget _reviewActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius:
+      BorderRadius.circular(20.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 10.w,
+          vertical: 6.h,
+        ),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius:
+          BorderRadius.circular(20.r),
+        ),
+        child: Row(
+          mainAxisSize:
+          MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14.sp,
+              color: color,
+            ),
+            horizontalSpace(4.w),
+            Text(
+              label,
+              style: pMedium12.copyWith(
+                fontSize: 11.sp,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // INFO ROW
+  // ============================================================
+
+  Widget _infoRow({
+    required String label,
+    required String value,
+    required Color primaryTextColor,
+    required Color secondaryTextColor,
+    IconData? leadingIcon,
+  }) {
+    return Padding(
+      padding:
+      EdgeInsets.symmetric(vertical: 9.h),
+      child: Row(
+        mainAxisAlignment:
+        MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              mainAxisSize:
+              MainAxisSize.min,
+              children: [
+                if (leadingIcon != null) ...[
+                  Icon(
+                    leadingIcon,
+                    size: 14.sp,
+                    color:
+                    secondaryTextColor,
+                  ),
+                  horizontalSpace(4.w),
+                ],
+
+                Flexible(
+                  child: Text(
+                    label,
+                    style:
+                    pRegular12.copyWith(
+                      color:
+                      secondaryTextColor,
+                      fontSize: 13.sp,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          horizontalSpace(10.w),
+
+          Flexible(
+            child: Text(
+              value,
+              textAlign:
+              TextAlign.right,
+              style:
+              pSemiBold12.copyWith(
+                color:
+                primaryTextColor,
+                fontSize: 13.sp,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // PROPERTY ROW
+  // ============================================================
+
+  Widget _propertyRow({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color primaryTextColor,
+    required Color secondaryTextColor,
+    bool isLast = false,
+  }) {
+    return Column(
+      children: [
+        ListTile(
+          contentPadding:
+          EdgeInsets.symmetric(
+            vertical: 2.h,
+            horizontal: 0,
+          ),
+
+          leading: Container(
+            padding:
+            EdgeInsets.all(7.w),
+            decoration: BoxDecoration(
+              color: secondaryTextColor
+                  .withOpacity(0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 17.sp,
+              color:
+              secondaryTextColor,
+            ),
+          ),
+
+          title: Text(
+            title,
+            style:
+            pSemiBold12.copyWith(
+              color:
+              primaryTextColor,
+              fontSize: 13.5.sp,
+            ),
+          ),
+
+          subtitle: Html(
+            data: subtitle,
+            style: {
+              "body": Style(
+                maxLines: 5,
+                textOverflow:
+                TextOverflow.ellipsis,
+                margin: Margins.zero,
+                padding:
+                HtmlPaddings.zero,
+              ),
+            },
+          ),
+        ),
+
+        if (!isLast)
+          _thinDivider(
+            secondaryTextColor
+                .withOpacity(0.12),
+          ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // STATUS CHIP
+  // ============================================================
+
+  Widget _statusChip({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding:
+      EdgeInsets.symmetric(
+        horizontal: 12.w,
+        vertical: 8.h,
+      ),
+      decoration: BoxDecoration(
+        color:
+        color.withOpacity(0.1),
+        borderRadius:
+        BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize:
+        MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 15.sp,
+            color: color,
+          ),
+
+          horizontalSpace(6.w),
+
+          Text(
+            label,
+            style:
+            pMedium12.copyWith(
+              color: color,
+              fontSize: 12.sp,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // DIVIDER
+  // ============================================================
+
+  Widget _thinDivider(Color color) {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: color,
+    );
+  }
+
+  // ============================================================
+  // PRODUCT INFO CONTAINER
+  // ============================================================
+
+  Widget productInfoContainer({
+    required Widget child,
+    required Color backgroundColor,
+    required Color borderColor,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius:
+        BorderRadius.circular(14.r),
+        // border: Border.all(
+        //   color: borderColor,
+        // ),
+      ),
+      child: child,
+    );
+  }
+}

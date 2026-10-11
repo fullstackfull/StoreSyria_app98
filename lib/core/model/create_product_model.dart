@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_this, prefer_collection_literals
-
 class CreateProductModel {
   int? status;
   String? message;

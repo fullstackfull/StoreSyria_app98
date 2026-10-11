@@ -64,7 +64,7 @@ Widget orderStatusTabsWidget({
         SizedBox(width: 14.w),
         tab(
           index: 4,
-          label: "returned".tr,
+          label: "return".tr,
         ),
         SizedBox(width: 14.w),
         tab(

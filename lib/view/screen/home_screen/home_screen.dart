@@ -1,10 +1,7 @@
-// ignore_for_file: prefer_const_constructors, avoid_print
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:store_go_app/core/controller/home_controller/new_coupon_controller.dart';
 import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
 import 'package:store_go_app/core/controller/product_controller/product_controller.dart';
 import 'package:store_go_app/core/controller/setting_controller/theme_controller.dart';
@@ -14,498 +11,380 @@ import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
-import 'package:store_go_app/view/screen/home_screen/coupon_screen/coupon_screen.dart';
-import 'package:store_go_app/view/screen/home_screen/coupon_screen/new_coupon_bottomsheet.dart';
-import 'package:store_go_app/view/screen/order_screen/order_detail_screen.dart';
-import 'package:store_go_app/view/screen/product_screen/add_new_product_screen.dart';
-import 'package:store_go_app/view/screen/product_screen/product_detail_screen.dart';
-import 'package:store_go_app/view/screen/statistics_screen/statistics_screen.dart';
-import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/home_controller.dart';
-import 'package:store_go_app/core/controller/dashboard_manager_controller/dashboard_manager_controller.dart';
-import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
-import '../../widget/common_snak_bar_widget.dart';
-import 'add_category_bottomsheet.dart';
-import 'coupon_screen/coupon_detail_screen.dart';
+import '../../../core/controller/home_controller/category_controller.dart';
+import '../../../core/model/static_model.dart';
+import '../../new_widgets/shimmer.dart';
+import '../statistics_screen/statistics_screen_widget.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
+class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   final HomeController homeController = Get.put(HomeController());
-  final ProductController productController = Get.put(ProductController());
-  final NewCouponController couponController = Get.put(NewCouponController());
+  final CategoryController categoryController = Get.put(CategoryController());
+  final ProductController productController = Get.put(ProductController(),permanent: true);
   final OrderController orderController = Get.put(OrderController());
-  final NotificationController notificationController = Get.put(NotificationController());
+  //final NotificationController notificationController = Get.put(NotificationController());
   final ThemeController themeController = Get.find<ThemeController>();
-  final GlobalKey<LiquidPullToRefreshState> _refreshIndicatorKey = GlobalKey<
-      LiquidPullToRefreshState>();
-
-  @override
+  final GlobalKey<LiquidPullToRefreshState> _refreshIndicatorKey = GlobalKey<LiquidPullToRefreshState>();  @override
   bool get wantKeepAlive => true;
+  late final AnimationController _visitorChartController;
+  late final AnimationController _visitorLineOpacityController;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getData());
+
+    _visitorChartController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 30),
+    );
+
+    _visitorLineOpacityController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+      value: 1,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getData();
+      _startVisitorChartAnimation();
+    });
   }
+
 
   Future<void> getData() async {
     await homeController.getDashboardData();
-    await homeController.getImageBaseUrl();
+    //await homeController.getImageBaseUrl();
     homeController.imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
-    // جلب الإشعارات عند فتح التطبيق
-    await notificationController.getNotifications();
+    //await notificationController.getNotifications();
+    //await categoryController.getCategoryData(1);
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return GetBuilder<ThemeController>(
-      builder: (themeController) {
-        final bool isDark = themeController.isDark.value;
-        final Color bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
+        builder: (themeController) {
+          final bool isDark = themeController.isDark.value;
+          final Color bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
 
-        return GetBuilder<HomeController>(
-          builder: (controller) {
-            if (controller.dashboardData == null) {
-              return const LoadingWidget();
-            }
-            return SafeArea(
-              child: Scaffold(
-                backgroundColor: bgColor,
-                resizeToAvoidBottomInset: false,
-              body: LiquidPullToRefresh(
-                key: _refreshIndicatorKey,
-                onRefresh: getData,
-                showChildOpacityTransition: false,
-                backgroundColor: AppColor.themeGreenColor,
-                color: AppColor.cWhite,
-                springAnimationDurationInMilliseconds: 500,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      buildAppTitleRow(
-                            () => showPopup(context),
-                        dateFormatted(date: DateTime.now().toString(),
-                            formatType: formatForDateTime(FormatType.date)),
-                      ),
-                      verticalSpace(20),
+          return GetBuilder<HomeController>(
+              builder: (controller) {
+                if (controller.dashboardData == null) {
+                  return Scaffold(
+                    backgroundColor: bgColor,
+                    body: const SafeArea(child: ShimmerDashboard()),
+                  );
+                }
+                return Scaffold(
+                  backgroundColor: bgColor,
+                  resizeToAvoidBottomInset: false,
+                  body: LiquidPullToRefresh(
+                    key: _refreshIndicatorKey,
+                    onRefresh: getData,
+                    showChildOpacityTransition: false,
+                    backgroundColor: AppColor.themeNavyBlueColor,
+                    color: bgColor,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(18, 40, 18, 32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          buildAppTitleRow(
+                            dateFormatted(date: DateTime.now().toString(),
+                                formatType: formatForDateTime(FormatType.date)),
+                            context,
+                          ),
+                          verticalSpace(20),
 
-                      buildProfileTitle(
-                        profileImage: '${homeController.imageBaseUrl
-                            .value}${homeController.dashboardData?.user
-                            ?.image ?? ''}',
-                        name: homeController.dashboardData?.user?.name ??
-                            "StoreSyria Admin",
-                        onValue: (_) => getData(),
-                      ),
-                      verticalSpace(16),
+                          buildProfileTitle(
+                            context,
+                            profileImage: '${homeController.imageBaseUrl
+                                .value}${homeController.dashboardData?.user
+                                ?.image ?? ''}',
+                            name: homeController.dashboardData?.user?.name ??
+                                "StoreSyria Admin",
+                            onValue: (_) => getData(),
+                          ),
 
-                      Text.rich(
-                        TextSpan(
-                          text: 'Have a nice day! '.tr,
-                          style: pBold12.copyWith(color: AppColor.cDarkGreyFont),
-                          children: <TextSpan>[
-                            TextSpan(
-                              text: 'Did you know that you can quickly add your favorite product or category to the store?'
-                                  .tr,
-                              style: pRegular12.copyWith(
-                                  color: AppColor.cDarkGreyFont),
-                            ),
-                          ],
-                        ),
-                      ),
-                      verticalSpace(16),
+                          verticalSpace(16),
 
-                      Obx(() {
-                        final isStoreOpen = homeController.isStore
-                            .value;
-                        final storeName = homeController.dashboardData?.qrcode
-                            ?.name ?? "My Store";
+                          Obx(() {
+                            final isStoreOpen = homeController.isStore
+                                .value;
+                            final storeName = homeController.dashboardData?.qrcode
+                                ?.name ?? "My Store";
 
-                        return GestureDetector(
-                          onTap: () => homeController.isStore.toggle(),
-                          child: Container(
-                            width: double.infinity,
-                            height: 68.h,
-                            decoration: BoxDecoration(
-                              color: AppColor.cWhite,
-                              borderRadius: BorderRadius.circular(35),
-                              border: Border.all(
-                                  color: AppColor.cBorder, width: 1),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    assetSvdImageWidget(
-                                        image: DefaultImages.sLogoIcn,
-                                        height: 25.h),
-                                    horizontalSpace(15.h),
-                                    Column(
-                                      mainAxisAlignment: MainAxisAlignment
-                                          .center,
-                                      crossAxisAlignment: CrossAxisAlignment
-                                          .start,
-                                      children: [
-                                        Text(storeName, style: pMedium14),
-                                        Text(Prefs.getString(
-                                            AppConstant.emailId) ?? "",
-                                            style: pRegular8),
-                                      ],
+                            return GestureDetector(
+                              onTap: () => homeController.isStore.toggle(),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                      color: isStoreOpen
+                                          ? AppColor.themeGreenColor.withOpacity(0.6)
+                                          : (isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+                                      width: 1.2),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColor.cShadow,
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 6),
                                     ),
                                   ],
                                 ),
-                                assetSvdImageWidget(
-                                  image: DefaultImages.dropDownIcn,
-                                  colorFilter: ColorFilter.mode(
-                                      AppColor.cLabel, BlendMode.srcIn),
-                                )
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 44.w,
+                                      height: 44.w,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: AppColor.themeGreenColor.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: assetSvdImageWidget(
+                                          image: DefaultImages.sLogoIcn,
+                                          height: 22.h),
+                                    ),
+                                    horizontalSpace(12),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(storeName,
+                                              style: pSemiBold14.copyWith(
+                                                  color: isDark ? Colors.white : AppColor.cLabel),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis),
+                                          verticalSpace(2),
+                                          Text(Prefs.getString(
+                                              AppConstant.emailId) ?? "",
+                                              style: pRegular10.copyWith(
+                                                  color: isDark ? Colors.white60 : AppColor.cDarkGreyFont),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis),
+                                        ],
+                                      ),
+                                    ),
+                                    horizontalSpace(8),
+                                    AnimatedContainer(
+                                      duration: const Duration(milliseconds: 250),
+                                      width: 34.w,
+                                      height: 34.w,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: isStoreOpen
+                                            ? AppColor.themeGreenColor.withOpacity(0.12)
+                                            : (isDark
+                                            ? DarkThemeColor.cBorder
+                                            : AppColor.cLight),
+                                        borderRadius: BorderRadius.circular(12.r),
+                                        border: Border.all(
+                                          color: isStoreOpen
+                                              ? AppColor.themeGreenColor.withOpacity(0.35)
+                                              : Colors.transparent,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: AnimatedRotation(
+                                        duration: const Duration(milliseconds: 300),
+                                        curve: Curves.easeOutBack,
+                                        turns: isStoreOpen ? 0.5 : 0,
+                                        child: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          size: 23.sp,
+                                          color: isStoreOpen
+                                              ? AppColor.themeGreenColor
+                                              : (isDark
+                                              ? Colors.white
+                                              : AppColor.cLabel),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
 
-                      Obx(() =>
-                      homeController.isStore.value
+                    Obx(
+                          () => homeController.isStore.value
                           ? Container(
-                        margin: const EdgeInsets.only(top: 10),
+                        margin: const EdgeInsets.only(top: 8),
                         decoration: BoxDecoration(
-                          border: Border.all(color: AppColor.cBorder),
-                          borderRadius: BorderRadius.circular(15),
+                          color: isDark
+                              ? DarkThemeColor.cCardBackground
+                              : AppColor.cWhite,
+                          border: Border.all(
+                            color: isDark
+                                ? DarkThemeColor.cBorder
+                                : AppColor.cBorder.withOpacity(0.5),
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColor.cShadow,
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                        padding: const EdgeInsets.all(14),
-                        child: ListView.builder(
-                          itemCount: homeController.dashboardData?.store
-                              ?.length ?? 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: ListView.separated(
+                          itemCount:
+                          homeController.dashboardData?.store?.length ?? 0,
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
+                          separatorBuilder: (context, index) => Divider(
+                            height: 1,
+                            thickness: 0.8,
+                            indent: 28,
+                            endIndent: 8,
+                            color: isDark
+                                ? DarkThemeColor.cBorder
+                                : AppColor.cBorder.withOpacity(0.5),
+                          ),
                           itemBuilder: (context, index) {
-                            final store = homeController.dashboardData!
-                                .store![index];
+                            final store =
+                            homeController.dashboardData!.store![index];
+
                             return InkWell(
                               onTap: () {
                                 Prefs.setStoreID(store.id.toString());
                                 homeController.setStoreIdData(
-                                    storeId: store.id.toString());
+                                  storeId: store.id.toString(),
+                                );
                                 homeController.isStore.value = false;
                               },
+                              borderRadius: BorderRadius.circular(14),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 8),
-                                child: Text(store.name?.trim() ?? "",
-                                    style: pSemiBold12),
+                                  horizontal: 8,
+                                  vertical: 14,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 9,
+                                      height: 9,
+                                      decoration: BoxDecoration(
+                                        color: AppColor.themeGreenColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    horizontalSpace(12),
+                                    Expanded(
+                                      child: Text(
+                                        store.name?.trim() ?? "",
+                                        style: pSemiBold14.copyWith(
+                                          color: isDark
+                                              ? Colors.white
+                                              : AppColor.cLabel,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
                         ),
                       )
-                          : const SizedBox.shrink()
-                      ),
-                      verticalSpace(25),
-                      CommonIconButton(
-                        title: 'Quick Add'.tr,
-                        iconData: DefaultImages.addCircleIcn,
-                        onPressed: () => homeController.isQuickAdd.toggle(),
-                        height: 51,
-                      ),
-
-                      if (homeController.isQuickAdd.value) ...[
-                        verticalSpace(10),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: AppColor.themeGreenColor,
-                            borderRadius: BorderRadius.circular(12),
+                          : const SizedBox.shrink(),
                           ),
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
+
+                          verticalSpace(15),
+                          qrCodeWidget(
+                            context,
+                              qrString: homeController.dashboardData?.qrcode?.url ??
+                                  "",
+                              title: homeController.dashboardData?.qrcode?.name ??
+                                  ""),
+                          verticalSpace(24),
+                          Row(
                             children: [
-                              buildListTile(
-                                image: DefaultImages.newProductIcn,
-                                text: "Add new product".tr,
-                                onPressed: () => Get.to(() => const AddNewProductScreen(isUpdate: false)),
-                              ),
-                              buildListTile(
-                                image: DefaultImages.newCategoryIcn,
-                                text: "Add new category".tr,
-                                onPressed: () => showModalBottomSheet(
-                                  context: context,
-                                  backgroundColor: AppColor.cBackGround,
-                                  barrierColor: AppColor.cGreyOpacity,
-                                  isScrollControlled: true,
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-                                  ),
-                                  builder: (_) => AddNewCategoriesWidget(isUpdate: false),
+                              Container(
+                                width: 4,
+                                height: 18,
+                                decoration: BoxDecoration(
+                                  color: AppColor.themeGreenColor,
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
-                              buildListTile(
-                                image: DefaultImages.newProductIcn,
-                                text: "Add new coupon".tr,
-                                onPressed: () => showModalBottomSheet(
-                                  context: context,
-                                  backgroundColor: AppColor.cBackGround,
-                                  barrierColor: AppColor.cGreyOpacity,
-                                  isScrollControlled: true,
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-                                  ),
-                                  builder: (_) => AddNewCouponWidget(isUpdate: false),
-                                ),
+                              horizontalSpace(8),
+                              Text(
+                                'Overview'.tr,
+                                style: pBold16.copyWith(
+                                    color: isDark ? Colors.white : AppColor.themeNavyBlueColor),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                      verticalSpace(25),
+                          verticalSpace(12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: totalProductWidget(context,image: DefaultImages.gridIcn,
+                                    title: "Total".tr,
+                                    subTitle: "Products".tr,
+                                    accentColor: AppColor.themeGreenColor,
+                                    total: homeController.dashboardData?.products
+                                        ?.toString() ?? "0"),
+                              ),
+                              horizontalSpace(10),
+                              Expanded(
+                                child: totalProductWidget(context,image: DefaultImages.listIcn,
+                                    title: "Total".tr,
+                                    subTitle: "Sales".tr,
+                                    accentColor: AppColor.blueColor,
+                                    total: homeController.dashboardData?.sales
+                                        ?.toString() ?? "0"),
+                              ),
+                              horizontalSpace(10),
+                              Expanded(
+                                child: totalProductWidget(context,image: DefaultImages.cartIcn,
+                                    title: "Total".tr,
+                                    subTitle: "Orders".tr,
+                                    accentColor: AppColor.cRed,
+                                    total: homeController.dashboardData?.order
+                                        ?.toString() ?? "0"),
+                              ),
+                            ],
+                          ),
 
-                      titleShowMoreWidget(title: "Statistics".tr,
-                          btnName: "Show more statistics".tr,
-                          onPresses: () => Get.to(() => StatisticsScreen())),
-                      verticalSpace(15),
-                      qrCodeWidget(
-                          qrString: homeController.dashboardData?.qrcode?.url ??
-                              "",
-                          title: homeController.dashboardData?.qrcode?.name ??
-                              ""),
-                      totalProductWidget(image: DefaultImages.gridIcn,
-                          title: "Total".tr,
-                          subTitle: "Products".tr,
-                          total: homeController.dashboardData?.products
-                              ?.toString() ?? "0"),
-                      totalProductWidget(image: DefaultImages.listIcn,
-                          title: "Total".tr,
-                          subTitle: "Sales".tr,
-                          total: homeController.dashboardData?.sales
-                              ?.toString() ?? "0"),
-                      totalProductWidget(image: DefaultImages.cartIcn,
-                          title: "Total".tr,
-                          subTitle: "Orders".tr,
-                          total: homeController.dashboardData?.order
-                              ?.toString() ?? "0"),
-                      verticalSpace(40),
-
-                      Text("Orders".tr,
-                          style: pRegular10.copyWith(fontSize: 20)),
-                      verticalSpace(10),
-                      OrderGraph(
-                          list: homeController.dashboardData?.orderchart ?? []),
-                      verticalSpace(25),
-
-                      titleShowMoreWidget(title: "Top Products".tr,
-                          btnName: "Go to Products".tr,
-                          onPresses: () {
-                            final dashboardController = Get.find<DashboardManagerController>();
-                            dashboardController.updateIndex(1);
-                          }),
-                      verticalSpace(15),
-                      ListView.builder(
-                        itemCount: homeController.topProductList.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final product = homeController.topProductList[index];
-                          return GestureDetector(
-                            onTap: () =>
-                                Get.to(() =>
-                                    ProductDetailScreen(
-                                        categoryId: product.categoryId
-                                            ?.toString() ?? "",
-                                        productId: product.id?.toString() ??
-                                            "", id: product.id.toString(),
-                                    )),
-                            child: topProductWidget(
-                              image: '${homeController.imageBaseUrl
-                                  .value}${product.coverImagePath ?? ''}',
-                              title: product.categoryName ?? "Uncategorized",
-                              subTitle: product.name ?? "No Name",
-                              amount: product.finalPrice ?? "0",
-                              digit: (index + 1).toString(),
-                              qty: product.productStock?.toString() ?? "0",
-                              index: index,
-                              deleteFun: () {
-                                if (Prefs.getBool(AppConstant.isDemoMode) ==
-                                    true) {
-                                  commonToast(AppConstant.demoString);
-                                } else {
-                                  productController.deleteProductData(
-                                      productId: product.id?.toString() ?? "");
-                                  getData();
-                                }
-                              },
-                              changeFun: () =>
-                                  Get.to(() =>
-                                      AddNewProductScreen(
-                                        isUpdate: true,
-                                        productId: product.id?.toString(),
-                                        productName: product.name,
-                                        qty: product.productStock?.toString(),
-                                        priceController: product.finalPrice,
-                                        productCategories: product.categoryName,
-                                        trending: product.trending?.toString(),
-                                        disAmountController: product
-                                            .discountPrice,
-                                        productTax: product.retuenText,
-                                        variantName: product.variantAttribute
-                                            ?.toString(),
-                                        productDescription: product.description,
-                                      )),
-                              viewFun: () =>
-                                  Get.to(() =>
-                                      ProductDetailScreen(
-                                          id: product.id.toString(),
-                                          categoryId: product.categoryId
-                                              ?.toString() ?? "",
-                                          productId: product.id?.toString() ??
-                                              "")),
-                            ),
-                          );
-                        },
+                          verticalSpace(24),
+                          GlassVisitorChart(
+                            visitorChart: homeController.dashboardData?.visitorchart ??
+                                <VisitorChartData>[],
+                            animation: _visitorChartController,
+                            lineOpacity: _visitorLineOpacityController,
+                          ),
+                          verticalSpace(18),
+                        ],
                       ),
-                      verticalSpace(25),
-
-                      titleShowMoreWidget(title: "Recent orders".tr,
-                          btnName: "Go to Orders".tr,
-                          onPresses: () {
-                            final dashboardController = Get.find<DashboardManagerController>();
-                            dashboardController.updateIndex(0);
-                          }),
-                      verticalSpace(15),
-                      ListView.builder(
-                        itemCount: homeController.recentOrderList.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final order = homeController.recentOrderList[index];
-                          return GestureDetector(
-                            onTap: () =>
-                                Get.to(() =>
-                                    OrderDetailScreen(
-                                        orderId: order.id?.toString() ?? "")),
-                            child: recentOrdersWidget(
-                              index: index,
-                              status: order.deliveryStatus,
-                              orderId: order.productOrderId,
-                              name: order.userName,
-                              date: order.orderDate,
-                              usd: order.finalPrice?.toString() ?? "0",
-                              viewFun: () =>
-                                  Get.to(() =>
-                                      OrderDetailScreen(
-                                          orderId: order.id?.toString() ?? "")),
-                              deleteFun: () {
-                                if (Prefs.getBool(AppConstant.isDemoMode) ==
-                                    true) {
-                                  commonToast(AppConstant.demoString);
-                                } else {
-                                  orderController.deleteOrderData(
-                                      orderId: order.id?.toString() ?? "");
-                                  getData();
-                                }
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                      verticalSpace(10),
-
-                      Text("Visitors".tr,
-                          style: pRegular10.copyWith(fontSize: 20)),
-                      verticalSpace(10),
-                      VisitorChart(visitorChart: homeController.dashboardData
-                          ?.visitorchart ?? []),
-                      verticalSpace(25),
-
-                      titleShowMoreWidget(title: "Product coupons".tr,
-                          btnName: "Go to Coupons".tr,
-                          onPresses: () => Get.to(() => const CouponScreen())),
-                      verticalSpace(15),
-                      ListView.builder(
-                        itemCount: homeController.couponsList.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final coupon = homeController.couponsList[index];
-                          return GestureDetector(
-                            onTap: () =>
-                            coupon.id != null
-                                ? Get.to(() =>
-                                CouponDetailScreen(couponId: coupon.id!))
-                                : null,
-                            child: productCouponWidget(
-                              index: index,
-                              discount: "${coupon.discountAmount}${coupon
-                                  .couponType == "percentage" ? "%" : ""}",
-                              name: coupon.couponName,
-                              code: coupon.couponCode,
-                              date: '',
-                              viewFun: () =>
-                              coupon.id != null
-                                  ? Get.to(() =>
-                                  CouponDetailScreen(couponId: coupon.id!))
-                                  : null,
-                              deleteFun: () {
-                                if (Prefs.getBool(AppConstant.isDemoMode) ==
-                                    true) {
-                                  commonToast(AppConstant.demoString);
-                                } else {
-                                  couponController.deleteCouponData(
-                                      couponId: coupon.id?.toString() ?? "");
-                                  getData();
-                                }
-                              },
-                              changeFun: () =>
-                                  showModalBottomSheet(
-                                    context: context,
-                                    backgroundColor: AppColor.cBackGround,
-                                    barrierColor: AppColor.cGreyOpacity,
-                                    isScrollControlled: true,
-                                    shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(30))),
-                                    constraints: BoxConstraints(
-                                        maxHeight: Get.height,
-                                        minHeight: Get.height / 1.5),
-                                    builder: (_) =>
-                                        AddNewCouponWidget(
-                                          isUpdate: true,
-                                          couponId: coupon.id?.toString(),
-                                          name: coupon.couponName,
-                                          flat: coupon.couponType,
-                                          code: coupon.couponCode,
-                                          discount: coupon.discountAmount
-                                              ?.toString(),
-                                        ),
-                                  ).then((_) => getData()),
-                            ),
-                          );
-                        },
-                      ),
-                      verticalSpace(20),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
-          );
+                );
+              });
         });
-      });
   }
-
   Widget buildListTile({String? image, String? text, Function()? onPressed}) {
     return ListTile(
       leading: assetSvdImageWidget(image: image!),
@@ -514,45 +393,36 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     );
   }
 
-  Widget myStoreDropDown(
-      {Function()? function, String? emailId, String? storeName}) {
-    return GestureDetector(
-      onTap: function,
-      child: Container(
-        width: double.infinity,
-        height: 68.h,
-        decoration: BoxDecoration(
-          color: AppColor.cWhite,
-          borderRadius: BorderRadius.circular(35),
-          border: Border.all(color: AppColor.cBorder, width: 1),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                assetSvdImageWidget(
-                    image: DefaultImages.sLogoIcn, height: 25.h),
-                horizontalSpace(15.h),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(storeName ?? "My Store".tr, style: pMedium14),
-                    Text(emailId ?? "", style: pRegular8),
-                  ],
-                ),
-              ],
-            ),
-            assetSvdImageWidget(
-              image: DefaultImages.dropDownIcn,
-              colorFilter: ColorFilter.mode(AppColor.cLabel, BlendMode.srcIn),
-            )
-          ],
-        ),
-      ),
+  Future<void> _startVisitorChartAnimation() async {
+    if (!mounted) return;
+
+    await _visitorChartController.forward(from: 0);
+
+    if (!mounted) return;
+
+    await Future.delayed(
+      const Duration(milliseconds: 900),
     );
+
+    if (!mounted) return;
+
+    await _visitorLineOpacityController.reverse();
+
+    if (!mounted) return;
+
+    _visitorChartController.value = 0;
+
+    await _visitorLineOpacityController.forward();
+
+    if (!mounted) return;
+
+    _startVisitorChartAnimation();
+  }
+  @override
+  void dispose() {
+    _visitorChartController.dispose();
+    _visitorLineOpacityController.dispose();
+
+    super.dispose();
   }
 }
-

@@ -14,7 +14,7 @@ import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
+import '../../new_widgets/shimmer.dart';
 import '../../widget/app_dialog.dart';
 
 class TaxScreen extends StatefulWidget {
@@ -65,68 +65,74 @@ class _TaxScreenState extends State<TaxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppColor.cLabel;
+
     return Scaffold(
-      backgroundColor: AppColor.cBackGround,
-      appBar: simpleAppBar(title: "Tax", date: "Monday, 30 Jan"),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(24.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CommonIconButton(
-                title: 'Add Tax',
-                iconData: DefaultImages.addCircleIcn,
-                onPressed: () {
-                  taxController.clearTaxFields();
-                  _showTaxBottomSheet(isUpdate: false);
-                },
-                height: 51.h,
-              ),
-              SizedBox(height: 20.h),
-              Text("Tax", style: pRegular20),
-              SizedBox(height: 25.h),
+      backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
+      appBar: simpleAppBar(
+          title: "tax".tr,
+          isBack: true,
+          label: null,
+          onNewLabelTap: () {  }),
+      body: Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CommonIconButton(
+              title: 'Add Tax'.tr,
+              iconData: DefaultImages.addCircleIcn,
+              onPressed: () {
+                taxController.clearTaxFields();
+                _showTaxBottomSheet(isUpdate: false);
+              },
+              height: 51.h,
+            ),
+            SizedBox(height: 20.h),
+            Text("tax".tr, style: pRegular20.copyWith(color: textColor)),
+            SizedBox(height: 25.h),
 
-              // Table Header (Static)
-              _buildTableHeader(),
-              SizedBox(height: 10.h),
-              horizontalDivider(),
+            // Table Header (Static)
+            _buildTableHeader(isDark),
+            SizedBox(height: 10.h),
+            horizontalDivider(),
 
-              // List Content (Reactive)
-              Expanded(child: Obx(() => _buildBody())),
-            ],
-          ),
+            // List Content (Reactive)
+            Expanded(child: Obx(() => _buildBody(isDark))),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader(bool isDark) {
+    final headerColor = isDark ? Colors.white70 : AppColor.cDarkGreyFont;
     return Row(
       children: [
         Expanded(
           flex: 1,
           child: Text(
-            "Name",
+            "Name".tr,
             style: pBold12.copyWith(
-                color: AppColor.cDarkGreyFont, fontSize: 10.sp),
+                color: headerColor, fontSize: 10.sp),
           ),
         ),
         Expanded(
           flex: 1,
           child: Text(
-            "Amount",
+            "Amount".tr,
             style: pBold12.copyWith(
-                color: AppColor.cDarkGreyFont, fontSize: 10.sp),
+                color: headerColor, fontSize: 10.sp),
             textAlign: TextAlign.center,
           ),
         ),
         Expanded(
           flex: 1,
           child: Text(
-            "Action",
+            "Action".tr,
             style: pBold12.copyWith(
-                color: AppColor.cDarkGreyFont, fontSize: 10.sp),
+                color: headerColor, fontSize: 10.sp),
             textAlign: TextAlign.right,
           ),
         ),
@@ -134,17 +140,17 @@ class _TaxScreenState extends State<TaxScreen> {
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(bool isDark) {
     /// First Loading
     if (taxController.isLoading.value && taxController.currantPage.value == 1) {
-      return const Center(child: LoadingWidget());
+      return const ShimmerTable();
     }
 
     /// Error State
     if (taxController.errorMessage.isNotEmpty &&
         taxController.taxList.isEmpty) {
       return RefreshIndicator(
-        backgroundColor: AppColor.cBackGround,
+        backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
         onRefresh: _getData,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -169,7 +175,7 @@ class _TaxScreenState extends State<TaxScreen> {
     /// Empty State
     if (taxController.taxList.isEmpty) {
       return RefreshIndicator(
-        backgroundColor: AppColor.cBackGround,
+        backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
         onRefresh: _getData,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -193,7 +199,7 @@ class _TaxScreenState extends State<TaxScreen> {
 
     /// Data List
     return RefreshIndicator(
-      backgroundColor: AppColor.cBackGround,
+      backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
       onRefresh: _getData,
       child: ListView.separated(
         physics: AlwaysScrollableScrollPhysics(),
@@ -206,14 +212,16 @@ class _TaxScreenState extends State<TaxScreen> {
             tax: tax,
             onEdit: () => _showTaxBottomSheet(isUpdate: true, tax: tax),
             onDelete: () {
-                AppDialog.showCustomDialog(
-                    iconColor: AppColor.cRedText,
-                    confirmColor: AppColor.cRedText,
-                    context: context,
-                    onConfirm: () =>
-                        taxController.deleteTaxData(
-                            taxId: tax.id.toString())
-                );
+              AppDialog.showCustomDialog(
+                  message: "deleteTax".tr,
+                  lottieAsset: 'assets/lottie/delete_icon.json',
+                  iconColor: AppColor.cRedText,
+                  confirmColor: AppColor.cRedText,
+                  context: context,
+                  onConfirm: () =>
+                      taxController.deleteTaxData(
+                          taxId: tax.id.toString())
+              );
             },
           );
         },
@@ -222,9 +230,10 @@ class _TaxScreenState extends State<TaxScreen> {
   }
 
   void _showTaxBottomSheet({required bool isUpdate, Tax? tax}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColor.cBackGround,
+      backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cBackGround,
       barrierColor: AppColor.cGreyOpacity,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -259,9 +268,11 @@ class _TaxItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final itemTextColor = isDark ? Colors.white70 : AppColor.cDarkGreyFont;
     final String amountText = tax.taxType == "percentage"
-        ? "${tax.taxAmount}% Discount"
-        : "\$${tax.taxAmount} Discount";
+        ? "${tax.taxAmount}% ${'Discount'.tr}"
+        : "\$${tax.taxAmount} ${'Discount'.tr}";
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 10.h),
@@ -271,7 +282,7 @@ class _TaxItemWidget extends StatelessWidget {
             flex: 1,
             child: Text(
               tax.taxName ?? '',
-              style: pMedium16.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10.sp),
+              style: pMedium16.copyWith(color: itemTextColor, fontSize: 10.sp),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -280,7 +291,7 @@ class _TaxItemWidget extends StatelessWidget {
             flex: 1,
             child: Text(
               amountText,
-              style: pBold12.copyWith(color: AppColor.cDarkGreyFont, fontSize: 10.sp),
+              style: pBold12.copyWith(color: itemTextColor, fontSize: 10.sp),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

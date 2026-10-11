@@ -1,43 +1,25 @@
-// // ignore_for_file: avoid_print
-//
-// import 'package:store_go_app/network_dio/network_dio.dart';
-// import 'package:store_go_app/utils/base_api.dart';
-// import 'package:store_go_app/utils/prefer.dart';
-//
-// class OrderRepository {
-//   getOrderData(int page) async {
-//     String endPoint = "${API.orderListUrl}${API.storeIdUrl}${Prefs.getStoreID()}${API.andPageUrl}$page";
-//     var response = await NetworkHttps.getRequest(endPoint);
-//     print("response==========>$response");
-//     return response;
-//   }
-//   deleteOrderData(orderId) async {
-//     String endPoint = API.deleteOrderUrl + API.storeIdUrl + Prefs.getStoreID() + API.orderIdUrl + orderId;
-//     var response = await NetworkHttps.deleteRequest(endPoint);
-//     print("response==========>$response");
-//     return response;
-//   }
-// }
-//
-// class OrderDetailRepository {
-//   getOrderDetailData(orderId) async {
-//     String endPoint = API.viewOrderUrl + API.storeIdUrl + Prefs.getStoreID() + API.orderIdUrl + orderId;
-//     var response = await NetworkHttps.getRequest(endPoint);
-//     print("response==========>$response");
-//     return response;
-//   }
-// }
-
-// ignore_for_file: avoid_print
-
-// ignore_for_file: avoid_print
-
 import 'package:intl/intl.dart';
-import 'package:store_go_app/network_dio/network_dio.dart';
+import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import '../../core/model/create_order_model.dart';
+import '../../network/result.dart';
 
 class OrderRepository {
+
+  Future<dynamic> assignOrderToDelivery({
+    required Map<String, dynamic> data,
+  }) async {
+    String endPoint = '${API.assignOrderUrl}${API.storeIdUrl}${Prefs.getStoreID()}';
+
+    var response = await NetworkHttps.postRequest(
+      endPoint,
+      data,
+    );
+
+    return response;
+  }
+
   getOrderData(
       int page,
       {int? deliveredStatus,
@@ -61,6 +43,33 @@ class OrderRepository {
     return response;
   }
 
+  getTopOrdersData()  async {
+    String endPoint = "${API.topOrdersUrl}${API.storeIdUrl}${Prefs.getStoreID()}";
+    var response = await NetworkHttps.getRequest(endPoint);
+    print("response==========>$response");
+    return response;
+  }
+
+  Future<Result<Map<String, dynamic>>> createOrder({
+    required CreateOrderRequest request,
+  }) async {
+    final String endPoint =
+        "${API.createOrderUrl}${API.storeIdUrl}${Prefs.getStoreID()}";
+
+    final body = request.toJson();
+
+    print("createOrder body==========>$body");
+
+    final response = await NetworkHttps.postRequest(
+      endPoint,
+      body,
+    );
+
+    print("createOrder response==========>$response");
+
+    return response;
+  }
+
   deleteOrderData(orderId) async {
     String endPoint = API.deleteOrderUrl + API.storeIdUrl + Prefs.getStoreID() + API.orderIdUrl + orderId;
     var response = await NetworkHttps.deleteRequest(endPoint);
@@ -68,7 +77,6 @@ class OrderRepository {
     return response;
   }
 
-  // ⭐⭐⭐ تحديث حالة الطلب ⭐⭐⭐
   updateOrderStatus({
     required String productOrderId,
     required int deliveredStatus,
@@ -91,7 +99,6 @@ class OrderRepository {
     return response;
   }
 
-  // ⭐⭐⭐ جديد: إنشاء ملاحظة ⭐⭐⭐
   createNote({
     required int orderId,
     required String noteType,
@@ -113,7 +120,6 @@ class OrderRepository {
     return response;
   }
 
-  // ⭐⭐⭐ جديد: حذف ملاحظة ⭐⭐⭐
   deleteNote({
     required int orderId,
     required int noteId,

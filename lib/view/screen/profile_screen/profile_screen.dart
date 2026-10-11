@@ -1,352 +1,653 @@
-// ignore_for_file: prefer_const_constructors, must_be_immutable, prefer_const_constructors_in_immutables
-
 import 'dart:io';
-
-import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:get/get.dart';
+import 'package:store_go_app/core/controller/profile_controller/profile_controller.dart';
 import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/utils/constant.dart';
+import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/prefer.dart';
-import 'package:store_go_app/utils/constant.dart';
-import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/utils/text_style.dart';
+import 'package:store_go_app/utils/validator.dart';
+import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
+import 'package:store_go_app/view/widget/app_dialog.dart';
+import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/icon_and_image.dart';
-import 'package:store_go_app/view/widget/common_appbar_widget.dart';
-import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
-import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:store_go_app/utils/helper.dart';
-import 'package:store_go_app/core/controller/profile_controller/profile_controller.dart';
-
+import '../../new_widgets/app_txt_field.dart';
+import '../../new_widgets/shimmer.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String name;
   final String profileImg;
 
-  ProfileScreen({super.key, required this.name, required this.profileImg});
+  ProfileScreen({
+    super.key,
+    required this.name,
+    required this.profileImg,
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  ProfileController profileController = Get.put(ProfileController());
+  final ProfileController profileController = Get.put(ProfileController());
 
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  GlobalKey<FormState> profileFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> profileFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     profileController.nameController.text = widget.name;
-    profileController.emailController.text = Prefs.getString(AppConstant.emailId);
+    profileController.emailController.text =
+        Prefs.getString(AppConstant.emailId);
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).requestFocus(FocusNode());
+        FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        backgroundColor: AppColor.cBackGround,
-        appBar: simpleAppBar(title: "My Account", date: "Monday, 30 Jan"),
+        backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cLight,
+        appBar: simpleAppBar(
+          title: "My Account",
+          label: null,
+          isBack: true,
+          isBold: true,
+          onNewLabelTap: () {},
+        ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Obx(() {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 45,
-                          backgroundColor: AppColor.themeGreenColor,
-                          child: ClipOval(
-                            child: profileController.selectedImagePath.value.isNotEmpty
-                                ? Image.file(
-                                    File(profileController.selectedImagePath.value),
-                                    width: 90,
-                                    height: 90,
-                                    fit: BoxFit.cover,
-                                  )
-                                : CachedNetworkImage(
-                                    imageUrl: getImageUrl(widget.profileImg),
-                                    width: 90,
-                                    height: 90,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Center(
-                                      child: CircularProgressIndicator(color: Colors.white),
-                                    ),
-                                    errorWidget: (context, url, error) => Image.network(
-                                      DefaultImages.profileImg,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        horizontalSpace(15),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Hello, ${widget.name}",
-                              style: pBold18.copyWith(fontSize: 20),
-                            ),
-                            Text(
-                              "Change your account settings",
-                              style: pMedium14.copyWith(color: AppColor.cGreenFont),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
-                                  builder: (context) {
-                                    return Container(
-                                      height: 250,
-                                      decoration: BoxDecoration(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          cameraIconWidget(
-                                            image: DefaultImages.cameraIcn,
-                                            title: "Camera",
-                                            function: () {
-                                              profileController.pickImage(ImageSource.camera);
-                                            },
-                                          ),
-                                          horizontalSpace(35),
-                                          cameraIconWidget(
-                                            image: DefaultImages.galleryIcn,
-                                            title: "Gallery",
-                                            function: () {
-                                              profileController.pickImage(ImageSource.gallery);
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                child: Row(
-                                  children: [
-                                    assetSvdImageWidget(image: DefaultImages.cameraIcn),
-                                    horizontalSpace(6),
-                                    Text(
-                                      "Change Profile Photo",
-                                      style: pRegular10,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      child: horizontalDivider(),
-                    ),
-                    Text(
-                      "Store Theme Settings",
-                      style: pRegular20,
-                    ),
-                    verticalSpace(25),
-                    Form(
-                      key: profileFormKey,
-                      child: Column(
-                        children: [
-                          AddProductTextField(
-                            controller: profileController.nameController,
-                            labelText: 'Full Name',
-                            hintText: 'Enter name',
-                            validator: (value) {
-                              return Validator.validateName(value!, "Name");
-                            },
-                          ),
-                          verticalSpace(10),
-                          AddProductTextField(
-                            controller: profileController.emailController,
-                            labelText: 'Email',
-                            hintText: 'Enter email',
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (value) => Validator.validateEmail(value!),
-                          ),
-                          verticalSpace(26),
-                          CommonIconButton(
-                            iconData: DefaultImages.whiteDoneIcn,
-                            title: 'Save changes',
-                            onPressed: () {
-                              if (profileFormKey.currentState!.validate()) {
-                                if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                  commonToast(AppConstant.demoString);
-                                } else {
-                                  profileController.editProfile(name: profileController.nameController.text.trim(), email: profileController.emailController.text.trim(), imagePath: profileController.selectedImagePath.value);
-                                }
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      child: horizontalDivider(),
-                    ),
-                    Text(
-                      "Password",
-                      style: pRegular20,
-                    ),
-                    verticalSpace(25),
-                    Form(
-                      key: formKey,
-                      child: Column(
-                        children: [
-                          AddProductTextField(
-                            controller: profileController.oldPasswordController,
-                            labelText: 'Old Password:',
-                            hintText: '*************',
-                            obscuringCharacter: '*',
-                            obscureText: profileController.isOldPassword.value,
-                            onChanged: (value) {
-                              Validator.validatePassword(value);
-                            },
-                            validator: (value) {
-                              return Validator.validatePassword(value!);
-                            },
-                            suffix: IconButton(
-                              onPressed: () {
-                                profileController.isOldPassword.value = !profileController.isOldPassword.value;
-                              },
-                              icon: Icon(
-                                profileController.isOldPassword.value ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
-                                color: AppColor.cFont,
-                              ),
-                            ),
-                          ),
-                          verticalSpace(10),
-                          AddProductTextField(
-                            controller: profileController.passwordController,
-                            labelText: 'Password:',
-                            hintText: '*************',
-                            obscuringCharacter: '*',
-                            obscureText: profileController.isPassword.value,
-                            onChanged: (value) {
-                              Validator.validatePassword(value);
-                            },
-                            validator: (value) {
-                              return Validator.validatePassword(value!);
-                            },
-                            suffix: IconButton(
-                              onPressed: () {
-                                profileController.isPassword.value = !profileController.isPassword.value;
-                              },
-                              icon: Icon(
-                                profileController.isPassword.value ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
-                                color: AppColor.cFont,
-                              ),
-                            ),
-                          ),
-                          verticalSpace(10),
-                          AddProductTextField(
-                            controller: profileController.confirmPasswordController,
-                            labelText: 'Confirm Password:',
-                            hintText: '*************',
-                            obscuringCharacter: '*',
-                            obscureText: profileController.isConfirmPassword.value,
-                            onChanged: (value) {
-                              Validator.validateConfirmPassword(value, profileController.passwordController.text);
-                            },
-                            validator: (value) {
-                              return Validator.validateConfirmPassword(value!, profileController.passwordController.text);
-                            },
-                            suffix: IconButton(
-                              onPressed: () {
-                                profileController.isConfirmPassword.value = !profileController.isConfirmPassword.value;
-                              },
-                              icon: Icon(
-                                profileController.isConfirmPassword.value ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
-                                color: AppColor.cFont,
-                              ),
-                            ),
-                          ),
-                          verticalSpace(26),
-                          CommonIconButton(
-                            iconData: DefaultImages.whiteDoneIcn,
-                            title: 'Save changes',
-                            onPressed: () {
-                              if (formKey.currentState!.validate()) {
-                                if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                                  commonToast(AppConstant.demoString);
-                                } else {
-                                  profileController.updatePassword(
-                                    oldPassword: profileController.oldPasswordController.text.trim(),
-                                    newPassword: profileController.passwordController.text.trim(),
-                                    confirmPassword: profileController.confirmPasswordController.text.trim(),
-                                  );
-                                }
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(vertical: 15),
-                    //   child: horizontalDivider(),
-                    // ),
-                    // Text(
-                    //   "Delete Account",
-                    //   style: pRegular20,
-                    // ),
-                    // verticalSpace(8),
-                    // Text(
-                    //   "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy ",
-                    //   style: pRegular10.copyWith(color: AppColor.cDarkGreyFont),
-                    // ),
-                    // verticalSpace(26),
-                    // CommonIconButton(
-                    //   iconData: DefaultImages.whiteCloseIcn,
-                    //   title: 'Delete My Account',
-                    //   onPressed: () {},
-                    //   btnColor: AppColor.cRed,
-                    // ),
-                  ],
-                ),
-              );
-            }),
+          child: Obx(
+                () => SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _profileHeader(isDark),
+                  const SizedBox(height: 20),
+                  _accountCard(isDark),
+                  const SizedBox(height: 16),
+                  _passwordCard(isDark),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
-
-  Widget cameraIconWidget({String? image, String? title, Function()? function}) {
-    return GestureDetector(
-      onTap: function,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          assetSvdImageWidget(image: image, height: 40, width: 40),
-          verticalSpace(10),
-          Text(
-            title!,
-            style: pRegular20,
-          )
+  
+  Widget _profileHeader(bool isDark) {
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [
+            AppColor.themeNavyBlueColor,
+            AppColor.blueColor,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.themeNavyBlueColor
+                .withOpacity(isDark ? 0.45 : 0.28),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
         ],
+      ),
+      child: Stack(
+        children: [
+          // Decorative circles
+          PositionedDirectional(
+            end: -40,
+            top: -50,
+            child: _decorCircle(160, Colors.white.withOpacity(0.06)),
+          ),
+          PositionedDirectional(
+            start: -30,
+            bottom: -60,
+            child: _decorCircle(
+                130, AppColor.themeNavyBlueColor.withOpacity(0.18)),
+          ),
+          PositionedDirectional(
+            end: 40,
+            bottom: 30,
+            child: _decorCircle(18, Colors.white.withOpacity(0.10)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 26, 20, 22),
+            child: Column(
+              children: [
+                _avatar(),
+                const SizedBox(height: 14),
+                Text(
+                  "Hello, ${widget.name}",
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: pBold18.copyWith(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Manage your account and profile",
+                  textAlign: TextAlign.center,
+                  style: pMedium12.copyWith(
+                    color: Colors.white.withOpacity(0.72),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: () {
+                    profileController.pickImage();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 9,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.14),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.22),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.photo_library_outlined,
+                          size: 17,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Change Profile Photo",
+                          style: pMedium12.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _decorCircle(double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+    );
+  }
+
+  Widget _avatar() {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Gradient ring
+        Hero(
+          tag: "123",
+          child: Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  AppColor.themeNavyBlueColor,
+                  Colors.white.withOpacity(0.7),
+                ],
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColor.themeNavyBlueColor,
+              ),
+              child: CircleAvatar(
+                radius: 48,
+                backgroundColor: AppColor.themeNavyBlueColor.withOpacity(0.15),
+                child: ClipOval(
+                  child: _profileImage(),
+                ),
+              ),
+            ),
+          ),
+        ),
+        PositionedDirectional(
+          end: 0,
+          bottom: 2,
+          child: GestureDetector(
+            onTap: () {
+              profileController.pickImage();
+            },
+            child: Container(
+              height: 34,
+              width: 34,
+              decoration: BoxDecoration(
+                color: AppColor.themeNavyBlueColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColor.themeNavyBlueColor,
+                  width: 3,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.18),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.camera_alt_outlined,
+                size: 16,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+// ---------------------------------------------------------------------------
+// PROFILE IMAGE
+// ---------------------------------------------------------------------------
+
+  Widget _profileImage() {
+    if (profileController.selectedImagePath.value.isNotEmpty) {
+      return Image.file(
+        File(profileController.selectedImagePath.value),
+        width: 96,
+        height: 96,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: getImageUrl(widget.profileImg),
+      width: 96,
+      height: 96,
+      fit: BoxFit.cover,
+      placeholder: (context, url) {
+        return const AppShimmer(
+          child: ShimmerCircle(size: 96),
+        );
+      },
+      errorWidget: (context, url, error) {
+        return Image.network(
+          DefaultImages.profileImg,
+          width: 96,
+          height: 96,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) {
+            return Icon(
+              Icons.person,
+              size: 44,
+              color: Colors.white,
+            );
+          },
+        );
+      },
+    );
+  }
+
+// ---------------------------------------------------------------------------
+// SECTION CARD (shared shell for both cards)
+// ---------------------------------------------------------------------------
+
+  Widget _sectionCard({
+    required bool isDark,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? DarkThemeColor.cBorder
+              : AppColor.cBorder.withOpacity(0.5),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.18 : 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+            child: Row(
+              children: [
+                Container(
+                  height: 42,
+                  width: 42,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
+                      colors: [
+                        AppColor.themeNavyBlueColor,
+                        AppColor.blueColor,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 21,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: pSemiBold16.copyWith(
+                          color: isDark ? Colors.white : AppColor.cLabel,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: pRegular12.copyWith(
+                          color: isDark
+                              ? Colors.white60
+                              : AppColor.cDarkGreyFont,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: isDark ? DarkThemeColor.cBorder : AppColor.cDivider,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _accountCard(bool isDark) {
+    return _sectionCard(
+      isDark: isDark,
+      icon: Icons.manage_accounts_outlined,
+      title: "Account Information",
+      subtitle: "Update your personal information",
+      child: Form(
+        key: profileFormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppTextField(
+              title: 'Full Name',
+              hint: 'Enter name',
+              icon: Icons.person_outline,
+              controller: profileController.nameController,
+              validator: (value) => Validator.validateName(value!, "Name"),
+            ),
+            const SizedBox(height: 16),
+            AppTextField(
+              title: 'Email Address',
+              hint: 'Enter email',
+              icon: Icons.email_outlined,
+              controller: profileController.emailController,
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) => Validator.validateEmail(value!),
+            ),
+            const SizedBox(height: 22),
+            AppButton(
+              text: "Save Changes",
+              isLoading: profileController.isLoading2.value,
+              onPressed: () {
+                if (profileFormKey.currentState!.validate()) {
+                  if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+                    commonToast(
+                      type: AppSnackBarType.info,
+                      AppConstant.demoString,
+                    );
+                  } else {
+                    profileController.editProfile(
+                      name: profileController.nameController.text.trim(),
+                      email: profileController.emailController.text.trim(),
+                      imagePath: profileController.selectedImagePath.value,
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _passwordCard(bool isDark) {
+    return _sectionCard(
+      isDark: isDark,
+      icon: Icons.shield_outlined,
+      title: "Security",
+      subtitle: "Keep your account password secure",
+      child: Form(
+        key: formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppTextField(
+              title: 'Current Password',
+              hint: '*************',
+              icon: Icons.lock_outline,
+              controller: profileController.oldPasswordController,
+              obscureText: profileController.isOldPassword.value,
+              validator: (value) => Validator.validatePassword(value!),
+              suffix: _visibilityToggle(
+                isDark: isDark,
+                obscured: profileController.isOldPassword.value,
+                onPressed: () {
+                  profileController.isOldPassword.value =
+                  !profileController.isOldPassword.value;
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            AppTextField(
+              title: 'New Password',
+              hint: '*************',
+              icon: Icons.lock_reset_outlined,
+              controller: profileController.passwordController,
+              obscureText: profileController.isPassword.value,
+              validator: (value) => Validator.validatePassword(value!),
+              suffix: _visibilityToggle(
+                isDark: isDark,
+                obscured: profileController.isPassword.value,
+                onPressed: () {
+                  profileController.isPassword.value =
+                  !profileController.isPassword.value;
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            AppTextField(
+              title: 'Confirm Password',
+              hint: '*************',
+              icon: Icons.verified_user_outlined,
+              controller: profileController.confirmPasswordController,
+              obscureText: profileController.isConfirmPassword.value,
+              textInputAction: TextInputAction.done,
+              validator: (value) => Validator.validateConfirmPassword(
+                value!,
+                profileController.passwordController.text,
+              ),
+              suffix: _visibilityToggle(
+                isDark: isDark,
+                obscured: profileController.isConfirmPassword.value,
+                onPressed: () {
+                  profileController.isConfirmPassword.value =
+                  !profileController.isConfirmPassword.value;
+                },
+              ),
+            ),
+            const SizedBox(height: 22),
+            AppButton(
+              text: "Update Password",
+              isLoading: profileController.isLoading.value,
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  if (Prefs.getBool(AppConstant.isDemoMode) == true) {
+                    commonToast(
+                      type: AppSnackBarType.info,
+                      AppConstant.demoString,
+                    );
+                  } else {
+                    profileController.updatePassword(
+                      oldPassword:
+                      profileController.oldPasswordController.text.trim(),
+                      newPassword:
+                      profileController.passwordController.text.trim(),
+                      confirmPassword:
+                      profileController.confirmPasswordController.text.trim(),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+// ---------------------------------------------------------------------------
+// PASSWORD VISIBILITY TOGGLE
+// ---------------------------------------------------------------------------
+
+  Widget _visibilityToggle({
+    required bool isDark,
+    required bool obscured,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      splashRadius: 20,
+      icon: Icon(
+        obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+        size: 20,
+        color: isDark ? Colors.white60 : AppColor.cFont,
+      ),
+    );
+  }
+
+// ---------------------------------------------------------------------------
+// FIELD LABEL
+// ---------------------------------------------------------------------------
+
+  Widget _fieldLabel({
+    required IconData icon,
+    required String title,
+    required bool isDark,
+  }) {
+    return Row(
+      children: [
+        Container(
+          height: 26,
+          width: 26,
+          decoration: BoxDecoration(
+            color: AppColor.themeNavyBlueColor.withOpacity(isDark ? 0.18 : 0.12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: 15,
+            color: AppColor.themeNavyBlueColor,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: pMedium14.copyWith(
+            fontSize: 13,
+            color: isDark ? Colors.white : AppColor.cLabel,
+          ),
+        ),
+      ],
+    );
+  }
+
+// ---------------------------------------------------------------------------
+// SAVE BUTTON
+// ---------------------------------------------------------------------------
+
+  Widget _saveButton({
+    required String title,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.28),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: CommonIconButton(
+        iconData: DefaultImages.whiteDoneIcn,
+        title: title,
+        height: 50,
+        radius: 14,
+        btnColor: color,
+        onPressed: onPressed,
       ),
     );
   }

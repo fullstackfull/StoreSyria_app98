@@ -31,7 +31,7 @@ class OrderDetailData {
   String? orderId;
   String? deliveryDate;
   double? orderRewardPoint;
-  int? returnPrice;
+  String? returnPrice;
   dynamic returnStatusMessage;
   String? returnDate;
   String? orderStatusText;
@@ -45,18 +45,26 @@ class OrderDetailData {
   String? paymnet;
   String? paymentStatus;
   String? delivery;
+  String? deliveryId;
+  String? deliveryBoyId;
   String? deliveredCharge;
+  String? currencySymbol;
   CouponInfo? couponInfo;
   List<Tax>? tax;
   String? subTotal;
+  String? taxPrice;
   String? finalPrice;
   List<Note>? notes;
 
   OrderDetailData(
       {this.id,
       this.isGuest,
+      this.currencySymbol,
+      this.taxPrice,
       this.orderId,
       this.deliveryDate,
+      this.deliveryId,
+      this.deliveryBoyId,
       this.orderRewardPoint,
       this.returnPrice,
       this.returnStatusMessage,
@@ -70,8 +78,8 @@ class OrderDetailData {
       this.deliveryInformations,
       this.paymnetType,
       this.paymnet,
-        this.paymentStatus,
-        this.notes,
+      this.paymentStatus,
+      this.notes,
       this.delivery,
       this.deliveredCharge,
       this.couponInfo,
@@ -86,11 +94,13 @@ class OrderDetailData {
     isGuest = json['is_guest'];
     orderId = json['order_id'];
     deliveryDate = json['delivery_date'];
+    deliveryBoyId = json['deliveryboy_id']?.toString();
     orderRewardPoint = json['order_reward_point'] != null ? double.tryParse(json['order_reward_point'].toString()) : null;
     returnPrice = json['return_price'];
     returnStatusMessage = json['return_status_message'];
     returnDate = json['return_date'];
     orderStatusText = json['order_status_text'];
+    currencySymbol = json['currency_symbol'];
     orderStatus = json['order_status'];
     orderStatusMessage = json['order_status_message'];
     print('===============${json['product'].runtimeType}');
@@ -125,6 +135,7 @@ class OrderDetailData {
     paymnet = json['paymnet'];
     paymentStatus = json['payment_status'];
     delivery = json['delivery'];
+    deliveryId = json['delivery_id']?.toString();
     deliveredCharge = json['delivered_charge'];
     couponInfo = json['coupon_info'] != null ? CouponInfo.fromJson(json['coupon_info']) : null;
     if (json['tax'] != null && json['tax'] is List) {
@@ -133,6 +144,7 @@ class OrderDetailData {
         tax!.add(Tax.fromJson(v));
       });
     }
+    taxPrice = json ['tax_price'] ?? "";
     subTotal = json['sub_total'];
     finalPrice = json['final_price'];
     if (json['notes'] != null && json['notes'] is List) {
@@ -147,7 +159,10 @@ class OrderDetailData {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;
     data['is_guest'] = this.isGuest;
+    data['delivery_id'] = this.deliveryId;
+    data['deliveryboy_id'] = this.deliveryBoyId;
     data['order_id'] = this.orderId;
+    data['currency_symbol'] = this.currencySymbol;
     data['delivery_date'] = this.deliveryDate;
     data['order_reward_point'] = this.orderRewardPoint;
     data['return_price'] = this.returnPrice;
@@ -178,6 +193,7 @@ class OrderDetailData {
       data['tax'] = this.tax!.map((v) => v.toJson()).toList();
     }
     data['sub_total'] = this.subTotal;
+    data['tax_price'] = this.taxPrice;
     data['final_price'] = this.finalPrice;
     if (this.notes != null) {
       data['notes'] = this.notes!.map((v) => v.toJson()).toList();
@@ -198,7 +214,7 @@ class Product {
   String? qty;
   String? variantId;
   String? variantName;
-  int? productReturn;
+  bool? productReturn;
 
   Product({this.productId, this.image, this.name, this.orignalPrice, this.totalOrignalPrice, this.perProductDiscountPrice, this.discountPrice, this.finalPrice, this.qty, this.variantId, this.variantName, this.productReturn});
 
@@ -215,8 +231,13 @@ class Product {
     qty = myPaymnetType == "POS" ? json["quantity"].toString() : json['qty'].toString();
     variantId = json['variant_id'].toString();
     variantName = json['variant_name'];
-    productReturn = json['return'];
-  }
+    final returnValue = json['return'];
+
+    if (returnValue == true || returnValue == 1 || returnValue == '1') {
+      productReturn = true;
+    } else {
+      productReturn = false;
+    }  }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
