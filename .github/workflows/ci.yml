@@ -1,0 +1,188 @@
+name: CI
+
+# Repo B (the Flutter merchant admin app) had NO CI of any kind. 79 guard tests
+# existed and nothing ran them, which made them documentation rather than
+# guards: the suite could go red for weeks without anyone learning. This file
+# is the first pipeline for this repository.
+#
+# WHAT IS GATED, AND WHY EACH BAR IS WHERE IT IS
+#
+#   flutter test                   -- blocking, must be 100%. MEASURED 129/129.
+#   flutter analyze errors         -- blocking, must be 0. MEASURED 0.
+#   flutter analyze warnings       -- blocking, must be 0. MEASURED 0.
+#   flutter analyze infos          -- RATCHET at 552: may fall, never rise.
+#   signing material in git        -- blocking.
+#   analyzer suppression count     -- RATCHET at 43: may fall, never rise.
+#
+# The warnings bar is deliberately set to ZERO rather than to
+# `--no-fatal-warnings`. The instruction for this work was not to make the
+# board green by lowering a bar, so the 54 warnings that existed were fixed
+# first -- four of them were real product defects, not tidiness -- and only
+# then was the gate set above them. `flutter analyze --no-fatal-infos` was
+# verified to exit 1 when a single unused local is introduced and 0 when it is
+# removed, so this gate is known to bite rather than assumed to.
+#
+# The infos bar is a ratchet instead of zero because 552 of the 552 remaining
+# issues are informational and the large majority are the deprecated
+# `withOpacity` call, whose replacement (`withValues`) is a mechanical but
+# very wide change that belongs in its own commit. A ratchet keeps that debt
+# from growing while it is paid down. Same idiom, and same reasoning, as the
+# composer-audit ratchet in repo A's ci.yml.
+#
+# ACTION PINNING. Every `uses:` names an exact patch version rather than a
+# floating major tag (repo A currently uses `@v4` / `@v2`; this is stricter).
+# A commit SHA is stronger still, because a tag can be moved. SHAs are NOT
+# used here because this pipeline was authored in an environment with no
+# access to the GitHub API, so a SHA could not be verified and an unverified
+# 40-character hex string is worse than a tag: it fails closed in a way nobody
+# can diagnose. Converting these four to SHAs is a follow-up for someone with
+# network access, and is the only outstanding item in this file.
+#
+# NOT GATED, DELIBERATELY
+#
+#   pubspec.lock cleanliness. `flutter pub get` re-resolves the lock on this
+#   SDK, so a "the lock did not change" check would fail on every run. That
+#   re-resolution is an accepted owner decision, not a defect.
+#
+#   analysis_options.yaml cleanliness. `flutter analyze` REWRITES this file:
+#   the SDK's own AnalysisOptionsMigration adds an `analyzer: exclude:` block
+#   for the generated platform directories (flutter_tools/lib/src/migrations/
+#   analysis_options_migration.dart:14-77, which logs "Upgrading
+#   analysis_options.yaml to exclude build and platform directories"). It is
+#   the tool, not a developer hiding scope. It also hides nothing here: the
+#   project reports 552 issues both with and without that block, because
+#   android/, ios/, web/, windows/, macos/ and linux/ contain no Dart in this
+#   repository. check-no-new-suppressions.sh therefore reads the COMMITTED
+#   file rather than the working tree, and separately fails any exclude that
+#   reaches lib/.
+#
+#   A signed release artifact. android/app/build.gradle.kts aborts a release
+#   build when android/key.properties is missing, by design, and no runner has
+#   the keystore. The authoritative check is
+#     apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk
+#   whose certificate subject must not be `CN=Android Debug, O=Android, C=US`.
+#   That needs real signing material and so cannot live here; what CAN be
+#   checked without it is in test/security/release_signing_test.dart (9 tests,
+#   run by `flutter test` below) plus the git-level hygiene job.
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Pinned to the version this repository is developed and measured against.
+  # A floating 'stable' would silently change the analyzer's diagnostic set,
+  # which is exactly what both ratchets below are counting.
+  FLUTTER_VERSION: 3.47.7
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Needs no Flutter SDK, so it answers in seconds and runs in parallel with
+  # the slow job. Both checks are pure git plus shell.
+  # ---------------------------------------------------------------------------
+  hygiene:
+    name: Secrets and suppression hygiene
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          # Full history: a keystore that was committed once and deleted later
+          # is still in the pack and still compromised, and
+          # check-signing-material.sh looks for exactly that.
+          fetch-depth: 0
+
+      - name: No signing material is tracked by git
+        # Asserts the material is IGNORED, never that it is absent.
+        # android/key.properties legitimately exists on a release engineer's
+        # machine (android/RELEASE_SIGNING.md:47), so an absence check would
+        # fail the moment the owner follows the documented runbook.
+        run: ./.github/scripts/check-signing-material.sh
+
+      - name: No new analyzer suppressions
+        run: ./.github/scripts/check-no-new-suppressions.sh
+
+  # ---------------------------------------------------------------------------
+  analyze-and-test:
+    name: Analyze and test
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: subosito/flutter-action@v2.18.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Record the toolchain actually used
+        # The ratchets are only meaningful against a known analyzer, so the
+        # version goes in the log where a failure can be read against it.
+        run: flutter --version
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: No errors and no warnings
+        # --no-fatal-infos keeps the 552 informational issues out of the
+        # verdict while leaving errors AND warnings fatal. Verified to exit
+        # non-zero on a single injected unused local.
+        run: flutter analyze --no-fatal-infos
+
+      - name: Informational issues must not grow
+        # The ratchet that makes the step above safe to keep narrow. The count
+        # may fall and never rise, so new informational debt fails the build
+        # even while the known 552 are being paid down.
+        env:
+          INFO_CEILING: '552'
+        run: |
+          set -o pipefail
+          flutter analyze > analyze.txt 2>&1 || true
+
+          if grep -q 'No issues found' analyze.txt; then
+            found=0
+          else
+            found="$(grep -c '^ *info • ' analyze.txt || true)"
+          fi
+
+          if [ -z "$found" ]; then
+            echo "::error::Could not parse the analyzer output."
+            cat analyze.txt
+            exit 1
+          fi
+
+          # A total of 0 with a non-empty report means the format changed and
+          # this step has gone vacuous, which must fail loudly rather than pass.
+          total="$(sed -n 's/^\([0-9]\{1,\}\) issues\? found\..*/\1/p' analyze.txt | tail -1)"
+          if [ -n "$total" ] && [ "$total" -gt 0 ] && [ "$found" -eq 0 ]; then
+            echo "::error::Analyzer reported $total issues but none parsed as 'info'. The output format changed; fix this step."
+            cat analyze.txt
+            exit 1
+          fi
+
+          echo "informational issues: $found (ceiling $INFO_CEILING)"
+
+          if [ "$found" -gt "$INFO_CEILING" ]; then
+            echo "::error::Informational issue count rose from $INFO_CEILING to $found."
+            cat analyze.txt
+            exit 1
+          fi
+
+          if [ "$found" -lt "$INFO_CEILING" ]; then
+            echo "::notice::Informational issues fell to $found. Lower INFO_CEILING to $found so the ratchet keeps holding."
+          fi
+
+      - name: flutter test
+        # Must be 100%. There is no allowance here and no continue-on-error:
+        # the suite was measured at 129/129 before this pipeline was added, so
+        # a red run is a real regression rather than inherited debt.
+        run: flutter test --reporter expanded
