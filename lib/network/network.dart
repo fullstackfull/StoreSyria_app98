@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'package:store_go_app/network/result.dart';
+import 'package:store_go_app/utils/app_log.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/screen/auth/login_widget.dart';
@@ -26,16 +26,11 @@ class NetworkHttps {
   static const Duration _timeout = Duration(seconds: 30);
   static const Duration _uploadTimeout = Duration(seconds: 60);
 
-  static final Logger logger = Logger(
-    printer: PrettyPrinter(
-      methodCount: 0,
-      errorMethodCount: 5,
-      lineLength: 120,
-      colors: true,
-      printEmojis: true,
-      dateTimeFormat: DateTimeFormat.none,
-    ),
-  );
+  // SEC-20c / R7-04. This class used to own a `Logger` with no filter and no
+  // level, so every request and every full response body was written to the
+  // device log in release builds too — and the login response body carries the
+  // bearer token. All logging now goes through AppLog, which is inert when
+  // kReleaseMode is true and redacts tokens at every level.
 
   // ===========================================================================
   // HEADERS
@@ -64,34 +59,15 @@ class NetworkHttps {
   }
 
   // ===========================================================================
-  // PRETTY JSON
-  // ===========================================================================
-
-  static String _prettyJson(dynamic data) {
-    try {
-      if (data is String) {
-        try {
-          data = jsonDecode(data);
-        } catch (_) {
-          return data;
-        }
-      }
-
-      return const JsonEncoder.withIndent('  ').convert(data);
-    } catch (_) {
-      return data.toString();
-    }
-  }
-
-  // ===========================================================================
   // REQUEST LOGGER
   // ===========================================================================
 
+  // NOTE: deliberately takes NO `headers` argument. Request headers carry the
+  // Authorization bearer token and must never reach a log sink.
   static void _logRequest({
     required String method,
     required String url,
     Map<String, dynamic>? body,
-    Map<String, String>? headers,
   }) {
     final buffer = StringBuffer();
 
@@ -108,14 +84,14 @@ class NetworkHttps {
 
     if (body != null && body.isNotEmpty) {
       buffer.writeln('\nBODY:');
-      buffer.writeln(_prettyJson(body));
+      buffer.writeln(AppLog.prettyJson(body));
     }
 
     buffer.writeln(
       '══════════════════════════════════════════════════════',
     );
 
-    logger.d(buffer.toString());
+    AppLog.d(buffer.toString());
   }
 
   // ===========================================================================
@@ -148,14 +124,17 @@ class NetworkHttps {
     if (response.body.isEmpty) {
       buffer.writeln('(empty response)');
     } else {
-      buffer.writeln(_prettyJson(response.body));
+      // AppLog.prettyJson masks `token`, `access_token`, `password` and any
+      // `Bearer <...>` substring, so the login response no longer discloses the
+      // bearer token even in a debug build.
+      buffer.writeln(AppLog.prettyJson(response.body));
     }
 
     buffer.writeln(
       '══════════════════════════════════════════════════════',
     );
 
-    logger.d(buffer.toString());
+    AppLog.d(buffer.toString());
   }
 
   // ===========================================================================
@@ -168,7 +147,7 @@ class NetworkHttps {
     dynamic error,
     StackTrace? stackTrace,
   }) {
-    logger.e(
+    AppLog.e(
       '''
 ══════════════════════════════════════════════════════
 ❌ $method ERROR
@@ -355,7 +334,6 @@ $error
       _logRequest(
         method: 'GET',
         url: getUrl,
-        headers: headers,
       );
 
       final response = await http.get(
@@ -474,7 +452,6 @@ $error
       _logRequest(
         method: 'POST',
         url: postUrl,
-        headers: headers,
         body: Map<String, dynamic>.from(data),
       );
 
@@ -596,7 +573,6 @@ $error
       _logRequest(
         method: 'PUT',
         url: putUrl,
-        headers: headers,
         body: Map<String, dynamic>.from(data),
       );
 
@@ -733,7 +709,6 @@ $error
       _logRequest(
         method: 'MULTIPART POST',
         url: url,
-        headers: headers,
         body: Map<String, dynamic>.from(fields),
       );
 
@@ -898,7 +873,6 @@ $error
       _logRequest(
         method: 'DELETE',
         url: deleteUrl,
-        headers: headers,
       );
 
       final response = await http.delete(

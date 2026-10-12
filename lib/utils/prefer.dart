@@ -1,6 +1,7 @@
-// ignore_for_file: avoid_print, constant_identifier_names
+// ignore_for_file: constant_identifier_names
 
 import '../main.dart';
+import 'app_log.dart';
 
 class Prefs {
   static const String USER_ID = 'userId';
@@ -74,7 +75,7 @@ class Prefs {
   }
 
   static clear() {
-    print('PREFS CLEARED');
+    AppLog.d('PREFS CLEARED');
     return getStorage!.erase();
   }
 
