@@ -440,10 +440,10 @@ $error
         );
       }
     } finally {
-      // Released on the next event-loop turn so the burst of concurrent 401s
-      // that triggered this collapses into one logout, while a genuine later
-      // 401 (a new session that also expires) is still handled.
-      Future<void>.delayed(
+      // Released after a short window so the burst of concurrent 401s that
+      // triggered this collapses into one logout, while a genuine later 401
+      // (a new session that also expires) is still handled.
+      Timer(
         const Duration(seconds: 2),
         () => _unauthorizedInFlight = false,
       );
