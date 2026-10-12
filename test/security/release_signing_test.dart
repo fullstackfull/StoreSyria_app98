@@ -147,11 +147,14 @@ void main() {
       final text = example.readAsStringSync();
 
       // The template must stay a template. Placeholders only.
-      final storePassword = RegExp(r'(?m)^storePassword=(.*)$')
+      // Dart's RegExp (RE2-style) has no inline (?m) flag; multiline is a
+      // named constructor argument. An inline flag group throws
+      // FormatException: Invalid group at construction time.
+      final storePassword = RegExp(r'^storePassword=(.*)$', multiLine: true)
           .firstMatch(text)
           ?.group(1)
           ?.trim();
-      final keyPassword = RegExp(r'(?m)^keyPassword=(.*)$')
+      final keyPassword = RegExp(r'^keyPassword=(.*)$', multiLine: true)
           .firstMatch(text)
           ?.group(1)
           ?.trim();
