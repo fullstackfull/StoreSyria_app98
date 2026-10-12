@@ -84,7 +84,7 @@ class OrderRepository {
     required String paymentStatus,
     String? note,
   }) async {
-    String endPoint = "/orders/update-status";
+    String endPoint = API.updateOrderStatusUrl;
 
     var body = {
       'product_order_id': productOrderId,
@@ -105,7 +105,7 @@ class OrderRepository {
     required String noteType,
     required String note,
   }) async {
-    String endPoint = "/orders/notes/create";
+    String endPoint = API.createOrderNoteUrl;
 
     var body = {
       'store_id': Prefs.getStoreID(),
@@ -125,7 +125,9 @@ class OrderRepository {
     required int orderId,
     required int noteId,
   }) async {
-    String endPoint = "/orders/notes/delete?store_id=${Prefs.getStoreID()}&order_id=$orderId&note_id=$noteId";
+    String endPoint =
+        "${API.deleteOrderNoteUrl}${API.storeIdUrl}${Prefs.getStoreID()}"
+        "&order_id=$orderId&note_id=$noteId";
 
     AppLog.d("deleteNote endPoint==========>$endPoint");
 

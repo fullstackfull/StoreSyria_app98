@@ -18,10 +18,27 @@
 // here, so changing base_api.dart fails until someone edits this file too, and
 // editing this file is the moment to check the server agrees.
 //
-// VERIFIED at the time of writing: all 81 live endpoints and all 16 query
-// fragments below are byte-identical to the committed manifest in repo A
-// (base_path "/api/admin", 81 uncommented endpoints, 16 fragments). The
-// comparison was run field by field; there was no drift in either direction.
+// RE-MEASURED against repo A's committed manifest
+// (tests/Support/ApiContract/manifests/flutter-endpoints.json: base_path
+// "/api/admin", 89 endpoint entries of which 81 uncommented, 16 fragments).
+// All 81 endpoint paths are byte-identical in both directions and all 16
+// fragment field names match: zero drift.
+//
+// TWO GAPS that measurement exposed, which is why this file grew:
+//
+//   1. THREE endpoints were missing from both sides. order_repository.dart
+//      wrote "/orders/update-status", "/orders/notes/create" and
+//      "/orders/notes/delete" as literals instead of declaring them here, so
+//      they were absent from the manifest and from this contract: three live
+//      endpoints that the server side had no record of the app calling. They
+//      are now API constants, which brings the client half to 84. Repo A's
+//      manifest still lists 81 and must be regenerated -- recorded as a
+//      cross-repo dependency, not edited from here.
+//   2. The manifest records fragments by field NAME ONLY, with no values, so
+//      a fragment VALUE change (`?store_id=` to `?storeId=`) is invisible to
+//      the server-side checker. The published declaration this file keeps in
+//      sync (client-endpoints.json) carries the values, so the server side
+//      can diff them.
 //
 // These tests read the real compiled `API` fields rather than grepping the
 // source, so a field that is RENAMED or DELETED breaks compilation here --
@@ -29,6 +46,7 @@
 // that is ADDED cannot break compilation, so `the contract covers every
 // endpoint the class declares` parses the source to catch that case.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -56,6 +74,7 @@ void main() {
     'changeLanguageUrl': '/updateStoreLanguage',
     'changeStoreUrl': '/changestore',
     'couponListUrl': '/couponlist',
+    'createOrderNoteUrl': '/orders/notes/create',
     'createOrderUrl': '/createOrderViaApi',
     'createProductUrl': '/createproduct',
     'currenciesUrl': '/getCurrenciesApi',
@@ -67,6 +86,7 @@ void main() {
     'deleteCouponUrl': '/deletecoupon',
     'deleteCustomerUrl': '/destroyCustomer',
     'deleteDeliveryBoyUrl': '/deliveryboysDestroy',
+    'deleteOrderNoteUrl': '/orders/notes/delete',
     'deleteOrderUrl': '/deleteorder',
     'deleteProductListUrl': '/deleteproduct',
     'deleteProductUrl': '/deleteproduct',
@@ -111,6 +131,7 @@ void main() {
     'updateCurrencyRateUrl': '/update-currency-rate',
     'updateCustomerUrl': '/update-customer',
     'updateDeliveryBoyUrl': '/deliveryboysUpdate',
+    'updateOrderStatusUrl': '/orders/update-status',
     'updatePassDeliveryBoyUrl': '/deliveryboysReset-password',
     'updatePasswordUrl': '/updatepassword',
     'updateProductUrl': '/updateproduct',
@@ -163,6 +184,7 @@ void main() {
     'changeLanguageUrl': API.changeLanguageUrl,
     'changeStoreUrl': API.changeStoreUrl,
     'couponListUrl': API.couponListUrl,
+    'createOrderNoteUrl': API.createOrderNoteUrl,
     'createOrderUrl': API.createOrderUrl,
     'createProductUrl': API.createProductUrl,
     'currenciesUrl': API.currenciesUrl,
@@ -174,6 +196,7 @@ void main() {
     'deleteCouponUrl': API.deleteCouponUrl,
     'deleteCustomerUrl': API.deleteCustomerUrl,
     'deleteDeliveryBoyUrl': API.deleteDeliveryBoyUrl,
+    'deleteOrderNoteUrl': API.deleteOrderNoteUrl,
     'deleteOrderUrl': API.deleteOrderUrl,
     'deleteProductListUrl': API.deleteProductListUrl,
     'deleteProductUrl': API.deleteProductUrl,
@@ -218,6 +241,7 @@ void main() {
     'updateCurrencyRateUrl': API.updateCurrencyRateUrl,
     'updateCustomerUrl': API.updateCustomerUrl,
     'updateDeliveryBoyUrl': API.updateDeliveryBoyUrl,
+    'updateOrderStatusUrl': API.updateOrderStatusUrl,
     'updatePassDeliveryBoyUrl': API.updatePassDeliveryBoyUrl,
     'updatePasswordUrl': API.updatePasswordUrl,
     'updateProductUrl': API.updateProductUrl,
@@ -438,6 +462,271 @@ void main() {
       // the calls would silently drop the tenant discriminator.
       expect(API.storeIdUrl, '?store_id=');
       expect(API.andStoreIdUrl, '&store_id=');
+    });
+  });
+
+  // =========================================================================
+  // Nothing may bypass the API class.
+  //
+  // Everything above tests the CONSTANTS. All of it is worth nothing if a
+  // repository writes its path inline, because then neither this file nor
+  // repo A's generated manifest can see that endpoint at all. That was not
+  // hypothetical: order_repository.dart did it three times, and those three
+  // endpoints were missing from the manifest the server side checks against.
+  //
+  // The scan reads raw source with line comments dropped -- deliberately NOT
+  // codeOnly(), which blanks string literals and would be blind to exactly
+  // what is being looked for here.
+  // =========================================================================
+
+  group('nothing bypasses the API class', () {
+    List<String> codeLines(File file) => file
+        .readAsStringSync()
+        .split('\n')
+        .map((l) => l.trimLeft().startsWith('//') ? '' : l)
+        .toList();
+
+    test('no endPoint is assigned a literal path', () {
+      final offenders = <String>[];
+      var assignments = 0;
+
+      // Either quote style. The double-quote form is the one that shipped,
+      // and a single-quote-only grep is how it stayed hidden.
+      final literal = RegExp('endPoint' r'\s*=\s*' '["' "']/");
+      final anyAssignment = RegExp('endPoint' r'\s*=');
+
+      for (final file in libDartFiles()) {
+        final lines = codeLines(file);
+
+        for (var i = 0; i < lines.length; i++) {
+          if (anyAssignment.hasMatch(lines[i])) assignments++;
+          if (literal.hasMatch(lines[i])) {
+            offenders.add('${relative(file)}:${i + 1}:${lines[i].trim()}');
+          }
+        }
+      }
+
+      expect(
+        assignments,
+        greaterThanOrEqualTo(25),
+        reason: 'Only $assignments endPoint assignments were found, so this '
+            'scan has stopped matching the repositories and has gone vacuous.',
+      );
+
+      expect(
+        offenders,
+        isEmpty,
+        reason: 'Declare the path in lib/utils/base_api.dart and add it to '
+            'this contract, then regenerate repo A\'s manifest. A path only '
+            'the repository knows about is a route the server can delete '
+            'without anything failing until a merchant\'s phone calls it.\n'
+            '${offenders.join('\n')}',
+      );
+    });
+
+    test('no literal path is handed straight to the network layer', () {
+      final offenders = <String>[];
+
+      final inline = RegExp(
+        r'(getRequest|postRequest|putRequest|deleteRequest|patchRequest)\s*\(\s*'
+        '["' "']/",
+      );
+
+      for (final file in libDartFiles()) {
+        final lines = codeLines(file);
+
+        for (var i = 0; i < lines.length; i++) {
+          if (inline.hasMatch(lines[i])) {
+            offenders.add('${relative(file)}:${i + 1}:${lines[i].trim()}');
+          }
+        }
+      }
+
+      expect(offenders, isEmpty, reason: offenders.join('\n'));
+    });
+
+    test('the regexes match the defect they are supposed to catch', () {
+      // The three literals that really shipped, so a typo cannot make the two
+      // scans above silently green.
+      final literal = RegExp('endPoint' r'\s*=\s*' '["' "']/");
+
+      expect(
+        literal.hasMatch('    String endPoint = "/orders/update-status";'),
+        isTrue,
+      );
+      expect(
+        literal.hasMatch("    String endPoint = '/orders/notes/create';"),
+        isTrue,
+      );
+      expect(
+        literal.hasMatch(
+          '    String endPoint = "\${API.taxListUrl}\${API.storeIdUrl}";',
+        ),
+        isFalse,
+      );
+    });
+
+    test('only base_api.dart knows the /api/ base path', () {
+      // A full URL pasted into a controller would survive every test above
+      // and would not move when the base path does.
+      final offenders = <String>[];
+
+      for (final file in libDartFiles()) {
+        final path = relative(file);
+        if (path == 'lib/utils/base_api.dart') continue;
+
+        final lines = codeLines(file);
+
+        for (var i = 0; i < lines.length; i++) {
+          if (lines[i].contains('/api/')) {
+            offenders.add('$path:${i + 1}:${lines[i].trim()}');
+          }
+        }
+      }
+
+      expect(offenders, isEmpty, reason: offenders.join('\n'));
+    });
+  });
+
+  // =========================================================================
+  // The published declaration.
+  //
+  // Repo A's manifest is GENERATED FROM this app, so regenerating it absorbs
+  // drift silently -- the known weakness of the server-side jaw.
+  // test/contract/client-endpoints.json is the opposite: committed HERE and
+  // verified against the real constants, so the server side has a file it can
+  // diff rather than a generator it has to trust. It also carries the
+  // fragment VALUES, which the manifest does not record at all.
+  // =========================================================================
+
+  group('the published client declaration stays in sync', () {
+    late Map<String, dynamic> published;
+
+    setUpAll(() {
+      published = jsonDecode(
+        File('${packageRoot().path}/test/contract/client-endpoints.json')
+            .readAsStringSync(),
+      ) as Map<String, dynamic>;
+    });
+
+    test('its endpoints are exactly the contracted endpoints', () {
+      expect(
+        Map<String, String>.from(published['endpoints'] as Map),
+        expectedEndpoints,
+        reason: 'test/contract/client-endpoints.json and this contract '
+            'disagree. The JSON is what the server side diffs against, so it '
+            'has to move in the same commit as the constant.',
+      );
+    });
+
+    test('its fragments are exactly the contracted fragments', () {
+      expect(
+        Map<String, String>.from(published['fragments'] as Map),
+        expectedFragments,
+      );
+    });
+
+    test('it publishes the live base url and base path', () {
+      expect(published['base_url'], API.baseUrl);
+      expect(API.baseUrl, endsWith(published['base_path'] as String));
+    });
+
+    test('the counts are stated, so a silent addition cannot pass', () {
+      // Repo A's manifest declares 81 endpoints and 16 fragments. The client
+      // is at 84 because three endpoints that were inline literals are now
+      // declared; the manifest must be regenerated to match. When an 85th
+      // appears this fails, and the regeneration question gets asked again
+      // instead of being forgotten.
+      expect(expectedEndpoints.length, 84);
+      expect(expectedFragments.length, 16);
+      expect((published['endpoints'] as Map).length, 84);
+      expect((published['fragments'] as Map).length, 16);
+    });
+  });
+
+  // =========================================================================
+  // Composition. The shape tests above check each constant alone; these
+  // assemble the real strings the repositories build and parse them, because
+  // a '?' and an '&' in the wrong order produce a URL that is perfectly valid
+  // and carries the wrong parameters.
+  // =========================================================================
+
+  group('composed URLs parse the way the server reads them', () {
+    test('a list endpoint carries store_id and page as separate parameters',
+        () {
+      // Verbatim the composition in tax_repository.dart:8,
+      // category_repository.dart:7, shipping_repository.dart:8,
+      // coupon_repository.dart:7 and order_repository.dart:30.
+      final uri = Uri.parse(
+        '${API.baseUrl}${API.taxListUrl}${API.storeIdUrl}7${API.andPageUrl}2',
+      );
+
+      expect(uri.scheme, 'https');
+      expect(uri.path, '/api/admin/taxlist');
+      expect(uri.queryParameters, {'store_id': '7', 'page': '2'});
+    });
+
+    test('an id endpoint carries store_id and the record id', () {
+      // order_repository.dart:140 and :75.
+      final uri = Uri.parse(
+        '${API.baseUrl}${API.viewOrderUrl}${API.storeIdUrl}7'
+        '${API.orderIdUrl}1234',
+      );
+
+      expect(uri.path, '/api/admin/vieworder');
+      expect(uri.queryParameters, {'store_id': '7', 'order_id': '1234'});
+    });
+
+    test('the delivery-boy fragment is a path segment, not a parameter', () {
+      // deliveryBoyIdUrl is '/', so the id lands in the PATH and store_id is
+      // still the first query parameter. delivery_boy_repository.dart:33.
+      final uri = Uri.parse(
+        '${API.baseUrl}${API.updateDeliveryBoyUrl}${API.deliveryBoyIdUrl}9'
+        '${API.storeIdUrl}7',
+      );
+
+      expect(uri.path, '/api/admin/deliveryboysUpdate/9');
+      expect(uri.queryParameters, {'store_id': '7'});
+    });
+
+    test('the order-note delete URL is unchanged by being de-inlined', () {
+      // order_repository.dart:128 built this as one literal with the path
+      // baked in. The constant plus fragments must produce the SAME bytes --
+      // a difference here would be a wire change, not a refactor.
+      final composed =
+          '${API.deleteOrderNoteUrl}${API.storeIdUrl}7&order_id=12&note_id=3';
+
+      expect(
+        composed,
+        '/orders/notes/delete?store_id=7&order_id=12&note_id=3',
+      );
+
+      final uri = Uri.parse('${API.baseUrl}$composed');
+
+      expect(uri.path, '/api/admin/orders/notes/delete');
+      expect(uri.queryParameters, {
+        'store_id': '7',
+        'order_id': '12',
+        'note_id': '3',
+      });
+    });
+
+    test('and the two order-note POST paths are unchanged too', () {
+      expect(API.updateOrderStatusUrl, '/orders/update-status');
+      expect(API.createOrderNoteUrl, '/orders/notes/create');
+    });
+
+    test('a swapped separator really does break, so these have teeth', () {
+      // With '?' used twice, Uri still parses -- it just reads the whole tail
+      // as ONE parameter value, which is why this class of defect is
+      // invisible without parsing. Asserted so the tests above are known to
+      // be capable of failing.
+      final wrong = Uri.parse(
+        '${API.baseUrl}${API.taxListUrl}${API.storeIdUrl}7${API.pageUrl}2',
+      );
+
+      expect(wrong.queryParameters, {'store_id': '7?page=2'});
+      expect(wrong.queryParameters.containsKey('page'), isFalse);
     });
   });
 }
