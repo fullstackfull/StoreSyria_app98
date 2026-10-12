@@ -19,9 +19,6 @@ Widget transactionCard({
   final IconData icon = _iconForType(tx.type, tx.isCredit);
   final Color cardColor =
   isDark ? const Color(0xFF18263F) : Colors.white;
-  final Color borderColor = isDark
-      ? Colors.white.withOpacity(.07)
-      : const Color(0xFFE8EAEE);
   final Color primaryText =
   isDark ? Colors.white : const Color(0xFF0F1A2E);
   final Color secondaryText =

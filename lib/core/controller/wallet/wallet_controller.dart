@@ -212,7 +212,6 @@ class WalletController extends GetxController {
       response.fold(
         onSuccess: (data) async {
           if (data['status'] == 1) {
-            final balanceData = data['data'];
             Get.back();
 
             commonToast(type: AppSnackBarType.success, data['message'] ?? 'Balance added successfully.',

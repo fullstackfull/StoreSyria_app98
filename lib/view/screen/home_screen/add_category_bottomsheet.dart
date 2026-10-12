@@ -754,9 +754,17 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
       child: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
-          return SlideTransition(
-            position: _slideAnimation,
-            child: child,
+          // R7-N5. `_fadeAnimation` was built in initState and driven by this
+          // same controller, but nothing ever consumed it -- the analyzer
+          // reported it as an unused field. The sheet was written to fade AND
+          // slide in; only the slide survived. Restored rather than deleted,
+          // because the CurvedAnimation and its curve are evidence of intent.
+          return FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: child,
+            ),
           );
         },
         child: Container(

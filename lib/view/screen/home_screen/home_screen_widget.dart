@@ -1,23 +1,17 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:store_go_app/core/model/dashboard_model.dart';
 import 'package:store_go_app/utils/colors.dart';
-import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/profile_screen/profile_screen.dart';
-import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/screen/notification_screen/notification_screen.dart';
 
@@ -339,7 +333,7 @@ Widget qrCodeWidget(BuildContext context,{String? qrString, String? title}) {
               verticalSpace(10),
               GestureDetector(
                 onTap: () {
-                  Clipboard.setData(ClipboardData(text: qrString ?? ""));
+                  Clipboard.setData(ClipboardData(text: qrString));
                   AppLog.d('copied');
                 },
                 child: Container(

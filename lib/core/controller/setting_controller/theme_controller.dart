@@ -182,7 +182,7 @@ class ThemeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    bool savedTheme = Prefs.getBool(AppConstant.isDarkUrl) ?? false;
+    bool savedTheme = Prefs.getBool(AppConstant.isDarkUrl);
     isDark.value = savedTheme;
     if (isDark.value) {
       AppDarkTheme.darkColor();

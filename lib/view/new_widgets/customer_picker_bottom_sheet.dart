@@ -217,8 +217,8 @@ class _CustomerPickerBottomSheetState
                         final name = customer.customerInfo?.name ?? '';
                         final email = customer.email ?? '';
                         final isActive = customer.status == 1;
-                        final statusLabel = customer?.statusText?.isNotEmpty == true
-                            ? customer!.statusText!
+                        final statusLabel = customer.statusText?.isNotEmpty == true
+                            ? customer.statusText!
                             : isActive
                             ? 'active'.tr
                             : 'inactive'.tr;

@@ -4,11 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import '../../core/controller/setting_controller/store_setting_controller.dart';
-import '../../core/model/currency_model.dart';
 import '../../translations/translation_service.dart';
 import '../../utils/colors.dart';
 import '../../utils/text_style.dart';
-import '../widget/common_button.dart';
 
 Widget languageOption({
   required String title,

@@ -5,7 +5,6 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../core/model/create_product_model.dart';
 import '../../new_widgets/app_txt_field.dart';
 import '../../widget/app_dialog.dart';
-import 'product_widget.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';

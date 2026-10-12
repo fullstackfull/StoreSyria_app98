@@ -85,8 +85,6 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final Color bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
-    final Color cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-    final Color borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder;
 
     return Scaffold(
       backgroundColor: bgColor,

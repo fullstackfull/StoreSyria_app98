@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../network/network.dart';
 import '../../../utils/pick_file.dart';
 import 'package:store_go_app/utils/app_log.dart';

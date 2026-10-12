@@ -48,21 +48,21 @@ class TaxController extends GetxController {
         if (data['status'] == 1) {
           taxModel = TaxModel.fromJson(data);
 
-          final newData = taxModel?.data?.data ?? [];
+          final newData = taxModel?.data.data ?? [];
 
           if (newData.isNotEmpty) {
             taxList.addAll(newData);
             taxList.refresh();
           }
 
-          if (currantPage.value >= (taxModel?.data?.lastPage ?? 1)) {
+          if (currantPage.value >= (taxModel?.data.lastPage ?? 1)) {
             isScroll.value = false;
           } else {
             isScroll.value = true;
           }
         } else {
           commonToast(type: AppSnackBarType.error, data['message'] ?? 'Something went wrong');
-          if (page < (taxModel?.data?.lastPage ?? 1)) {
+          if (page < (taxModel?.data.lastPage ?? 1)) {
             isScroll.value = true;
           }
         }

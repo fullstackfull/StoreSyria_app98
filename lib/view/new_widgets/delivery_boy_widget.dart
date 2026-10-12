@@ -8,7 +8,6 @@ import 'package:store_go_app/utils/helper.dart';
 import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
 import 'package:store_go_app/view/new_widgets/status_pill.dart';
 
-import '../widget/common_snak_bar_widget.dart';
 
 Widget deliveryBoyWidget({
   required BuildContext context,

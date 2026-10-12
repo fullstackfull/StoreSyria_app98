@@ -17,7 +17,6 @@ class AddProductController extends GetxController {
   ProductRepository productRepository = ProductRepository();
 
   static const _taxOptions = ['none', 'taxable', 'shipping'];
-  static const _stockStatusOptions = ['in_stock', 'out_of_stock', 'on_backorder'];
 
   RxBool isTrending = true.obs;
   RxBool isStatus = true.obs;
@@ -312,7 +311,7 @@ class AddProductController extends GetxController {
                   .toString();
         },
         onFailure: (reason, message, validationErrors) {
-          errorMessage = message?.toString();
+          errorMessage = message.toString();
         },
       );
 

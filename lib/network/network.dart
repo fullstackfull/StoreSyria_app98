@@ -272,6 +272,32 @@ $error
     }
 
     // -------------------------------------------------------------------------
+    // BLANK MESSAGE
+    // -------------------------------------------------------------------------
+    //
+    // R7-N4. The parser above accepts any non-null `message`, and an empty
+    // string is not null -- so a server answering `{"message": ""}` (or a
+    // whitespace-only one, or `{"data": {"message": ""}}`) overwrote the
+    // generic wording with nothing and the merchant got a completely BLANK
+    // error toast with no indication of what failed.
+    //
+    // The 40 call sites that look defensive about this -- `message ?? 'Error
+    // updating store information'` and friends -- cannot catch it: Failure
+    // .message is a non-nullable String (result.dart:41), so every one of
+    // those `??` fallbacks is dead code, which is what the analyzer was
+    // reporting as `dead_null_aware_expression`.
+    //
+    // Resetting to the sentinel rather than to a literal is deliberate: the
+    // status-code switch below tests for exactly this value, so a blank body
+    // now inherits the per-status wording (session_expired on 401,
+    // action_not_permitted on 403, resource_not_found on 404, ...) instead of
+    // a generic string that would mask which code arrived.
+
+    if (message.trim().isEmpty) {
+      message = 'error_occurred'.tr;
+    }
+
+    // -------------------------------------------------------------------------
     // STATUS CODE
     // -------------------------------------------------------------------------
 

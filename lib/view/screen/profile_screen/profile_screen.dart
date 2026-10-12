@@ -10,10 +10,8 @@ import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/utils/validator.dart';
-import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
-import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../new_widgets/app_txt_field.dart';
 import '../../new_widgets/shimmer.dart';
@@ -580,74 +578,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
         size: 20,
         color: isDark ? Colors.white60 : AppColor.cFont,
-      ),
-    );
-  }
-
-// ---------------------------------------------------------------------------
-// FIELD LABEL
-// ---------------------------------------------------------------------------
-
-  Widget _fieldLabel({
-    required IconData icon,
-    required String title,
-    required bool isDark,
-  }) {
-    return Row(
-      children: [
-        Container(
-          height: 26,
-          width: 26,
-          decoration: BoxDecoration(
-            color: AppColor.themeNavyBlueColor.withOpacity(isDark ? 0.18 : 0.12),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            icon,
-            size: 15,
-            color: AppColor.themeNavyBlueColor,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: pMedium14.copyWith(
-            fontSize: 13,
-            color: isDark ? Colors.white : AppColor.cLabel,
-          ),
-        ),
-      ],
-    );
-  }
-
-// ---------------------------------------------------------------------------
-// SAVE BUTTON
-// ---------------------------------------------------------------------------
-
-  Widget _saveButton({
-    required String title,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.28),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: CommonIconButton(
-        iconData: DefaultImages.whiteDoneIcn,
-        title: title,
-        height: 50,
-        radius: 14,
-        btnColor: color,
-        onPressed: onPressed,
       ),
     );
   }

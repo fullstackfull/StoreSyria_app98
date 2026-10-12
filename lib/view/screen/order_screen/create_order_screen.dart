@@ -308,7 +308,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             const SizedBox(height: 10),
 
             Obx(() {
-              final availableProducts = productController.productList;
 
               return Column(
                 children: List.generate(

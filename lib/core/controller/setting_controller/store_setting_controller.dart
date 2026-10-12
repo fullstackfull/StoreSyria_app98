@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -335,12 +334,9 @@ class StoreSettingController extends GetxController {
           }
         },
         onFailure: (reason, message, errors) {
-          errorMessage.value =
-              message ?? 'Error updating store information';
+          errorMessage.value = message;
 
-          commonToast(type: AppSnackBarType.error, 
-            message ?? 'Error updating store information',
-          );
+          commonToast(type: AppSnackBarType.error, message);
         },
       );
     } catch (e) {

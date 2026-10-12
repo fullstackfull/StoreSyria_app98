@@ -8,7 +8,6 @@ import 'package:store_go_app/core/model/review_model.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 
 class AddReviewController extends GetxController {
   ReviewRepository reviewRepository = ReviewRepository();
@@ -32,7 +31,7 @@ class AddReviewController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    userId.value = Prefs.getUserID() ?? '';
+    userId.value = Prefs.getUserID();
 
     userValue.value = Prefs.getString("name") ?? '';
   }

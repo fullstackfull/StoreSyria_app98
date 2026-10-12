@@ -6,7 +6,6 @@ import 'package:store_go_app/core/controller/setting_controller/theme_controller
 import 'package:store_go_app/routes/routes.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/images.dart';
-import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/setting_screen/store_setting_screen.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';

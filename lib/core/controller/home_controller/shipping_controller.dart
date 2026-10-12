@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/shipping_repository.dart';
 import 'package:store_go_app/core/model/shipping_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/utils/app_log.dart';
 
 class ShippingController extends GetxController {

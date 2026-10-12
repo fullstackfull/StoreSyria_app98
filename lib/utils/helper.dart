@@ -45,10 +45,6 @@ String formatForDateTime(FormatType formatType) {
       {
         return "dd MMM,yyyy";
       }
-    default:
-      {
-        return "";
-      }
   }
 }
 

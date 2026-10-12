@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
-import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 import '../../../core/controller/delivery_boy/delivery_boy_controller.dart';
 import '../../new_widgets/delivery_boy_widget.dart';

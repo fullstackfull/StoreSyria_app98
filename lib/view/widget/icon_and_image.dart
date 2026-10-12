@@ -28,7 +28,13 @@ Widget assetSvdImageWidget({
     width: width,
     height: height,
     fit: fit ?? BoxFit.contain,
-    //colorFilter: finalColorFilter,
+    // R7-N2. This was commented out while `finalColorFilter` above was still
+    // being computed, so every caller that passed `color:` or `colorFilter:`
+    // got an untinted SVG. Seven live call sites rely on the tint -- including
+    // a white copy icon drawn on a coloured card, which rendered in its own
+    // source colour and effectively disappeared. The analyzer only reported it
+    // as `unused_local_variable`.
+    colorFilter: finalColorFilter,
   );
 }
 

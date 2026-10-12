@@ -85,7 +85,7 @@ class AppDialog {
 
             final hasLottie =
                 lottieAsset != null &&
-                    lottieAsset!.trim().isNotEmpty;
+                    lottieAsset.trim().isNotEmpty;
 
             final hasIcon =
                 icon != null && !hasLottie;

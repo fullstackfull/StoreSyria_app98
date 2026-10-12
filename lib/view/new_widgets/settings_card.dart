@@ -88,12 +88,12 @@ Widget settingCard({
               overflow: TextOverflow.ellipsis,
             ),
 
-            if (subtitle != null && subtitle!.isNotEmpty) ...[
+            if (subtitle != null && subtitle.isNotEmpty) ...[
               const SizedBox(height: 5),
 
               // Card Subtitle
               Text(
-                subtitle!,
+                subtitle,
                 style: pMedium12.copyWith(
                   color: isDark
                       ? AppColor.cFont.withOpacity(0.55)
