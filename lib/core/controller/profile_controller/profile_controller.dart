@@ -136,10 +136,9 @@ class ProfileController extends GetxController {
         );
       }
 
-      request.headers.addAll({
-        "Authorization": 'Bearer ${Prefs.getToken()}',
-        "Cache-Control": "no-cache",
-      });
+      // R7-N1: was a hand-rolled Bearer map. NetworkHttps.authHeaders() is the
+      // single construction site and already sends Cache-Control: no-cache.
+      request.headers.addAll(NetworkHttps.authHeaders());
 
       final response = await request.send();
 

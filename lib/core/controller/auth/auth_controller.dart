@@ -85,20 +85,16 @@ class AuthController extends GetxController {
     isLoading.value = true;
 
     try {
-      final token = Prefs.getToken();
-
       final url = Uri.parse(
         API.baseUrl + API.logoutUrl,
       );
 
       AppLog.d('=== LOGOUT URL === $url');
 
+      // R7-N1: was a hand-rolled Bearer map. Identical bytes, one site.
       final response = await http.post(
         url,
-        headers: {
-          ...NetworkHttps.baseHeaders,
-          'Authorization': 'Bearer $token',
-        },
+        headers: NetworkHttps.authHeaders(),
       );
 
       AppLog.d('=== LOGOUT STATUS === ${response.statusCode}');

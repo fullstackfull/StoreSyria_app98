@@ -46,7 +46,25 @@ class NetworkHttps {
   // AUTH HEADERS
   // ===========================================================================
 
-  static Map<String, String> _getAuthHeaders() {
+  /// THE ONLY PLACE THE `Authorization` HEADER IS BUILT — finding R7-N1 /
+  /// NEW-auth-header-six-sites.
+  ///
+  /// It used to be built in six live or near-live places: here plus four
+  /// hand-rolled bypasses (logout, profile update, category create/update and
+  /// the FCM example) and three more commented out in the payment-settings
+  /// controllers, so the bypass pattern was habitual rather than accidental.
+  /// Three of the four live bypasses were WRITE operations, which means any
+  /// future change to how the app presents its token — a scheme change, a
+  /// refresh, an added header — applied only to the network layer would have
+  /// left those endpoints silently broken.
+  ///
+  /// Public so the remaining `http.MultipartRequest` call sites can use it
+  /// directly. `MultipartRequest.finalize()` overwrites `content-type` with the
+  /// multipart boundary, so handing these headers to a multipart request is
+  /// safe — and is already what this class does internally.
+  ///
+  /// Emits exactly the same bytes as before for every pre-existing call site.
+  static Map<String, String> authHeaders() {
     final token = Prefs.getToken();
 
     final headers = Map<String, String>.from(baseHeaders);
@@ -329,7 +347,7 @@ $error
     final getUrl = API.baseUrl + endPoint;
 
     try {
-      final headers = _getAuthHeaders();
+      final headers = authHeaders();
 
       _logRequest(
         method: 'GET',
@@ -447,7 +465,7 @@ $error
     final postUrl = API.baseUrl + endPoint;
 
     try {
-      final headers = _getAuthHeaders();
+      final headers = authHeaders();
 
       _logRequest(
         method: 'POST',
@@ -568,7 +586,7 @@ $error
     final putUrl = API.baseUrl + endPoint;
 
     try {
-      final headers = _getAuthHeaders();
+      final headers = authHeaders();
 
       _logRequest(
         method: 'PUT',
@@ -697,7 +715,7 @@ $error
         Uri.parse(url),
       );
 
-      final headers = _getAuthHeaders();
+      final headers = authHeaders();
 
       request.headers.addAll(headers);
       request.fields.addAll(fields);
@@ -868,7 +886,7 @@ $error
     final deleteUrl = API.baseUrl + endPoint;
 
     try {
-      final headers = _getAuthHeaders();
+      final headers = authHeaders();
 
       _logRequest(
         method: 'DELETE',

@@ -298,10 +298,9 @@ class FirebaseMessagingService {
     /*
     final response = await http.post(
       Uri.parse('${Prefs.getBaseUrl()}/api/fcm-token'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
+      // R7-N1: do NOT hand-roll the Authorization header. There is exactly one
+      // construction site: NetworkHttps.authHeaders().
+      headers: NetworkHttps.authHeaders(),
       body: jsonEncode({
         'fcm_token': token,
         'store_id': storeId,

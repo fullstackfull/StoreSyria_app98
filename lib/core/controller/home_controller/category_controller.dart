@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/config/repository/search_repository.dart';
 import 'package:store_go_app/config/repository/category_repository.dart';
+import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
@@ -271,11 +272,9 @@ class CategoryController extends GetxController
       );
     }
 
-    request.headers.addAll({
-      "Authorization":
-      'Bearer ${Prefs.getToken()}',
-      'Cache-Control': 'no-cache',
-    });
+    // R7-N1: was a hand-rolled Bearer map. NetworkHttps.authHeaders() is the
+    // single construction site and already sends Cache-Control: no-cache.
+    request.headers.addAll(NetworkHttps.authHeaders());
 
     final http.StreamedResponse response =
     await request.send();

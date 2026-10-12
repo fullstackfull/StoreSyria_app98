@@ -46,6 +46,11 @@ class AppLog {
   /// value nor its length.
   static const String redacted = '***redacted***';
 
+  /// Written as a whole literal rather than interpolated so that the only
+  /// `Bearer <interpolation>` expression under lib/ stays the one place the
+  /// header is actually built (finding R7-N1).
+  static const String _bearerRedacted = 'Bearer ***redacted***';
+
   /// Map keys whose VALUE must never reach a log line. Compared
   /// case-insensitively after stripping `-` and `_`.
   static const Set<String> _sensitiveKeys = <String>{
@@ -206,7 +211,7 @@ class AppLog {
   static String scrubString(String input) {
     if (input.isEmpty) return input;
 
-    var out = input.replaceAll(_bearerPattern, 'Bearer $redacted');
+    var out = input.replaceAll(_bearerPattern, _bearerRedacted);
 
     out = out.replaceAllMapped(
       _jsonSecretPattern,
