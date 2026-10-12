@@ -258,7 +258,15 @@ $error
           }
         }
       }
-    } catch (_) {
+    }
+
+    // Defensive on purpose. The body may be HTML (a proxy or web-server error
+    // page), empty, a JSON array instead of an object, or valid JSON whose
+    // `message`/`errors` fields the server has since renamed. None of those may
+    // turn an error response into an exception: the status-code switch below
+    // still has to run, because that is what logs the merchant out on 401 and
+    // tells them to slow down on 429.
+    catch (_) {
       message = 'server_error'.tr;
     }
 
@@ -281,7 +289,16 @@ $error
 
       case 401:
         reason = FailureReason.unauthorized;
-        _handleUnauthorized();
+
+        // The server-side authentication repair means 401 is now a REAL
+        // response rather than a theoretical one: requests that used to be
+        // waved through as anonymous are rejected. So this path must be safe
+        // to hit several times at once -- see handleUnauthorized().
+        if (message == 'error_occurred'.tr) {
+          message = 'session_expired'.tr;
+        }
+
+        handleUnauthorized();
         break;
 
     // -----------------------------------------------------------------------
@@ -294,6 +311,47 @@ $error
         if (message == 'error_occurred'.tr ||
             message == 'Unknown error') {
           message = 'resource_not_found'.tr;
+        }
+
+        break;
+
+    // -----------------------------------------------------------------------
+    // 422 — Laravel FormRequest validation
+    // -----------------------------------------------------------------------
+    //
+    // Only 400 was handled before. Laravel answers a failed FormRequest with
+    // 422, so server-side request validation would otherwise have surfaced to
+    // the merchant as a generic "an error occurred" with the per-field errors
+    // parsed but the reason thrown away.
+
+      case 422:
+        reason = FailureReason.validation;
+        break;
+
+    // -----------------------------------------------------------------------
+    // 429 — rate limited
+    // -----------------------------------------------------------------------
+
+      case 429:
+        {
+          reason = FailureReason.rateLimited;
+
+          // Honour Retry-After when the server sends it, so the message
+          // tells the merchant how long to wait instead of inviting an
+          // immediate retry that deepens the throttle. A non-numeric or
+          // absent value falls back to the generic wording; Laravel's
+          // ThrottleRequests sends delay-seconds.
+          final retryAfter = int.tryParse(
+            response.headers['retry-after']?.trim() ?? '',
+          );
+
+          if (retryAfter != null && retryAfter > 0) {
+            message = 'too_many_requests_retry_after'.trParams({
+              'seconds': retryAfter.toString(),
+            });
+          } else {
+            message = 'too_many_requests'.tr;
+          }
         }
 
         break;
@@ -327,12 +385,44 @@ $error
   // UNAUTHORIZED
   // ===========================================================================
 
-  static Future<void> _handleUnauthorized() async {
-    await Prefs.clear();
+  /// True while a forced logout is in flight.
+  ///
+  /// The old guard compared `Get.currentRoute` against the literal `'/login'`,
+  /// but this method navigates with `Get.offAll(() => NormalLoginWidget())`,
+  /// which produces an unnamed route -- so the guard never matched. With the
+  /// server now genuinely returning 401, several in-flight requests can fail
+  /// at once (the dashboard alone fans out into a handful), and each one would
+  /// have called Prefs.clear() and pushed another login screen. This latch
+  /// makes the forced logout happen exactly once.
+  static bool _unauthorizedInFlight = false;
 
-    if (Get.currentRoute != '/login') {
-      Get.offAll(
-            () => NormalLoginWidget(),
+  /// Clears the local session and returns to the login screen. Public so the
+  /// two remaining hand-rolled multipart call sites can share it instead of
+  /// duplicating the clear-and-navigate pair.
+  static Future<void> handleUnauthorized() async {
+    if (_unauthorizedInFlight) return;
+    _unauthorizedInFlight = true;
+
+    try {
+      await Prefs.clear();
+
+      // Kept exactly as it was, including the ineffective route comparison:
+      // Get.offAll with a widget builder yields an unnamed route, so this
+      // never matches. The latch above is what actually makes the forced
+      // logout idempotent. Left in place rather than changed to
+      // Get.offAllNamed so this commit introduces no navigation change.
+      if (Get.currentRoute != '/login') {
+        Get.offAll(
+              () => NormalLoginWidget(),
+        );
+      }
+    } finally {
+      // Released on the next event-loop turn so the burst of concurrent 401s
+      // that triggered this collapses into one logout, while a genuine later
+      // 401 (a new session that also expires) is still handled.
+      Future<void>.delayed(
+        const Duration(seconds: 2),
+        () => _unauthorizedInFlight = false,
       );
     }
   }

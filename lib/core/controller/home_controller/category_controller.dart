@@ -285,9 +285,19 @@ class CategoryController extends GetxController
       getCategoryData(
         currantPage.value,
       );
+    } else if (response.statusCode == 401) {
+      // Was missing entirely: a 401 here showed the raw English reason phrase
+      // and left the dead session in local storage. One shared forced-logout
+      // path, guarded against concurrent 401s.
+      await NetworkHttps.handleUnauthorized();
+    } else if (response.statusCode == 429) {
+      commonToast(
+        type: AppSnackBarType.error,
+        'too_many_requests'.tr,
+      );
     } else {
-      commonToast(type: AppSnackBarType.error, 
-        response.reasonPhrase ?? '',
+      commonToast(type: AppSnackBarType.error,
+        response.reasonPhrase ?? 'error_occurred'.tr,
       );
     }
   }

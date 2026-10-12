@@ -6,6 +6,12 @@ enum FailureReason {
   unauthorized,
   validation,
   notFound,
+
+  /// HTTP 429. Added because server-side rate limiting is arriving: without a
+  /// reason of its own a throttled merchant saw the generic "an error
+  /// occurred" and retried immediately, making the throttling worse.
+  rateLimited,
+
   unknown,
 }
 

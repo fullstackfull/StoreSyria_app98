@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
-import 'package:store_go_app/view/screen/auth/login_widget.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../network/network.dart';
@@ -143,9 +142,19 @@ class ProfileController extends GetxController {
       final response = await request.send();
 
       final responseData = await response.stream.bytesToString();
-      final decodedData = jsonDecode(responseData);
 
-      if (response.statusCode == 200 ||
+      // Status code FIRST, decode second. The body used to be decoded before
+      // the status was looked at, so a 401, 429 or 500 whose body is HTML or
+      // empty threw out of this block and the 401 branch below never ran --
+      // leaving a dead session in local storage. Now that the server really
+      // does return 401 and 429, that was the common case, not the edge one.
+      final Map<String, dynamic> decodedData =
+          _decodeOrEmpty(responseData);
+
+      if (response.statusCode == 401) {
+        // One shared forced-logout path, guarded against concurrent 401s.
+        await NetworkHttps.handleUnauthorized();
+      } else if (response.statusCode == 200 ||
           response.statusCode == 201) {
         if (decodedData['status'] == 1 ||
             decodedData['success'] == true) {
@@ -165,10 +174,11 @@ class ProfileController extends GetxController {
                 "Update Failed",
           );
         }
-      } else if (response.statusCode == 401) {
-        await Prefs.clear();
-
-        Get.offAll(() => NormalLoginWidget());
+      } else if (response.statusCode == 429) {
+        commonToast(
+          type: AppSnackBarType.error,
+          'too_many_requests'.tr,
+        );
       } else {
         commonToast(
           type: AppSnackBarType.error,
@@ -187,6 +197,25 @@ class ProfileController extends GetxController {
     } finally {
       isLoading2.value = false;
     }
+  }
+
+  /// Decodes a response body that may not be JSON at all.
+  ///
+  /// Returns an empty map for an empty body, for HTML (a proxy or web-server
+  /// error page), and for a JSON array where an object was expected, so a
+  /// changed or unexpected server response degrades to "no message" instead of
+  /// throwing past the status-code handling.
+  Map<String, dynamic> _decodeOrEmpty(String body) {
+    if (body.trim().isEmpty) return <String, dynamic>{};
+
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+    } catch (_) {
+      // fall through
+    }
+
+    return <String, dynamic>{};
   }
 
   @override
