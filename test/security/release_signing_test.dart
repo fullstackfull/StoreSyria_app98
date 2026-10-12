@@ -132,6 +132,83 @@ void main() {
       );
     });
 
+    test('git itself ignores the secret paths', () {
+      // The test above reads .gitignore as text and asserts a pattern string
+      // is present. That proves the file says the right thing, not that git
+      // acts on it: a later negation rule, a nested .gitignore, or a path
+      // already in the index would all leave the pattern in place and the file
+      // committable anyway. So ask git.
+      final root = packageRoot().path;
+
+      final probe = Process.runSync(
+        'git',
+        [
+          '-C',
+          root,
+          'check-ignore',
+          'android/key.properties',
+          'android/app/storesyria-release.jks',
+          'android/app/upload.keystore',
+        ],
+      );
+
+      if (probe.exitCode == 128) {
+        // Not a git work tree (an exported tarball, say). Nothing to assert.
+        markTestSkipped('not a git work tree');
+        return;
+      }
+
+      final ignored = (probe.stdout as String)
+          .split('\n')
+          .map((l) => l.trim())
+          .where((l) => l.isNotEmpty)
+          .toSet();
+
+      expect(
+        ignored,
+        containsAll(<String>[
+          'android/key.properties',
+          'android/app/storesyria-release.jks',
+          'android/app/upload.keystore',
+        ]),
+        reason:
+            'git check-ignore did not ignore every secret path. '
+            'Ignored: $ignored',
+      );
+    });
+
+    test('no keystore or key.properties is in the git index', () {
+      final root = packageRoot().path;
+
+      final listing = Process.runSync(
+        'git',
+        ['-C', root, 'ls-files'],
+      );
+
+      if (listing.exitCode == 128) {
+        markTestSkipped('not a git work tree');
+        return;
+      }
+
+      final offenders = (listing.stdout as String)
+          .split('\n')
+          .map((l) => l.trim())
+          .where((l) =>
+              l.endsWith('.jks') ||
+              l.endsWith('.keystore') ||
+              l.endsWith('key.properties'))
+          .toList();
+
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'These are tracked by git and must never be: $offenders. '
+            'Note key.properties.example is a template and is allowed; '
+            'key.properties itself is not.',
+      );
+    });
+
     test('the tracked template carries no real credential', () {
       final example =
           File('${packageRoot().path}/android/key.properties.example');
