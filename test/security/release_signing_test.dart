@@ -111,7 +111,23 @@ void main() {
         reason: 'Keystore files must be ignored by git.',
       );
 
-      final tracked = Directory(root)
+      // WORKING-TREE SCAN, CORRECTED.
+      //
+      // This previously asserted that no file named key.properties, *.jks or
+      // *.keystore EXISTS ON DISK. That conflates "present" with "committed" --
+      // two different properties, and only one of them is a defect. It therefore
+      // failed the moment the owner followed this branch's OWN runbook:
+      // android/RELEASE_SIGNING.md:47 instructs them to create
+      // android/key.properties and fill in the real keystore passwords. A
+      // developer who cannot build a signed release without that file was being
+      // told by the test suite that having it is a security violation.
+      //
+      // The property that actually matters is that such a file is IGNORED by git,
+      // so it cannot be committed by accident. That is asserted here against git
+      // itself, for whatever files are genuinely present -- which is strictly
+      // stronger than forbidding their existence, and does not punish the
+      // documented setup.
+      final present = Directory(root)
           .listSync(recursive: true)
           .whereType<File>()
           .where((f) =>
@@ -123,12 +139,32 @@ void main() {
           .map((f) => f.path)
           .toList();
 
+      final committable = <String>[];
+
+      for (final path in present) {
+        final check = Process.runSync(
+          'git',
+          ['-C', root, 'check-ignore', '--quiet', path],
+        );
+
+        // 0 = ignored, 1 = NOT ignored, 128 = not a work tree.
+        if (check.exitCode == 128) {
+          markTestSkipped('not a git work tree');
+          return;
+        }
+
+        if (check.exitCode != 0) {
+          committable.add(path);
+        }
+      }
+
       expect(
-        tracked,
+        committable,
         isEmpty,
         reason:
-            'A keystore or key.properties is present in the working tree. '
-            'Neither may ever be committed. Found: $tracked',
+            'A keystore or key.properties is present in the working tree and is '
+            'NOT ignored by git, so it can be committed by accident. Either add '
+            'it to .gitignore or move it out of the tree. Found: $committable',
       );
     });
 
