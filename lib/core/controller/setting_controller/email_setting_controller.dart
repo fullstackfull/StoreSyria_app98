@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/setting_repository.dart';
 import 'package:store_go_app/core/model/email_setting_model.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 
 class EmailSettingController extends GetxController {
@@ -47,7 +48,7 @@ class EmailSettingController extends GetxController {
     isLoading.value = false;
     response.fold(
       onSuccess: (data) {
-        commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
+        commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: 'Success'));
       },
       onFailure: (reason,message,errors) {
         errorMessage.value = message ?? 'Error saving email setting';
@@ -74,7 +75,7 @@ class EmailSettingController extends GetxController {
           mailFromAddress.text = emailSetting?.mailFromAddress ?? '';
           mailFromName.text = emailSetting?.mailFromName ?? '';
         } else {
-          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, apiMessage(data, fallback: 'Failed'));
         }
       },
       onFailure: (reason,message,errors) {
@@ -90,7 +91,7 @@ class EmailSettingController extends GetxController {
     isLoading.value = false;
     response.fold(
       onSuccess: (data) {
-        commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
+        commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: 'Success'));
       },
       onFailure: (reason,message,errors) {
         errorMessage.value = message ?? 'Error sending email';

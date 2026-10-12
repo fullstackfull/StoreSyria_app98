@@ -8,6 +8,7 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/core/model/categories_model.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../utils/pick_file.dart';
 import 'cahe.dart';
@@ -152,7 +153,7 @@ class CategoryController extends GetxController
           }
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']['message'] ?? '',
+            apiMessage(data, fallback: ''),
           );
         }
       },
@@ -197,7 +198,7 @@ class CategoryController extends GetxController
           categoriesList.refresh();
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']['message'] ?? '',
+            apiMessage(data, fallback: ''),
           );
         }
       },
@@ -327,12 +328,11 @@ class CategoryController extends GetxController
           }
 
           commonToast(type: AppSnackBarType.success, 
-            data['data']['message'] ?? '',
+            apiMessage(data, fallback: ''),
           );
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']['message'] ??
-                'Delete failed',
+            apiMessage(data, fallback: 'Delete failed'),
           );
         }
       },

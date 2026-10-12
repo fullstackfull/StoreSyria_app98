@@ -10,6 +10,7 @@ import 'package:store_go_app/core/controller/product_controller/product_detail_c
 import 'package:store_go_app/core/model/create_product_model.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
+import 'package:store_go_app/network/result.dart';
 import '../../../utils/pick_file.dart';
 
 class AddProductController extends GetxController {
@@ -306,9 +307,7 @@ class AddProductController extends GetxController {
       response.fold(
         onSuccess: (data) {
           success = true;
-          successMessage =
-              (data['data']?['message'] ?? data['message'] ?? 'Success')
-                  .toString();
+          successMessage = apiMessage(data, fallback: 'Success');
         },
         onFailure: (reason, message, validationErrors) {
           errorMessage = message.toString();

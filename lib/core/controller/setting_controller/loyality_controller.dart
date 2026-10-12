@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/loyalty_repository.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 
 class LoyaltyController extends GetxController {
@@ -22,9 +23,9 @@ class LoyaltyController extends GetxController {
     response.fold(
       onSuccess: (data) {
         if(data['status'] == 1) {
-          commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
+          commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: 'Success'));
         } else {
-          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, apiMessage(data, fallback: 'Failed'));
         }
       },
       onFailure: (reason, message, errors) {
@@ -42,15 +43,19 @@ class LoyaltyController extends GetxController {
     response.fold(
       onSuccess: (data) {
         if(data['status'] == 1) {
-          rewardPointController.text = data['data']['reward_point'] ?? '';
-          if(data['data']['loyality_program_enabled'] == "on") {
-            isStatus.value = true;
-          } else {
-            isStatus.value = false;
-          }
-          status.value = data['data']['loyality_program_enabled'] ?? 'off';
+          rewardPointController.text =
+              apiText(data, ['data', 'reward_point']);
+
+          final enabled = apiText(
+            data,
+            ['data', 'loyality_program_enabled'],
+            fallback: 'off',
+          );
+
+          isStatus.value = enabled == "on";
+          status.value = enabled;
         } else {
-          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, apiMessage(data, fallback: 'Failed'));
         }
       },
       onFailure: (reason, message, errors) {

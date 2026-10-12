@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/plan_repository.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
+import 'package:store_go_app/network/result.dart';
 import '../../model/my_plan_model.dart';
 
 class PlanController extends GetxController {
@@ -37,8 +38,7 @@ class PlanController extends GetxController {
         } else {
           final message =
               data['message'] ??
-                  data['data']?['message'] ??
-                  'Something went wrong';
+                  apiMessage(data, fallback: 'Something went wrong');
 
           errorMessage.value = message;
           commonToast(type: AppSnackBarType.error, message);

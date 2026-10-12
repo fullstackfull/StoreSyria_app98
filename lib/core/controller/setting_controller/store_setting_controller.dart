@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../config/repository/store_settings_repository.dart';
 import '../../../utils/pick_file.dart';
@@ -635,21 +636,36 @@ class StoreSettingController extends GetxController {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
+          commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: 'Success'));
 
-          AppLog.d(
-            "StoreID----->${data['data']['user_info']['current_store']}",
-          );
+          // Three levels deep, and the two levels above `current_store` were
+          // both unguarded. Worse than the message reads around it: when the
+          // index threw, the Prefs.setStoreID below it never ran, so the app
+          // stayed pointed at the store the server had just deleted.
+          //
+          // The `.toString()` was the second half of it -- on a response that
+          // HAD user_info but a null current_store it wrote the four-character
+          // string "null" into the cached store id, which then went out as
+          // `?store_id=null` on every later request.
+          final currentStore =
+              apiText(data, ['data', 'user_info', 'current_store']);
 
-          Prefs.setStoreID(
-            data['data']['user_info']['current_store'].toString(),
-          );
+          AppLog.d("StoreID----->$currentStore");
+
+          if (currentStore.isEmpty) {
+            AppLog.d(
+              'deleteStoreData: the response carried no '
+              'data.user_info.current_store; keeping the cached store id',
+            );
+          } else {
+            Prefs.setStoreID(currentStore);
+          }
 
           AppLog.d(
             "StoreID----->--${Prefs.getStoreID()}",
           );
         } else {
-          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, apiMessage(data, fallback: 'Failed'));
         }
       },
       onFailure: (reason, message, errors) {

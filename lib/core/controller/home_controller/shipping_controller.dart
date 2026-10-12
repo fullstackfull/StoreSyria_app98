@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/shipping_repository.dart';
 import 'package:store_go_app/core/model/shipping_model.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/utils/app_log.dart';
 
@@ -78,7 +79,7 @@ class ShippingController extends GetxController {
 
     response.fold(
       onSuccess: (data) {
-        commonToast(type: AppSnackBarType.success, data['message'] ?? data['data']['message']);
+        commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: ''));
         getShippingData(currantPage.value);
       },
       onFailure: (reason, message, errors) {

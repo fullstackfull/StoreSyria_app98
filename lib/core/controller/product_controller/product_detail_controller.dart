@@ -3,6 +3,7 @@ import 'package:store_go_app/config/repository/product_repository.dart';
 import 'package:store_go_app/core/model/product_detail_model.dart';
 import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
+import 'package:store_go_app/network/result.dart';
 
 class ProductDetailController extends GetxController {
   RxString colorType = ''.obs;
@@ -36,9 +37,7 @@ class ProductDetailController extends GetxController {
           update();
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']?['message'] ??
-                data['message'] ??
-                'Error',
+            apiMessage(data, fallback: 'Error'),
           );
         }
       },

@@ -8,6 +8,7 @@ import 'package:store_go_app/core/model/review_model.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
+import 'package:store_go_app/network/result.dart';
 
 class AddReviewController extends GetxController {
   ReviewRepository reviewRepository = ReviewRepository();
@@ -133,9 +134,7 @@ class AddReviewController extends GetxController {
     response.fold(
       onSuccess: (data) async {
         commonToast(type: AppSnackBarType.success, 
-          data['data']?['message'] ??
-              data['message'] ??
-              "Deleted",
+          apiMessage(data, fallback: "Deleted"),
         );
 
         await getReviewData(productId);
@@ -176,9 +175,7 @@ class AddReviewController extends GetxController {
       response.fold(
         onSuccess: (data) async {
           commonToast(type: AppSnackBarType.success, 
-            data['data']?['message'] ??
-                data['message'] ??
-                "Success",
+            apiMessage(data, fallback: "Success"),
           );
 
           await getReviewData(productId);

@@ -8,6 +8,7 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../network/network.dart';
 import '../../../utils/pick_file.dart';
 import 'package:store_go_app/utils/app_log.dart';
+import 'package:store_go_app/network/result.dart';
 
 class ProfileController extends GetxController {
   TextEditingController nameController = TextEditingController();
@@ -61,9 +62,7 @@ class ProfileController extends GetxController {
               data['success'] == true) {
             commonToast(
               type: AppSnackBarType.success,
-              data['data']?['message'] ??
-                  data['message'] ??
-                  "Password Updated Successfully",
+              apiMessage(data, fallback: "Password Updated Successfully"),
             );
 
             oldPasswordController.clear();
@@ -74,9 +73,7 @@ class ProfileController extends GetxController {
           } else {
             commonToast(
               type: AppSnackBarType.error,
-              data['data']?['message'] ??
-                  data['message'] ??
-                  "Failed to update password",
+              apiMessage(data, fallback: "Failed to update password"),
             );
           }
         },
@@ -158,18 +155,14 @@ class ProfileController extends GetxController {
             decodedData['success'] == true) {
           commonToast(
             type: AppSnackBarType.success,
-            decodedData['data']?['message'] ??
-                decodedData['message'] ??
-                "Profile Updated Successfully",
+            apiMessage(decodedData, fallback: "Profile Updated Successfully"),
           );
 
           selectedImagePath.value = '';
         } else {
           commonToast(
             type: AppSnackBarType.error,
-            decodedData['data']?['message'] ??
-                decodedData['message'] ??
-                "Update Failed",
+            apiMessage(decodedData, fallback: "Update Failed"),
           );
         }
       } else if (response.statusCode == 429) {
@@ -180,9 +173,7 @@ class ProfileController extends GetxController {
       } else {
         commonToast(
           type: AppSnackBarType.error,
-          decodedData['data']?['message'] ??
-              decodedData['message'] ??
-              "Something went wrong",
+          apiMessage(decodedData, fallback: "Something went wrong"),
         );
       }
     } catch (e) {

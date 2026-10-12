@@ -204,9 +204,7 @@ class ProductController extends GetxController implements StoreAware {
           );
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']?['message'] ??
-                data['message'] ??
-                'Error',
+            apiMessage(data, fallback: 'Error'),
           );
         }
       },
@@ -262,10 +260,10 @@ class ProductController extends GetxController implements StoreAware {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          searchTotal.value = data['data']?['total'] ?? 0;
+          searchTotal.value = apiValueAt(data, ['data', 'total']) ?? 0;
 
           final List products =
-              data['data']?['data'] ?? [];
+              apiValueAt(data, ['data', 'data']) ?? [];
 
           searchResults.assignAll(
             products
@@ -310,9 +308,7 @@ class ProductController extends GetxController implements StoreAware {
     response.fold(
       onSuccess: (data) async {
         commonToast(type: AppSnackBarType.success, 
-          data['data']?['message'] ??
-              data['message'] ??
-              'Deleted',
+          apiMessage(data, fallback: 'Deleted'),
         );
 
         productList.clear();
