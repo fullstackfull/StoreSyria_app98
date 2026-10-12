@@ -7,6 +7,13 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/app_log.dart';
 
 /// خدمة إدارة FCM Token - Singleton
+///
+/// THE single owner of the FCM registration token: reading it, persisting it
+/// in [Prefs], the one `onTokenRefresh` subscription, POSTing it to
+/// `API.fcmTokenUrl`, and deleting it on logout. FirebaseMessagingService used
+/// to duplicate the read/subscribe/send trio with a stubbed-out backend call
+/// (NEW-duplicate-fcm-services); that half is gone, so a token rotation now
+/// runs one handler, not two.
 class FcmTokenService {
   static final FcmTokenService _instance = FcmTokenService._internal();
   factory FcmTokenService() => _instance;
@@ -165,7 +172,12 @@ class FcmTokenService {
       // إرسال الطلب
       final result = await NetworkHttps.postRequest(API.fcmTokenUrl, data);
 
-      return result.fold(
+      // fold<bool> explicitly: inferred from the enclosing `Future<bool>`
+      // context R becomes FutureOr<bool>, and returning a possible Future from
+      // inside a try block whose catch is meant to swallow send failures is
+      // exactly what unawaited_return_in_try_block warns about. Pinning R to
+      // bool makes the value plainly synchronous.
+      return result.fold<bool>(
         onSuccess: (data) {
           AppLog.d('✅ FCM Token تم إرساله بنجاح للسيرفر للمتجر $currentStoreId');
           return true;

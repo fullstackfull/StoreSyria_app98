@@ -1,12 +1,8 @@
-import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/utils/app_log.dart';
 
@@ -22,7 +18,23 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   AppLog.d('📩 [BACKGROUND] Data: ${message.data}');
 }
 
-/// 🔔 خدمة إدارة الإشعارات - Singleton
+/// 🔔 خدمة عرض الإشعارات وتوجيهها - Singleton
+///
+/// NEW-duplicate-fcm-services. This service and [FcmTokenService] were BOTH
+/// initialized from main() and BOTH registered a
+/// `FirebaseMessaging.instance.onTokenRefresh.listen(...)` subscription, so a
+/// single token rotation ran two different handlers: this one wrote the token
+/// to an in-memory field and called a `_sendTokenToBackend` whose entire HTTP
+/// call was commented out behind a TODO and which returned `true` regardless;
+/// the other wrote it to [Prefs] and POSTed it to `API.fcmTokenUrl` for real.
+/// Two owners of one piece of state, one of which only pretended to work.
+///
+/// The FCM token now has exactly ONE owner: [FcmTokenService]. That is the
+/// path app code already used -- AuthController and HomeController call
+/// `FcmTokenService().sendFcmTokenToServer(...)` and `clearFcmToken()`, and
+/// nothing anywhere called this class's token members. This service is
+/// responsible for notification PERMISSION, DISPLAY and TAP ROUTING only, and
+/// deliberately holds no token state.
 class FirebaseMessagingService {
   static final FirebaseMessagingService _instance = FirebaseMessagingService._internal();
   factory FirebaseMessagingService() => _instance;
@@ -30,10 +42,6 @@ class FirebaseMessagingService {
 
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
-
-  /// 🔑 FCM Token الحالي
-  String? _fcmToken;
-  String? get fcmToken => _fcmToken;
 
   /// 🚀 تهيئة الإشعارات (تستدعى مرة واحدة في main)
   Future<void> initialize() async {
@@ -57,11 +65,8 @@ class FirebaseMessagingService {
     // 6️⃣ الاستماع للضغط على الإشعار (عند فتح التطبيق من الإشعار)
     _listenNotificationTap();
 
-    // 7️⃣ الحصول على FCM Token
-    await _refreshFcmToken();
-
-    // 8️⃣ الاستماع لتغيير التوكن
-    _listenTokenRefresh();
+    // NOTE: the FCM token is deliberately NOT read or subscribed to here.
+    // FcmTokenService owns it, including the single onTokenRefresh listener.
 
     AppLog.d('✅ تهيئة الإشعارات اكتملت');
   }
@@ -143,7 +148,6 @@ class FirebaseMessagingService {
   /// 📱 عرض إشعار محلي
   Future<void> _showLocalNotification(RemoteMessage message) async {
     RemoteNotification? notification = message.notification;
-    AndroidNotification? android = message.notification?.android;
 
     if (notification != null) {
       await _localNotifications.show(
@@ -238,97 +242,4 @@ class FirebaseMessagingService {
     }
   }
 
-  /// 🔄 الحصول على FCM Token جديد
-  Future<String?> _refreshFcmToken() async {
-    try {
-      _fcmToken = await _messaging.getToken();
-      AppLog.d('🔑 FCM Token: ${AppLog.redact(_fcmToken)}');
-      return _fcmToken;
-    } catch (e) {
-      AppLog.d('❌ خطأ في الحصول على FCM Token: $e');
-      return null;
-    }
-  }
-
-  /// 🔄 الاستماع لتغيير FCM Token
-  void _listenTokenRefresh() {
-    _messaging.onTokenRefresh.listen((String newToken) {
-      AppLog.d('🔄 FCM Token تغير: ${AppLog.redact(newToken)}');
-      _fcmToken = newToken;
-      // TODO: أرسل التوكن الجديد للـ Backend
-      _sendTokenToBackend(newToken);
-    });
-  }
-
-  /// 📤 إرسال FCM Token للـ Backend (تستدعى عند تسجيل الدخول)
-  Future<bool> sendFcmTokenToBackend({
-    required String authToken,
-    required int storeId,
-  }) async {
-    try {
-      if (_fcmToken == null || _fcmToken!.isEmpty) {
-        _fcmToken = await _refreshFcmToken();
-      }
-
-      if (_fcmToken == null) {
-        AppLog.d('❌ لا يوجد FCM Token');
-        return false;
-      }
-
-      return await _sendTokenToBackend(_fcmToken!, authToken: authToken, storeId: storeId);
-    } catch (e) {
-      AppLog.d('❌ خطأ في إرسال FCM Token: $e');
-      return false;
-    }
-  }
-
-  /// 📤 إرسال التوكن للـ Backend (private)
-  Future<bool> _sendTokenToBackend(
-      String token, {
-        String? authToken,
-        int? storeId,
-      }) async {
-    // TODO: استبدل هذا بـ API الحقيقي
-    AppLog.d('📤 إرسال FCM Token للـ Backend:');
-    AppLog.d('   Token: ${AppLog.redact(token)}');
-    AppLog.d('   Store ID: $storeId');
-
-    // مثال على استدعاء API:
-    /*
-    final response = await http.post(
-      Uri.parse('${Prefs.getBaseUrl()}/api/fcm-token'),
-      // R7-N1: do NOT hand-roll the Authorization header. There is exactly one
-      // construction site: NetworkHttps.authHeaders().
-      headers: NetworkHttps.authHeaders(),
-      body: jsonEncode({
-        'fcm_token': token,
-        'store_id': storeId,
-        'device_type': Platform.isAndroid ? 'android' : 'ios',
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      AppLog.d('✅ FCM Token أُرسل بنجاح');
-      return true;
-    } else {
-      AppLog.d('❌ فشل إرسال FCM Token: ${response.statusCode}');
-      return false;
-    }
-    */
-
-    return true;
-  }
-
-  /// 🗑️ حذف FCM Token (عند تسجيل الخروج)
-  Future<void> deleteFcmToken() async {
-    await _messaging.deleteToken();
-    _fcmToken = null;
-    AppLog.d('🗑️ FCM Token حُذف');
-  }
-
-  /// 📋 الحصول على FCM Token الحالي
-  Future<String?> getCurrentToken() async {
-    if (_fcmToken != null) return _fcmToken;
-    return await _refreshFcmToken();
-  }
 }
