@@ -635,6 +635,7 @@ const Map<String, String> en = {
   'paid_by2': 'Paid by @method',
   'connection_failed': 'Connection failed. Please try again.',
   'error_occurred': 'An error occurred',
+  'store_changed': 'Store changed',
   'resource_not_found': 'The requested resource was not found',
   'server_internal_error': 'An internal server error occurred',
   'no_internet_connection': 'No internet connection',

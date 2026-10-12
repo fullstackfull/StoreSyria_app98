@@ -635,6 +635,7 @@ const Map<String, String> ar = {
   'paid_by2': 'تم الدفع عبر @method',
   'connection_failed': 'فشل الاتصال، يرجى المحاولة مرة أخرى',
   'error_occurred': 'حدث خطأ',
+  'store_changed': 'تم تغيير المتجر',
   'server_error': 'حدث خطأ في الخادم، يرجى المحاولة لاحقًا',
   'resource_not_found': 'البيانات المطلوبة غير موجودة',
   'server_internal_error': 'حدث خطأ داخلي في الخادم',

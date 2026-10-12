@@ -4,6 +4,7 @@ import 'package:store_go_app/core/model/image_base_url_model.dart';
 import 'package:store_go_app/core/model/dashboard_model.dart';
 import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/utils/constant.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
@@ -131,7 +132,10 @@ class HomeController extends GetxController implements StoreAware {
       onSuccess: (data) {
         if (data['status'] == 1) {
           isStore.value = false;
-          commonToast(type: AppSnackBarType.success, data['data']['message']);
+          commonToast(
+            type: AppSnackBarType.success,
+            apiMessage(data, fallback: 'store_changed'.tr),
+          );
 
           Prefs.setStoreID(storeId);
 
@@ -144,7 +148,10 @@ class HomeController extends GetxController implements StoreAware {
           // تبعها.
           StoreChangeService.instance.notifyStoreChanged();
         } else {
-          commonToast(type: AppSnackBarType.error, data['data']['message']);
+          commonToast(
+            type: AppSnackBarType.error,
+            apiMessage(data, fallback: 'error_occurred'.tr),
+          );
         }
       },
       onFailure: (reason, message, errors) {
