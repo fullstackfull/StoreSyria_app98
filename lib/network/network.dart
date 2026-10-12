@@ -302,6 +302,29 @@ $error
         break;
 
     // -----------------------------------------------------------------------
+    // 403 — authorized but not permitted
+    // -----------------------------------------------------------------------
+    //
+    // Was unhandled, so it fell to `default` and reached the merchant as "an
+    // error occurred". It matters now because the server-side authorization
+    // work replaces "every token holder can do everything" with Laravel
+    // Policies and Gates, and a policy denial answers 403 -- including when a
+    // request carries a store_id the authenticated merchant does not own.
+    //
+    // Deliberately NOT a forced logout: 403 means the session is valid and the
+    // action is not allowed, which is the opposite of 401. Clearing the
+    // session here would turn one denied action into a logout loop.
+
+      case 403:
+        reason = FailureReason.unauthorized;
+
+        if (message == 'error_occurred'.tr) {
+          message = 'action_not_permitted'.tr;
+        }
+
+        break;
+
+    // -----------------------------------------------------------------------
     // 404
     // -----------------------------------------------------------------------
 

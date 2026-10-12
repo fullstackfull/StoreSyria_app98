@@ -645,4 +645,5 @@ const Map<String, String> en = {
       'Too many requests. Please try again in @seconds seconds.',
   'session_expired': 'Your session has expired. Please log in again.',
   'invalid_server_response': 'The server returned an unexpected response.',
+  'action_not_permitted': 'You do not have permission to perform this action.',
 };

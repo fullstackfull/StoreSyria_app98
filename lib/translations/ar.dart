@@ -646,4 +646,5 @@ const Map<String, String> ar = {
       'طلبات كثيرة جدًا، يرجى المحاولة مرة أخرى بعد @seconds ثانية',
   'session_expired': 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى',
   'invalid_server_response': 'أرجع الخادم استجابة غير متوقعة',
+  'action_not_permitted': 'ليست لديك صلاحية لتنفيذ هذا الإجراء',
 };

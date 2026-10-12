@@ -62,6 +62,23 @@ class Prefs {
     return getStorage!.write(USER_ID, userID);
   }
 
+  /// The merchant's currently selected store id, CACHED from the server.
+  ///
+  /// NOT AUTHORITATIVE, and must never be used for an authorization decision
+  /// in the app (finding NEW-client-supplied-store-id / R7-N2). It lives in
+  /// unencrypted local storage, which means it is attacker-controlled on a
+  /// rooted or compromised device.
+  ///
+  /// It is still sent as `?store_id=` on the API calls that expect it, because
+  /// changing the wire format would break against today's backend. The
+  /// authoritative fix is server-side: the backend derives the tenant from the
+  /// authenticated principal and must validate or ignore this parameter. When
+  /// it does, a store_id the merchant does not own answers 403 -- which the
+  /// network layer now reports as 'action_not_permitted' rather than a
+  /// generic error.
+  ///
+  /// Write it only from a value the SERVER supplied: the login response's
+  /// `current_store`, the store list, or the store-settings response.
   static String getStoreID() {
     return getStorage!.read(storeId) ?? '';
   }
