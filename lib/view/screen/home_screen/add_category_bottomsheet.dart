@@ -193,7 +193,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: navyBlue.withOpacity(
+            color: navyBlue.withValues(alpha:
               isDark ? 0.25 : 0.08,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -270,7 +270,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(
+              color: navyBlue.withValues(alpha:
                 isDark ? 0.22 : 0.07,
               ),
               borderRadius: BorderRadius.circular(11.r),
@@ -364,7 +364,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(
+              color: navyBlue.withValues(alpha:
                 isDark ? 0.22 : 0.07,
               ),
               borderRadius: BorderRadius.circular(11),
@@ -556,7 +556,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     return Container(
       width: 40.w,
       height: 40.h,
-      color: navyBlue.withOpacity(0.07),
+      color: navyBlue.withValues(alpha: 0.07),
       child: Icon(
         icon,
         color: navyBlue,

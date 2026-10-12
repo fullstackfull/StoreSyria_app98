@@ -96,7 +96,7 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
             end: -70.w,
             child: _GlowCircle(
               size: 240.w,
-              color: AppColor.themeGreenColor.withOpacity(isDark ? 0.14 : 0.12),
+              color: AppColor.themeGreenColor.withValues(alpha: isDark ? 0.14 : 0.12),
             ),
           ),
           PositionedDirectional(
@@ -104,7 +104,7 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
             start: -80.w,
             child: _GlowCircle(
               size: 280.w,
-              color: AppColor.themeNavyBlueColor.withOpacity(isDark ? 0.22 : 0.08),
+              color: AppColor.themeNavyBlueColor.withValues(alpha: isDark ? 0.22 : 0.08),
             ),
           ),
 
@@ -139,7 +139,7 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
                           color: AppColor.themeGreenColor,
                           backgroundColor: isDark
                               ? DarkThemeColor.cBorder
-                              : AppColor.themeGreenColor.withOpacity(0.15),
+                              : AppColor.themeGreenColor.withValues(alpha: 0.15),
                         ),
                       ),
                     ),

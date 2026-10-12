@@ -435,9 +435,9 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
         : const Color(0xFF172C4E);
 
     final Color iconBackground = isDark
-        ? Colors.white.withOpacity(0.07)
+        ? Colors.white.withValues(alpha: 0.07)
         : const Color(0xFF172C4E)
-        .withOpacity(0.06);
+        .withValues(alpha: 0.06);
 
     return Container(
       width: double.infinity,
@@ -448,7 +448,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
         BorderRadius.circular(16.r),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.06)
+              ? Colors.white.withValues(alpha: 0.06)
               : const Color(0xFFE5E8ED),
         ),
         boxShadow: isDark
@@ -456,7 +456,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
             : [
           BoxShadow(
             color: Colors.black
-                .withOpacity(0.035),
+                .withValues(alpha: 0.035),
             blurRadius: 12,
             offset:
             const Offset(0, 3),
@@ -575,7 +575,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                 side: BorderSide(
                   color: AppColor
                       .themeNavyBlueColor
-                      .withOpacity(0.35),
+                      .withValues(alpha: 0.35),
                 ),
                 padding:
                 EdgeInsets.symmetric(
@@ -602,14 +602,14 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
           decoration: BoxDecoration(
             color: isDark
                 ? Colors.white
-                .withOpacity(0.03)
+                .withValues(alpha: 0.03)
                 : const Color(0xFFF7F8FA),
             borderRadius:
             BorderRadius.circular(14.r),
             border: Border.all(
               color: isDark
                   ? Colors.white
-                  .withOpacity(0.07)
+                  .withValues(alpha: 0.07)
                   : const Color(0xFFE2E6EC),
             ),
           ),

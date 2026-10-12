@@ -228,7 +228,7 @@ class _ProductDetailScreenState
     final images = productDetailController.getProductImages();
 
     final imageBackground = isDark
-        ? Colors.white.withOpacity(.05)
+        ? Colors.white.withValues(alpha: .05)
         : const Color(0xFFF3F4F6);
 
     if (images.isEmpty) {
@@ -724,10 +724,10 @@ class _ProductDetailScreenState
                     BoxDecoration(
                       color: hasReview
                           ? Colors.grey
-                          .withOpacity(0.12)
+                          .withValues(alpha: 0.12)
                           : AppColor
                           .themeGreenColor
-                          .withOpacity(0.1),
+                          .withValues(alpha: 0.1),
                       borderRadius:
                       BorderRadius.circular(
                         20.r,
@@ -876,7 +876,7 @@ class _ProductDetailScreenState
               // ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(
+                  color: Colors.black.withValues(alpha:
                     isDark ? 0 : 0.03,
                   ),
                   blurRadius: 10,
@@ -900,7 +900,7 @@ class _ProductDetailScreenState
                       BoxDecoration(
                         color: AppColor
                             .themeGreenColor
-                            .withOpacity(0.12),
+                            .withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
                       alignment:
@@ -1020,7 +1020,7 @@ class _ProductDetailScreenState
                                   )
                                       : Colors
                                       .grey)
-                                      .withOpacity(
+                                      .withValues(alpha:
                                       0.1),
                                   borderRadius:
                                   BorderRadius
@@ -1222,7 +1222,7 @@ class _ProductDetailScreenState
           vertical: 6.h,
         ),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius:
           BorderRadius.circular(20.r),
         ),
@@ -1343,7 +1343,7 @@ class _ProductDetailScreenState
             EdgeInsets.all(7.w),
             decoration: BoxDecoration(
               color: secondaryTextColor
-                  .withOpacity(0.08),
+                  .withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -1382,7 +1382,7 @@ class _ProductDetailScreenState
         if (!isLast)
           _thinDivider(
             secondaryTextColor
-                .withOpacity(0.12),
+                .withValues(alpha: 0.12),
           ),
       ],
     );
@@ -1405,7 +1405,7 @@ class _ProductDetailScreenState
       ),
       decoration: BoxDecoration(
         color:
-        color.withOpacity(0.1),
+        color.withValues(alpha: 0.1),
         borderRadius:
         BorderRadius.circular(20.r),
       ),

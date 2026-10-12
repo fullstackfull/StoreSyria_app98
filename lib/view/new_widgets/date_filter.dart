@@ -53,7 +53,7 @@ Future<DateTimeRange?> showDateRangeBottomSheet({
                     width: 40.w,
                     height: 4.h,
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
+                      color: Colors.grey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
@@ -160,7 +160,7 @@ Future<DateTimeRange?> showDateRangeBottomSheet({
                             vertical: 14.h,
                           ),
                           side: BorderSide(
-                            color: accent.withOpacity(0.4),
+                            color: accent.withValues(alpha: 0.4),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius:
@@ -248,7 +248,7 @@ class _DatePickerField extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: borderColor.withOpacity(0.5)),
+          border: Border.all(color: borderColor.withValues(alpha: 0.5)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,7 +359,7 @@ Widget sectionHeaderWithFilterWidget({
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30.r),
-              border: Border.all(color: accent.withOpacity(0.4)),
+              border: Border.all(color: accent.withValues(alpha: 0.4)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

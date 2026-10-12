@@ -38,7 +38,7 @@ Widget topOrderCardWidget({
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -168,7 +168,7 @@ Widget orderStatusBadgeWidget({
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.12),
+      color: color.withValues(alpha: 0.12),
       borderRadius: BorderRadius.circular(20.r),
     ),
     child: Row(
@@ -222,7 +222,7 @@ Widget allOrdersListItemWidget({
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        // border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+        // border: Border.all(color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3)),
         color: cardColor,
         borderRadius: BorderRadius.circular(18.r),
       ),
@@ -385,7 +385,7 @@ Widget deliveryAssignChip({
       vertical: 2.h,
     ),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.10),
+      color: color.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(10.r),
     ),
     child: Row(

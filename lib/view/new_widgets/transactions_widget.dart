@@ -29,12 +29,12 @@ Widget transactionCard({
     decoration: BoxDecoration(
       color: cardColor,
       borderRadius: BorderRadius.circular(16.r),
-      // border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+      // border: Border.all(color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3)),
       boxShadow: isDark
           ? null
           : [
         BoxShadow(
-          color: Colors.black.withOpacity(0.03),
+          color: Colors.black.withValues(alpha: 0.03),
           offset: const Offset(0, 3),
           blurRadius: 10,
         ),
@@ -47,7 +47,7 @@ Widget transactionCard({
           width: 42.w,
           height: 42.w,
           decoration: BoxDecoration(
-            color: amountColor.withOpacity(isDark ? 0.15 : 0.10),
+            color: amountColor.withValues(alpha: isDark ? 0.15 : 0.10),
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Icon(icon, color: amountColor, size: 20.sp),
@@ -157,7 +157,7 @@ Widget _statusBadge({required String status, required bool isDark}) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
     decoration: BoxDecoration(
-      color: color.withOpacity(isDark ? 0.18 : 0.10),
+      color: color.withValues(alpha: isDark ? 0.18 : 0.10),
       borderRadius: BorderRadius.circular(20.r),
     ),
     child: Text(

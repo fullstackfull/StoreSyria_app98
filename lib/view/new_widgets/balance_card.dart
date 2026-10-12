@@ -24,7 +24,7 @@ Widget balanceCard({
       width: double.infinity,
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+        border: Border.all(color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -37,7 +37,7 @@ Widget balanceCard({
         borderRadius: BorderRadius.circular(22.r),
         boxShadow: [
           BoxShadow(
-            color : AppColor.cBlack.withOpacity(0.2),
+            color : AppColor.cBlack.withValues(alpha: 0.2),
             offset: const Offset(0, 8),
             blurRadius: 20,
           ),
@@ -155,7 +155,7 @@ Widget cardButton({
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: filled
-              ? AppColor.themeGreenColor.withOpacity(0.7)
+              ? AppColor.themeGreenColor.withValues(alpha: 0.7)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(color: filled ? AppColor.themeNavyBlueColor : AppColor.cBorder),

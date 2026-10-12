@@ -64,7 +64,7 @@ Widget deliveryBoyWidget({
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(
+            color: Colors.black.withValues(alpha:
               isDark ? .10 : .035,
             ),
             blurRadius: 12,
@@ -129,7 +129,7 @@ Widget deliveryBoyWidget({
                   width: 22.w,
                   height: 22.w,
                   decoration: BoxDecoration(
-                    color: AppColor.themeNavyBlueColor.withOpacity(.07),
+                    color: AppColor.themeNavyBlueColor.withValues(alpha: .07),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -195,7 +195,7 @@ Widget _deliveryBoyInfoRow({
         width: 22.w,
         height: 22.w,
         decoration: BoxDecoration(
-          color: iconColor.withOpacity(.07),
+          color: iconColor.withValues(alpha: .07),
           shape: BoxShape.circle,
         ),
         child: Icon(

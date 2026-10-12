@@ -120,7 +120,7 @@ class ThemeController extends GetxController {
         backgroundColor: card,
         modalBackgroundColor: card,
         surfaceTintColor: Colors.transparent,
-        modalBarrierColor: Colors.black.withOpacity(dark ? 0.6 : 0.45),
+        modalBarrierColor: Colors.black.withValues(alpha: dark ? 0.6 : 0.45),
         shape: sheetShape,
         dragHandleColor: border,
       ),
@@ -162,7 +162,7 @@ class ThemeController extends GetxController {
       ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: accent,
-        selectionColor: accent.withOpacity(0.3),
+        selectionColor: accent.withValues(alpha: 0.3),
         selectionHandleColor: accent,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: accent),

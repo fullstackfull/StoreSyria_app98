@@ -30,14 +30,14 @@ Widget languageOption({
         ),
         decoration: BoxDecoration(
           color: selected
-              ? AppColor.themeGreenColor.withOpacity(
+              ? AppColor.themeGreenColor.withValues(alpha:
             isDark ? 0.12 : 0.08,
           )
               : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected
-                ? AppColor.themeGreenColor.withOpacity(
+                ? AppColor.themeGreenColor.withValues(alpha:
               isDark ? 0.35 : 0.30,
             )
                 : Colors.transparent,
@@ -75,8 +75,8 @@ Widget languageOption({
                   color: (selected && !isLoading)
                       ? AppColor.themeGreenColor
                       : isDark
-                      ? Colors.white.withOpacity(0.25)
-                      : AppColor.cFont.withOpacity(0.25),
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : AppColor.cFont.withValues(alpha: 0.25),
                   width: 1.5,
                 ),
               ),
@@ -138,12 +138,12 @@ Widget languageSelector({
       borderRadius: BorderRadius.circular(18),
       border: Border.all(
         color: isDark
-            ? DarkThemeColor.cBorder.withOpacity(0.7)
+            ? DarkThemeColor.cBorder.withValues(alpha: 0.7)
             : Colors.transparent,
       ),
       boxShadow: [
         BoxShadow(
-          color: AppColor.themeGreenColor.withOpacity(
+          color: AppColor.themeGreenColor.withValues(alpha:
             isDark ? 0.07 : 0.12,
           ),
           offset: const Offset(0, 2),
@@ -262,7 +262,7 @@ Widget currencySelector({
           'no_currencies_found'.tr,
           style: pRegular14.copyWith(
             color: isDark
-                ? DarkThemeColor.cText.withOpacity(0.5)
+                ? DarkThemeColor.cText.withValues(alpha: 0.5)
                 : AppColor.cDarkGreyFont,
           ),
         ),
@@ -280,12 +280,12 @@ Widget currencySelector({
       borderRadius: BorderRadius.circular(18),
       border: Border.all(
         color: isDark
-            ? DarkThemeColor.cBorder.withOpacity(0.7)
+            ? DarkThemeColor.cBorder.withValues(alpha: 0.7)
             : Colors.transparent,
       ),
       boxShadow: [
         BoxShadow(
-          color: AppColor.themeGreenColor.withOpacity(
+          color: AppColor.themeGreenColor.withValues(alpha:
             isDark ? 0.07 : 0.12,
           ),
           offset: const Offset(0, 2),
@@ -368,19 +368,19 @@ Widget currencyOption({
         ),
         decoration: BoxDecoration(
           color: selected
-              ? AppColor.themeGreenColor.withOpacity(
+              ? AppColor.themeGreenColor.withValues(alpha:
                   isDark ? 0.12 : 0.08,
                 )
               : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected
-                ? AppColor.themeGreenColor.withOpacity(
+                ? AppColor.themeGreenColor.withValues(alpha:
                     isDark ? 0.45 : 0.35,
                   )
                 : isDark
-                    ? DarkThemeColor.cBorder.withOpacity(0.3)
-                    : AppColor.cBorder.withOpacity(0.4),
+                    ? DarkThemeColor.cBorder.withValues(alpha: 0.3)
+                    : AppColor.cBorder.withValues(alpha: 0.4),
             width: selected ? 1.5 : 1.0,
           ),
         ),
@@ -393,10 +393,10 @@ Widget currencyOption({
                 height: 28.h,
                 decoration: BoxDecoration(
                   color: selected
-                      ? AppColor.themeGreenColor.withOpacity(0.12)
+                      ? AppColor.themeGreenColor.withValues(alpha: 0.12)
                       : (isDark
-                          ? Colors.white.withOpacity(0.05)
-                          : Colors.black.withOpacity(0.04)),
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.black.withValues(alpha: 0.04)),
                   borderRadius: BorderRadius.circular(11.r),
                 ),
                 child: Center(
@@ -437,7 +437,7 @@ Widget currencyOption({
                     title,
                     style: pMedium10.copyWith(
                       color: isDark
-                          ? DarkThemeColor.cText.withOpacity(0.5)
+                          ? DarkThemeColor.cText.withValues(alpha: 0.5)
                           : AppColor.cDarkGreyFont,
                     ),
                     maxLines: 1,
@@ -461,8 +461,8 @@ Widget currencyOption({
                   color: (selected && !isLoading)
                       ? AppColor.themeGreenColor
                       : isDark
-                          ? Colors.white.withOpacity(0.25)
-                          : AppColor.cFont.withOpacity(0.25),
+                          ? Colors.white.withValues(alpha: 0.25)
+                          : AppColor.cFont.withValues(alpha: 0.25),
                   width: 1.5,
                 ),
               ),
@@ -527,17 +527,17 @@ Widget mainCard({
 
           border: Border.all(
             color: isExpanded
-                ? AppColor.themeGreenColor.withOpacity(
+                ? AppColor.themeGreenColor.withValues(alpha:
               isDark ? 0.40 : 0.30,
             )
                 : isDark
-                ? DarkThemeColor.cBorder.withOpacity(0.7)
+                ? DarkThemeColor.cBorder.withValues(alpha: 0.7)
                 : Colors.transparent,
           ),
 
           boxShadow: [
             BoxShadow(
-              color : AppColor.cBlack.withOpacity(0.2),
+              color : AppColor.cBlack.withValues(alpha: 0.2),
               offset: const Offset(0, 2),
               blurRadius: 8,
               spreadRadius: 0,
@@ -575,7 +575,7 @@ Widget mainCard({
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColor.themeGreenColor.withOpacity(
+                      color: AppColor.themeGreenColor.withValues(alpha:
                         isDark ? 0.12 : 0.08,
                       ),
                       borderRadius: BorderRadius.circular(20),
@@ -610,8 +610,8 @@ Widget mainCard({
                 key: ValueKey(isExpanded),
                 size: 26,
                 color: isDark
-                    ? Colors.white.withOpacity(0.45)
-                    : AppColor.cFont.withOpacity(0.5),
+                    ? Colors.white.withValues(alpha: 0.45)
+                    : AppColor.cFont.withValues(alpha: 0.5),
               ),
             ),
           ],

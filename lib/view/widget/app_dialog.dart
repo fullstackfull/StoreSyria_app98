@@ -29,7 +29,7 @@ class AppDialog {
       context: context,
       barrierDismissible: barrierDismissible,
       barrierLabel: 'Dialog',
-      barrierColor: Colors.black.withOpacity(.45),
+      barrierColor: Colors.black.withValues(alpha: .45),
       transitionDuration: const Duration(milliseconds: 200),
 
       pageBuilder: (
@@ -75,11 +75,11 @@ class AppDialog {
                 iconColor ?? confirmButtonColor;
 
             final cancelBorderColor = isDark
-                ? Colors.white.withOpacity(.14)
+                ? Colors.white.withValues(alpha: .14)
                 : const Color(0xFFE3E5EA);
 
             final dialogBorderColor =
-            accentColor.withOpacity(
+            accentColor.withValues(alpha:
               isDark ? .55 : .45,
             );
 
@@ -120,7 +120,7 @@ class AppDialog {
 
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(
+                          color: Colors.black.withValues(alpha:
                             isDark ? .3 : .06,
                           ),
                           blurRadius: 16,
@@ -177,12 +177,12 @@ class AppDialog {
                                   end: Alignment.bottomRight,
                                   colors: [
                                     accentColor
-                                        .withOpacity(
+                                        .withValues(alpha:
                                         isDark
                                             ? .28
                                             : .16),
                                     accentColor
-                                        .withOpacity(
+                                        .withValues(alpha:
                                         isDark
                                             ? .14
                                             : .07),

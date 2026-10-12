@@ -165,7 +165,7 @@ class _AddNewDeliveryBoyWidgetState extends State<AddNewDeliveryBoyWidget>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(isDark ? 0.22 : 0.07),
+              color: navyBlue.withValues(alpha: isDark ? 0.22 : 0.07),
               borderRadius: BorderRadius.circular(11),
             ),
             child: Icon(

@@ -26,7 +26,7 @@ Widget buildCategoryWidget({
   final Color secondaryText =
   isDark ? const Color(0xFFA9B8D0) : const Color(0xFF777D87);
   final Color borderColor =
-  isDark ? Colors.white.withOpacity(.07) : const Color(0xFFE8EAEE);
+  isDark ? Colors.white.withValues(alpha: .07) : const Color(0xFFE8EAEE);
   final Color accent = AppColor.themeNavyBlueColor;
 
   const Color success = Color(0xFF16A34A);
@@ -57,7 +57,7 @@ Widget buildCategoryWidget({
           ? null
           : [
         BoxShadow(
-          color: Colors.black.withOpacity(.05),
+          color: Colors.black.withValues(alpha: .05),
           blurRadius: 18,
           spreadRadius: -4,
           offset: Offset(0, 8),
@@ -94,9 +94,9 @@ Widget buildCategoryWidget({
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withOpacity(.28),
+                          Colors.black.withValues(alpha: .28),
                           Colors.transparent,
-                          Colors.black.withOpacity(.22),
+                          Colors.black.withValues(alpha: .22),
                         ],
                         stops: [0, .45, 1],
                       ),
@@ -206,7 +206,7 @@ Widget buildCategoryWidget({
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(isDark ? .18 : .07),
+                  color: accent.withValues(alpha: isDark ? .18 : .07),
                   borderRadius: BorderRadius.circular(11.r),
                 ),
                 child: Row(
@@ -261,7 +261,7 @@ Widget _chip({
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(.94),
+      color: Colors.white.withValues(alpha: .94),
       borderRadius: BorderRadius.circular(20.r),
     ),
     child: Row(
@@ -355,8 +355,8 @@ Widget _imagePlaceholder({required bool isDark}) {
         height: 52.w,
         decoration: BoxDecoration(
           color: isDark
-              ? Colors.white.withOpacity(.05)
-              : Colors.white.withOpacity(.8),
+              ? Colors.white.withValues(alpha: .05)
+              : Colors.white.withValues(alpha: .8),
           shape: BoxShape.circle,
         ),
         child: Icon(

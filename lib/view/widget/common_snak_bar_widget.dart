@@ -322,12 +322,12 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
          // تعديل الحواف لتكون بلون النوع (Type Color)
          // ==================================================
          border: Border.all(
-          color: style.color.withOpacity(isDark ? 0.6 : 0.3),
+          color: style.color.withValues(alpha: isDark ? 0.6 : 0.3),
           width: 1.2,
          ),
          boxShadow: [
           BoxShadow(
-           color: style.color.withOpacity(isDark ? 0.18 : 0.10),
+           color: style.color.withValues(alpha: isDark ? 0.18 : 0.10),
            blurRadius: 18,
            offset: const Offset(0, 6),
           ),
@@ -343,7 +343,7 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
            width: 34,
            height: 34,
            decoration: BoxDecoration(
-            color: style.color.withOpacity(.10),
+            color: style.color.withValues(alpha: .10),
             shape: BoxShape.circle,
            ),
            child: Icon(

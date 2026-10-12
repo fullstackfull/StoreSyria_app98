@@ -95,7 +95,7 @@ class ErrorState extends StatelessWidget {
                     width: 90.w,
                     height: 90.w,
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(.08),
+                      color: Colors.grey.withValues(alpha: .08),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

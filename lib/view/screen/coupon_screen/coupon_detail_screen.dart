@@ -158,7 +158,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
         : Colors.white;
 
     final borderColor = isDark
-        ? Colors.white.withOpacity(0.06)
+        ? Colors.white.withValues(alpha: 0.06)
         : const Color(0xFFE7E9ED);
 
     String formattedDate = '-';
@@ -190,7 +190,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
             ? []
             : [
           BoxShadow(
-            color: Colors.black.withOpacity(0.035),
+            color: Colors.black.withValues(alpha: 0.035),
             blurRadius: 12,
             spreadRadius: 0,
             offset: const Offset(0, 4),
@@ -295,7 +295,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
             height: 1,
             thickness: 1,
             color: isDark
-                ? Colors.white.withOpacity(0.07)
+                ? Colors.white.withValues(alpha: 0.07)
                 : const Color(0xFFEDEEF1),
           ),
 
@@ -322,7 +322,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
                 width: 1,
                 height: 38.h,
                 color: isDark
-                    ? Colors.white.withOpacity(0.07)
+                    ? Colors.white.withValues(alpha: 0.07)
                     : const Color(0xFFEDEEF1),
               ),
 
@@ -362,7 +362,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen> {
           width: 32.w,
           height: 32.w,
           decoration: BoxDecoration(
-            color: green.withOpacity(0.08),
+            color: green.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(9.r),
           ),
           child: Icon(

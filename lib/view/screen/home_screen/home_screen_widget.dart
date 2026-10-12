@@ -49,7 +49,7 @@ Widget buildAppTitleRow(String date,BuildContext context) {
                 color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
                 borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
-                  color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5),
+                  color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withValues(alpha: 0.5),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -129,7 +129,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: AppColor.themeNavyBlueColor.withOpacity(0.28),
+            color: AppColor.themeNavyBlueColor.withValues(alpha: 0.28),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -146,7 +146,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
               height: 130,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.06),
+                color: Colors.white.withValues(alpha: 0.06),
               ),
             ),
           ),
@@ -158,7 +158,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColor.themeGreenColor.withOpacity(0.18),
+                color: AppColor.themeGreenColor.withValues(alpha: 0.18),
               ),
             ),
           ),
@@ -175,7 +175,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
                       gradient: LinearGradient(
                         colors: [
                           AppColor.themeGreenColor,
-                          Colors.white.withOpacity(0.6),
+                          Colors.white.withValues(alpha: 0.6),
                         ],
                       ),
                     ),
@@ -224,7 +224,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
                     children: [
                       Text(
                         "Welcome back".tr,
-                        style: pRegular12.copyWith(color: Colors.white.withOpacity(0.75)),
+                        style: pRegular12.copyWith(color: Colors.white.withValues(alpha: 0.75)),
                       ),
                       verticalSpace(4),
                       Text(
@@ -241,9 +241,9 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
                   width: 36.w,
                   height: 36.w,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.14),
+                    color: Colors.white.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: Colors.white.withOpacity(0.18)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
                   ),
                   child: Icon(
                     Icons.arrow_forward_ios_rounded,
@@ -266,7 +266,7 @@ Widget qrCodeWidget(BuildContext context,{String? qrString, String? title}) {
     width: double.infinity,
     decoration: BoxDecoration(
       color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
-      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withValues(alpha: 0.5)),
       borderRadius: BorderRadius.circular(22.r),
       boxShadow: [
         BoxShadow(
@@ -284,7 +284,7 @@ Widget qrCodeWidget(BuildContext context,{String? qrString, String? title}) {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: AppColor.themeGreenColor.withOpacity(0.35), width: 1.5),
+            border: Border.all(color: AppColor.themeGreenColor.withValues(alpha: 0.35), width: 1.5),
           ),
           child: CustomPaint(
             size: Size.square(64),
@@ -387,7 +387,7 @@ Widget totalProductWidget(BuildContext context,{
     decoration: BoxDecoration(
       color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
       borderRadius: BorderRadius.circular(20.r),
-      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withValues(alpha: 0.5)),
       boxShadow: [
         BoxShadow(
           color: AppColor.cShadow,
@@ -406,7 +406,7 @@ Widget totalProductWidget(BuildContext context,{
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: accent.withOpacity(0.08),
+              color: accent.withValues(alpha: 0.08),
             ),
           ),
         ),
@@ -420,7 +420,7 @@ Widget totalProductWidget(BuildContext context,{
                 height: 38.w,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.14),
+                  color: accent.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: assetSvdImageWidget(

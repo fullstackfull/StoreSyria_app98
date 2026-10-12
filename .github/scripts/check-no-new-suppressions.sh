@@ -29,8 +29,8 @@
 # scaffold directories, and it logs "Upgrading analysis_options.yaml to exclude
 # build and platform directories" when it fires.
 #
-# MEASURED on Flutter 3.47.7: the project reports 552 issues with that block
-# present and 552 without it, because android/, ios/, web/, windows/, macos/
+# MEASURED on Flutter 3.47.7: the project reports 248 issues with that block
+# present and 248 without it, because android/, ios/, web/, windows/, macos/
 # and linux/ contain no Dart at all here. So the SDK's block hides NOTHING in
 # this repository and is tolerated. An exclude that reaches lib/ is a different
 # thing entirely and fails below.

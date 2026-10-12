@@ -227,7 +227,7 @@ class _CustomerPickerBottomSheetState
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
                             backgroundColor:
-                            navyBlue.withOpacity(isDark ? 0.25 : 0.08),
+                            navyBlue.withValues(alpha: isDark ? 0.25 : 0.08),
                             child: Text(
                               name.isNotEmpty ? name[0].toUpperCase() : '?',
                               style: const TextStyle(

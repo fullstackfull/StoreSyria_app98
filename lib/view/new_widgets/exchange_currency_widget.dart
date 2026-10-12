@@ -50,7 +50,7 @@ Widget exchangeRatesSection({
           'no_exchange_rates_found'.tr,
           style: pRegular14.copyWith(
             color: isDark
-                ? DarkThemeColor.cText.withOpacity(0.5)
+                ? DarkThemeColor.cText.withValues(alpha: 0.5)
                 : AppColor.cDarkGreyFont,
           ),
         ),
@@ -88,7 +88,7 @@ Widget exchangeRatesSection({
           'no_exchange_rates_found'.tr,
           style: pRegular14.copyWith(
             color: isDark
-                ? DarkThemeColor.cText.withOpacity(0.5)
+                ? DarkThemeColor.cText.withValues(alpha: 0.5)
                 : AppColor.cDarkGreyFont,
           ),
         ),
@@ -106,12 +106,12 @@ Widget exchangeRatesSection({
       borderRadius: BorderRadius.circular(18),
       border: Border.all(
         color: isDark
-            ? DarkThemeColor.cBorder.withOpacity(0.7)
+            ? DarkThemeColor.cBorder.withValues(alpha: 0.7)
             : Colors.transparent,
       ),
       boxShadow: [
         BoxShadow(
-          color: AppColor.themeGreenColor.withOpacity(
+          color: AppColor.themeGreenColor.withValues(alpha:
             isDark ? 0.07 : 0.12,
           ),
           offset: const Offset(0, 2),
@@ -163,13 +163,13 @@ Widget exchangeRateItemCard({
       ),
       decoration: BoxDecoration(
         color: isDark
-            ? (item.isActive ? Colors.transparent : Colors.black.withOpacity(0.1))
+            ? (item.isActive ? Colors.transparent : Colors.black.withValues(alpha: 0.1))
             : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark
-              ? DarkThemeColor.cBorder.withOpacity(0.3)
-              : AppColor.cBorder.withOpacity(0.4),
+              ? DarkThemeColor.cBorder.withValues(alpha: 0.3)
+              : AppColor.cBorder.withValues(alpha: 0.4),
         ),
       ),
       child: Row(
@@ -181,10 +181,10 @@ Widget exchangeRateItemCard({
               height: 28.h,
               decoration: BoxDecoration(
                 color: item.isActive
-                    ? AppColor.themeGreenColor.withOpacity(0.1)
+                    ? AppColor.themeGreenColor.withValues(alpha: 0.1)
                     : (isDark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.black.withOpacity(0.04)),
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.04)),
                 borderRadius: BorderRadius.circular(11.r),
               ),
               child: Center(
@@ -196,7 +196,7 @@ Widget exchangeRateItemCard({
                     color: item.isActive
                         ? AppColor.themeGreenColor
                         : (isDark
-                        ? DarkThemeColor.cText.withOpacity(0.4)
+                        ? DarkThemeColor.cText.withValues(alpha: 0.4)
                         : AppColor.cDarkGreyFont),
                   ),
                 ),
@@ -239,7 +239,7 @@ Widget exchangeRateItemCard({
                   item.currencyName,
                   style: pMedium10.copyWith(
                     color: isDark
-                        ? DarkThemeColor.cText.withOpacity(0.5)
+                        ? DarkThemeColor.cText.withValues(alpha: 0.5)
                         : AppColor.cDarkGreyFont,
                   ),
                   maxLines: 1,
@@ -275,7 +275,7 @@ Widget exchangeRateItemCard({
             child: Container(
               padding: EdgeInsets.all(7.w),
               decoration: BoxDecoration(
-                color: AppColor.themeGreenColor.withOpacity(isDark ? 0.15 : 0.08),
+                color: AppColor.themeGreenColor.withValues(alpha: isDark ? 0.15 : 0.08),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
@@ -373,7 +373,7 @@ void showEditExchangeRateSheet({
                       width: 44.w,
                       height: 44.w,
                       decoration: BoxDecoration(
-                        color: AppColor.themeGreenColor.withOpacity(0.12),
+                        color: AppColor.themeGreenColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(14.r),
                       ),
                       child: Center(
@@ -429,10 +429,10 @@ void showEditExchangeRateSheet({
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
                   decoration: BoxDecoration(
-                    color: AppColor.themeGreenColor.withOpacity(isDark ? 0.08 : 0.05),
+                    color: AppColor.themeGreenColor.withValues(alpha: isDark ? 0.08 : 0.05),
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(
-                      color: AppColor.themeGreenColor.withOpacity(0.2),
+                      color: AppColor.themeGreenColor.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Row(

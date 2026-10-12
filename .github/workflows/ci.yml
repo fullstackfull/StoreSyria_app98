@@ -10,7 +10,7 @@ name: CI
 #   flutter test                   -- blocking, must be 100%. MEASURED 217/217.
 #   flutter analyze errors         -- blocking, must be 0. MEASURED 0.
 #   flutter analyze warnings       -- blocking, must be 0. MEASURED 0.
-#   flutter analyze infos          -- RATCHET at 552: may fall, never rise.
+#   flutter analyze infos          -- RATCHET at 248: may fall, never rise.
 #   signing material in git        -- blocking.
 #   analyzer suppression count     -- RATCHET at 43: may fall, never rise.
 #
@@ -22,12 +22,16 @@ name: CI
 # verified to exit 1 when a single unused local is introduced and 0 when it is
 # removed, so this gate is known to bite rather than assumed to.
 #
-# The infos bar is a ratchet instead of zero because 552 of the 552 remaining
-# issues are informational and the large majority are the deprecated
-# `withOpacity` call, whose replacement (`withValues`) is a mechanical but
-# very wide change that belongs in its own commit. A ratchet keeps that debt
-# from growing while it is paid down. Same idiom, and same reasoning, as the
-# composer-audit ratchet in repo A's ci.yml.
+# The infos bar is a ratchet rather than zero because the remaining issues are
+# all informational. It was 552; the 304 deprecated `withOpacity` calls that
+# made up the majority have since been migrated to `withValues`, measured
+# 552 -> 248 with 0 errors and 0 warnings throughout, so the ceiling moves
+# with them -- lowering it in the same commit as the fix is what keeps a
+# ratchet a ratchet. What is left is 93 prefer_const_constructors, 91
+# unnecessary_this, 23 remaining deprecations (activeColor, trackColor,
+# MaterialStateProperty and friends, each needing a judgement call rather than
+# a substitution), 12 use_super_parameters and a tail of smaller lints. Same
+# idiom, and same reasoning, as the composer-audit ratchet in repo A's ci.yml.
 #
 # ACTION PINNING. All three `uses:` lines name an immutable commit SHA, with
 # the tag they resolved from in a trailing comment. A version tag is mutable:
@@ -74,7 +78,7 @@ name: CI
 #   analysis_options_migration.dart:14-77, which logs "Upgrading
 #   analysis_options.yaml to exclude build and platform directories"). It is
 #   the tool, not a developer hiding scope. It also hides nothing here: the
-#   project reports 552 issues both with and without that block, because
+#   project reports 248 issues both with and without that block, because
 #   android/, ios/, web/, windows/, macos/ and linux/ contain no Dart in this
 #   repository. check-no-new-suppressions.sh therefore reads the COMMITTED
 #   file rather than the working tree, and separately fails any exclude that
@@ -166,7 +170,7 @@ jobs:
         run: flutter pub get
 
       - name: No errors and no warnings
-        # --no-fatal-infos keeps the 552 informational issues out of the
+        # --no-fatal-infos keeps the 248 informational issues out of the
         # verdict while leaving errors AND warnings fatal. Verified to exit
         # non-zero on a single injected unused local.
         run: flutter analyze --no-fatal-infos
@@ -174,31 +178,39 @@ jobs:
       - name: Informational issues must not grow
         # The ratchet that makes the step above safe to keep narrow. The count
         # may fall and never rise, so new informational debt fails the build
-        # even while the known 552 are being paid down.
+        # even while the known 248 are being paid down.
         env:
-          INFO_CEILING: '552'
+          INFO_CEILING: '248'
         run: |
           set -o pipefail
-          flutter analyze > analyze.txt 2>&1 || true
 
-          if grep -q 'No issues found' analyze.txt; then
+          # OUTSIDE the repository. Writing analyze.txt into the checkout left
+          # an untracked file behind, which the containment step at the end of
+          # this job correctly reports as "the build modified something it was
+          # not supposed to" -- found by running that step locally rather than
+          # by watching a red build.
+          out="$(mktemp -t analyze.XXXXXX)"
+
+          flutter analyze > "$out" 2>&1 || true
+
+          if grep -q 'No issues found' "$out"; then
             found=0
           else
-            found="$(grep -c '^ *info • ' analyze.txt || true)"
+            found="$(grep -c '^ *info • ' "$out" || true)"
           fi
 
           if [ -z "$found" ]; then
             echo "::error::Could not parse the analyzer output."
-            cat analyze.txt
+            cat "$out"
             exit 1
           fi
 
           # A total of 0 with a non-empty report means the format changed and
           # this step has gone vacuous, which must fail loudly rather than pass.
-          total="$(sed -n 's/^\([0-9]\{1,\}\) issues\? found\..*/\1/p' analyze.txt | tail -1)"
+          total="$(sed -n 's/^\([0-9]\{1,\}\) issues\? found\..*/\1/p' "$out" | tail -1)"
           if [ -n "$total" ] && [ "$total" -gt 0 ] && [ "$found" -eq 0 ]; then
             echo "::error::Analyzer reported $total issues but none parsed as 'info'. The output format changed; fix this step."
-            cat analyze.txt
+            cat "$out"
             exit 1
           fi
 
@@ -206,7 +218,7 @@ jobs:
 
           if [ "$found" -gt "$INFO_CEILING" ]; then
             echo "::error::Informational issue count rose from $INFO_CEILING to $found."
-            cat analyze.txt
+            cat "$out"
             exit 1
           fi
 

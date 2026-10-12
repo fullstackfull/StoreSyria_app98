@@ -124,7 +124,7 @@ class _SnackBarContent extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.35 : 0.08),
+              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
               blurRadius: 18,
               offset: const Offset(0, 7),
             ),
@@ -146,7 +146,7 @@ class _SnackBarContent extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(isDark ? 0.20 : 0.10),
+                    color: color.withValues(alpha: isDark ? 0.20 : 0.10),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(

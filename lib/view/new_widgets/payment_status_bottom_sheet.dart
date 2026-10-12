@@ -279,7 +279,7 @@ class _PaymentOptionCard extends StatelessWidget {
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: isSelected
-              ? bgColor.withOpacity(isDark ? 0.15 : 1)
+              ? bgColor.withValues(alpha: isDark ? 0.15 : 1)
               : (isDark ? DarkThemeColor.cCardBackground : Colors.grey.shade50),
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
@@ -293,7 +293,7 @@ class _PaymentOptionCard extends StatelessWidget {
               width: 48.w,
               height: 48.w,
               decoration: BoxDecoration(
-                color: bgColor.withOpacity(isDark ? 0.3 : 1),
+                color: bgColor.withValues(alpha: isDark ? 0.3 : 1),
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Icon(icon, color: textColor, size: 24.sp),
@@ -487,7 +487,7 @@ class OrderStatusBottomSheet {
                                         ? (isDark
                                         ? config
                                         .backgroundColor
-                                        .withOpacity(0.15)
+                                        .withValues(alpha: 0.15)
                                         : config
                                         .backgroundColor)
                                         : (isDark
@@ -622,7 +622,7 @@ class OrderStatusBottomSheet {
                                       color: isDark
                                           ? Colors.grey.shade500
                                           : AppColor.cFont
-                                          .withOpacity(0.6),
+                                          .withValues(alpha: 0.6),
                                     ),
                                     filled: true,
                                     fillColor: isDark

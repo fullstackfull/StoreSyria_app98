@@ -339,11 +339,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         color: cardBg,
         borderRadius: BorderRadius.circular(22.r),
         border: Border.all(
-          color: borderColor.withOpacity(.75),
+          color: borderColor.withValues(alpha: .75),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.045),
+            color: Colors.black.withValues(alpha: .045),
             blurRadius: 20,
             spreadRadius: 0,
             offset: const Offset(0, 8),
@@ -367,8 +367,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      accentColor.withOpacity(.16),
-                      accentColor.withOpacity(.06),
+                      accentColor.withValues(alpha: .16),
+                      accentColor.withValues(alpha: .06),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(15.r),
@@ -437,12 +437,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               height: 32.w,
                               decoration: BoxDecoration(
                                 color:
-                                accentColor.withOpacity(.08),
+                                accentColor.withValues(alpha: .08),
                                 borderRadius:
                                 BorderRadius.circular(9.r),
                                 border: Border.all(
                                   color:
-                                  accentColor.withOpacity(.12),
+                                  accentColor.withValues(alpha: .12),
                                 ),
                               ),
                               child: Icon(
@@ -473,10 +473,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               vertical: 10.h,
             ),
             decoration: BoxDecoration(
-              color: accentColor.withOpacity(.045),
+              color: accentColor.withValues(alpha: .045),
               borderRadius: BorderRadius.circular(14.r),
               border: Border.all(
-                color: accentColor.withOpacity(.09),
+                color: accentColor.withValues(alpha: .09),
               ),
             ),
             child: Row(
@@ -485,7 +485,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   width: 30.w,
                   height: 30.w,
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(.09),
+                    color: accentColor.withValues(alpha: .09),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -564,10 +564,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               vertical: 10.h,
             ),
             decoration: BoxDecoration(
-              color: accentColor.withOpacity(.045),
+              color: accentColor.withValues(alpha: .045),
               borderRadius: BorderRadius.circular(14.r),
               border: Border.all(
-                color: accentColor.withOpacity(.09),
+                color: accentColor.withValues(alpha: .09),
               ),
             ),
             child: Row(
@@ -576,7 +576,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   width: 30.w,
                   height: 30.w,
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(.09),
+                    color: accentColor.withValues(alpha: .09),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -640,11 +640,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         horizontal: 10.w, vertical: 6.h),
                     decoration: BoxDecoration(
                       color: (isAssigned ? accentColor : unassignedColor)
-                          .withOpacity(.10),
+                          .withValues(alpha: .10),
                       borderRadius: BorderRadius.circular(20.r),
                       border: Border.all(
                         color: (isAssigned ? accentColor : unassignedColor)
-                            .withOpacity(.25),
+                            .withValues(alpha: .25),
                       ),
                     ),
                     child: Row(
@@ -680,7 +680,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           // ─────────────────────────────
           Container(
             height: 1.h,
-            color: borderColor.withOpacity(.7),
+            color: borderColor.withValues(alpha: .7),
           ),
 
           SizedBox(height: 14.h),
@@ -705,7 +705,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 width: 1.w,
                 height: 34.h,
                 margin: EdgeInsets.symmetric(horizontal: 14.w),
-                color: borderColor.withOpacity(.8),
+                color: borderColor.withValues(alpha: .8),
               ),
 
               Expanded(
@@ -739,7 +739,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           width: 34.w,
           height: 34.w,
           decoration: BoxDecoration(
-            color: color.withOpacity(.07),
+            color: color.withValues(alpha: .07),
             borderRadius: BorderRadius.circular(10.r),
           ),
           child: Icon(
@@ -827,7 +827,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
-                color: AppColor.themeNavyBlueColor.withOpacity(.20),
+                color: AppColor.themeNavyBlueColor.withValues(alpha: .20),
                 blurRadius: 18,
                 spreadRadius: 0,
                 offset: const Offset(0, 7),
@@ -840,7 +840,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 width: 40.w,
                 height: 40.w,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(.15),
+                  color: Colors.white.withValues(alpha: .15),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Icon(
@@ -867,7 +867,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       "invoice".tr,
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: Colors.white.withOpacity(.75),
+                        color: Colors.white.withValues(alpha: .75),
                       ),
                     ),
                   ],
@@ -876,7 +876,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(.12),
+                  color: Colors.white.withValues(alpha: .12),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -1029,7 +1029,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             height: 26.w,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: accentColor.withOpacity(.08),
+              color: accentColor.withValues(alpha: .08),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(
@@ -1121,7 +1121,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: AppColor.themeNavyBlueColor.withOpacity(.15),
+            color: AppColor.themeNavyBlueColor.withValues(alpha: .15),
             blurRadius: 16,
             offset: const Offset(0, 7),
           ),
@@ -1135,7 +1135,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 width: 38.w,
                 height: 38.w,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(.10),
+                  color: Colors.white.withValues(alpha: .10),
                   borderRadius: BorderRadius.circular(11.r),
                 ),
                 child: Icon(
@@ -1205,7 +1205,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           Padding(
             padding: EdgeInsets.symmetric(vertical: 14.h),
             child: Divider(
-              color: Colors.white.withOpacity(.15),
+              color: Colors.white.withValues(alpha: .15),
               height: 1.h,
             ),
           ),
@@ -1243,7 +1243,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   vertical: 7.h,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(.09),
+                  color: Colors.white.withValues(alpha: .09),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
@@ -1304,7 +1304,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           width: 32.w,
           height: 32.w,
           decoration: BoxDecoration(
-            color: color.withOpacity(.09),
+            color: color.withValues(alpha: .09),
             borderRadius: BorderRadius.circular(10.r),
           ),
           child: Icon(
@@ -1355,7 +1355,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             width: 34.w,
             height: 34.w,
             decoration: BoxDecoration(
-              color: accentColor.withOpacity(.09),
+              color: accentColor.withValues(alpha: .09),
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Icon(
@@ -1493,13 +1493,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   width: 52.w,
                   height: 52.w,
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(.08),
+                    color: accentColor.withValues(alpha: .08),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.note_alt_outlined,
                     size: 25.sp,
-                    color: accentColor.withOpacity(.65),
+                    color: accentColor.withValues(alpha: .65),
                   ),
                 ),
                 SizedBox(height: 10.h),
@@ -1711,7 +1711,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                     color: isSelected
                                         ? AppColor
                                         .themeNavyBlueColor
-                                        .withOpacity(
+                                        .withValues(alpha:
                                         isDark
                                             ? .18
                                             : .07)
@@ -1804,7 +1804,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               color: isDark
                                   ? Colors.grey.shade500
                                   : AppColor.cFont
-                                  .withOpacity(.5),
+                                  .withValues(alpha: .5),
                             ),
                             filled: true,
                             fillColor: isDark
@@ -1939,7 +1939,7 @@ class _NoteCard extends StatelessWidget {
                 width: 38.w,
                 height: 38.w,
                 decoration: BoxDecoration(
-                  color: noteColor.withOpacity(.09),
+                  color: noteColor.withValues(alpha: .09),
                   borderRadius: BorderRadius.circular(11.r),
                 ),
                 child: Icon(

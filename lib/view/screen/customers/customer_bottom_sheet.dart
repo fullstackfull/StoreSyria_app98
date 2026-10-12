@@ -255,7 +255,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(isDark ? 0.22 : 0.07),
+              color: navyBlue.withValues(alpha: isDark ? 0.22 : 0.07),
               borderRadius: BorderRadius.circular(11),
             ),
             child: Icon(
@@ -677,7 +677,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+              color: navyBlue.withValues(alpha: isDark ? 0.20 : 0.07),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -716,7 +716,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(
-              color: borderColor.withOpacity(0.6),
+              color: borderColor.withValues(alpha: 0.6),
             ),
           ),
 
@@ -726,7 +726,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
           ),
 
           hintStyle: TextStyle(
-            color: secondaryTextColor.withOpacity(0.75),
+            color: secondaryTextColor.withValues(alpha: 0.75),
             fontSize: 13,
           ),
         ),
@@ -793,7 +793,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+            color: navyBlue.withValues(alpha: isDark ? 0.20 : 0.07),
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(
@@ -832,7 +832,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(
-            color: borderColor.withOpacity(0.6),
+            color: borderColor.withValues(alpha: 0.6),
           ),
         ),
 

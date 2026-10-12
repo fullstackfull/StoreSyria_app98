@@ -134,8 +134,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
                                       color: isStoreOpen
-                                          ? AppColor.themeGreenColor.withOpacity(0.6)
-                                          : (isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+                                          ? AppColor.themeGreenColor.withValues(alpha: 0.6)
+                                          : (isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withValues(alpha: 0.5)),
                                       width: 1.2),
                                   boxShadow: [
                                     BoxShadow(
@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                       height: 44.w,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        color: AppColor.themeGreenColor.withOpacity(0.12),
+                                        color: AppColor.themeGreenColor.withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(14),
                                       ),
                                       child: assetSvdImageWidget(
@@ -189,14 +189,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: isStoreOpen
-                                            ? AppColor.themeGreenColor.withOpacity(0.12)
+                                            ? AppColor.themeGreenColor.withValues(alpha: 0.12)
                                             : (isDark
                                             ? DarkThemeColor.cBorder
                                             : AppColor.cLight),
                                         borderRadius: BorderRadius.circular(12.r),
                                         border: Border.all(
                                           color: isStoreOpen
-                                              ? AppColor.themeGreenColor.withOpacity(0.35)
+                                              ? AppColor.themeGreenColor.withValues(alpha: 0.35)
                                               : Colors.transparent,
                                           width: 1,
                                         ),
@@ -233,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           border: Border.all(
                             color: isDark
                                 ? DarkThemeColor.cBorder
-                                : AppColor.cBorder.withOpacity(0.5),
+                                : AppColor.cBorder.withValues(alpha: 0.5),
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
@@ -257,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             endIndent: 8,
                             color: isDark
                                 ? DarkThemeColor.cBorder
-                                : AppColor.cBorder.withOpacity(0.5),
+                                : AppColor.cBorder.withValues(alpha: 0.5),
                           ),
                           itemBuilder: (context, index) {
                             final store =

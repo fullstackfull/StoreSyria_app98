@@ -40,7 +40,7 @@ Widget allProductsListItemWidget({
   isDark ? const Color(0xFFA9B8D0) : const Color(0xFF8A8F98);
   final imageBg = isDark ? const Color(0xFF213252) : const Color(0xFFF6F7F9);
   final dividerColor =
-  isDark ? Colors.white.withOpacity(.07) : const Color(0xFFEEF0F3);
+  isDark ? Colors.white.withValues(alpha: .07) : const Color(0xFFEEF0F3);
 
   final accentColor = AppColor.themeGreenColor;
   const dangerColor = Color(0xFFEF4444);
@@ -103,7 +103,7 @@ Widget allProductsListItemWidget({
               ? null
               : [
             BoxShadow(
-              color: const Color(0xFF111827).withOpacity(.06),
+              color: const Color(0xFF111827).withValues(alpha: .06),
               blurRadius: 22,
               spreadRadius: -6,
               offset: const Offset(0, 10),
@@ -157,12 +157,12 @@ Widget allProductsListItemWidget({
                                     padding: EdgeInsets.symmetric(
                                         horizontal: 10.w, vertical: 3.h),
                                     decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(.78),
+                                      color: Colors.black.withValues(alpha: .78),
                                       borderRadius:
                                       BorderRadius.circular(30.r),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(.18),
+                                          color: Colors.black.withValues(alpha: .18),
                                           blurRadius: 12,
                                           offset: const Offset(0, 4),
                                         ),
@@ -233,7 +233,7 @@ Widget allProductsListItemWidget({
                           padding: EdgeInsets.symmetric(
                               horizontal: 7.w, vertical: 3.h),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(.95),
+                            color: Colors.white.withValues(alpha: .95),
                             borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Row(
@@ -329,7 +329,7 @@ Widget allProductsListItemWidget({
                           padding: EdgeInsets.symmetric(
                               horizontal: 8.w, vertical: 3.h),
                           decoration: BoxDecoration(
-                            color: statusColor.withOpacity(.10),
+                            color: statusColor.withValues(alpha: .10),
                             borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: FittedBox(
@@ -376,7 +376,7 @@ Widget allProductsListItemWidget({
                             TextStyle(
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w600,
-                              color: subTextColor.withOpacity(.8),
+                              color: subTextColor.withValues(alpha: .8),
                             ),
                             alignment: Alignment.centerRight,
                           ),
@@ -402,7 +402,7 @@ Widget _overlayChip({
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
     decoration: BoxDecoration(
-      color: Colors.black.withOpacity(.72),
+      color: Colors.black.withValues(alpha: .72),
       borderRadius: BorderRadius.circular(20.r),
     ),
     child: Row(
@@ -563,7 +563,7 @@ class AddProductTextField extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(11.r),
-                      color: navyBlue.withOpacity(0.07),
+                      color: navyBlue.withValues(alpha: 0.07),
                     ),
                     child: Icon(icon, color: navyBlue, size: 22.w),
                   ),

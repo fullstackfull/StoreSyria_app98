@@ -101,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         boxShadow: [
           BoxShadow(
             color: AppColor.themeNavyBlueColor
-                .withOpacity(isDark ? 0.45 : 0.28),
+                .withValues(alpha: isDark ? 0.45 : 0.28),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -113,18 +113,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           PositionedDirectional(
             end: -40,
             top: -50,
-            child: _decorCircle(160, Colors.white.withOpacity(0.06)),
+            child: _decorCircle(160, Colors.white.withValues(alpha: 0.06)),
           ),
           PositionedDirectional(
             start: -30,
             bottom: -60,
             child: _decorCircle(
-                130, AppColor.themeNavyBlueColor.withOpacity(0.18)),
+                130, AppColor.themeNavyBlueColor.withValues(alpha: 0.18)),
           ),
           PositionedDirectional(
             end: 40,
             bottom: 30,
-            child: _decorCircle(18, Colors.white.withOpacity(0.10)),
+            child: _decorCircle(18, Colors.white.withValues(alpha: 0.10)),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 26, 20, 22),
@@ -147,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   "Manage your account and profile",
                   textAlign: TextAlign.center,
                   style: pMedium12.copyWith(
-                    color: Colors.white.withOpacity(0.72),
+                    color: Colors.white.withValues(alpha: 0.72),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -161,10 +161,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       vertical: 9,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.14),
+                      color: Colors.white.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.22),
+                        color: Colors.white.withValues(alpha: 0.22),
                       ),
                     ),
                     child: Row(
@@ -219,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               gradient: LinearGradient(
                 colors: [
                   AppColor.themeNavyBlueColor,
-                  Colors.white.withOpacity(0.7),
+                  Colors.white.withValues(alpha: 0.7),
                 ],
               ),
             ),
@@ -231,7 +231,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: CircleAvatar(
                 radius: 48,
-                backgroundColor: AppColor.themeNavyBlueColor.withOpacity(0.15),
+                backgroundColor: AppColor.themeNavyBlueColor.withValues(alpha: 0.15),
                 child: ClipOval(
                   child: _profileImage(),
                 ),
@@ -258,7 +258,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.18),
+                    color: Colors.black.withValues(alpha: 0.18),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -337,11 +337,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         border: Border.all(
           color: isDark
               ? DarkThemeColor.cBorder
-              : AppColor.cBorder.withOpacity(0.5),
+              : AppColor.cBorder.withValues(alpha: 0.5),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.18 : 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),

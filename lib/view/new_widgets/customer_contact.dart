@@ -140,13 +140,13 @@ class CustomerContactActions extends StatelessWidget {
 
     // زر كبسولة أفقي: أيقونة ونص جنب بعض بلون الإجراء
     return Material(
-      color: tone.withOpacity(isDark ? 0.14 : 0.10),
+      color: tone.withValues(alpha: isDark ? 0.14 : 0.10),
       shape: const StadiumBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        splashColor: tone.withOpacity(0.18),
-        highlightColor: tone.withOpacity(0.08),
+        splashColor: tone.withValues(alpha: 0.18),
+        highlightColor: tone.withValues(alpha: 0.08),
         child: SizedBox(
           height: 42.h,
           child: Padding(

@@ -163,7 +163,7 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: navyBlue.withOpacity(
+            color: navyBlue.withValues(alpha:
               isDark ? 0.25 : 0.08,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -342,7 +342,7 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(
+              color: navyBlue.withValues(alpha:
                 isDark ? 0.22 : 0.07,
               ),
               borderRadius: BorderRadius.circular(11),
@@ -429,7 +429,7 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(
+              color: navyBlue.withValues(alpha:
                 isDark ? 0.22 : 0.07,
               ),
               borderRadius: BorderRadius.circular(11),
