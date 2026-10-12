@@ -7,6 +7,7 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import '../../core/controller/auth/auth_controller.dart';
 import '../../core/controller/onboarding_controller/onboarding_controller.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class WelComeScreen extends StatefulWidget {
   const WelComeScreen({super.key});
@@ -60,9 +61,9 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
       final isOnboardingCompleted = onboardingController.isOnboardingCompleted;
       final isLoggedIn = Prefs.getToken().isNotEmpty;
 
-      print('🔍 التحقق في Welcome Screen:');
-      print('   OnBoarding: $isOnboardingCompleted');
-      print('   Logged In: $isLoggedIn');
+      AppLog.d('🔍 التحقق في Welcome Screen:');
+      AppLog.d('   OnBoarding: $isOnboardingCompleted');
+      AppLog.d('   Logged In: $isLoggedIn');
 
       if (!isOnboardingCompleted) {
         Get.offAllNamed('/onboarding');

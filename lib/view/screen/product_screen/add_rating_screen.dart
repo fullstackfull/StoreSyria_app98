@@ -1,4 +1,4 @@
-// ignore_for_file: must_be_immutable, avoid_print, prefer_const_constructors
+// ignore_for_file: must_be_immutable, prefer_const_constructors
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -15,6 +15,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/core/controller/product_controller/add_review_controller.dart';
 import '../../widget/app_dialog.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class AddRatingScreen extends StatefulWidget {
   final String categoryId;
@@ -139,9 +140,9 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
                                   color: AppColor.cGreenFont,
                                 ),
                                 onRatingUpdate: (rating) {
-                                  print(rating);
+                                  AppLog.d(rating);
                                   addReviewController.rate.value = rating;
-                                  print(addReviewController.rate.value);
+                                  AppLog.d(addReviewController.rate.value);
                                 },
                               ),
                             ),

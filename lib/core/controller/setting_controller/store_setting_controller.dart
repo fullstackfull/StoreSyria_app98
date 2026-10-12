@@ -10,6 +10,7 @@ import '../../../utils/pick_file.dart';
 import '../../model/currency_model.dart';
 import '../../model/language_model.dart';
 import '../../model/store_info_model.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class StoreSettingController extends GetxController {
   StoreSettingRepository settingRepository = StoreSettingRepository();
@@ -128,7 +129,7 @@ class StoreSettingController extends GetxController {
 
       response.fold(
         onSuccess: (data) {
-          print("Store Info Response =====> $data");
+          AppLog.d("Store Info Response =====> $data");
 
           final status = data['status'];
 
@@ -137,7 +138,7 @@ class StoreSettingController extends GetxController {
 
             _fillControllers();
 
-            print(
+            AppLog.d(
               "Store Name =====> ${storeInfoData.value?.store?.name}",
             );
           } else {
@@ -311,7 +312,7 @@ class StoreSettingController extends GetxController {
 
       response.fold(
         onSuccess: (data) async {
-          print("Update Store Response =====> $data");
+          AppLog.d("Update Store Response =====> $data");
 
           if (data['status'] == 1 ||
               data['status'] == '1' ||
@@ -345,7 +346,7 @@ class StoreSettingController extends GetxController {
     } catch (e) {
       errorMessage.value = e.toString();
 
-      print("Update Store Error =====> $e");
+      AppLog.d("Update Store Error =====> $e");
 
       commonToast(type: AppSnackBarType.error, 
         'Error updating store information',
@@ -368,7 +369,7 @@ class StoreSettingController extends GetxController {
 
       response.fold(
         onSuccess: (data) {
-          print("Change Language Response =====> $data");
+          AppLog.d("Change Language Response =====> $data");
 
           if (data['status'] == 1) {
             commonToast(type: AppSnackBarType.success, 
@@ -387,7 +388,7 @@ class StoreSettingController extends GetxController {
               );
             }
 
-            print(
+            AppLog.d(
               "Current Language =====> ${currentLanguage.value?.code}",
             );
           } else {
@@ -424,7 +425,7 @@ class StoreSettingController extends GetxController {
 
       response.fold(
         onSuccess: (data) {
-          print("Change Currency Response =====> $data");
+          AppLog.d("Change Currency Response =====> $data");
 
           if (data['status'] == 1) {
             commonToast(type: AppSnackBarType.success, 
@@ -460,7 +461,7 @@ class StoreSettingController extends GetxController {
               }
             }
 
-            print(
+            AppLog.d(
               "Current Currency =====> ${currentCurrency.value?.code}",
             );
 
@@ -494,7 +495,7 @@ class StoreSettingController extends GetxController {
 
       response.fold(
         onSuccess: (data) {
-          print("Languages & Currency Response =====> $data");
+          AppLog.d("Languages & Currency Response =====> $data");
 
           if (data['status'] == 1) {
             final responseData = data['data'];
@@ -558,9 +559,9 @@ class StoreSettingController extends GetxController {
         currencies.assignAll(
           decoded.map((e) => Currency.fromJson(e)).toList(),
         );
-        print("✅ Loaded ${currencies.length} currencies from cache");
+        AppLog.d("✅ Loaded ${currencies.length} currencies from cache");
       } catch (e) {
-        print("Error decoding cached currencies: $e");
+        AppLog.d("Error decoding cached currencies: $e");
       }
     }
 
@@ -569,7 +570,7 @@ class StoreSettingController extends GetxController {
         currentCurrency.value =
             Currency.fromJson(jsonDecode(cachedCurrent));
       } catch (e) {
-        print("Error decoding cached current currency: $e");
+        AppLog.d("Error decoding cached current currency: $e");
       }
     }
   }
@@ -588,7 +589,7 @@ class StoreSettingController extends GetxController {
 
   Future<void> getCurrenciesData({bool forceRefresh = false}) async {
     if (!forceRefresh && _isCacheValid() && currencies.isNotEmpty) {
-      print("📦 Using cached currencies (still valid < 24h)");
+      AppLog.d("📦 Using cached currencies (still valid < 24h)");
       return;
     }
 
@@ -599,7 +600,7 @@ class StoreSettingController extends GetxController {
 
       response.fold(
         onSuccess: (data) {
-          print("Currencies Response =====> $data");
+          AppLog.d("Currencies Response =====> $data");
 
           if (data['status'] == 1) {
             final currencyResponse = CurrencyResponse.fromJson(data);
@@ -612,7 +613,7 @@ class StoreSettingController extends GetxController {
               currencyResponse.data.currentCurrency,
             );
 
-            print("Currencies Length =====> ${currencies.length}");
+            AppLog.d("Currencies Length =====> ${currencies.length}");
           } else {
             commonToast(type: AppSnackBarType.error, data['message'] ?? 'Failed to get currencies');
           }
@@ -640,7 +641,7 @@ class StoreSettingController extends GetxController {
         if (data['status'] == 1) {
           commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
 
-          print(
+          AppLog.d(
             "StoreID----->${data['data']['user_info']['current_store']}",
           );
 
@@ -648,7 +649,7 @@ class StoreSettingController extends GetxController {
             data['data']['user_info']['current_store'].toString(),
           );
 
-          print(
+          AppLog.d(
             "StoreID----->--${Prefs.getStoreID()}",
           );
         } else {

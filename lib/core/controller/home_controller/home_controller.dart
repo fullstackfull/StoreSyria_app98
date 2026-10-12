@@ -10,6 +10,7 @@ import 'package:store_go_app/core/services/fcm_token_service.dart';
 
 import 'store_change_service.dart';
 import 'cahe.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class HomeController extends GetxController implements StoreAware {
   // مفاتيح الكاش الخاصة بهاد الكنترولر
@@ -190,7 +191,7 @@ class HomeController extends GetxController implements StoreAware {
       final fcmService = FcmTokenService();
       await fcmService.sendFcmTokenToServer(storeId: storeId);
     } catch (e) {
-      print('❌ خطأ في إرسال FCM Token بعد تغيير المتجر: $e');
+      AppLog.d('❌ خطأ في إرسال FCM Token بعد تغيير المتجر: $e');
     }
   }
 }

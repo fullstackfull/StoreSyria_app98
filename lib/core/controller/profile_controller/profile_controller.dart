@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +8,7 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../network/network.dart';
 import '../../../utils/pick_file.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class ProfileController extends GetxController {
   TextEditingController nameController = TextEditingController();
@@ -94,7 +93,7 @@ class ProfileController extends GetxController {
         },
       );
     } catch (e) {
-      print("Error in updatePassword: $e");
+      AppLog.e('Error in updatePassword', error: e);
 
       commonToast(
         type: AppSnackBarType.error,
@@ -188,7 +187,7 @@ class ProfileController extends GetxController {
         );
       }
     } catch (e) {
-      print("Error in editProfile: $e");
+      AppLog.e('Error in editProfile', error: e);
 
       commonToast(
         type: AppSnackBarType.error,

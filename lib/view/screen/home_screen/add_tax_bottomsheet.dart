@@ -1,4 +1,4 @@
-// ignore_for_file: must_be_immutable, prefer_const_constructors, avoid_print, prefer_const_constructors_in_immutables
+// ignore_for_file: must_be_immutable, prefer_const_constructors, prefer_const_constructors_in_immutables
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,6 +15,7 @@ import 'package:store_go_app/view/widget/common_drop_down_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/tax_controller.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class AddTaxWidget extends StatefulWidget {
   final bool isUpdate;
@@ -145,7 +146,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                           } else {
                             taxController.status.value = '0';
                           }
-                          print("-----------${taxController.status.value}");
+                          AppLog.d("-----------${taxController.status.value}");
                         },
                       ),
                     ],

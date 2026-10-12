@@ -21,6 +21,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/screen/notification_screen/notification_screen.dart';
 
+import 'package:store_go_app/utils/app_log.dart';
 
 Widget buildAppTitleRow(String date,BuildContext context) {
   final NotificationController notificationController = Get.find<NotificationController>();
@@ -339,7 +340,7 @@ Widget qrCodeWidget(BuildContext context,{String? qrString, String? title}) {
               GestureDetector(
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: qrString ?? ""));
-                  print('copied');
+                  AppLog.d('copied');
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),

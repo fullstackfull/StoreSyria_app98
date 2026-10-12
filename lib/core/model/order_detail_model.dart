@@ -1,3 +1,5 @@
+import 'package:store_go_app/utils/app_log.dart';
+
 
 String myPaymnetType = '';
 
@@ -89,7 +91,7 @@ class OrderDetailData {
 
   OrderDetailData.fromJson(Map<String, dynamic> json) {
     myPaymnetType = json["paymnet_type"];
-    print('=======myPaymnetType========$myPaymnetType');
+    AppLog.d('=======myPaymnetType========$myPaymnetType');
     id = json['id'];
     isGuest = json['is_guest'];
     orderId = json['order_id'];
@@ -103,25 +105,25 @@ class OrderDetailData {
     currencySymbol = json['currency_symbol'];
     orderStatus = json['order_status'];
     orderStatusMessage = json['order_status_message'];
-    print('===============${json['product'].runtimeType}');
+    AppLog.d('===============${json['product'].runtimeType}');
     if (json['product'].runtimeType != List<dynamic>) {
-      print('--------> ${json['product']}');
+      AppLog.d('--------> ${json['product']}');
       product = <Product>[];
       json['product'].values.map(
         (v) {
           product!.add(Product.fromJson(v));
         },
       );
-      print('-product-===------> ${json['product'].values.map(
+      AppLog.d('-product-===------> ${json['product'].values.map(
         (v) {
-          print('==>$v');
+          AppLog.d('==>$v');
           product!.add(Product.fromJson(v));
         },
       )}');
-      print('-product-------> $product');
+      AppLog.d('-product-------> $product');
     } else {
       if (json['product'] != null) {
-        print('===============${json['product']}');
+        AppLog.d('===============${json['product']}');
         product = <Product>[];
         json['product'].forEach((v) {
           product!.add(Product.fromJson(v));
@@ -219,7 +221,7 @@ class Product {
   Product({this.productId, this.image, this.name, this.orignalPrice, this.totalOrignalPrice, this.perProductDiscountPrice, this.discountPrice, this.finalPrice, this.qty, this.variantId, this.variantName, this.productReturn});
 
   Product.fromJson(Map<String, dynamic> json) {
-    print('=======myPaymnetType========$myPaymnetType');
+    AppLog.d('=======myPaymnetType========$myPaymnetType');
     productId = json['product_id'].toString();
     image = json['image'];
     name = json['name'];

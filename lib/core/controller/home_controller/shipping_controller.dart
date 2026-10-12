@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -9,6 +7,7 @@ import 'package:store_go_app/config/repository/shipping_repository.dart';
 import 'package:store_go_app/core/model/shipping_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class ShippingController extends GetxController {
   ShippingRepository shippingRepository = ShippingRepository();
@@ -30,7 +29,7 @@ class ShippingController extends GetxController {
 
     if (result != null) {
       File file = File(result.files.single.path!);
-      print("-=-=-=-=---------->  ${file.path}");
+      AppLog.d("-=-=-=-=---------->  ${file.path}");
       return file.path;
     } else {
       // User canceled the picker

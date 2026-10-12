@@ -14,6 +14,7 @@ import '../../model/create_order_model.dart';
 import '../../model/customer_model.dart';
 import '../../model/top_order_model.dart';
 
+import 'package:store_go_app/utils/app_log.dart';
 
 enum OrderListMode {
   normal,
@@ -267,7 +268,7 @@ class OrderController extends GetxController implements StoreAware {
     } catch (e) {
       success = false;
       commonToast(type: AppSnackBarType.error, 'failed_to_create_order'.tr);
-      print('❌ createOrderData Error: $e');
+      AppLog.d('❌ createOrderData Error: $e');
     } finally {
       isCreatingOrder.value = false;
     }
@@ -502,7 +503,7 @@ class OrderController extends GetxController implements StoreAware {
 
       commonToast(type: AppSnackBarType.error, 'unexpected_error_loading_orders'.tr);
 
-      print('❌ getOrderData Error: $e');
+      AppLog.d('❌ getOrderData Error: $e');
     } finally {
       if (page == 1) {
         isLoadingOrders.value = false;
@@ -528,7 +529,7 @@ class OrderController extends GetxController implements StoreAware {
       );
     } catch (e) {
       commonToast(type: AppSnackBarType.error, 'unexpected_error_loading_orders'.tr);
-      print('❌ getTopOrderData Error: $e');
+      AppLog.d('❌ getTopOrderData Error: $e');
     } finally {
       isLoadingTopOrders.value = false;
     }
@@ -586,7 +587,7 @@ class OrderController extends GetxController implements StoreAware {
       errorMessage.value = 'failed_to_search_orders'.tr;
       commonToast(type: AppSnackBarType.error, 'failed_to_search_orders'.tr);
 
-      print('❌ searchOrderData Error: $e');
+      AppLog.d('❌ searchOrderData Error: $e');
     } finally {
       isSearching.value = false;
       isSearchingOrders.value = false;
@@ -652,7 +653,7 @@ class OrderController extends GetxController implements StoreAware {
     } catch (e) {
       errorMessage.value = 'failed_to_process_order_details'.tr;
       commonToast(type: AppSnackBarType.error, 'failed_to_process_order_details'.tr);
-      print('❌ getOrderDetailData Error: $e');
+      AppLog.d('❌ getOrderDetailData Error: $e');
     } finally {
       isLoadingOrderDetails.value = false;
     }
@@ -702,7 +703,7 @@ class OrderController extends GetxController implements StoreAware {
     } catch (e) {
       success = false;
       commonToast(type: AppSnackBarType.error, 'failed_to_update_order_status'.tr);
-      print('❌ updateOrderStatus Error: $e');
+      AppLog.d('❌ updateOrderStatus Error: $e');
     } finally {
       isUpdatingOrderStatus.value = false;
     }
@@ -740,7 +741,7 @@ class OrderController extends GetxController implements StoreAware {
     } catch (e) {
       success = false;
       commonToast(type: AppSnackBarType.error, 'failed_to_add_order_note'.tr);
-      print('❌ createOrderNote Error: $e');
+      AppLog.d('❌ createOrderNote Error: $e');
     } finally {
       isCreatingOrderNote.value = false;
     }
@@ -776,7 +777,7 @@ class OrderController extends GetxController implements StoreAware {
     } catch (e) {
       success = false;
       commonToast(type: AppSnackBarType.error, 'failed_to_delete_order_note'.tr);
-      print('❌ deleteOrderNote Error: $e');
+      AppLog.d('❌ deleteOrderNote Error: $e');
     } finally {
       isDeletingOrderNote.value = false;
     }
@@ -806,7 +807,7 @@ class OrderController extends GetxController implements StoreAware {
       );
     } catch (e) {
       commonToast(type: AppSnackBarType.error, 'failed_to_delete_order'.tr);
-      print('❌ deleteOrderData Error: $e');
+      AppLog.d('❌ deleteOrderData Error: $e');
     } finally {
       isDeletingOrder.value = false;
     }

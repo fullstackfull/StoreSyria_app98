@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../config/repository/wallet_repository.dart';
 import '../../model/wallet_model.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class WalletController extends GetxController {
   final WalletRepository walletRepository = WalletRepository();
@@ -80,7 +81,7 @@ class WalletController extends GetxController {
 
       response.fold(
         onSuccess: (data) {
-          print("Wallet Response =====> $data");
+          AppLog.d("Wallet Response =====> $data");
 
           if (data['status'] == 1) {
             final walletData =
@@ -309,7 +310,7 @@ class WalletController extends GetxController {
 
       response.fold(
         onSuccess: (data) {
-          print(
+          AppLog.d(
             "Wallet Load More Response =====> $data",
           );
 

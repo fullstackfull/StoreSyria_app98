@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/utils/base_api.dart';

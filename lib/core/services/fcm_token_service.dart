@@ -1,11 +1,10 @@
-// ignore_for_file: avoid_print
-
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 /// خدمة إدارة FCM Token - Singleton
 class FcmTokenService {
@@ -17,7 +16,7 @@ class FcmTokenService {
 
   /// 🚀 تهيئة الخدمة
   Future<void> initialize() async {
-    print('🔔 بدء تهيئة خدمة FCM Token...');
+    AppLog.d('🔔 بدء تهيئة خدمة FCM Token...');
 
     // الحصول على أو إنشاء Device ID
     await _initializeDeviceId();
@@ -28,7 +27,7 @@ class FcmTokenService {
     // الاستماع لتغييرات التوكن
     _listenTokenRefresh();
 
-    print('✅ تهيئة خدمة FCM Token اكتملت');
+    AppLog.d('✅ تهيئة خدمة FCM Token اكتملت');
   }
 
   /// 📱 الحصول على أو إنشاء Device ID فريد
@@ -52,16 +51,16 @@ class FcmTokenService {
 
         if (deviceId.isNotEmpty) {
           Prefs.setDeviceId(deviceId);
-          print('📱 Device ID تم إنشاؤه: $deviceId');
+          AppLog.d('📱 Device ID تم إنشاؤه: $deviceId');
         }
       } catch (e) {
-        print('❌ خطأ في الحصول على Device ID: $e');
+        AppLog.d('❌ خطأ في الحصول على Device ID: $e');
         // Fallback: generate a random ID
         deviceId = 'device-${DateTime.now().millisecondsSinceEpoch}';
         Prefs.setDeviceId(deviceId);
       }
     } else {
-      print('📱 Device ID موجود: $deviceId');
+      AppLog.d('📱 Device ID موجود: $deviceId');
     }
   }
 
@@ -72,11 +71,11 @@ class FcmTokenService {
       
       if (token != null && token.isNotEmpty) {
         _saveFcmToken(token);
-        print('🔑 FCM Token تم الحصول عليه: ${token.substring(0, 20)}...');
+        AppLog.d('🔑 FCM Token تم الحصول عليه: ${AppLog.redact(token)}');
         return token;
       }
     } catch (e) {
-      print('❌ خطأ في الحصول على FCM Token: $e');
+      AppLog.d('❌ خطأ في الحصول على FCM Token: $e');
     }
     return null;
   }
@@ -87,11 +86,11 @@ class FcmTokenService {
     
     if (oldToken != token) {
       Prefs.setFcmToken(token);
-      print('💾 FCM Token تم حفظه محلياً');
+      AppLog.d('💾 FCM Token تم حفظه محلياً');
       
       // إذا كان التوكن تغير، أرسله للسيرفر
       if (oldToken.isNotEmpty) {
-        print('🔄 التوكن تغير، سيتم إرساله للسيرفر');
+        AppLog.d('🔄 التوكن تغير، سيتم إرساله للسيرفر');
       }
     }
   }
@@ -99,7 +98,7 @@ class FcmTokenService {
   /// 👂 الاستماع لتغييرات التوكن
   void _listenTokenRefresh() {
     _messaging.onTokenRefresh.listen((String newToken) {
-      print('🔄 FCM Token تم تحديثه: ${newToken.substring(0, 20)}...');
+      AppLog.d('🔄 FCM Token تم تحديثه: ${AppLog.redact(newToken)}');
       _saveFcmToken(newToken);
       
       // أرسل التوكن الجديد للسيرفر تلقائياً
@@ -120,7 +119,7 @@ class FcmTokenService {
       String fcmToken = await _messaging.getToken() ?? '';
       
       if (fcmToken.isEmpty) {
-        print('❌ فشل الحصول على FCM Token من Firebase');
+        AppLog.d('❌ فشل الحصول على FCM Token من Firebase');
         return false;
       }
 
@@ -129,7 +128,7 @@ class FcmTokenService {
       // التحقق من وجود Device ID
       String deviceId = Prefs.getDeviceId();
       if (deviceId.isEmpty) {
-        print('⚠️ لا يوجد Device ID محفوظ');
+        AppLog.d('⚠️ لا يوجد Device ID محفوظ');
         await _initializeDeviceId();
         deviceId = Prefs.getDeviceId();
       }
@@ -137,7 +136,7 @@ class FcmTokenService {
       // استخدام storeId الممرر أو المحفوظ
       String currentStoreId = storeId ?? Prefs.getStoreID();
       if (currentStoreId.isEmpty) {
-        print('⚠️ لا يوجد Store ID');
+        AppLog.d('⚠️ لا يوجد Store ID');
         return false;
       }
 
@@ -157,27 +156,27 @@ class FcmTokenService {
         'platform': platform,
       };
 
-      print('📤 إرسال FCM Token جديد للسيرفر...');
-      print('   Store ID: $currentStoreId');
-      print('   Platform: $platform');
-      print('   Device ID: $deviceId');
-      print('   FCM Token: ${fcmToken.substring(0, fcmToken.length > 20 ? 20 : fcmToken.length)}...');
+      AppLog.d('📤 إرسال FCM Token جديد للسيرفر...');
+      AppLog.d('   Store ID: $currentStoreId');
+      AppLog.d('   Platform: $platform');
+      AppLog.d('   Device ID: $deviceId');
+      AppLog.d('   FCM Token: ${AppLog.redact(fcmToken)}');
 
       // إرسال الطلب
       final result = await NetworkHttps.postRequest(API.fcmTokenUrl, data);
 
       return result.fold(
         onSuccess: (data) {
-          print('✅ FCM Token تم إرساله بنجاح للسيرفر للمتجر $currentStoreId');
+          AppLog.d('✅ FCM Token تم إرساله بنجاح للسيرفر للمتجر $currentStoreId');
           return true;
         },
         onFailure: (reason, message, errors) {
-          print('❌ فشل إرسال FCM Token: $message');
+          AppLog.d('❌ فشل إرسال FCM Token: $message');
           return false;
         },
       );
     } catch (e) {
-      print('❌ استثناء في إرسال FCM Token: $e');
+      AppLog.d('❌ استثناء في إرسال FCM Token: $e');
       return false;
     }
   }
@@ -187,13 +186,13 @@ class FcmTokenService {
     try {
       // إلغاء وتدمير التوكن في سيرفرات Firebase يمنع استلام إشعارات الحساب السابق ويولد توكن جديد عند دخول مستخدم جديد
       await _messaging.deleteToken();
-      print('🗑️ FCM Token تم حذفه وتدميره من Firebase بنجاح');
+      AppLog.d('🗑️ FCM Token تم حذفه وتدميره من Firebase بنجاح');
     } catch (e) {
-      print('⚠️ خطأ في حذف FCM Token من Firebase: $e');
+      AppLog.d('⚠️ خطأ في حذف FCM Token من Firebase: $e');
     }
 
     Prefs.setFcmToken('');
-    print('🧹 FCM Token تم مسحه محلياً');
+    AppLog.d('🧹 FCM Token تم مسحه محلياً');
   }
 
   /// 🔍 الحصول على FCM Token الحالي

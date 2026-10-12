@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/model/notification_model.dart';
@@ -8,6 +6,7 @@ import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class NotificationController extends GetxController
     with WidgetsBindingObserver
@@ -95,11 +94,11 @@ class NotificationController extends GetxController
           CacheService.save(_cacheNotificationKey, data);
         },
         onFailure: (reason, message, errors) {
-          print('❌ فشل جلب الإشعارات: $message');
+          AppLog.d('❌ فشل جلب الإشعارات: $message');
         },
       );
     } catch (e) {
-      print('❌ استثناء في جلب الإشعارات: $e');
+      AppLog.d('❌ استثناء في جلب الإشعارات: $e');
     }
 
     isLoading.value = false;
@@ -121,9 +120,9 @@ class NotificationController extends GetxController
       unreadCount.value = 0;
     }
     
-    print('🔔 عدد الإشعارات غير المقروءة: ${unreadCount.value}');
-    print('🔔 العدد الحالي من السيرفر: $currentCount');
-    print('🔔 آخر عدد محفوظ عند القراءة: $lastSavedCount');
+    AppLog.d('🔔 عدد الإشعارات غير المقروءة: ${unreadCount.value}');
+    AppLog.d('🔔 العدد الحالي من السيرفر: $currentCount');
+    AppLog.d('🔔 آخر عدد محفوظ عند القراءة: $lastSavedCount');
   }
 
   /// 💾 حفظ آخر عدد محفوظ محلياً
@@ -134,7 +133,7 @@ class NotificationController extends GetxController
   /// 📥 تحميل آخر عدد محفوظ
   void _loadLastSavedCount() {
     lastSavedCount = Prefs.getInt('last_notification_count');
-    print('🔔 تم تحميل آخر عدد محفوظ: $lastSavedCount');
+    AppLog.d('🔔 تم تحميل آخر عدد محفوظ: $lastSavedCount');
   }
 
   // ══════════════════════════════════════════
@@ -150,7 +149,7 @@ class NotificationController extends GetxController
       final ids = raw.split(',').map((e) => int.tryParse(e.trim())).whereType<int>();
       tappedNotificationIds.addAll(ids);
     }
-    print('👆 تم تحميل الإشعارات المضغوطة: ${tappedNotificationIds.length}');
+    AppLog.d('👆 تم تحميل الإشعارات المضغوطة: ${tappedNotificationIds.length}');
   }
 
   /// 💾 حفظ معرّفات الإشعارات المضغوطة
@@ -164,7 +163,7 @@ class NotificationController extends GetxController
     if (!tappedNotificationIds.contains(notificationId)) {
       tappedNotificationIds.add(notificationId);
       _saveTappedIds();
-      print('👆 تم تسجيل الضغط على الإشعار: $notificationId');
+      AppLog.d('👆 تم تسجيل الضغط على الإشعار: $notificationId');
     }
   }
 
@@ -181,7 +180,7 @@ class NotificationController extends GetxController
       }
     }
     _saveTappedIds();
-    print('✅ تم تحديد جميع الإشعارات كمضغوطة بصرياً');
+    AppLog.d('✅ تم تحديد جميع الإشعارات كمضغوطة بصرياً');
   }
 
   /// ✅ تحديد إشعار كمقروء
@@ -197,7 +196,7 @@ class NotificationController extends GetxController
         }
       }
     } catch (e) {
-      print('❌ استثناء في تحديد الإشعار كمقروء: $e');
+      AppLog.d('❌ استثناء في تحديد الإشعار كمقروء: $e');
     }
   }
 
@@ -215,16 +214,16 @@ class NotificationController extends GetxController
       _saveLastSavedCount(currentTotal);
       unreadCount.value = 0;
       
-      print('✅ تم تحديد جميع الإشعارات كمقروءة');
+      AppLog.d('✅ تم تحديد جميع الإشعارات كمقروءة');
     } catch (e) {
-      print('❌ استثناء في تحديد جميع الإشعارات كمقروءة: $e');
+      AppLog.d('❌ استثناء في تحديد جميع الإشعارات كمقروءة: $e');
     }
   }
 
   /// 🔄 تحديث العداد عند وصول إشعار جديد (من FCM)
   void incrementUnreadCount() {
     unreadCount.value++;
-    print('🔔 تم زيادة عدد الإشعارات غير المقروءة: ${unreadCount.value}');
+    AppLog.d('🔔 تم زيادة عدد الإشعارات غير المقروءة: ${unreadCount.value}');
   }
 
   /// 🧹 مسح بيانات الإشعارات عند تسجيل الخروج
@@ -235,6 +234,6 @@ class NotificationController extends GetxController
     tappedNotificationIds.clear();
     Prefs.setInt('last_notification_count', 0);
     Prefs.setString(_tappedIdsKey, '');
-    print('🧹 تم مسح بيانات الإشعارات');
+    AppLog.d('🧹 تم مسح بيانات الإشعارات');
   }
 }

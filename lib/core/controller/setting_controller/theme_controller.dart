@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -9,6 +7,7 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/theme_switch_overlay.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class ThemeController extends GetxController {
   final scrollbarTheme = ScrollbarThemeData(
@@ -177,7 +176,7 @@ class ThemeController extends GetxController {
     Prefs.setBool(AppConstant.isDarkUrl, value);
 
     update();
-    print('Theme Changed to: ${value ? "Dark" : "Light"}');
+    AppLog.d('Theme Changed to: ${value ? "Dark" : "Light"}');
   }
 
   @override

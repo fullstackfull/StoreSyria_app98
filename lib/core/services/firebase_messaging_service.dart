@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -10,6 +8,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 /// 🔑 Top-level function لمعالجة الإشعارات في Background (مهم جداً!)
 /// يجب أن يكون outside أي class و top-level
@@ -17,10 +16,10 @@ import 'package:store_go_app/core/controller/notification_controller/notificatio
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // لا تستدعي Firebase.initializeApp() هنا إذا كان التطبيق يستخدم Firebase بالفعل
   // لأن Firebase Core يتم تهيئته تلقائياً في Background
-  print('📩 [BACKGROUND] إشعار وارد: ${message.messageId}');
-  print('📩 [BACKGROUND] Title: ${message.notification?.title}');
-  print('📩 [BACKGROUND] Body: ${message.notification?.body}');
-  print('📩 [BACKGROUND] Data: ${message.data}');
+  AppLog.d('📩 [BACKGROUND] إشعار وارد: ${message.messageId}');
+  AppLog.d('📩 [BACKGROUND] Title: ${message.notification?.title}');
+  AppLog.d('📩 [BACKGROUND] Body: ${message.notification?.body}');
+  AppLog.d('📩 [BACKGROUND] Data: ${message.data}');
 }
 
 /// 🔔 خدمة إدارة الإشعارات - Singleton
@@ -38,7 +37,7 @@ class FirebaseMessagingService {
 
   /// 🚀 تهيئة الإشعارات (تستدعى مرة واحدة في main)
   Future<void> initialize() async {
-    print('🔔 بدء تهيئة الإشعارات...');
+    AppLog.d('🔔 بدء تهيئة الإشعارات...');
 
     // 1️⃣ تسجيل handler الخلفية (يجب قبل أي شيء)
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -64,7 +63,7 @@ class FirebaseMessagingService {
     // 8️⃣ الاستماع لتغيير التوكن
     _listenTokenRefresh();
 
-    print('✅ تهيئة الإشعارات اكتملت');
+    AppLog.d('✅ تهيئة الإشعارات اكتملت');
   }
 
   /// 🛡️ طلب إذن الإشعارات
@@ -77,7 +76,7 @@ class FirebaseMessagingService {
       criticalAlert: false,
     );
 
-    print('🔔 حالة إذن الإشعارات: ${settings.authorizationStatus}');
+    AppLog.d('🔔 حالة إذن الإشعارات: ${settings.authorizationStatus}');
   }
 
   /// 📱 إعداد الإشعارات المحلية
@@ -98,7 +97,7 @@ class FirebaseMessagingService {
     await _localNotifications.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        print('👆 تم الضغط على إشعار محلي: ${response.payload}');
+        AppLog.d('👆 تم الضغط على إشعار محلي: ${response.payload}');
         _handleNotificationTap(response.payload);
       },
     );
@@ -123,17 +122,17 @@ class FirebaseMessagingService {
   /// 👂 الاستماع للإشعارات في Foreground (التطبيق مفتوح)
   void _listenForegroundMessages() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('📩 [FOREGROUND] إشعار وارد:');
-      print('   Title: ${message.notification?.title}');
-      print('   Body: ${message.notification?.body}');
-      print('   Data: ${message.data}');
+      AppLog.d('📩 [FOREGROUND] إشعار وارد:');
+      AppLog.d('   Title: ${message.notification?.title}');
+      AppLog.d('   Body: ${message.notification?.body}');
+      AppLog.d('   Data: ${message.data}');
 
       // زيادة عدد الإشعارات غير المقروءة
       try {
         final notificationController = Get.find<NotificationController>();
         notificationController.incrementUnreadCount();
       } catch (e) {
-        print('⚠️ لم يتم العثور على NotificationController: $e');
+        AppLog.d('⚠️ لم يتم العثور على NotificationController: $e');
       }
 
       // عرض إشعار محلي لأن FCM لا يعرض إشعارات تلقائياً في Foreground
@@ -177,14 +176,14 @@ class FirebaseMessagingService {
   void _listenNotificationTap() {
     // عندما التطبيق كان في Background وضغط المستخدم على الإشعار
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('👆 [BACKGROUND TAP] تم الضغط على الإشعار:');
-      print('   Data: ${message.data}');
+      AppLog.d('👆 [BACKGROUND TAP] تم الضغط على الإشعار:');
+      AppLog.d('   Data: ${message.data}');
       try {
         if (Get.isRegistered<NotificationController>()) {
           Get.find<NotificationController>().getNotifications(showLoading: false);
         }
       } catch (e) {
-        print('⚠️ خطأ في تحديث الإشعارات عند الضغط: $e');
+        AppLog.d('⚠️ خطأ في تحديث الإشعارات عند الضغط: $e');
       }
       _handleNotificationTap(jsonEncode(message.data));
     });
@@ -192,14 +191,14 @@ class FirebaseMessagingService {
     // التحقق إذا فُتح التطبيق من إشعار (Terminated state)
     _messaging.getInitialMessage().then((RemoteMessage? message) {
       if (message != null) {
-        print('👆 [TERMINATED TAP] التطبيق فُتح من إشعار:');
-        print('   Data: ${message.data}');
+        AppLog.d('👆 [TERMINATED TAP] التطبيق فُتح من إشعار:');
+        AppLog.d('   Data: ${message.data}');
         try {
           if (Get.isRegistered<NotificationController>()) {
             Get.find<NotificationController>().getNotifications(showLoading: false);
           }
         } catch (e) {
-          print('⚠️ خطأ في تحديث الإشعارات عند فتح التطبيق المغلق: $e');
+          AppLog.d('⚠️ خطأ في تحديث الإشعارات عند فتح التطبيق المغلق: $e');
         }
         _handleNotificationTap(jsonEncode(message.data));
       }
@@ -212,7 +211,7 @@ class FirebaseMessagingService {
 
     try {
       final data = jsonDecode(payload) as Map<String, dynamic>;
-      print('🎯 معالجة الإشعار: $data');
+      AppLog.d('🎯 معالجة الإشعار: $data');
 
       final String? type = data['type']?.toString();
       final String? id = data['id']?.toString();
@@ -221,21 +220,21 @@ class FirebaseMessagingService {
       switch (type) {
         case 'order':
         // Get.toNamed('/order-details', arguments: id);
-          print('🛒 توجيه لصفحة الطلب: $id');
+          AppLog.d('🛒 توجيه لصفحة الطلب: $id');
           break;
         case 'product':
         // Get.toNamed('/product-details', arguments: id);
-          print('📦 توجيه لصفحة المنتج: $id');
+          AppLog.d('📦 توجيه لصفحة المنتج: $id');
           break;
         case 'message':
         // Get.toNamed('/messages');
-          print('💬 توجيه لصفحة الرسائل');
+          AppLog.d('💬 توجيه لصفحة الرسائل');
           break;
         default:
-          print('📌 نوع إشعار غير معروف: $type');
+          AppLog.d('📌 نوع إشعار غير معروف: $type');
       }
     } catch (e) {
-      print('❌ خطأ في معالجة الإشعار: $e');
+      AppLog.d('❌ خطأ في معالجة الإشعار: $e');
     }
   }
 
@@ -243,10 +242,10 @@ class FirebaseMessagingService {
   Future<String?> _refreshFcmToken() async {
     try {
       _fcmToken = await _messaging.getToken();
-      print('🔑 FCM Token: $_fcmToken');
+      AppLog.d('🔑 FCM Token: ${AppLog.redact(_fcmToken)}');
       return _fcmToken;
     } catch (e) {
-      print('❌ خطأ في الحصول على FCM Token: $e');
+      AppLog.d('❌ خطأ في الحصول على FCM Token: $e');
       return null;
     }
   }
@@ -254,7 +253,7 @@ class FirebaseMessagingService {
   /// 🔄 الاستماع لتغيير FCM Token
   void _listenTokenRefresh() {
     _messaging.onTokenRefresh.listen((String newToken) {
-      print('🔄 FCM Token تغير: $newToken');
+      AppLog.d('🔄 FCM Token تغير: ${AppLog.redact(newToken)}');
       _fcmToken = newToken;
       // TODO: أرسل التوكن الجديد للـ Backend
       _sendTokenToBackend(newToken);
@@ -272,13 +271,13 @@ class FirebaseMessagingService {
       }
 
       if (_fcmToken == null) {
-        print('❌ لا يوجد FCM Token');
+        AppLog.d('❌ لا يوجد FCM Token');
         return false;
       }
 
       return await _sendTokenToBackend(_fcmToken!, authToken: authToken, storeId: storeId);
     } catch (e) {
-      print('❌ خطأ في إرسال FCM Token: $e');
+      AppLog.d('❌ خطأ في إرسال FCM Token: $e');
       return false;
     }
   }
@@ -290,9 +289,9 @@ class FirebaseMessagingService {
         int? storeId,
       }) async {
     // TODO: استبدل هذا بـ API الحقيقي
-    print('📤 إرسال FCM Token للـ Backend:');
-    print('   Token: ${token.substring(0, token.length > 20 ? 20 : token.length)}...');
-    print('   Store ID: $storeId');
+    AppLog.d('📤 إرسال FCM Token للـ Backend:');
+    AppLog.d('   Token: ${AppLog.redact(token)}');
+    AppLog.d('   Store ID: $storeId');
 
     // مثال على استدعاء API:
     /*
@@ -309,10 +308,10 @@ class FirebaseMessagingService {
     );
 
     if (response.statusCode == 200) {
-      print('✅ FCM Token أُرسل بنجاح');
+      AppLog.d('✅ FCM Token أُرسل بنجاح');
       return true;
     } else {
-      print('❌ فشل إرسال FCM Token: ${response.statusCode}');
+      AppLog.d('❌ فشل إرسال FCM Token: ${response.statusCode}');
       return false;
     }
     */
@@ -324,7 +323,7 @@ class FirebaseMessagingService {
   Future<void> deleteFcmToken() async {
     await _messaging.deleteToken();
     _fcmToken = null;
-    print('🗑️ FCM Token حُذف');
+    AppLog.d('🗑️ FCM Token حُذف');
   }
 
   /// 📋 الحصول على FCM Token الحالي

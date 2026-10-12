@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors_in_immutables, prefer_const_constructors, avoid_print, must_be_immutable, sdk_version_since
+// ignore_for_file: prefer_const_constructors_in_immutables, prefer_const_constructors, must_be_immutable, sdk_version_since
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';

@@ -1,4 +1,4 @@
-// ignore_for_file: must_be_immutable, avoid_print, prefer_const_constructors_in_immutables
+// ignore_for_file: must_be_immutable, prefer_const_constructors_in_immutables
 
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +14,7 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/core/controller/setting_controller/loyality_controller.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class LoyaltyProgramScreen extends StatefulWidget {
   LoyaltyProgramScreen({super.key});
@@ -74,7 +75,7 @@ class _LoyaltyProgramScreenState extends State<LoyaltyProgramScreen> {
                           } else {
                             loyaltyController.status.value = 'off';
                           }
-                          print("-----------${loyaltyController.status.value}");
+                          AppLog.d("-----------${loyaltyController.status.value}");
                         },
                         activeColor: AppColor.themeGreenColor,
                       ),
