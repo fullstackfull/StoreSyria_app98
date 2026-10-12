@@ -7,7 +7,7 @@ name: CI
 #
 # WHAT IS GATED, AND WHY EACH BAR IS WHERE IT IS
 #
-#   flutter test                   -- blocking, must be 100%. MEASURED 129/129.
+#   flutter test                   -- blocking, must be 100%. MEASURED 217/217.
 #   flutter analyze errors         -- blocking, must be 0. MEASURED 0.
 #   flutter analyze warnings       -- blocking, must be 0. MEASURED 0.
 #   flutter analyze infos          -- RATCHET at 552: may fall, never rise.
@@ -29,20 +29,44 @@ name: CI
 # from growing while it is paid down. Same idiom, and same reasoning, as the
 # composer-audit ratchet in repo A's ci.yml.
 #
-# ACTION PINNING. Every `uses:` names an exact patch version rather than a
-# floating major tag (repo A currently uses `@v4` / `@v2`; this is stricter).
-# A commit SHA is stronger still, because a tag can be moved. SHAs are NOT
-# used here because this pipeline was authored in an environment with no
-# access to the GitHub API, so a SHA could not be verified and an unverified
-# 40-character hex string is worse than a tag: it fails closed in a way nobody
-# can diagnose. Converting these four to SHAs is a follow-up for someone with
-# network access, and is the only outstanding item in this file.
+# ACTION PINNING. All three `uses:` lines name an immutable commit SHA, with
+# the tag they resolved from in a trailing comment. A version tag is mutable:
+# whoever controls the action repository can move `v4.2.2` to a different
+# commit, and every run after that executes code nobody here reviewed, with
+# this repository's checkout and the Flutter cache in reach.
+#
+# The previous revision left tags in place for an honest reason -- the GitHub
+# API was unreachable, and an unverifiable 40-character hex string is worse
+# than a tag. That is now resolved and VERIFIED rather than copied:
+#
+#   actions/checkout v4.2.2
+#     git ls-remote https://github.com/actions/checkout refs/tags/v4.2.2
+#       -> 11bd71901bbe5b1630ceea73d27597364c9af683
+#   subosito/flutter-action v2.18.0
+#     git ls-remote https://github.com/subosito/flutter-action refs/tags/v2.18.0
+#       -> f2c4f6686ca8e8d6e6d0f28410eeef506ed66aff
+#
+# Neither printed a peeled `^{}` line, so both tags are lightweight and point
+# straight at a commit. Each SHA was then fetched (`git fetch --depth 1 <url>
+# <sha>`) and the object confirmed to BE a commit in that repository:
+# "Prepare 4.2.2 Release (#1953)" dated 2024-10-23 and "fix syntax mistake in
+# readme (#338)" dated 2024-12-03. The github.com release page for each tag
+# shows the same SHA, so two independent routes agree.
+#
+# The GitHub REST API is still unreachable from here (api.github.com answers
+# 403 through this environment's proxy, and the gh CLI and the GitHub MCP tool
+# both refuse repositories outside this workspace). git-over-HTTPS is not, and
+# it is the authoritative source for a ref anyway.
+#
+# To move an action version: resolve the new tag the same way, replace the SHA,
+# and update the trailing comment in the same edit.
 #
 # NOT GATED, DELIBERATELY
 #
 #   pubspec.lock cleanliness. `flutter pub get` re-resolves the lock on this
 #   SDK, so a "the lock did not change" check would fail on every run. That
-#   re-resolution is an accepted owner decision, not a defect.
+#   re-resolution is an owner decision: it is reported for a decision, not
+#   silently committed.
 #
 #   analysis_options.yaml cleanliness. `flutter analyze` REWRITES this file:
 #   the SDK's own AnalysisOptionsMigration adds an `analyzer: exclude:` block
@@ -55,6 +79,15 @@ name: CI
 #   repository. check-no-new-suppressions.sh therefore reads the COMMITTED
 #   file rather than the working tree, and separately fails any exclude that
 #   reaches lib/.
+#
+#   MEASURED ADDITION: `flutter test` rewrites this file too, not only
+#   `flutter analyze` -- it prints the same "Upgrading analysis_options.yaml to
+#   exclude build and platform directories" line. So BOTH slow steps below
+#   leave the tree dirty, and any step added after them that asserted a clean
+#   tree would fail for a reason unrelated to the code. Rather than leaving
+#   that as a comment, the last step of the job now states exactly which paths
+#   the SDK is allowed to have touched, fails on any other, and restores them.
+#   That is the difference between a known mutation and an ignored one.
 #
 #   A signed release artifact. android/app/build.gradle.kts aborts a release
 #   build when android/key.properties is missing, by design, and no runner has
@@ -93,7 +126,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           # Full history: a keystore that was committed once and deleted later
           # is still in the pack and still compromised, and
@@ -116,9 +149,9 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: subosito/flutter-action@v2.18.0
+      - uses: subosito/flutter-action@f2c4f6686ca8e8d6e6d0f28410eeef506ed66aff # v2.18.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
@@ -183,6 +216,54 @@ jobs:
 
       - name: flutter test
         # Must be 100%. There is no allowance here and no continue-on-error:
-        # the suite was measured at 129/129 before this pipeline was added, so
-        # a red run is a real regression rather than inherited debt.
+        # the suite measures 217/217 on this SDK, so a red run is a real
+        # regression rather than inherited debt.
         run: flutter test --reporter expanded
+
+      # ---------------------------------------------------------------------
+      # LAST step on purpose. Three steps above rewrite TRACKED files:
+      # `flutter pub get` re-resolves pubspec.lock, and `flutter analyze` and
+      # `flutter test` both add the SDK's `analyzer: exclude:` block to
+      # analysis_options.yaml. Running this at the end means it sees every
+      # mutation they made between them, names the two that are expected, and
+      # fails on anything else -- a build that quietly edits a source file is
+      # a build nobody can reproduce.
+      #
+      # It also restores those two, so a step added after this one can assert
+      # a clean tree and have that assertion mean something.
+      # ---------------------------------------------------------------------
+      - name: The SDK's tracked-file rewrites are contained, not ignored
+        run: |
+          set -euo pipefail
+
+          echo "Working tree after the build:"
+          git status --porcelain
+
+          # One pass, no word splitting: a path containing a space must not
+          # be silently broken into two "unexpected" entries.
+          unexpected="$(git status --porcelain |
+            sed 's/^...//; s/.* -> //' |
+            sort -u |
+            grep -vxE 'analysis_options\.yaml|pubspec\.lock' || true)"
+
+          if [ -n "$unexpected" ]; then
+            echo "::error::The build modified tracked files other than the two expected ones. Only analysis_options.yaml (the SDK's analyzer migration) and pubspec.lock (pub re-resolution) may change."
+            printf '%s\n' "$unexpected"
+            git --no-pager diff
+            exit 1
+          fi
+
+          # The SDK's block excludes the generated platform directories. An
+          # exclude reaching lib/ would silence the whole app and both
+          # analyzer gates above with it, so it fails here too, not only in
+          # check-no-new-suppressions.sh, which reads the committed file.
+          if git diff -- analysis_options.yaml |
+               grep -nE '^\+[[:space:]]*-[[:space:]]*(\./)?lib(/|$)'; then
+            echo "::error::The analysis_options rewrite excluded lib/ from analysis."
+            exit 1
+          fi
+
+          git checkout -- analysis_options.yaml pubspec.lock
+
+          echo "Restored. Working tree now:"
+          git status --porcelain
