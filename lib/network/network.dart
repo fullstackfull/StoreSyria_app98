@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/network/result.dart';
@@ -298,7 +299,7 @@ $error
           message = 'session_expired'.tr;
         }
 
-        handleUnauthorized();
+        onUnauthorized();
         break;
 
     // -----------------------------------------------------------------------
@@ -364,9 +365,21 @@ $error
           // immediate retry that deepens the throttle. A non-numeric or
           // absent value falls back to the generic wording; Laravel's
           // ThrottleRequests sends delay-seconds.
-          final retryAfter = int.tryParse(
-            response.headers['retry-after']?.trim() ?? '',
-          );
+          // Case-insensitive on purpose. dart:io lowercases header names
+          // coming off the wire, but a mock client, a web (BrowserClient)
+          // response or an intermediary need not, and a missed header here
+          // silently downgrades the message rather than failing visibly.
+          // Note RFC 7231 also allows an HTTP-date here; Laravel's
+          // ThrottleRequests sends delay-seconds, and a date simply fails
+          // int.tryParse and falls through to the generic wording.
+          final retryAfterRaw = response.headers.entries
+              .firstWhere(
+                (e) => e.key.toLowerCase() == 'retry-after',
+                orElse: () => const MapEntry<String, String>('', ''),
+              )
+              .value;
+
+          final retryAfter = int.tryParse(retryAfterRaw.trim());
 
           if (retryAfter != null && retryAfter > 0) {
             message = 'too_many_requests_retry_after'.trParams({
@@ -418,6 +431,27 @@ $error
   /// have called Prefs.clear() and pushed another login screen. This latch
   /// makes the forced logout happen exactly once.
   static bool _unauthorizedInFlight = false;
+
+  /// The forced-logout action, as a replaceable reference rather than a direct
+  /// call.
+  ///
+  /// In production this IS [handleUnauthorized] -- same function, same
+  /// behaviour. It exists as a field so a test can observe which status codes
+  /// reach the forced-logout path and which must not (a 429 reaching it would
+  /// clear the merchant's session and bounce them to the login screen for
+  /// nothing more than being throttled) without having to stand up GetStorage
+  /// and a navigator, neither of which exists in a unit test.
+  @visibleForTesting
+  static Future<void> Function() onUnauthorized = handleUnauthorized;
+
+  /// Classifies an error response exactly as the request verbs do.
+  ///
+  /// A seam for tests only: the status-code mapping is otherwise private and
+  /// reachable only through a live HTTP call, so it had no executable
+  /// coverage at all. Production code must keep calling the verbs.
+  @visibleForTesting
+  static Failure<T> classifyErrorResponse<T>(http.Response response) =>
+      _handleErrorResponse<T>(response);
 
   /// Clears the local session and returns to the login screen. Public so the
   /// two remaining hand-rolled multipart call sites can share it instead of
