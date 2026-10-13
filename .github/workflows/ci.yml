@@ -7,12 +7,15 @@ name: CI
 #
 # WHAT IS GATED, AND WHY EACH BAR IS WHERE IT IS
 #
-#   flutter test                   -- blocking, must be 100%. MEASURED 1105/1105.
+#   pubspec.lock is installable    -- blocking. NEW, and the one that makes
+#                                     every number below mean something.
+#   flutter test                   -- blocking, must be 100%. MEASURED 1165/1165.
 #   flutter analyze errors         -- blocking, must be 0. MEASURED 0.
 #   flutter analyze warnings       -- blocking, must be 0. MEASURED 0.
 #   flutter analyze infos          -- RATCHET at 248: may fall, never rise.
 #   signing material in git        -- blocking.
 #   analyzer suppression count     -- RATCHET at 43: may fall, never rise.
+#   tracked files the build may rewrite -- blocking, allowlist of exactly one.
 #
 # The warnings bar is deliberately set to ZERO rather than to
 # `--no-fatal-warnings`. The instruction for this work was not to make the
@@ -67,35 +70,13 @@ name: CI
 #
 # NOT GATED, DELIBERATELY
 #
-#   pubspec.lock cleanliness. `flutter pub get` re-resolves the lock on this
-#   SDK, so a "the lock did not change" check would fail on every run. That
-#   re-resolution is an owner decision: it is reported for a decision, not
-#   silently committed.
+#   Nothing about pubspec.lock. It is GATED now -- see below -- so it has
+#   moved out of this list.
 #
-#   MEASURED, so the decision can be made on numbers rather than on a feeling.
-#   `flutter pub get` on Flutter 3.47.7 / Dart 3.13.5 reports "Changed 7
-#   dependencies!" and rewrites 15 lines:
+# THE LOCKFILE, WHICH USED TO BE THE BIGGEST HOLE HERE
 #
-#     characters               1.4.0   -> 1.4.1
-#     intl                     0.20.2  -> 0.20.3
-#     matcher                  0.12.17 -> 0.12.20
-#     material_color_utilities 0.11.1  -> 0.13.0
-#     meta                     1.16.0  -> 1.19.0
-#     test_api                 0.7.6   -> 0.7.12
-#     vector_math              2.2.0   -> 2.4.3
-#
-#   Six are `transitive` and SDK-pinned; `intl` is the only `direct main` one
-#   and `pubspec.yaml:75` already declares `intl: ^0.20.2`, which admits
-#   0.20.3 -- so NO pubspec.yaml constraint has to move for any of the seven.
-#   Nothing crosses a major version.
-#
-#   The re-resolved lock was then RUN, not assumed safe: `flutter test` ->
-#   1105/1105 and `flutter analyze` -> 248 issues / 0 errors / 0 warnings,
-#   identical to the committed lock on both counts. The committed lock was
-#   restored afterwards.
-#
-#   AND THE DECISIVE FACT, which was measured rather than assumed: the
-#   committed lock is NOT INSTALLABLE on this toolchain at all.
+#   This section previously explained, at length, that the committed
+#   pubspec.lock could not be installed on this toolchain:
 #
 #     $ flutter pub get --enforce-lockfile
 #     > vector_math 2.4.3 (was 2.2.0)
@@ -103,29 +84,62 @@ name: CI
 #     Unable to satisfy `pubspec.yaml` using `pubspec.lock`.
 #     Failed to update packages.
 #
-#   So EVERY repo-B number this project has reported -- the inherited 217/217
-#   baseline included -- comes from the re-resolved set above and not from the
-#   committed lock, because no `pub get` on this SDK can produce the committed
-#   one. `.dart_tool/package_config.json` confirms it from the other side: it
-#   links characters 1.4.1, intl 0.20.3, matcher 0.12.20,
-#   material_color_utilities 0.13.0, meta 1.19.0, test_api 0.7.12 and
-#   vector_math 2.4.3. This is the repo-B analogue of repo A's vendor/ drift
-#   and it must be stated alongside any figure from this repository.
+#   That was true, and it meant every figure this project reported for repo B
+#   came from a RE-RESOLVED package set that nobody had committed. The job
+#   below ran `flutter pub get`, which silently re-resolved on each run, so
+#   the pipeline could not have caught it either.
 #
-#   RECOMMENDATION, and the one reason it is the owner's call rather than
-#   housekeeping: the re-resolution also moves the lock's own SDK floor,
+#   IT IS FIXED, by committing the resolution instead of re-doing it. The
+#   seven packages the lock was behind on, and why each moved -- read from the
+#   SDK's own manifests rather than inferred:
 #
-#     sdks:
-#       dart: ">=3.9.0 <4.0.0"   ->   dart: ">=3.11.0-0 <4.0.0"
+#     characters               1.4.0   -> 1.4.1   flutter/pubspec.yaml:15 ^1.4.1
+#     material_color_utilities 0.11.1  -> 0.13.0  flutter/pubspec.yaml:19 EXACT 0.13.0
+#     meta                     1.16.0  -> 1.19.0  flutter/pubspec.yaml:20 ^1.18.3
+#     vector_math              2.2.0   -> 2.4.3   flutter/pubspec.yaml:21 ^2.4.0
+#     test_api                 0.7.6   -> 0.7.12  flutter_test/pubspec.yaml:21 EXACT 0.7.12
+#     matcher                  0.12.17 -> 0.12.20 flutter_test/pubspec.yaml:22 EXACT 0.12.20
+#     intl                     0.20.2  -> 0.20.3  pub.dev, inside the declared ^0.20.2
 #
-#   (the `flutter: ">=3.35.1"` line does not move). That floor is what stops a
-#   `pub get` on an older Dart, and `pubspec.yaml:22` still declares
-#   `environment: sdk: '>=3.1.3 <4.0.0'`. Committing the lock therefore
-#   narrows who can build the app while the manifest still says otherwise, so
-#   it should land as ONE owner-approved change: the re-resolved lock together
-#   with a matching `environment: sdk:` floor in pubspec.yaml. Committing the
-#   lock alone leaves the two files disagreeing about the minimum toolchain,
-#   which is worse than the re-resolution it tidies.
+#   SIX OF THE SEVEN ARE NOT A CHOICE. They are what the Flutter SDK pinned to
+#   FLUTTER_VERSION below requires of its own dependencies, three of them as
+#   exact pins. So the committed lock was not merely stale, it was
+#   categorically uninstallable at this Flutter version, and no `pub get` on
+#   this SDK could ever have produced it. `intl` is the only genuine pub.dev
+#   resolution, and it is a patch bump inside the constraint pubspec.yaml
+#   already declares.
+#
+#   VERSION CROSSINGS, stated precisely because "nothing crosses a major" is
+#   the kind of claim that hides the one case that matters. Under plain semver
+#   nothing crosses a major version. Under pub's rule for 0.x releases, where
+#   the MINOR is the breaking component, exactly one does:
+#   material_color_utilities 0.11.1 -> 0.13.0 (^0.11.1 would not admit 0.13.0).
+#   It is transitive, it is an EXACT pin in flutter/pubspec.yaml, and it is
+#   therefore not a decision this repository gets to make.
+#
+#   pubspec.yaml's `environment:` was raised in the same commit, because the
+#   two files disagreed about the minimum toolchain and the lock is the one
+#   that binds: `--enforce-lockfile` checks the lock's `sdks:` block and
+#   refuses below it, so a developer on an older Dart passed the manifest's
+#   check and then failed the lock's. Both floors are copied from the lock's
+#   own `sdks:` block rather than chosen:
+#
+#     sdk:     '>=3.1.3 <4.0.0'  ->  '>=3.11.0 <4.0.0'
+#     flutter: (absent)          ->  '>=3.35.1'
+#
+#   MEASURED AFTERWARDS, all four on this worktree:
+#     flutter pub get --enforce-lockfile  -> "Got dependencies!", exit 0
+#     flutter pub get, run twice          -> pubspec.lock byte-identical
+#     flutter analyze                     -> 248 issues, 0 errors, 0 warnings
+#     flutter test                        -> 1165/1165
+#   and the lock is still byte-identical after analyze and test, which is why
+#   the containment step below can now allow exactly ONE file to change.
+#
+#   NOT VERIFIED HERE, and said plainly: none of this has run on a GitHub
+#   ubuntu-24.04 runner. If the install step below fails there, that is the
+#   gate working -- it means the committed resolution does not reproduce on a
+#   clean machine, which is exactly what repo A's lock job discovered about
+#   PayHere the first time it was allowed to run.
 #
 #   analysis_options.yaml cleanliness. `flutter analyze` REWRITES this file:
 #   the SDK's own AnalysisOptionsMigration adds an `analyzer: exclude:` block
@@ -221,8 +235,18 @@ jobs:
         # version goes in the log where a failure can be read against it.
         run: flutter --version
 
-      - name: flutter pub get
-        run: flutter pub get
+      - name: The committed pubspec.lock is installable, and is what is used
+        # --enforce-lockfile rather than a bare `pub get`. A bare `pub get`
+        # re-resolves and REWRITES the lock, so every step after it measured a
+        # package set that was never committed and the drift could not fail a
+        # build. With this flag the job installs the committed resolution or
+        # stops, which is what makes the numbers in the steps below
+        # reproducible rather than merely reported.
+        #
+        # It also means pubspec.lock is no longer rewritten during the run --
+        # measured: byte-identical after analyze and test -- which is what
+        # lets the containment step at the end allow only one file.
+        run: flutter pub get --enforce-lockfile
 
       - name: No errors and no warnings
         # --no-fatal-infos keeps the 248 informational issues out of the
@@ -283,22 +307,49 @@ jobs:
 
       - name: flutter test
         # Must be 100%. There is no allowance here and no continue-on-error:
-        # the suite measures 1105/1105 on this SDK (217 at the time this job
-        # was written; the response-shape and release-posture work added 888),
-        # so a red run is a real regression rather than inherited debt.
+        # the suite measures 1165/1165 on this SDK. It was 217 when this job
+        # was written; the response-shape and release-posture work took it to
+        # 1104, the temp-directory race test to 1105, and this closure cycle
+        # added 60 on top of that:
+        #
+        #   test/network/rate_limit_backoff_test.dart                21
+        #   test/security/store_change_cache_isolation_test.dart     13
+        #   test/contract/newly_gated_endpoints_test.dart             9
+        #   test/security/hand_rolled_status_handling_test.dart       7
+        #   test/security/release_signing_test.dart                  +6
+        #   test/security/no_certificate_validation_override_test     +4
+        #                                                          -----
+        #                                                            60
+        #
+        # 1105 + 60 = 1165, which is the figure above. Added up rather than
+        # asserted: an earlier revision of this comment said 59 because it
+        # double-counted the temp-directory test as new when it was already
+        # in the 1105 baseline, and an arithmetic slip in a count is exactly
+        # how this file carried a stale number twice before.
+        #
+        # EVERY ONE OF THOSE FIGURES WAS RE-MEASURED, not carried forward.
+        # This file has twice shipped a stale count, which is why the number
+        # is cited next to the step that enforces it rather than only in a
+        # summary at the top.
         run: flutter test --reporter expanded
 
       # ---------------------------------------------------------------------
-      # LAST step on purpose. Three steps above rewrite TRACKED files:
-      # `flutter pub get` re-resolves pubspec.lock, and `flutter analyze` and
-      # `flutter test` both add the SDK's `analyzer: exclude:` block to
-      # analysis_options.yaml. Running this at the end means it sees every
-      # mutation they made between them, names the two that are expected, and
-      # fails on anything else -- a build that quietly edits a source file is
-      # a build nobody can reproduce.
+      # LAST step on purpose. Two steps above rewrite a TRACKED file:
+      # `flutter analyze` and `flutter test` both add the SDK's
+      # `analyzer: exclude:` block to analysis_options.yaml. Running this at
+      # the end means it sees every mutation they made between them, names the
+      # ONE that is expected, and fails on anything else -- a build that
+      # quietly edits a source file is a build nobody can reproduce.
       #
-      # It also restores those two, so a step added after this one can assert
-      # a clean tree and have that assertion mean something.
+      # pubspec.lock USED TO BE ON THIS ALLOWLIST, because `flutter pub get`
+      # re-resolved it on every run. It is not any more: the install step uses
+      # --enforce-lockfile, and the lock was measured byte-identical after
+      # analyze and test. So a pubspec.lock that changes during a build now
+      # means the committed resolution did not hold, and that must fail here
+      # rather than be waved through as expected noise.
+      #
+      # It also restores the one file, so a step added after this can assert a
+      # clean tree and have that assertion mean something.
       # ---------------------------------------------------------------------
       - name: The SDK's tracked-file rewrites are contained, not ignored
         run: |
@@ -312,10 +363,10 @@ jobs:
           unexpected="$(git status --porcelain |
             sed 's/^...//; s/.* -> //' |
             sort -u |
-            grep -vxE 'analysis_options\.yaml|pubspec\.lock' || true)"
+            grep -vxE 'analysis_options\.yaml' || true)"
 
           if [ -n "$unexpected" ]; then
-            echo "::error::The build modified tracked files other than the two expected ones. Only analysis_options.yaml (the SDK's analyzer migration) and pubspec.lock (pub re-resolution) may change."
+            echo "::error::The build modified tracked files other than the one expected. Only analysis_options.yaml (the SDK's analyzer migration) may change. A pubspec.lock listed here means --enforce-lockfile did not hold the committed resolution: run 'flutter pub get' locally, check what moved, and commit the lock with its reason."
             printf '%s\n' "$unexpected"
             git --no-pager diff
             exit 1
@@ -331,7 +382,7 @@ jobs:
             exit 1
           fi
 
-          git checkout -- analysis_options.yaml pubspec.lock
+          git checkout -- analysis_options.yaml
 
           echo "Restored. Working tree now:"
           git status --porcelain

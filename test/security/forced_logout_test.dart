@@ -181,10 +181,17 @@ void main() {
 
   group('the clear path has no bypass', () {
     test('only Prefs erases the storage container', () {
-      // A controller holding its own `GetStorage()` handle gets the SAME
-      // default container (store_setting_controller.dart:17 does exactly
-      // this), so an erase() anywhere else would wipe the allowlist too and
-      // nothing would point at it.
+      // A controller holding its own `GetStorage()` handle would get the
+      // SAME default container, so an erase() anywhere else would wipe the
+      // allowlist too and nothing would point at it.
+      //
+      // store_setting_controller.dart:17 used to be exactly that case and was
+      // cited here. It is not any more: its currency cache went through its
+      // own handle AND outside the store-change reset, which is what let one
+      // store's currency format render another store's prices for 24 hours.
+      // It now persists through CacheService -- see
+      // store_change_cache_isolation_test.dart, which asserts that Prefs and
+      // CacheService are the only writers to the container.
       final offenders = <String>[];
 
       for (final file in libDartFiles()) {

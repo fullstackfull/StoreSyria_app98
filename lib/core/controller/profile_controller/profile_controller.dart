@@ -165,6 +165,19 @@ class ProfileController extends GetxController {
             apiMessage(decodedData, fallback: "Update Failed"),
           );
         }
+      } else if (response.statusCode == 403) {
+        // Authorized but not permitted, and deliberately NOT a logout -- the
+        // server answers 403 rather than 401 precisely so one denied action
+        // cannot end the session. This branch existed in the network layer
+        // (network.dart:344-355) but not here, so a policy denial reached the
+        // merchant through the `else` below as the raw English reason phrase,
+        // "Forbidden", in an Arabic UI. The three codes the network layer
+        // distinguishes have to be distinguished at every site that handles
+        // status codes itself.
+        commonToast(
+          type: AppSnackBarType.error,
+          'action_not_permitted'.tr,
+        );
       } else if (response.statusCode == 429) {
         commonToast(
           type: AppSnackBarType.error,
