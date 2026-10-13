@@ -9,7 +9,7 @@ name: CI
 #
 #   pubspec.lock is installable    -- blocking. NEW, and the one that makes
 #                                     every number below mean something.
-#   flutter test                   -- blocking, must be 100%. MEASURED 1135/1135.
+#   flutter test                   -- blocking, must be 100%. MEASURED 1158/1158.
 #   flutter analyze errors         -- blocking, must be 0. MEASURED 0.
 #   flutter analyze warnings       -- blocking, must be 0. MEASURED 0.
 #   flutter analyze infos          -- RATCHET at 248: may fall, never rise.
@@ -131,7 +131,7 @@ name: CI
 #     flutter pub get --enforce-lockfile  -> "Got dependencies!", exit 0
 #     flutter pub get, run twice          -> pubspec.lock byte-identical
 #     flutter analyze                     -> 248 issues, 0 errors, 0 warnings
-#     flutter test                        -> 1135/1135
+#     flutter test                        -> 1158/1158
 #   and the lock is still byte-identical after analyze and test, which is why
 #   the containment step below can now allow exactly ONE file to change.
 #
@@ -307,11 +307,18 @@ jobs:
 
       - name: flutter test
         # Must be 100%. There is no allowance here and no continue-on-error:
-        # the suite measures 1135/1135 on this SDK (217 at the time this job
+        # the suite measures 1158/1158 on this SDK (217 at the time this job
         # was written; the response-shape and release-posture work added 888,
-        # the temp-directory race one more, and the 429 backoff and the
-        # newly-gated-endpoint contract 30 between them), so a red run is a
-        # real regression rather than inherited debt.
+        # the temp-directory race one more, and this closure cycle 52 -- the
+        # 429 backoff 21, the newly-gated-endpoint contract 9, store-change
+        # cache isolation 13, the TLS guard's own self-checks 4 and the
+        # release-abort coverage 6), so a red run is a real regression rather
+        # than inherited debt.
+        #
+        # EVERY ONE OF THOSE FIGURES WAS RE-MEASURED, not carried forward.
+        # This file has twice shipped a stale count, which is why the number
+        # is cited next to the step that enforces it rather than only in a
+        # summary at the top.
         run: flutter test --reporter expanded
 
       # ---------------------------------------------------------------------
