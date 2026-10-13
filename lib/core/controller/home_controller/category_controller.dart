@@ -288,6 +288,15 @@ class CategoryController extends GetxController
       // and left the dead session in local storage. One shared forced-logout
       // path, guarded against concurrent 401s.
       await NetworkHttps.handleUnauthorized();
+    } else if (response.statusCode == 403) {
+      // Authorized but not permitted, and deliberately NOT a logout. Without
+      // this branch a policy denial fell to the `else` below and the merchant
+      // saw `response.reasonPhrase` -- the literal string "Forbidden",
+      // untranslated, in an Arabic UI.
+      commonToast(
+        type: AppSnackBarType.error,
+        'action_not_permitted'.tr,
+      );
     } else if (response.statusCode == 429) {
       commonToast(
         type: AppSnackBarType.error,
