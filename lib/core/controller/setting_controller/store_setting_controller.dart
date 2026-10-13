@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import '../home_controller/cahe.dart';
+import '../home_controller/store_change_service.dart';
 import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../config/repository/store_settings_repository.dart';
@@ -12,9 +13,44 @@ import '../../model/language_model.dart';
 import '../../model/store_info_model.dart';
 import 'package:store_go_app/utils/app_log.dart';
 
-class StoreSettingController extends GetxController {
+/// NEW-CURRENCY-CACHE-CROSS-STORE.
+///
+/// This controller cached STORE-SCOPED data in a container of its own and was
+/// never told when the store changed, so a merchant who switched stores kept
+/// seeing the previous store's currency list and, worse, its CURRENT
+/// CURRENCY -- the symbol and format every price on the screen is rendered
+/// with -- for up to 24 hours.
+///
+/// It was not a brief flash before the real data landed, either.
+/// getCurrenciesData() returns early while the cache is valid, so the correct
+/// data was deliberately not requested:
+///
+///   if (!forceRefresh && _isCacheValid() && currencies.isNotEmpty) return;
+///
+/// The server leaves no doubt that this is tenant data: getCurrenciesApi
+/// requires store_id and checks `->where('created_by', $user->id)` before it
+/// answers (repo A Api/DashboardController::getCurrenciesApi, 6985-7010). So
+/// the app was displaying one tenant's money format under another tenant's
+/// name, decided entirely on the device, where no server-side scope can
+/// reach.
+///
+/// Two things were wrong and both are fixed here:
+///
+///   1. It was not StoreAware. Eight controllers already implement that
+///      interface, register with StoreChangeService in onInit and clear their
+///      cache in resetForStoreChange; this one did not, so
+///      notifyStoreChanged() (home_controller.dart:149) never reached it.
+///
+///   2. It persisted through its OWN `GetStorage()` handle rather than
+///      CacheService. `GetStorage()` with no container name returns the SAME
+///      default container Prefs and CacheService use, so nothing was isolated
+///      by it -- it only put these three keys outside the one mechanism an
+///      audit of the cache would look at. They now go through it,
+///      which also means they pick up its `cache_` prefix. Existing installs
+///      therefore miss once and refetch, which is the desired outcome anyway:
+///      whatever is cached under the old keys may belong to the wrong store.
+class StoreSettingController extends GetxController implements StoreAware {
   StoreSettingRepository settingRepository = StoreSettingRepository();
-  final GetStorage _box = GetStorage();
   static const String _currenciesCacheKey = 'cached_currencies';
   static const String _currentCurrencyCacheKey = 'cached_current_currency';
   static const String _currenciesCacheTimeKey = 'cached_currencies_time';
@@ -77,6 +113,39 @@ class StoreSettingController extends GetxController {
     if (currencies.isEmpty) {
       getCurrenciesData();
     }
+
+    // Registered the same way the other eight store-scoped controllers are:
+    // a closure, so the service always reaches the live instance even if this
+    // one is disposed and recreated in between.
+    StoreChangeService.instance.register(() => this);
+  }
+
+  /// Called by StoreChangeService once a store change has SUCCEEDED.
+  ///
+  /// Clears the in-memory state and the persisted copy, then refetches with
+  /// forceRefresh so the 24-hour validity window cannot suppress the new
+  /// store's currencies -- without the flag this method would clear the cache
+  /// and then immediately be short-circuited by a stale timestamp if one
+  /// survived.
+  @override
+  void resetForStoreChange() {
+    currencies.clear();
+    currentCurrency.value = null;
+    currentLanguage.value = null;
+    languages.clear();
+    currencyRates.clear();
+    defaultRatesCurrency.value = '';
+    storeInfoData.value = null;
+
+    _clearCurrencyCache();
+
+    getCurrenciesData(forceRefresh: true);
+  }
+
+  void _clearCurrencyCache() {
+    CacheService.clear(_currenciesCacheKey);
+    CacheService.clear(_currentCurrencyCacheKey);
+    CacheService.clear(_currenciesCacheTimeKey);
   }
 
   @override
@@ -536,7 +605,7 @@ class StoreSettingController extends GetxController {
   }
 
   bool _isCacheValid() {
-    final cachedTime = _box.read(_currenciesCacheTimeKey);
+    final cachedTime = CacheService.get<String>(_currenciesCacheTimeKey);
     if (cachedTime == null) return false;
 
     final cachedDateTime = DateTime.tryParse(cachedTime.toString());
@@ -547,14 +616,13 @@ class StoreSettingController extends GetxController {
 
   void _loadFromCacheIfValid() {
     if (!_isCacheValid()) {
-      _box.remove(_currenciesCacheKey);
-      _box.remove(_currentCurrencyCacheKey);
-      _box.remove(_currenciesCacheTimeKey);
+      _clearCurrencyCache();
       return;
     }
 
-    final cachedList = _box.read(_currenciesCacheKey);
-    final cachedCurrent = _box.read(_currentCurrencyCacheKey);
+    final cachedList = CacheService.get<String>(_currenciesCacheKey);
+    final cachedCurrent =
+        CacheService.get<String>(_currentCurrencyCacheKey);
 
     if (cachedList != null) {
       try {
@@ -579,14 +647,20 @@ class StoreSettingController extends GetxController {
   }
 
   void _saveToCache(List<Currency> list, Currency? current) {
-    _box.write(
+    CacheService.save(
       _currenciesCacheKey,
       jsonEncode(list.map((e) => e.toJson()).toList()),
     );
     if (current != null) {
-      _box.write(_currentCurrencyCacheKey, jsonEncode(current.toJson()));
+      CacheService.save(
+        _currentCurrencyCacheKey,
+        jsonEncode(current.toJson()),
+      );
     }
-    _box.write(_currenciesCacheTimeKey, DateTime.now().toIso8601String());
+    CacheService.save(
+      _currenciesCacheTimeKey,
+      DateTime.now().toIso8601String(),
+    );
   }
 
 
