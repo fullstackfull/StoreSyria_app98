@@ -50,11 +50,21 @@ fi
 # .git/info/exclude or a global ignore file, and a naive grep also matches a
 # commented-out rule that does nothing.
 
+# The iOS paths were missing from this list, and .gitignore had no rule for
+# them either: `git check-ignore ios/Runner/dist.mobileprovision` answered NO,
+# so an iOS provisioning profile or distribution certificate dropped into the
+# tree would only have been caught by step 1 ABOVE -- i.e. after it was already
+# committed, which is after the key is public. Both the rules and these probes
+# were added together.
 for path in \
   android/key.properties \
   android/app/release.keystore \
   android/app/upload-keystore.jks \
-  ios/Runner/dummy.p12
+  ios/Runner/dummy.p12 \
+  ios/Runner/dist.mobileprovision \
+  ios/Runner/dist.cer \
+  ios/certs/dist.pfx \
+  android/app/debug.pem
 do
   if git check-ignore -q "$path"; then
     note "ok: git ignores $path"
