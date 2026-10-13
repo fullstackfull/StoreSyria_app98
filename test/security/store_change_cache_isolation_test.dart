@@ -168,12 +168,12 @@ void main() {
 
           if (_globalCacheKeys.contains(key)) continue;
 
-          if (!source.contains('CacheService.clear($key)')) {
+          if (!_clearedByReset(source, key)) {
             uncleared.add(
-              '$path  $key is persisted but never cleared. If it is '
-              'platform-global rather than tenant data, add it to '
-              '_globalCacheKeys WITH the evidence that its endpoint carries '
-              'no store_id.',
+              '$path  $key is persisted but the store-change reset does not '
+              'clear it. If it is platform-global rather than tenant data, '
+              'add it to _globalCacheKeys WITH the evidence that its '
+              'endpoint carries no store_id.',
             );
           }
         }
@@ -350,6 +350,53 @@ void main() {
       );
     });
   });
+}
+
+/// The body of `name`'s declaration, brace-matched.
+///
+/// Returns '' when there is no such declaration.
+String _bodyOf(String source, String name) {
+  final at = source.indexOf(name);
+  if (at < 0) return '';
+
+  final open = source.indexOf('{', at);
+  if (open < 0) return '';
+
+  var depth = 0;
+
+  for (var i = open; i < source.length; i++) {
+    if (source[i] == '{') depth++;
+    if (source[i] == '}') {
+      depth--;
+      if (depth == 0) return source.substring(open, i + 1);
+    }
+  }
+
+  return '';
+}
+
+/// Whether a store change actually REACHES the clear for [key].
+///
+/// `source.contains('CacheService.clear(key)')` is not enough: a clear that
+/// exists in a helper nobody calls any more satisfies it while leaving the
+/// stale rows on disk, which is precisely the regression this file is here to
+/// catch. So the reset's own body is brace-matched, and one level of
+/// indirection is followed -- every current controller either clears inline
+/// or delegates to a private zero-argument helper
+/// (_clearCurrencyCache, _resetDashboardData).
+bool _clearedByReset(String source, String key) {
+  final reset = _bodyOf(source, 'void resetForStoreChange()');
+  if (reset.isEmpty) return false;
+
+  final clear = 'CacheService.clear($key)';
+
+  if (reset.contains(clear)) return true;
+
+  for (final m in RegExp(r'(_\w+)\(\)').allMatches(reset)) {
+    if (_bodyOf(source, 'void ${m.group(1)}()').contains(clear)) return true;
+  }
+
+  return false;
 }
 
 class _Fake implements StoreAware {
