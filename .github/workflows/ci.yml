@@ -94,6 +94,24 @@ name: CI
 #   identical to the committed lock on both counts. The committed lock was
 #   restored afterwards.
 #
+#   AND THE DECISIVE FACT, which was measured rather than assumed: the
+#   committed lock is NOT INSTALLABLE on this toolchain at all.
+#
+#     $ flutter pub get --enforce-lockfile
+#     > vector_math 2.4.3 (was 2.2.0)
+#     Would change 7 dependencies.
+#     Unable to satisfy `pubspec.yaml` using `pubspec.lock`.
+#     Failed to update packages.
+#
+#   So EVERY repo-B number this project has reported -- the inherited 217/217
+#   baseline included -- comes from the re-resolved set above and not from the
+#   committed lock, because no `pub get` on this SDK can produce the committed
+#   one. `.dart_tool/package_config.json` confirms it from the other side: it
+#   links characters 1.4.1, intl 0.20.3, matcher 0.12.20,
+#   material_color_utilities 0.13.0, meta 1.19.0, test_api 0.7.12 and
+#   vector_math 2.4.3. This is the repo-B analogue of repo A's vendor/ drift
+#   and it must be stated alongside any figure from this repository.
+#
 #   RECOMMENDATION, and the one reason it is the owner's call rather than
 #   housekeeping: the re-resolution also moves the lock's own SDK floor,
 #
