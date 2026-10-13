@@ -193,7 +193,21 @@ void main() {
   });
 
   tearDownAll(() {
-    if (storageDir.existsSync()) storageDir.deleteSync(recursive: true);
+    // Cleanup must never fail the suite. `recursive: true` was already set and it
+    // still failed on a GitHub-hosted runner:
+    //   FileSystemException: Deletion failed, path = '/tmp/store_go_nested_test...'
+    //   (OS Error: Directory not empty, errno = 39)
+    // That is a race, not a missing flag -- GetStorage flushes in the background, so
+    // a file can be recreated inside the directory between the recursive walk and the
+    // final rmdir. It passed locally and failed in CI for exactly that reason.
+    //
+    // A leftover directory under the OS temp dir is harmless and the OS reclaims it.
+    // Losing a whole green suite to a cleanup race is not.
+    try {
+      if (storageDir.existsSync()) storageDir.deleteSync(recursive: true);
+    } catch (_) {
+      // Intentionally ignored; see above.
+    }
   });
 
   setUp(() async {

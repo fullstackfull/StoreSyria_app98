@@ -53,7 +53,13 @@ void main() {
   });
 
   tearDownAll(() {
-    if (storageDir.existsSync()) storageDir.deleteSync(recursive: true);
+    // See nested_api_read_test.dart: this delete can lose a race with GetStorage's
+    // background flush and fail with errno 39 even with recursive: true.
+    try {
+      if (storageDir.existsSync()) storageDir.deleteSync(recursive: true);
+    } catch (_) {
+      // Intentionally ignored.
+    }
   });
 
   setUp(() async {
