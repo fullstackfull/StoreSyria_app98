@@ -41,7 +41,21 @@ class ProductDetailController extends GetxController {
           );
         }
       },
-      onFailure: (reason, message, validationErrors) {},
+      // Was `{}` -- an empty closure, so every failure was discarded.
+      //
+      // `/viewproduct` carries `?store_id=` (product_repository.dart:28-32),
+      // one of the admin-API sites repo A now answers 403 on for a store the
+      // caller does not own. The screen does NOT go blank when that happens:
+      // `controller.product` was already populated from the list row by
+      // setProduct() (product_detail_screen.dart:55), so the page kept
+      // rendering with the list's fields and silently omitted everything this
+      // request supplies -- the sub-images and the currency symbol. A denial
+      // therefore looked like a product that merely has one image, with no
+      // error anywhere. Toast, and deliberately no logout: `message` is
+      // already action_not_permitted for a 403.
+      onFailure: (reason, message, validationErrors) {
+        commonToast(type: AppSnackBarType.error, message);
+      },
     );
   }
 

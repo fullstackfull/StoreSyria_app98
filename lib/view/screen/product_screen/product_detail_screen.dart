@@ -798,6 +798,43 @@ class _ProductDetailScreenState
     required bool isDark,
   }) {
     return Obx(() {
+      // The failure branch comes FIRST, and that order is the fix.
+      //
+      // `/reviewlist` sends `?store_id=`, so repo A now answers 403 on it for
+      // a store the caller does not own. Both a denial and a genuinely
+      // review-less product leave `reviewList` empty, so testing emptiness
+      // first reported "No reviews yet" for a request the server had
+      // REFUSED -- an error rendered as an empty success. Only the controller
+      // knows which happened, so the view asks it.
+      final reviewError =
+          reviewController.reviewErrorMessage.value;
+
+      if (reviewError.isNotEmpty) {
+        return Padding(
+          padding:
+          EdgeInsets.symmetric(vertical: 30.h),
+          child: Center(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 42.sp,
+                  color: Colors.grey.shade400,
+                ),
+                verticalSpace(12.h),
+                Text(
+                  reviewError,
+                  textAlign: TextAlign.center,
+                  style: pSemiBold14.copyWith(
+                    color: secondaryTextColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
       if (reviewController.reviewList.isEmpty) {
         return Padding(
           padding:

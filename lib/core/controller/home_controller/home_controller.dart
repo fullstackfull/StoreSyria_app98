@@ -154,8 +154,20 @@ class HomeController extends GetxController implements StoreAware {
           );
         }
       },
+      // The toast here was commented out, which made this the quietest
+      // failure in the app and the one that matters most.
+      //
+      // `/changestore` POSTs `store_id` (dashboard_repository.dart:16), so it
+      // IS the store-ownership endpoint: a 403 here is exactly "that store is
+      // not yours". The switch correctly does not happen -- Prefs.setStoreID,
+      // the FCM re-registration and notifyStoreChanged all sit inside
+      // onSuccess -- but the merchant was told nothing at all, so the app
+      // stayed on the previous store with no indication that the tap had been
+      // refused rather than simply not registered. Silence is the worst
+      // rendering of a denial, because the obvious response to it is to tap
+      // again.
       onFailure: (reason, message, errors) {
-        // commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
 
