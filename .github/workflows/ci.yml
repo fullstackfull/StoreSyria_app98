@@ -307,13 +307,25 @@ jobs:
 
       - name: flutter test
         # Must be 100%. There is no allowance here and no continue-on-error:
-        # the suite measures 1165/1165 on this SDK (217 at the time this job
-        # was written; the response-shape and release-posture work added 888,
-        # the temp-directory race one more, and this closure cycle 59 -- the
-        # 429 backoff 21, store-change cache isolation 13, the
-        # newly-gated-endpoint contract 9, hand-rolled status handling 7, the
-        # release-abort coverage 6 and the TLS guard's own self-checks 4), so
-        # a red run is a real regression rather than inherited debt.
+        # the suite measures 1165/1165 on this SDK. It was 217 when this job
+        # was written; the response-shape and release-posture work took it to
+        # 1104, the temp-directory race test to 1105, and this closure cycle
+        # added 60 on top of that:
+        #
+        #   test/network/rate_limit_backoff_test.dart                21
+        #   test/security/store_change_cache_isolation_test.dart     13
+        #   test/contract/newly_gated_endpoints_test.dart             9
+        #   test/security/hand_rolled_status_handling_test.dart       7
+        #   test/security/release_signing_test.dart                  +6
+        #   test/security/no_certificate_validation_override_test     +4
+        #                                                          -----
+        #                                                            60
+        #
+        # 1105 + 60 = 1165, which is the figure above. Added up rather than
+        # asserted: an earlier revision of this comment said 59 because it
+        # double-counted the temp-directory test as new when it was already
+        # in the 1105 baseline, and an arithmetic slip in a count is exactly
+        # how this file carried a stale number twice before.
         #
         # EVERY ONE OF THOSE FIGURES WAS RE-MEASURED, not carried forward.
         # This file has twice shipped a stale count, which is why the number
