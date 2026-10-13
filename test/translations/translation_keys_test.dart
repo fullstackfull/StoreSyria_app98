@@ -5,13 +5,22 @@
 // things that silently degrade the Arabic build and locks the measurements in
 // as a ratchet.
 //
-// WHAT WAS MEASURED when these baselines were taken:
+// WHAT WAS MEASURED when these baselines were taken, and RE-MEASURED this
+// phase with this file's own `_declaredKeys` / `_usedKeys` helpers. Three of
+// the five totals had drifted while the ratchet itself stayed intact, so they
+// are corrected here rather than left to be quoted:
 //
-//   en.dart        640 keys
-//   ar.dart        642 keys
-//   distinct literal `.tr` keys used in lib/   523
-//   used but defined in NEITHER map             47
-//   defined on one side only                     2
+//                                             then    now
+//   en.dart                                    640    646
+//   ar.dart                                    642    648
+//   distinct literal `.tr` keys used in lib/    523    527
+//   used but defined in NEITHER map              47     47
+//   defined on one side only                      2      2
+//
+// The gap did not grow: both baselines below are exactly as large as they
+// were, and the two one-sided keys are still `add_delivery_men` and
+// `price_label`. Ten keys of copy were added and four new `.tr` sites landed,
+// all of them translated -- which is the ratchet working, not slipping.
 //
 // GetX's `.tr` returns the KEY ITSELF when a translation is missing, so each of
 // those 47 keys shows the merchant a raw identifier like `cost_price`, or an
