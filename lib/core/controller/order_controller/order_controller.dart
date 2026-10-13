@@ -570,6 +570,7 @@ class OrderController extends GetxController implements StoreAware {
 
           if (responseData is List) {
             for (final item in responseData) {
+              if (item is! Map<String, dynamic>) continue;
               searchResults.add(
                 OrderData.fromJson(item),
               );

@@ -6,6 +6,7 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../config/repository/wallet_repository.dart';
 import '../../model/wallet_model.dart';
 import 'package:store_go_app/utils/app_log.dart';
+import 'package:store_go_app/network/result.dart';
 
 class WalletController extends GetxController {
   final WalletRepository walletRepository = WalletRepository();
@@ -85,7 +86,7 @@ class WalletController extends GetxController {
 
           if (data['status'] == 1) {
             final walletData =
-            WalletData.fromJson(data['data']);
+            WalletData.fromJson(jsonMap(data['data']));
             currencySymbol.value =
                 walletData.currencySymbol ?? currencySymbol.value;
 
@@ -154,7 +155,7 @@ class WalletController extends GetxController {
         onSuccess: (data) {
           searchResults.clear();
           if (data['status'] == 1) {
-            final walletData = WalletData.fromJson(data['data']);
+            final walletData = WalletData.fromJson(jsonMap(data['data']));
             searchResults.assignAll(walletData.transactions);
           } else {
             commonToast(type: AppSnackBarType.error, 
@@ -315,7 +316,7 @@ class WalletController extends GetxController {
 
           if (data['status'] == 1) {
             final walletData =
-            WalletData.fromJson(data['data']);
+            WalletData.fromJson(jsonMap(data['data']));
 
             transactions.addAll(
               walletData.transactions,
