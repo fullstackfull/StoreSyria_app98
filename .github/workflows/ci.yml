@@ -7,7 +7,7 @@ name: CI
 #
 # WHAT IS GATED, AND WHY EACH BAR IS WHERE IT IS
 #
-#   flutter test                   -- blocking, must be 100%. MEASURED 1098/1098.
+#   flutter test                   -- blocking, must be 100%. MEASURED 1105/1105.
 #   flutter analyze errors         -- blocking, must be 0. MEASURED 0.
 #   flutter analyze warnings       -- blocking, must be 0. MEASURED 0.
 #   flutter analyze infos          -- RATCHET at 248: may fall, never rise.
@@ -90,7 +90,7 @@ name: CI
 #   Nothing crosses a major version.
 #
 #   The re-resolved lock was then RUN, not assumed safe: `flutter test` ->
-#   1098/1098 and `flutter analyze` -> 248 issues / 0 errors / 0 warnings,
+#   1105/1105 and `flutter analyze` -> 248 issues / 0 errors / 0 warnings,
 #   identical to the committed lock on both counts. The committed lock was
 #   restored afterwards.
 #
@@ -283,9 +283,9 @@ jobs:
 
       - name: flutter test
         # Must be 100%. There is no allowance here and no continue-on-error:
-        # the suite measures 1098/1098 on this SDK (217 at the time this job
-        # was written; the response-shape work added 881), so a red run is a
-        # real regression rather than inherited debt.
+        # the suite measures 1105/1105 on this SDK (217 at the time this job
+        # was written; the response-shape and release-posture work added 888),
+        # so a red run is a real regression rather than inherited debt.
         run: flutter test --reporter expanded
 
       # ---------------------------------------------------------------------
