@@ -407,6 +407,11 @@ $error
 
           final retryAfter = int.tryParse(retryAfterRaw.trim());
 
+          // Shut the local gate for the window the server just named, so the
+          // next scroll notification cannot spend another request learning the
+          // same thing. See _rateLimitPreflight.
+          _armRateLimitBackoff(retryAfter);
+
           if (retryAfter != null && retryAfter > 0) {
             message = 'too_many_requests_retry_after'.trParams({
               'seconds': retryAfter.toString(),
@@ -511,6 +516,135 @@ $error
   }
 
   // ===========================================================================
+  // RATE-LIMIT BACKOFF
+  // ===========================================================================
+
+  /// NEW-429-RETRY-STORM. Until the `api` middleware group was given
+  /// `throttleApi('120,1')` (repo A bootstrap/app.php), all 211 API route
+  /// declarations were UNTHROTTLED, so a client that fired the same request
+  /// repeatedly was merely wasteful. It is now self-harming: the 121st request
+  /// in a minute is refused, and this app has a shape that reaches that number
+  /// without anybody doing anything unusual.
+  ///
+  /// The shape is infinite scroll. Six screens attach a `ScrollController`
+  /// listener that fires a page request whenever the viewport is within 200px
+  /// of the bottom -- products_screen.dart:64-80, category_screen.dart:49,
+  /// customer_screen.dart:60, customers_details.dart, and the two picker bottom
+  /// sheets. The listener is called on EVERY scroll notification, and its only
+  /// brake is `isLoading`, which the controller clears in a `finally` as soon
+  /// as the request completes (product_controller.dart:168-170). So a merchant
+  /// who keeps dragging at the end of a list while requests are FAILING gets
+  /// one request per scroll notification: the failure path is faster than the
+  /// success path, because it does not append rows and does not move the
+  /// scroll extent away from the trigger band. That turns a single 429 into a
+  /// stream of them, each one a toast, and keeps the throttle window full so
+  /// the list cannot recover while the merchant is still looking at it.
+  ///
+  /// So the client needs a brake of its own. After a 429 this gate refuses to
+  /// put another request on the wire until the server's own `Retry-After`
+  /// window has passed, and answers with the same `Failure(rateLimited, ...)`
+  /// the server would have produced -- same reason, same wording, now with a
+  /// live countdown. Nothing above this layer has to change, and no caller can
+  /// mistake it for a different outcome.
+  ///
+  /// It is deliberately NOT a retry: retrying is what caused the problem.
+  /// And it is deliberately NOT on the forced-logout path -- 429 means "slow
+  /// down", and clearing the session over a throttle is precisely the
+  /// behaviour repo B's 401 handling must never be extended to cover.
+  static DateTime? _rateLimitedUntil;
+
+  /// Clamp. Laravel's ThrottleRequests sends the seconds remaining in the
+  /// window, but the value arrives from the network and a long one (a proxy's
+  /// `Retry-After: 3600`) would make the app look broken for an hour. Capping
+  /// it means the gate never holds a request back LONGER than the server
+  /// would: when the cap expires one request goes through, and if the window is
+  /// genuinely still open the fresh 429 re-arms the gate with a fresh value.
+  /// Self-correcting beats precise here.
+  static const Duration _maxRateLimitBackoff = Duration(seconds: 60);
+
+  /// Used when the response carries no usable `Retry-After`. Short on purpose:
+  /// its job is to collapse the scroll storm described above, which arrives at
+  /// several requests per second, not to impose a long penalty on a merchant
+  /// who tapped twice.
+  static const Duration _defaultRateLimitBackoff = Duration(seconds: 2);
+
+  /// Clock seam. Only so a test can prove the gate EXPIRES without sleeping
+  /// for it; production reads the real clock.
+  @visibleForTesting
+  static DateTime Function() clock = DateTime.now;
+
+  /// Time left on the gate, or null when it is open.
+  @visibleForTesting
+  static Duration? rateLimitBackoffRemaining() {
+    final until = _rateLimitedUntil;
+    if (until == null) return null;
+
+    final remaining = until.difference(clock());
+    if (remaining <= Duration.zero) {
+      _rateLimitedUntil = null;
+      return null;
+    }
+
+    return remaining;
+  }
+
+  /// Opens the gate. Tests share process state, so this is how a test that
+  /// classified a 429 avoids arming the gate for whatever runs next.
+  @visibleForTesting
+  static void resetRateLimitBackoff() {
+    _rateLimitedUntil = null;
+  }
+
+  static void _armRateLimitBackoff(int? retryAfterSeconds) {
+    var window = _defaultRateLimitBackoff;
+
+    if (retryAfterSeconds != null && retryAfterSeconds > 0) {
+      window = Duration(seconds: retryAfterSeconds);
+
+      if (window > _maxRateLimitBackoff) {
+        window = _maxRateLimitBackoff;
+      }
+    }
+
+    final until = clock().add(window);
+
+    // Never shorten a gate that is already further out. Several requests can
+    // be in flight when the throttle trips, and the last 429 to land is not
+    // necessarily the one carrying the largest remaining window.
+    final current = _rateLimitedUntil;
+    if (current == null || until.isAfter(current)) {
+      _rateLimitedUntil = until;
+    }
+  }
+
+  /// Consulted by every request verb BEFORE it touches the network. Returns
+  /// null when the gate is open, and the failure the server would have
+  /// produced when it is shut.
+  static Failure<T>? _rateLimitPreflight<T>({
+    required String method,
+    required String url,
+  }) {
+    final remaining = rateLimitBackoffRemaining();
+    if (remaining == null) return null;
+
+    // Round UP, so the countdown never tells the merchant to retry at a moment
+    // the gate is still shut.
+    final seconds = (remaining.inMilliseconds / 1000).ceil();
+
+    AppLog.d(
+      'Request suppressed by the local rate-limit backoff '
+      '($method $url): ${seconds}s remaining.',
+    );
+
+    return Failure<T>(
+      FailureReason.rateLimited,
+      'too_many_requests_retry_after'.trParams({
+        'seconds': seconds.toString(),
+      }),
+    );
+  }
+
+  // ===========================================================================
   // GET
   // ===========================================================================
 
@@ -518,6 +652,12 @@ $error
       String endPoint,
       ) async {
     final getUrl = API.baseUrl + endPoint;
+
+    final throttled = _rateLimitPreflight<Map<String, dynamic>>(
+      method: 'GET',
+      url: getUrl,
+    );
+    if (throttled != null) return throttled;
 
     try {
       final headers = authHeaders();
@@ -636,6 +776,12 @@ $error
       Map data,
       ) async {
     final postUrl = API.baseUrl + endPoint;
+
+    final throttled = _rateLimitPreflight<Map<String, dynamic>>(
+      method: 'POST',
+      url: postUrl,
+    );
+    if (throttled != null) return throttled;
 
     try {
       final headers = authHeaders();
@@ -757,6 +903,12 @@ $error
       Map data,
       ) async {
     final putUrl = API.baseUrl + endPoint;
+
+    final throttled = _rateLimitPreflight<Map<String, dynamic>>(
+      method: 'PUT',
+      url: putUrl,
+    );
+    if (throttled != null) return throttled;
 
     try {
       final headers = authHeaders();
@@ -881,6 +1033,12 @@ $error
     String multiFileKey = 'product_image[]',
   }) async {
     final url = API.baseUrl + endPoint;
+
+    final throttled = _rateLimitPreflight<Map<String, dynamic>>(
+      method: 'MULTIPART',
+      url: url,
+    );
+    if (throttled != null) return throttled;
 
     try {
       final request = http.MultipartRequest(
@@ -1057,6 +1215,12 @@ $error
       String endPoint,
       ) async {
     final deleteUrl = API.baseUrl + endPoint;
+
+    final throttled = _rateLimitPreflight<Map<String, dynamic>>(
+      method: 'DELETE',
+      url: deleteUrl,
+    );
+    if (throttled != null) return throttled;
 
     try {
       final headers = authHeaders();
