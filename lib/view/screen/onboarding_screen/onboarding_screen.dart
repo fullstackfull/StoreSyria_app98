@@ -122,8 +122,8 @@ class OnboardingScreen extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                accent.withOpacity(isDark ? 0.22 : 0.14),
-                accent.withOpacity(0),
+                accent.withValues(alpha: isDark ? 0.22 : 0.14),
+                accent.withValues(alpha: 0),
               ],
             ),
           ),
@@ -138,7 +138,7 @@ class OnboardingScreen extends StatelessWidget {
   Widget _buildTopBar(
       OnboardingController controller, bool isDark, Color accent) {
     final chipBg = isDark
-        ? DarkThemeColor.cCardBackground.withOpacity(0.85)
+        ? DarkThemeColor.cCardBackground.withValues(alpha: 0.85)
         : AppColor.cWhite;
     final chipBorder = isDark ? DarkThemeColor.cBorder : AppColor.cDivider;
     final textColor = isDark ? Colors.white : AppColor.cLabel;
@@ -156,7 +156,7 @@ class OnboardingScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               decoration: BoxDecoration(
-                color: accent.withOpacity(isDark ? 0.18 : 0.12),
+                color: accent.withValues(alpha: isDark ? 0.18 : 0.12),
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text(
@@ -259,7 +259,7 @@ class OnboardingScreen extends StatelessWidget {
       String lottiePath, bool isDark, Color accent) {
     final cardColor =
     isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-    final ringColor = accent.withOpacity(isDark ? 0.20 : 0.14);
+    final ringColor = accent.withValues(alpha: isDark ? 0.20 : 0.14);
 
     return Center(
       child: TweenAnimationBuilder<double>(
@@ -287,7 +287,7 @@ class OnboardingScreen extends StatelessWidget {
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: accent.withOpacity(isDark ? 0.10 : 0.07),
+                  color: accent.withValues(alpha: isDark ? 0.10 : 0.07),
                 ),
                 child: Container(
                   padding: EdgeInsets.all(22.w),
@@ -299,7 +299,7 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: accent.withOpacity(isDark ? 0.30 : 0.18),
+                        color: accent.withValues(alpha: isDark ? 0.30 : 0.18),
                         blurRadius: 40,
                         offset: Offset(0, 16),
                       ),
@@ -338,7 +338,7 @@ class OnboardingScreen extends StatelessWidget {
         : [AppColor.themeNavyBlueColor, AppColor.blueColor];
     final shadowColor =
     (isDark ? AppColor.themeGreenColor : AppColor.blueColor)
-        .withOpacity(isDark ? 0.25 : 0.30);
+        .withValues(alpha: isDark ? 0.25 : 0.30);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 28.h),
@@ -396,7 +396,7 @@ class OnboardingScreen extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.all(4.w),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.18),
+                            color: Colors.white.withValues(alpha: 0.18),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(

@@ -12,13 +12,19 @@ Widget balanceCard({
   required WalletController controller,
   required BuildContext context,
 }) {
-  String balance =  controller.availableBalance.value;
   return Obx(() {
+    // R7-N3. `balance` used to be read HERE, outside the Obx builder, which
+    // broke it twice over. GetX only registers an observable as a dependency
+    // when it is read inside the builder, and a local captured outside the
+    // closure is never re-evaluated when the closure re-runs -- so this was a
+    // snapshot taken once, at widget-construction time, and frozen.
+    final String balance = controller.availableBalance.value;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+        border: Border.all(color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -31,7 +37,7 @@ Widget balanceCard({
         borderRadius: BorderRadius.circular(22.r),
         boxShadow: [
           BoxShadow(
-            color : AppColor.cBlack.withOpacity(0.2),
+            color : AppColor.cBlack.withValues(alpha: 0.2),
             offset: const Offset(0, 8),
             blurRadius: 20,
           ),
@@ -63,10 +69,18 @@ Widget balanceCard({
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: balance.isEmpty || balance == null ?
+                // `balance == null` was dead: `balance` is a non-nullable
+                // String, so the analyzer reported `unnecessary_null_comparison`.
+                // The surviving `isEmpty` test never fired either, because
+                // availableBalance is seeded with '0' (wallet_controller.dart:21),
+                // which is not empty -- so the spinner was unreachable and a
+                // merchant was shown a hard "0" balance while the wallet was
+                // still loading. A zero balance the merchant does not actually
+                // have is worse than a spinner, so the load state now drives it.
+                child: controller.isLoading.value || balance.isEmpty ?
                 CircularProgressIndicator(color: Colors.grey,strokeWidth: 2.w,) :
                 Text(
-                  controller.availableBalance.value,
+                  balance,
                   style:  TextStyle(
                     color: Colors.white,
                     fontSize: 30.sp,
@@ -141,7 +155,7 @@ Widget cardButton({
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: filled
-              ? AppColor.themeGreenColor.withOpacity(0.7)
+              ? AppColor.themeGreenColor.withValues(alpha: 0.7)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(color: filled ? AppColor.themeNavyBlueColor : AppColor.cBorder),

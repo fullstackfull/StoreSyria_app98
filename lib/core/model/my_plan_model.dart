@@ -1,3 +1,5 @@
+import 'package:store_go_app/network/result.dart';
+
 class CurrentPlanResponse {
   final int maxPrice;
   final int status;
@@ -16,7 +18,7 @@ class CurrentPlanResponse {
       maxPrice: json['max_price'] ?? 0,
       status: json['status'] ?? 0,
       message: json['message'] ?? '',
-      data: CurrentPlanData.fromJson(json['data'] ?? {}),
+      data: CurrentPlanData.fromJson(jsonMap(json['data'])),
     );
   }
 
@@ -44,9 +46,9 @@ class CurrentPlanData {
   factory CurrentPlanData.fromJson(Map<String, dynamic> json) {
     return CurrentPlanData(
       storeId: json['store_id'] ?? 0,
-      currentPlan: Plan.fromJson(json['current_plan'] ?? {}),
+      currentPlan: Plan.fromJson(jsonMap(json['current_plan'])),
       currentUserPlan:
-      CurrentUserPlan.fromJson(json['current_user_plan'] ?? {}),
+      CurrentUserPlan.fromJson(jsonMap(json['current_user_plan'])),
     );
   }
 
@@ -104,14 +106,14 @@ class Plan {
       duration: json['duration'] ?? '',
       durationText: json['duration_text'] ?? '',
       priceDisplay: json['price_display'] ?? '',
-      limits: PlanLimits.fromJson(json['limits'] ?? {}),
-      features: PlanFeatures.fromJson(json['features'] ?? {}),
+      limits: PlanLimits.fromJson(jsonMap(json['limits'])),
+      features: PlanFeatures.fromJson(jsonMap(json['features'])),
       hasTrial: json['has_trial'] ?? false,
       trialDays: json['trial_days'] ?? 0,
       description: json['description'] ?? '',
-      planStatus: PlanStatus.fromJson(json['plan_status'] ?? {}),
+      planStatus: PlanStatus.fromJson(jsonMap(json['plan_status'])),
       userSubscription:
-      UserSubscription.fromJson(json['user_subscription'] ?? {}),
+      UserSubscription.fromJson(jsonMap(json['user_subscription'])),
     );
   }
 
@@ -149,9 +151,9 @@ class PlanLimits {
 
   factory PlanLimits.fromJson(Map<String, dynamic> json) {
     return PlanLimits(
-      products: PlanLimit.fromJson(json['products'] ?? {}),
-      stores: PlanLimit.fromJson(json['stores'] ?? {}),
-      users: PlanLimit.fromJson(json['users'] ?? {}),
+      products: PlanLimit.fromJson(jsonMap(json['products'])),
+      stores: PlanLimit.fromJson(jsonMap(json['stores'])),
+      users: PlanLimit.fromJson(jsonMap(json['users'])),
     );
   }
 

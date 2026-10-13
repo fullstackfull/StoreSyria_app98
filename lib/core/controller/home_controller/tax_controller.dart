@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/tax_repository.dart';
 import 'package:store_go_app/core/model/tax_model.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 
 class TaxController extends GetxController {
@@ -48,21 +49,21 @@ class TaxController extends GetxController {
         if (data['status'] == 1) {
           taxModel = TaxModel.fromJson(data);
 
-          final newData = taxModel?.data?.data ?? [];
+          final newData = taxModel?.data.data ?? [];
 
           if (newData.isNotEmpty) {
             taxList.addAll(newData);
             taxList.refresh();
           }
 
-          if (currantPage.value >= (taxModel?.data?.lastPage ?? 1)) {
+          if (currantPage.value >= (taxModel?.data.lastPage ?? 1)) {
             isScroll.value = false;
           } else {
             isScroll.value = true;
           }
         } else {
           commonToast(type: AppSnackBarType.error, data['message'] ?? 'Something went wrong');
-          if (page < (taxModel?.data?.lastPage ?? 1)) {
+          if (page < (taxModel?.data.lastPage ?? 1)) {
             isScroll.value = true;
           }
         }
@@ -99,7 +100,7 @@ class TaxController extends GetxController {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Success');
+          commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: 'Success'));
           taxList.clear();
           currantPage.value = 1;
           isScroll.value = true;
@@ -107,7 +108,7 @@ class TaxController extends GetxController {
           clearTaxFields();
           Get.back();
         } else {
-          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed');
+          commonToast(type: AppSnackBarType.error, apiMessage(data, fallback: 'Failed'));
         }
       },
       onFailure: (reason, message, errors) {
@@ -129,7 +130,7 @@ class TaxController extends GetxController {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          commonToast(type: AppSnackBarType.success, data['data']['message'] ?? 'Deleted successfully');
+          commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: 'Deleted successfully'));
           taxList.clear();
           currantPage.value = 1;
           isScroll.value = true;
@@ -139,7 +140,7 @@ class TaxController extends GetxController {
             Get.back();
           }
         } else {
-          commonToast(type: AppSnackBarType.error, data['data']['message'] ?? 'Failed to delete');
+          commonToast(type: AppSnackBarType.error, apiMessage(data, fallback: 'Failed to delete'));
         }
       },
       onFailure: (reason, message, errors) {

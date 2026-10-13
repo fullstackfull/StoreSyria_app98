@@ -1,14 +1,14 @@
-// ignore_for_file: avoid_print
-
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/config/repository/search_repository.dart';
 import 'package:store_go_app/config/repository/category_repository.dart';
+import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/core/model/categories_model.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../utils/pick_file.dart';
 import 'cahe.dart';
@@ -153,7 +153,7 @@ class CategoryController extends GetxController
           }
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']['message'] ?? '',
+            apiMessage(data, fallback: ''),
           );
         }
       },
@@ -183,22 +183,21 @@ class CategoryController extends GetxController
         categoriesList.clear();
 
         if (data['status'] == 1) {
-          for (
-          int i = 0;
-          i < data['data'].length;
-          i++
-          ) {
-            categoriesList.add(
-              CategoryData.fromJson(
-                data['data'][i],
-              ),
-            );
+          // `data['data'].length` is a NoSuchMethodError on a
+          // `{"status": 1}` body, and `data['data'][i]` is a TypeError when
+          // the server answers `"data": {}` -- an int index on a Map. Neither
+          // is visible to the two-adjacent-STRING-subscript ratchet, because
+          // the second index here is `i`, not a literal.
+          for (final item in jsonList(data['data'])) {
+            if (item is Map<String, dynamic>) {
+              categoriesList.add(CategoryData.fromJson(item));
+            }
           }
 
           categoriesList.refresh();
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']['message'] ?? '',
+            apiMessage(data, fallback: ''),
           );
         }
       },
@@ -271,11 +270,9 @@ class CategoryController extends GetxController
       );
     }
 
-    request.headers.addAll({
-      "Authorization":
-      'Bearer ${Prefs.getToken()}',
-      'Cache-Control': 'no-cache',
-    });
+    // R7-N1: was a hand-rolled Bearer map. NetworkHttps.authHeaders() is the
+    // single construction site and already sends Cache-Control: no-cache.
+    request.headers.addAll(NetworkHttps.authHeaders());
 
     final http.StreamedResponse response =
     await request.send();
@@ -286,9 +283,28 @@ class CategoryController extends GetxController
       getCategoryData(
         currantPage.value,
       );
+    } else if (response.statusCode == 401) {
+      // Was missing entirely: a 401 here showed the raw English reason phrase
+      // and left the dead session in local storage. One shared forced-logout
+      // path, guarded against concurrent 401s.
+      await NetworkHttps.handleUnauthorized();
+    } else if (response.statusCode == 403) {
+      // Authorized but not permitted, and deliberately NOT a logout. Without
+      // this branch a policy denial fell to the `else` below and the merchant
+      // saw `response.reasonPhrase` -- the literal string "Forbidden",
+      // untranslated, in an Arabic UI.
+      commonToast(
+        type: AppSnackBarType.error,
+        'action_not_permitted'.tr,
+      );
+    } else if (response.statusCode == 429) {
+      commonToast(
+        type: AppSnackBarType.error,
+        'too_many_requests'.tr,
+      );
     } else {
-      commonToast(type: AppSnackBarType.error, 
-        response.reasonPhrase ?? '',
+      commonToast(type: AppSnackBarType.error,
+        response.reasonPhrase ?? 'error_occurred'.tr,
       );
     }
   }
@@ -320,12 +336,11 @@ class CategoryController extends GetxController
           }
 
           commonToast(type: AppSnackBarType.success, 
-            data['data']['message'] ?? '',
+            apiMessage(data, fallback: ''),
           );
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']['message'] ??
-                'Delete failed',
+            apiMessage(data, fallback: 'Delete failed'),
           );
         }
       },

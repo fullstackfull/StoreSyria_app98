@@ -635,9 +635,16 @@ const Map<String, String> en = {
   'paid_by2': 'Paid by @method',
   'connection_failed': 'Connection failed. Please try again.',
   'error_occurred': 'An error occurred',
+  'store_changed': 'Store changed',
   'resource_not_found': 'The requested resource was not found',
   'server_internal_error': 'An internal server error occurred',
   'no_internet_connection': 'No internet connection',
   'unexpected_error': 'An unexpected error occurred. Please try again.',
   'request_timeout': 'Request timed out. Please try again.',
+  'too_many_requests': 'Too many requests. Please wait a moment and try again.',
+  'too_many_requests_retry_after':
+      'Too many requests. Please try again in @seconds seconds.',
+  'session_expired': 'Your session has expired. Please log in again.',
+  'invalid_server_response': 'The server returned an unexpected response.',
+  'action_not_permitted': 'You do not have permission to perform this action.',
 };

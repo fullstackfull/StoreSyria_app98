@@ -4,12 +4,14 @@ import 'package:store_go_app/core/model/image_base_url_model.dart';
 import 'package:store_go_app/core/model/dashboard_model.dart';
 import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/utils/constant.dart';
+import 'package:store_go_app/network/result.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 
 import 'store_change_service.dart';
 import 'cahe.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class HomeController extends GetxController implements StoreAware {
   // مفاتيح الكاش الخاصة بهاد الكنترولر
@@ -107,7 +109,7 @@ class HomeController extends GetxController implements StoreAware {
 
     response.fold(
       onSuccess: (data) {
-        imageUrlData = ImageUrlData.fromJson(data['data']);
+        imageUrlData = ImageUrlData.fromJson(jsonMap(data['data']));
         imageBaseUrl.value = imageUrlData!.imageUrl!;
         Prefs.setString(AppConstant.imageUrl, imageUrlData!.imageUrl!);
         Prefs.setString(AppConstant.paymentUrl, imageUrlData!.paymentUrl!);
@@ -130,7 +132,10 @@ class HomeController extends GetxController implements StoreAware {
       onSuccess: (data) {
         if (data['status'] == 1) {
           isStore.value = false;
-          commonToast(type: AppSnackBarType.success, data['data']['message']);
+          commonToast(
+            type: AppSnackBarType.success,
+            apiMessage(data, fallback: 'store_changed'.tr),
+          );
 
           Prefs.setStoreID(storeId);
 
@@ -143,11 +148,26 @@ class HomeController extends GetxController implements StoreAware {
           // تبعها.
           StoreChangeService.instance.notifyStoreChanged();
         } else {
-          commonToast(type: AppSnackBarType.error, data['data']['message']);
+          commonToast(
+            type: AppSnackBarType.error,
+            apiMessage(data, fallback: 'error_occurred'.tr),
+          );
         }
       },
+      // The toast here was commented out, which made this the quietest
+      // failure in the app and the one that matters most.
+      //
+      // `/changestore` POSTs `store_id` (dashboard_repository.dart:16), so it
+      // IS the store-ownership endpoint: a 403 here is exactly "that store is
+      // not yours". The switch correctly does not happen -- Prefs.setStoreID,
+      // the FCM re-registration and notifyStoreChanged all sit inside
+      // onSuccess -- but the merchant was told nothing at all, so the app
+      // stayed on the previous store with no indication that the tap had been
+      // refused rather than simply not registered. Silence is the worst
+      // rendering of a denial, because the obvious response to it is to tap
+      // again.
       onFailure: (reason, message, errors) {
-        // commonToast(message);
+        commonToast(type: AppSnackBarType.error, message);
       },
     );
 
@@ -160,7 +180,7 @@ class HomeController extends GetxController implements StoreAware {
 
     response.fold(
       onSuccess: (data) {
-        dashboardData = DashboardData.fromJson(data['data']);
+        dashboardData = DashboardData.fromJson(jsonMap(data['data']));
 
         topProductList.value = dashboardData!.product ?? [];
         recentOrderList.value = dashboardData!.recentOrder ?? [];
@@ -190,7 +210,7 @@ class HomeController extends GetxController implements StoreAware {
       final fcmService = FcmTokenService();
       await fcmService.sendFcmTokenToServer(storeId: storeId);
     } catch (e) {
-      print('❌ خطأ في إرسال FCM Token بعد تغيير المتجر: $e');
+      AppLog.d('❌ خطأ في إرسال FCM Token بعد تغيير المتجر: $e');
     }
   }
 }

@@ -15,7 +15,7 @@ Widget statusPill({
       vertical: 5.h,
     ),
     decoration: BoxDecoration(
-      color: color.withOpacity(.09),
+      color: color.withValues(alpha: .09),
       borderRadius: BorderRadius.circular(20.r),
     ),
     child: Row(

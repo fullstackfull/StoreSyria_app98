@@ -15,7 +15,7 @@ Widget MyPlanCard({
     width: double.infinity,
     padding: EdgeInsets.all(20.w),
     decoration: BoxDecoration(
-      border: Border.all(color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+      border: Border.all(color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3)),
       gradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -28,7 +28,7 @@ Widget MyPlanCard({
       borderRadius: BorderRadius.circular(22.r),
       boxShadow: [
         BoxShadow(
-          color: AppColor.themeNavyBlueColor.withOpacity(0.3),
+          color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3),
           offset: const Offset(0, 8),
           blurRadius: 20,
         ),
@@ -79,7 +79,7 @@ Widget MyPlanCard({
                   vertical: 5.h,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444).withOpacity(.9),
+                  color: const Color(0xFFEF4444).withValues(alpha: .9),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
@@ -98,7 +98,7 @@ Widget MyPlanCard({
                   vertical: 6.h,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(.16),
+                  color: Colors.green.withValues(alpha: .16),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
@@ -119,7 +119,7 @@ Widget MyPlanCard({
           children: [
             Icon(
               Icons.event_outlined,
-              color: Colors.white.withOpacity(.8),
+              color: Colors.white.withValues(alpha: .8),
               size: 18.sp,
             ),
             SizedBox(width: 8.w),
@@ -127,7 +127,7 @@ Widget MyPlanCard({
               '${'expire_date'.tr}: '
                   '${plan.planStatus.planExpireDate}',
               style: TextStyle(
-                color: Colors.white.withOpacity(.9),
+                color: Colors.white.withValues(alpha: .9),
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w500,
               ),
@@ -140,7 +140,7 @@ Widget MyPlanCard({
           Text(
             plan.planStatus.expireMessage,
             style: TextStyle(
-              color: Colors.white.withOpacity(.75),
+              color: Colors.white.withValues(alpha: .75),
               fontSize: 12.sp,
             ),
           ),
@@ -194,7 +194,7 @@ Widget usageCard({
       borderRadius: BorderRadius.circular(16.r),
       // border: Border.all(
       //   color: isDark
-      //       ? Colors.white.withOpacity(.06)
+      //       ? Colors.white.withValues(alpha: .06)
       //       : AppColor.cBorder,
       // ),
     ),
@@ -207,7 +207,7 @@ Widget usageCard({
               height: 40.w,
               decoration: BoxDecoration(
                 color: AppColor.themeNavyBlueColor
-                    .withOpacity(.08),
+                    .withValues(alpha: .08),
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Icon(
@@ -249,7 +249,7 @@ Widget usageCard({
             value: progress,
             minHeight: 7.h,
             backgroundColor: isDark
-                ? Colors.white.withOpacity(.08)
+                ? Colors.white.withValues(alpha: .08)
                 : const Color(0xFFEDEFF2),
             valueColor: AlwaysStoppedAnimation<Color>(
                 percentage < 50
@@ -302,7 +302,7 @@ Widget detailsCard({
       borderRadius: BorderRadius.circular(16.r),
       // border: Border.all(
       //   color: isDark
-      //       ? Colors.white.withOpacity(.06)
+      //       ? Colors.white.withValues(alpha: .06)
       //       : const Color(0xFFE8EAEE),
       // ),
     ),
@@ -363,7 +363,7 @@ Widget divider(bool isDark) {
   return Divider(
     height: 1,
     color: isDark
-        ? Colors.white.withOpacity(.06)
+        ? Colors.white.withValues(alpha: .06)
         : const Color(0xFFE8EAEE),
   );
 }
@@ -413,7 +413,7 @@ Widget featuresCard({
       borderRadius: BorderRadius.circular(16.r),
       // border: Border.all(
       //   color: isDark
-      //       ? Colors.white.withOpacity(.06)
+      //       ? Colors.white.withValues(alpha: .06)
       //       : const Color(0xFFE8EAEE),
       // ),
     ),

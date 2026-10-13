@@ -1,26 +1,21 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:store_go_app/core/model/dashboard_model.dart';
 import 'package:store_go_app/utils/colors.dart';
-import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/view/screen/profile_screen/profile_screen.dart';
-import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 import 'package:store_go_app/view/screen/notification_screen/notification_screen.dart';
 
+import 'package:store_go_app/utils/app_log.dart';
 
 Widget buildAppTitleRow(String date,BuildContext context) {
   final NotificationController notificationController = Get.find<NotificationController>();
@@ -54,7 +49,7 @@ Widget buildAppTitleRow(String date,BuildContext context) {
                 color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
                 borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
-                  color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5),
+                  color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withValues(alpha: 0.5),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -134,7 +129,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: AppColor.themeNavyBlueColor.withOpacity(0.28),
+            color: AppColor.themeNavyBlueColor.withValues(alpha: 0.28),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -151,7 +146,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
               height: 130,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.06),
+                color: Colors.white.withValues(alpha: 0.06),
               ),
             ),
           ),
@@ -163,7 +158,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColor.themeGreenColor.withOpacity(0.18),
+                color: AppColor.themeGreenColor.withValues(alpha: 0.18),
               ),
             ),
           ),
@@ -180,7 +175,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
                       gradient: LinearGradient(
                         colors: [
                           AppColor.themeGreenColor,
-                          Colors.white.withOpacity(0.6),
+                          Colors.white.withValues(alpha: 0.6),
                         ],
                       ),
                     ),
@@ -229,7 +224,7 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
                     children: [
                       Text(
                         "Welcome back".tr,
-                        style: pRegular12.copyWith(color: Colors.white.withOpacity(0.75)),
+                        style: pRegular12.copyWith(color: Colors.white.withValues(alpha: 0.75)),
                       ),
                       verticalSpace(4),
                       Text(
@@ -246,9 +241,9 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
                   width: 36.w,
                   height: 36.w,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.14),
+                    color: Colors.white.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: Colors.white.withOpacity(0.18)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
                   ),
                   child: Icon(
                     Icons.arrow_forward_ios_rounded,
@@ -271,7 +266,7 @@ Widget qrCodeWidget(BuildContext context,{String? qrString, String? title}) {
     width: double.infinity,
     decoration: BoxDecoration(
       color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
-      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withValues(alpha: 0.5)),
       borderRadius: BorderRadius.circular(22.r),
       boxShadow: [
         BoxShadow(
@@ -289,7 +284,7 @@ Widget qrCodeWidget(BuildContext context,{String? qrString, String? title}) {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: AppColor.themeGreenColor.withOpacity(0.35), width: 1.5),
+            border: Border.all(color: AppColor.themeGreenColor.withValues(alpha: 0.35), width: 1.5),
           ),
           child: CustomPaint(
             size: Size.square(64),
@@ -338,8 +333,8 @@ Widget qrCodeWidget(BuildContext context,{String? qrString, String? title}) {
               verticalSpace(10),
               GestureDetector(
                 onTap: () {
-                  Clipboard.setData(ClipboardData(text: qrString ?? ""));
-                  print('copied');
+                  Clipboard.setData(ClipboardData(text: qrString));
+                  AppLog.d('copied');
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
@@ -392,7 +387,7 @@ Widget totalProductWidget(BuildContext context,{
     decoration: BoxDecoration(
       color: isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite,
       borderRadius: BorderRadius.circular(20.r),
-      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(0.5)),
+      border: Border.all(color: isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withValues(alpha: 0.5)),
       boxShadow: [
         BoxShadow(
           color: AppColor.cShadow,
@@ -411,7 +406,7 @@ Widget totalProductWidget(BuildContext context,{
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: accent.withOpacity(0.08),
+              color: accent.withValues(alpha: 0.08),
             ),
           ),
         ),
@@ -425,7 +420,7 @@ Widget totalProductWidget(BuildContext context,{
                 height: 38.w,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.14),
+                  color: accent.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: assetSvdImageWidget(

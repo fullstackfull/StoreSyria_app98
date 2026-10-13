@@ -190,12 +190,12 @@ class _PaymentSettingScreenState
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.06)
-              : Colors.grey.withOpacity(0.08),
+              ? Colors.white.withValues(alpha: 0.06)
+              : Colors.grey.withValues(alpha: 0.08),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(
+            color: Colors.black.withValues(alpha:
               isDark ? 0.12 : 0.04,
             ),
             blurRadius: 10,
@@ -210,7 +210,7 @@ class _PaymentSettingScreenState
             width: 48.w,
             height: 48.w,
             decoration: BoxDecoration(
-              color: AppColor.themeNavyBlueColor.withOpacity(
+              color: AppColor.themeNavyBlueColor.withValues(alpha:
                 isDark ? 0.14 : 0.08,
               ),
               borderRadius: BorderRadius.circular(14.r),

@@ -1,16 +1,14 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
-import 'package:store_go_app/view/screen/auth/login_widget.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 import '../../../network/network.dart';
 import '../../../utils/pick_file.dart';
+import 'package:store_go_app/utils/app_log.dart';
+import 'package:store_go_app/network/result.dart';
 
 class ProfileController extends GetxController {
   TextEditingController nameController = TextEditingController();
@@ -64,9 +62,7 @@ class ProfileController extends GetxController {
               data['success'] == true) {
             commonToast(
               type: AppSnackBarType.success,
-              data['data']?['message'] ??
-                  data['message'] ??
-                  "Password Updated Successfully",
+              apiMessage(data, fallback: "Password Updated Successfully"),
             );
 
             oldPasswordController.clear();
@@ -77,9 +73,7 @@ class ProfileController extends GetxController {
           } else {
             commonToast(
               type: AppSnackBarType.error,
-              data['data']?['message'] ??
-                  data['message'] ??
-                  "Failed to update password",
+              apiMessage(data, fallback: "Failed to update password"),
             );
           }
         },
@@ -95,7 +89,7 @@ class ProfileController extends GetxController {
         },
       );
     } catch (e) {
-      print("Error in updatePassword: $e");
+      AppLog.e('Error in updatePassword', error: e);
 
       commonToast(
         type: AppSnackBarType.error,
@@ -136,50 +130,67 @@ class ProfileController extends GetxController {
         );
       }
 
-      request.headers.addAll({
-        "Authorization": 'Bearer ${Prefs.getToken()}',
-        "Cache-Control": "no-cache",
-      });
+      // R7-N1: was a hand-rolled Bearer map. NetworkHttps.authHeaders() is the
+      // single construction site and already sends Cache-Control: no-cache.
+      request.headers.addAll(NetworkHttps.authHeaders());
 
       final response = await request.send();
 
       final responseData = await response.stream.bytesToString();
-      final decodedData = jsonDecode(responseData);
 
-      if (response.statusCode == 200 ||
+      // Status code FIRST, decode second. The body used to be decoded before
+      // the status was looked at, so a 401, 429 or 500 whose body is HTML or
+      // empty threw out of this block and the 401 branch below never ran --
+      // leaving a dead session in local storage. Now that the server really
+      // does return 401 and 429, that was the common case, not the edge one.
+      final Map<String, dynamic> decodedData =
+          _decodeOrEmpty(responseData);
+
+      if (response.statusCode == 401) {
+        // One shared forced-logout path, guarded against concurrent 401s.
+        await NetworkHttps.handleUnauthorized();
+      } else if (response.statusCode == 200 ||
           response.statusCode == 201) {
         if (decodedData['status'] == 1 ||
             decodedData['success'] == true) {
           commonToast(
             type: AppSnackBarType.success,
-            decodedData['data']?['message'] ??
-                decodedData['message'] ??
-                "Profile Updated Successfully",
+            apiMessage(decodedData, fallback: "Profile Updated Successfully"),
           );
 
           selectedImagePath.value = '';
         } else {
           commonToast(
             type: AppSnackBarType.error,
-            decodedData['data']?['message'] ??
-                decodedData['message'] ??
-                "Update Failed",
+            apiMessage(decodedData, fallback: "Update Failed"),
           );
         }
-      } else if (response.statusCode == 401) {
-        await Prefs.clear();
-
-        Get.offAll(() => NormalLoginWidget());
+      } else if (response.statusCode == 403) {
+        // Authorized but not permitted, and deliberately NOT a logout -- the
+        // server answers 403 rather than 401 precisely so one denied action
+        // cannot end the session. This branch existed in the network layer
+        // (network.dart:344-355) but not here, so a policy denial reached the
+        // merchant through the `else` below as the raw English reason phrase,
+        // "Forbidden", in an Arabic UI. The three codes the network layer
+        // distinguishes have to be distinguished at every site that handles
+        // status codes itself.
+        commonToast(
+          type: AppSnackBarType.error,
+          'action_not_permitted'.tr,
+        );
+      } else if (response.statusCode == 429) {
+        commonToast(
+          type: AppSnackBarType.error,
+          'too_many_requests'.tr,
+        );
       } else {
         commonToast(
           type: AppSnackBarType.error,
-          decodedData['data']?['message'] ??
-              decodedData['message'] ??
-              "Something went wrong",
+          apiMessage(decodedData, fallback: "Something went wrong"),
         );
       }
     } catch (e) {
-      print("Error in editProfile: $e");
+      AppLog.e('Error in editProfile', error: e);
 
       commonToast(
         type: AppSnackBarType.error,
@@ -188,6 +199,25 @@ class ProfileController extends GetxController {
     } finally {
       isLoading2.value = false;
     }
+  }
+
+  /// Decodes a response body that may not be JSON at all.
+  ///
+  /// Returns an empty map for an empty body, for HTML (a proxy or web-server
+  /// error page), and for a JSON array where an object was expected, so a
+  /// changed or unexpected server response degrades to "no message" instead of
+  /// throwing past the status-code handling.
+  Map<String, dynamic> _decodeOrEmpty(String body) {
+    if (body.trim().isEmpty) return <String, dynamic>{};
+
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+    } catch (_) {
+      // fall through
+    }
+
+    return <String, dynamic>{};
   }
 
   @override

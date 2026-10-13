@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/payment_setting_repository.dart';
 import 'package:store_go_app/core/model/payment_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
+import 'package:store_go_app/network/result.dart';
 
 class PaymentSettingController extends GetxController {
   final PaymentSettingRepository paymentSettingRepository =
@@ -25,21 +26,17 @@ class PaymentSettingController extends GetxController {
       response.fold(
         onSuccess: (data) {
           if (data['status'] == 1) {
-            final responseData =
-            data['data'] as Map<String, dynamic>;
+            // Three bare casts on a decoded body: `as Map<String, dynamic>`
+            // throws on `"data": []`, `as List<dynamic>?` throws on a Map or
+            // a scalar BEFORE its `?? []` is consulted, and
+            // `item as Map<String, dynamic>` throws on a scalar element.
+            final responseData = jsonMap(data['data']);
 
-            final activeMethods =
-                responseData['active_methods']
-                as List<dynamic>? ??
-                    [];
-
-            paymentMethods.value = activeMethods
-                .map(
-                  (item) => PaymentMethod.fromJson(
-                item as Map<String, dynamic>,
-              ),
-            )
-                .toList();
+            paymentMethods.value =
+                jsonList(responseData['active_methods'])
+                    .whereType<Map<String, dynamic>>()
+                    .map(PaymentMethod.fromJson)
+                    .toList();
           } else {
             errorMessage.value =
                 data['message'] ?? 'Something went wrong';

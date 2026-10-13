@@ -4,6 +4,7 @@ import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import '../../core/model/create_order_model.dart';
 import '../../network/result.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class OrderRepository {
 
@@ -39,14 +40,14 @@ class OrderRepository {
     }
 
     var response = await NetworkHttps.getRequest(endPoint);
-    print("response==========>$response");
+    AppLog.d("response==========>$response");
     return response;
   }
 
   getTopOrdersData()  async {
     String endPoint = "${API.topOrdersUrl}${API.storeIdUrl}${Prefs.getStoreID()}";
     var response = await NetworkHttps.getRequest(endPoint);
-    print("response==========>$response");
+    AppLog.d("response==========>$response");
     return response;
   }
 
@@ -58,14 +59,14 @@ class OrderRepository {
 
     final body = request.toJson();
 
-    print("createOrder body==========>$body");
+    AppLog.d("createOrder body==========>$body");
 
     final response = await NetworkHttps.postRequest(
       endPoint,
       body,
     );
 
-    print("createOrder response==========>$response");
+    AppLog.d("createOrder response==========>$response");
 
     return response;
   }
@@ -73,7 +74,7 @@ class OrderRepository {
   deleteOrderData(orderId) async {
     String endPoint = API.deleteOrderUrl + API.storeIdUrl + Prefs.getStoreID() + API.orderIdUrl + orderId;
     var response = await NetworkHttps.deleteRequest(endPoint);
-    print("response==========>$response");
+    AppLog.d("response==========>$response");
     return response;
   }
 
@@ -83,7 +84,7 @@ class OrderRepository {
     required String paymentStatus,
     String? note,
   }) async {
-    String endPoint = "/orders/update-status";
+    String endPoint = API.updateOrderStatusUrl;
 
     var body = {
       'product_order_id': productOrderId,
@@ -92,10 +93,10 @@ class OrderRepository {
       'note': note ?? '',
     };
 
-    print("updateOrderStatus body==========>$body");
+    AppLog.d("updateOrderStatus body==========>$body");
 
     var response = await NetworkHttps.postRequest(endPoint, body);
-    print("updateOrderStatus response==========>$response");
+    AppLog.d("updateOrderStatus response==========>$response");
     return response;
   }
 
@@ -104,7 +105,7 @@ class OrderRepository {
     required String noteType,
     required String note,
   }) async {
-    String endPoint = "/orders/notes/create";
+    String endPoint = API.createOrderNoteUrl;
 
     var body = {
       'store_id': Prefs.getStoreID(),
@@ -113,10 +114,10 @@ class OrderRepository {
       'note': note,
     };
 
-    print("createNote body==========>$body");
+    AppLog.d("createNote body==========>$body");
 
     var response = await NetworkHttps.postRequest(endPoint, body);
-    print("createNote response==========>$response");
+    AppLog.d("createNote response==========>$response");
     return response;
   }
 
@@ -124,12 +125,14 @@ class OrderRepository {
     required int orderId,
     required int noteId,
   }) async {
-    String endPoint = "/orders/notes/delete?store_id=${Prefs.getStoreID()}&order_id=$orderId&note_id=$noteId";
+    String endPoint =
+        "${API.deleteOrderNoteUrl}${API.storeIdUrl}${Prefs.getStoreID()}"
+        "&order_id=$orderId&note_id=$noteId";
 
-    print("deleteNote endPoint==========>$endPoint");
+    AppLog.d("deleteNote endPoint==========>$endPoint");
 
     var response = await NetworkHttps.deleteRequest(endPoint);
-    print("deleteNote response==========>$response");
+    AppLog.d("deleteNote response==========>$response");
     return response;
   }
 }
@@ -138,7 +141,7 @@ class OrderDetailRepository {
   getOrderDetailData(orderId) async {
     String endPoint = API.viewOrderUrl + API.storeIdUrl + Prefs.getStoreID() + API.orderIdUrl + orderId;
     var response = await NetworkHttps.getRequest(endPoint);
-    print("response==========>$response");
+    AppLog.d("response==========>$response");
     return response;
   }
 }

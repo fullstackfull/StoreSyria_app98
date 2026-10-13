@@ -6,6 +6,7 @@ import 'package:store_go_app/config/repository/customer_repository.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
+import 'package:store_go_app/network/result.dart';
 import '../../../config/repository/search_repository.dart';
 import '../../model/customer_model.dart';
 import '../../model/customer_orders_model.dart';
@@ -135,9 +136,7 @@ final TextEditingController searchController = TextEditingController();
             }
           } else {
             commonToast(type: AppSnackBarType.error, 
-              data['data']?['message'] ??
-                  data['message'] ??
-                  'Error',
+              apiMessage(data, fallback: 'Error'),
             );
           }
         },
@@ -265,9 +264,7 @@ void resetCustomerSearch() {
         } else {
 
           commonToast(type: AppSnackBarType.error, 
-            data['data']?['message'] ??
-                data['message'] ??
-                'Error',
+            apiMessage(data, fallback: 'Error'),
           );
 
           if (currantPage.value == page) {
@@ -313,9 +310,7 @@ void resetCustomerSearch() {
 
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']?['message'] ??
-                data['message'] ??
-                'Error',
+            apiMessage(data, fallback: 'Error'),
           );
         }
       },
@@ -383,9 +378,7 @@ void resetCustomerSearch() {
             success = true;
 
             commonToast(type: AppSnackBarType.success, 
-              data['data']?['message'] ??
-                  data['message'] ??
-                  'Customer added successfully',
+              apiMessage(data, fallback: 'Customer added successfully'),
             );
 
             customerList.clear();
@@ -399,9 +392,7 @@ void resetCustomerSearch() {
           } else {
             commonToast(
               type: AppSnackBarType.error,
-              data['data']?['message'] ??
-                  data['message'] ??
-                  'Error',
+              apiMessage(data, fallback: 'Error'),
             );
           }
         },
@@ -481,9 +472,7 @@ Future<bool> updateCustomerData({
           success = true;
 
           commonToast(type: AppSnackBarType.success, 
-            data['data']?['message'] ??
-                data['message'] ??
-                'Customer updated successfully',
+            apiMessage(data, fallback: 'Customer updated successfully'),
           );
 
           CacheService.clear(_cacheCustomerKey);
@@ -497,9 +486,7 @@ Future<bool> updateCustomerData({
         } else {
           commonToast(
             type: AppSnackBarType.error,
-            data['data']?['message'] ??
-                data['message'] ??
-                'Error',
+            apiMessage(data, fallback: 'Error'),
           );
         }
       },
@@ -543,9 +530,7 @@ Future<bool> updateCustomerData({
     response.fold(
       onSuccess: (data) async {
         commonToast(type: AppSnackBarType.success, 
-          data['data']?['message'] ??
-              data['message'] ??
-              'Deleted',
+          apiMessage(data, fallback: 'Deleted'),
         );
 
         customerList.clear();
@@ -652,12 +637,10 @@ Future<bool> updateCustomerData({
 
             customerOrdersErrorMessage.value = '';
           } else {
-            final msg = data['data']?['message'] ??
-                data['message'] ??
-                'Error';
+            final msg = apiMessage(data, fallback: 'Error');
 
-            customerOrdersErrorMessage.value = msg.toString();
-            commonToast(type: AppSnackBarType.error, msg.toString());
+            customerOrdersErrorMessage.value = msg;
+            commonToast(type: AppSnackBarType.error, msg);
           }
         },
         onFailure: (

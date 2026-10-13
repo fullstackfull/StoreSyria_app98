@@ -57,7 +57,7 @@ Widget productCouponWidget({
       decoration: BoxDecoration(
         color: cardColor,
         // border: Border.all(
-        //     color: AppColor.themeNavyBlueColor.withOpacity(0.3)),
+        //     color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(18.r),
       ),
       child: Column(
@@ -92,7 +92,7 @@ Widget productCouponWidget({
                             height: 18.w,
                             decoration: BoxDecoration(
                               color: AppColor.themeGreenColor
-                                  .withOpacity(.06),
+                                  .withValues(alpha: .06),
                               borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Icon(
@@ -147,7 +147,7 @@ Widget productCouponWidget({
                 width: 25.w,
                 height: 25.w,
                 decoration: BoxDecoration(
-                  color: AppColor.themeGreenColor.withOpacity(.06),
+                  color: AppColor.themeGreenColor.withValues(alpha: .06),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Icon(
@@ -174,7 +174,7 @@ Widget productCouponWidget({
                     vertical: 3.h,
                   ),
                   decoration: BoxDecoration(
-                    color: subTextColor.withOpacity(.08),
+                    color: subTextColor.withValues(alpha: .08),
                     borderRadius: BorderRadius.circular(5.r),
                   ),
                   child: Text(
@@ -266,7 +266,7 @@ Widget couponStatusBadgeWidget({
       vertical: 5.h,
     ),
     decoration: BoxDecoration(
-      color: color.withOpacity(.06),
+      color: color.withValues(alpha: .06),
       borderRadius: BorderRadius.circular(7.r),
     ),
     child: Row(

@@ -142,13 +142,13 @@ class StoreSettingScreen extends StatelessWidget {
                   color: AppColor.cBackGround,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: AppColor.cRed.withOpacity(
+                    color: AppColor.cRed.withValues(alpha:
                       isDark ? 0.40 : 0.25,
                     ),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColor.cRedText.withOpacity(
+                      color: AppColor.cRedText.withValues(alpha:
                         isDark ? 0.15 : 0.2,
                       ),
                       offset: const Offset(0, 4),

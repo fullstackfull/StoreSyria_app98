@@ -66,14 +66,10 @@
 //   }) async {
 //     Loader.showLoader();
 //     String url = API.baseUrl + API.bankPaymentUrl;
-//     print(" URL===> $url");
-//     print("authHeaders===>${Prefs.getToken()}");
+//     AppLog.d(" URL===> $url");
 //     var request = http.MultipartRequest('POST', Uri.parse(url));
-//     request.headers.addAll({
-//       "Authorization": 'Bearer ${Prefs.getToken()}',
-//       HttpHeaders.contentTypeHeader: 'application/json',
-//       HttpHeaders.cacheControlHeader: "no-cache",
-//     });
+//     // R7-N1: do NOT hand-roll the Authorization header here.
+//     request.headers.addAll(NetworkHttps.authHeaders());
 //     request.fields.addAll({'store_id': Prefs.getStoreID(), 'CURRENCY_NAME': currencyName, 'CURRENCY': currency, 'is_bank_transfer_enabled': status, 'bank_transfer': bankInfo});
 //     if (imagePath.value != '') {
 //       request.files.add(await http.MultipartFile.fromPath('bank_transfer_image', image));

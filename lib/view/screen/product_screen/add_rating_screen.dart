@@ -1,4 +1,4 @@
-// ignore_for_file: must_be_immutable, avoid_print, prefer_const_constructors
+// ignore_for_file: must_be_immutable, prefer_const_constructors
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -15,6 +15,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/core/controller/product_controller/add_review_controller.dart';
 import '../../widget/app_dialog.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class AddRatingScreen extends StatefulWidget {
   final String categoryId;
@@ -132,16 +133,16 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
                                 itemCount: 5,
                                 itemSize: 38.sp,
                                 unratedColor:
-                                secondaryTextColor.withOpacity(0.3),
+                                secondaryTextColor.withValues(alpha: 0.3),
                                 glow: false,
                                 itemBuilder: (context, _) => Icon(
                                   Icons.star_rate_rounded,
                                   color: AppColor.cGreenFont,
                                 ),
                                 onRatingUpdate: (rating) {
-                                  print(rating);
+                                  AppLog.d(rating);
                                   addReviewController.rate.value = rating;
-                                  print(addReviewController.rate.value);
+                                  AppLog.d(addReviewController.rate.value);
                                 },
                               ),
                             ),
@@ -242,14 +243,14 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
                                     color: (isVisible
                                         ? AppColor.themeGreenColor
                                         : Colors.grey)
-                                        .withOpacity(0.08),
+                                        .withValues(alpha: 0.08),
                                     borderRadius:
                                     BorderRadius.circular(12.r),
                                     // border: Border.all(
                                     //   color: (isVisible
                                     //       ? AppColor.themeGreenColor
                                     //       : Colors.grey)
-                                    //       .withOpacity(0.3),
+                                    //       .withValues(alpha: 0.3),
                                     // ),
                                   ),
                                   child: SwitchListTile(
@@ -281,7 +282,7 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
                                       value ? '1' : '0';
                                     },
                                     activeColor: AppColor.themeGreenColor,
-                                    activeTrackColor: AppColor.themeGreenColor.withOpacity(0.3),
+                                    activeTrackColor: AppColor.themeGreenColor.withValues(alpha: 0.3),
                                     inactiveThumbColor:
                                     Colors.grey.shade500,
                                     inactiveTrackColor:
@@ -384,7 +385,7 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
         // border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -407,7 +408,7 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
         Container(
           padding: EdgeInsets.all(6.w),
           decoration: BoxDecoration(
-            color: AppColor.themeGreenColor.withOpacity(0.1),
+            color: AppColor.themeGreenColor.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(

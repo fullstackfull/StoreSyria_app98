@@ -635,10 +635,17 @@ const Map<String, String> ar = {
   'paid_by2': 'تم الدفع عبر @method',
   'connection_failed': 'فشل الاتصال، يرجى المحاولة مرة أخرى',
   'error_occurred': 'حدث خطأ',
+  'store_changed': 'تم تغيير المتجر',
   'server_error': 'حدث خطأ في الخادم، يرجى المحاولة لاحقًا',
   'resource_not_found': 'البيانات المطلوبة غير موجودة',
   'server_internal_error': 'حدث خطأ داخلي في الخادم',
   'no_internet_connection': 'لا يوجد اتصال بالإنترنت',
   'unexpected_error': 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى',
   'request_timeout': 'انتهت مهلة الطلب، يرجى المحاولة مرة أخرى',
+  'too_many_requests': 'طلبات كثيرة جدًا، يرجى الانتظار قليلًا ثم المحاولة مرة أخرى',
+  'too_many_requests_retry_after':
+      'طلبات كثيرة جدًا، يرجى المحاولة مرة أخرى بعد @seconds ثانية',
+  'session_expired': 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى',
+  'invalid_server_response': 'أرجع الخادم استجابة غير متوقعة',
+  'action_not_permitted': 'ليست لديك صلاحية لتنفيذ هذا الإجراء',
 };

@@ -278,7 +278,7 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                               height: 44,
                               fit: BoxFit.cover,
                               backgroundColor:
-                              navyBlue.withOpacity(isDark ? 0.25 : 0.08),
+                              navyBlue.withValues(alpha: isDark ? 0.25 : 0.08),
                               iconColor: isDark
                                   ? Colors.white70
                                   : navyBlue,
@@ -304,10 +304,10 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                                     vertical: 3,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: stockColor.withOpacity(.10),
+                                    color: stockColor.withValues(alpha: .10),
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
-                                      color: stockColor.withOpacity(.20),
+                                      color: stockColor.withValues(alpha: .20),
                                     ),
                                   ),
                                   child: Text(
@@ -329,13 +329,13 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: isTrack
-                                        ? Colors.blue.withOpacity(.10)
-                                        : Colors.grey.withOpacity(.10),
+                                        ? Colors.blue.withValues(alpha: .10)
+                                        : Colors.grey.withValues(alpha: .10),
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
                                       color: isTrack
-                                          ? Colors.blue.withOpacity(.20)
-                                          : Colors.grey.withOpacity(.20),
+                                          ? Colors.blue.withValues(alpha: .20)
+                                          : Colors.grey.withValues(alpha: .20),
                                     ),
                                   ),
                                   child: Text(

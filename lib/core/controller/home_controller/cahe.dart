@@ -1,6 +1,5 @@
-// ignore_for_file: avoid_print
-
 import 'package:store_go_app/main.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 /// خدمة كاش بسيطة مبنية فوق GetStorage الموجودة أصلاً بالمشروع
 /// (نفس الأداة المستخدمة بكلاس Prefs)، ما بتضيف أي مكتبة جديدة.
@@ -18,7 +17,7 @@ class CacheService {
     try {
       await getStorage?.write('$_prefix$key', data);
     } catch (e) {
-      print('CacheService.save error [$key]: $e');
+      AppLog.d('CacheService.save error [$key]: $e');
     }
   }
 
@@ -29,7 +28,7 @@ class CacheService {
       if (value == null) return null;
       return value as T;
     } catch (e) {
-      print('CacheService.get error [$key]: $e');
+      AppLog.d('CacheService.get error [$key]: $e');
       return null;
     }
   }
@@ -39,7 +38,7 @@ class CacheService {
     try {
       await getStorage?.remove('$_prefix$key');
     } catch (e) {
-      print('CacheService.clear error [$key]: $e');
+      AppLog.d('CacheService.clear error [$key]: $e');
     }
   }
 }

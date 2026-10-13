@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/store_go.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:store_go_app/utils/app_log.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/core/services/firebase_messaging_service.dart';
@@ -30,7 +31,7 @@ Future<void> main() async {
   getStorage = GetStorage();
 
   final language = Prefs.getLanguage();
-  print('🌐 Current Language: $language');
+  AppLog.d('Current language: $language');
 
   await FirebaseMessagingService().initialize();
   await FcmTokenService().initialize();
@@ -41,11 +42,9 @@ Future<void> main() async {
 
   final onboardingController = OnboardingController();
   final isOnboardingCompleted = onboardingController.isOnboardingCompleted;
-  print('🔍 حالة OnBoarding: $isOnboardingCompleted');
+  AppLog.d('Onboarding completed: $isOnboardingCompleted');
 
-  final token = Prefs.getToken();
-  print("hi $token");
-  print("isDemo========> $isDemoMode = ${Prefs.getBool(AppConstant.isDemoMode)}");
+  AppLog.d('Demo mode: ${Prefs.getBool(AppConstant.isDemoMode)}');
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };

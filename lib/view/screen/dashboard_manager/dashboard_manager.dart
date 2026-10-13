@@ -78,7 +78,7 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
                   fontSize: 14.sp,
                 )),
               snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: AppColor.themeNavyBlueColor.withOpacity(0.9),
+              backgroundColor: AppColor.themeNavyBlueColor.withValues(alpha: 0.9),
               margin: EdgeInsets.symmetric(vertical: 90.h,horizontal: 90.w),
               padding: EdgeInsets.symmetric(vertical: 10.h),
               borderRadius: 22.r,

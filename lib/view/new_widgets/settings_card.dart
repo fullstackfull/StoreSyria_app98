@@ -24,15 +24,15 @@ Widget settingCard({
           boxShadow: [
             BoxShadow(
               color: isDark
-                  ? Colors.black.withOpacity(0.18)
-                  : AppColor.cBlack.withOpacity(0.2),
+                  ? Colors.black.withValues(alpha: 0.18)
+                  : AppColor.cBlack.withValues(alpha: 0.2),
               offset: const Offset(0, 2),
               blurRadius: 8,
             ),
           ],
           border: Border.all(
             color: isDark
-                ? AppColor.cFont.withOpacity(0.05)
+                ? AppColor.cFont.withValues(alpha: 0.05)
                 : Colors.transparent,
           ),
         ),
@@ -48,8 +48,8 @@ Widget settingCard({
                   height: 40,
                   decoration: BoxDecoration(
                     color: isDark
-                        ? AppColor.themeNavyBlueColor.withOpacity(0.12)
-                        : AppColor.themeNavyBlueColor.withOpacity(0.08),
+                        ? AppColor.themeNavyBlueColor.withValues(alpha: 0.12)
+                        : AppColor.themeNavyBlueColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(13),
                   ),
                   child: Center(
@@ -59,7 +59,7 @@ Widget settingCard({
                       height: 27.h,
                       colorFilter: ColorFilter.mode(
                         isDark
-                            ? AppColor.themeGreenColor.withOpacity(0.3)
+                            ? AppColor.themeGreenColor.withValues(alpha: 0.3)
                             : AppColor.themeNavyBlueColor,
                         BlendMode.srcIn,
                       ),
@@ -69,7 +69,7 @@ Widget settingCard({
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 14,
-                  color: AppColor.cFont.withOpacity(
+                  color: AppColor.cFont.withValues(alpha:
                     isDark ? 0.4 : 0.5,
                   ),
                 ),
@@ -88,16 +88,16 @@ Widget settingCard({
               overflow: TextOverflow.ellipsis,
             ),
 
-            if (subtitle != null && subtitle!.isNotEmpty) ...[
+            if (subtitle != null && subtitle.isNotEmpty) ...[
               const SizedBox(height: 5),
 
               // Card Subtitle
               Text(
-                subtitle!,
+                subtitle,
                 style: pMedium12.copyWith(
                   color: isDark
-                      ? AppColor.cFont.withOpacity(0.55)
-                      : AppColor.cFont.withOpacity(0.55),
+                      ? AppColor.cFont.withValues(alpha: 0.55)
+                      : AppColor.cFont.withValues(alpha: 0.55),
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -131,7 +131,7 @@ Widget settingWidget({
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColor.themeNavyBlueColor.withOpacity(0.06),
+                color: AppColor.themeNavyBlueColor.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
@@ -159,7 +159,7 @@ Widget settingWidget({
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 13,
-              color: AppColor.cFont.withOpacity(0.35),
+              color: AppColor.cFont.withValues(alpha: 0.35),
             ),
           ],
         ),

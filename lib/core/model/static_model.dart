@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_collection_literals, unnecessary_this
 
+import 'package:store_go_app/network/result.dart';
+
 class StaticsDataModel {
   int? status;
   String? message;
@@ -10,7 +12,7 @@ class StaticsDataModel {
   StaticsDataModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? StaticData.fromJson(json['data']) : null;
+    data = json['data'] is Map ? StaticData.fromJson(jsonMap(json['data'])) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -42,30 +44,35 @@ class StaticData {
     if (json['visitorchart'] != null && json['visitorchart'] is List) {
       visitorchart = <VisitorChartData>[];
       json['visitorchart'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         visitorchart!.add(VisitorChartData.fromJson(v));
       });
     }
     if (json['topurl'] != null && json['topurl'] is List) {
       topurl = <TopUrl>[];
       json['topurl'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         topurl!.add(TopUrl.fromJson(v));
       });
     }
     if (json['platform'] != null && json['platform'] is List) {
       platform = <PlatformData>[];
       json['platform'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         platform!.add(PlatformData.fromJson(v));
       });
     }
     if (json['browser'] != null && json['browser'] is List) {
       browser = <BrowserData>[];
       json['browser'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         browser!.add(BrowserData.fromJson(v));
       });
     }
     if (json['device'] != null && json['device'] is List) {
       device = <DeviceData>[];
       json['device'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         device!.add(DeviceData.fromJson(v));
       });
     }

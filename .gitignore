@@ -48,10 +48,25 @@ app.*.map.json
 /android/app/release
 
 # Never commit keystores or secrets
+#
+# The iOS half was missing. `git check-ignore` answered NO for
+# ios/Runner/dist.mobileprovision, ios/Runner/dist.cer, ios/certs/dist.pfx and
+# android/app/x.pem, so .github/scripts/check-signing-material.sh could only
+# catch those AFTER they were committed -- and by then the key is public. These
+# patterns keep them out of the index in the first place. Measured: zero
+# tracked files match any of them (`git ls-files | grep -iE
+# '\.(pem|key|cer|p12|pfx|mobileprovision|jks|keystore)$'` returns nothing),
+# so nothing legitimate becomes ignored.
 android/key.properties
+**/key.properties
 **/*.keystore
 **/*.jks
 **/*.p12
+**/*.pfx
+**/*.mobileprovision
+**/*.cer
+**/*.pem
+**/*.key
 #**/*.env
 #.env
 

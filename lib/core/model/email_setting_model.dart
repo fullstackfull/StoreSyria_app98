@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_collection_literals, unnecessary_this
 
+import 'package:store_go_app/network/result.dart';
+
 class EmailSettingModel {
   int? status;
   String? message;
@@ -10,7 +12,7 @@ class EmailSettingModel {
   EmailSettingModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? EmailSetting.fromJson(json['data']) : null;
+    data = json['data'] is Map ? EmailSetting.fromJson(jsonMap(json['data'])) : null;
   }
 
   Map<String, dynamic> toJson() {

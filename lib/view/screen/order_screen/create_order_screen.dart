@@ -189,7 +189,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+                        color: navyBlue.withValues(alpha: isDark ? 0.20 : 0.07),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(Icons.person_outline, color: navyBlue, size: 20),
@@ -308,7 +308,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             const SizedBox(height: 10),
 
             Obx(() {
-              final availableProducts = productController.productList;
 
               return Column(
                 children: List.generate(
@@ -351,7 +350,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                         width: 30,
                                         height: 30,
                                         decoration: BoxDecoration(
-                                          color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+                                          color: navyBlue.withValues(alpha: isDark ? 0.20 : 0.07),
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: const Icon(Icons.inventory_2_outlined,
@@ -444,7 +443,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 decoration: BoxDecoration(
                   color: cardColor,
                   border: Border.all(
-                    color: navyBlue.withOpacity(0.4),
+                    color: navyBlue.withValues(alpha: 0.4),
                   ),
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -816,7 +815,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             decoration: BoxDecoration(
               color: cardColor,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: navyBlue.withOpacity(0.3)),
+              border: Border.all(color: navyBlue.withValues(alpha: 0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -906,7 +905,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+            color: navyBlue.withValues(alpha: isDark ? 0.20 : 0.07),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: navyBlue, size: 20),
@@ -931,7 +930,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: borderColor.withOpacity(0.6)),
+          borderSide: BorderSide(color: borderColor.withValues(alpha: 0.6)),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -940,7 +939,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         errorStyle: const TextStyle(color: Colors.red),
         labelStyle: TextStyle(color: secondaryTextColor, fontSize: 13),
         hintStyle: TextStyle(
-          color: secondaryTextColor.withOpacity(0.75),
+          color: secondaryTextColor.withValues(alpha: 0.75),
           fontSize: 13,
         ),
       ),

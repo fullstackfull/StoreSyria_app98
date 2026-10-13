@@ -193,7 +193,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: navyBlue.withOpacity(
+            color: navyBlue.withValues(alpha:
               isDark ? 0.25 : 0.08,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -270,7 +270,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(
+              color: navyBlue.withValues(alpha:
                 isDark ? 0.22 : 0.07,
               ),
               borderRadius: BorderRadius.circular(11.r),
@@ -364,7 +364,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(
+              color: navyBlue.withValues(alpha:
                 isDark ? 0.22 : 0.07,
               ),
               borderRadius: BorderRadius.circular(11),
@@ -556,7 +556,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     return Container(
       width: 40.w,
       height: 40.h,
-      color: navyBlue.withOpacity(0.07),
+      color: navyBlue.withValues(alpha: 0.07),
       child: Icon(
         icon,
         color: navyBlue,
@@ -754,9 +754,17 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
       child: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
-          return SlideTransition(
-            position: _slideAnimation,
-            child: child,
+          // R7-N5. `_fadeAnimation` was built in initState and driven by this
+          // same controller, but nothing ever consumed it -- the analyzer
+          // reported it as an unused field. The sheet was written to fade AND
+          // slide in; only the slide survived. Restored rather than deleted,
+          // because the CurvedAnimation and its curve are evidence of intent.
+          return FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: child,
+            ),
           );
         },
         child: Container(

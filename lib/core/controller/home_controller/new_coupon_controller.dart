@@ -8,6 +8,7 @@ import 'package:store_go_app/core/model/coupon_model.dart';
 import 'package:store_go_app/core/model/view_used_coupon_model.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
+import 'package:store_go_app/network/result.dart';
 import 'cahe.dart';
 import 'store_change_service.dart';
 
@@ -596,8 +597,7 @@ class NewCouponController extends GetxController implements StoreAware {
 
         if (data['status'] == 1) {
           commonToast(type: AppSnackBarType.success, 
-            data['data']?['message'] ??
-                "Success",
+            apiMessage(data, fallback: "Success"),
           );
 
           clearCouponFields();
@@ -606,8 +606,7 @@ class NewCouponController extends GetxController implements StoreAware {
 
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']?['message'] ??
-                "Failed",
+            apiMessage(data, fallback: "Failed"),
           );
         }
       },
@@ -663,8 +662,7 @@ class NewCouponController extends GetxController implements StoreAware {
       onSuccess: (data) {
         if (data['status'] == 1) {
           commonToast(type: AppSnackBarType.success, 
-            data['data']?['message'] ??
-                "Deleted successfully",
+            apiMessage(data, fallback: "Deleted successfully"),
           );
 
           awaitRefresh();
@@ -674,8 +672,7 @@ class NewCouponController extends GetxController implements StoreAware {
           }
         } else {
           commonToast(type: AppSnackBarType.error, 
-            data['data']?['message'] ??
-                "Failed",
+            apiMessage(data, fallback: "Failed"),
           );
         }
       },

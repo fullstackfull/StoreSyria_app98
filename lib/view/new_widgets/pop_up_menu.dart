@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../utils/colors.dart';
 
 class AppPopupMenu extends StatelessWidget {
   final VoidCallback? viewFun;
@@ -59,8 +58,8 @@ class AppPopupMenu extends StatelessWidget {
         height: 1.h,
         thickness: 1,
         color: isDark
-            ? Colors.white.withOpacity(0.12)
-            : Colors.black.withOpacity(0.08),
+            ? Colors.white.withValues(alpha: 0.12)
+            : Colors.black.withValues(alpha: 0.08),
       ),
     );
   }
@@ -202,8 +201,8 @@ class AppPopupMenu extends StatelessWidget {
         height: 28.h,
         decoration: BoxDecoration(
           color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : color ?? Colors.black.withOpacity(0.05),
+              ? Colors.white.withValues(alpha: 0.08)
+              : color ?? Colors.black.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(10.r),
           border: Border.all(color: Colors.grey)
         ),
@@ -215,15 +214,15 @@ class AppPopupMenu extends StatelessWidget {
       ),
 
       elevation: 8,
-      shadowColor: Colors.black.withOpacity(0.4),
+      shadowColor: Colors.black.withValues(alpha: 0.4),
       color: cardColor,
 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.r),
         side: BorderSide(
           color: isDark
-              ? Colors.white.withOpacity(0.12)
-              : Colors.black.withOpacity(0.08),
+              ? Colors.white.withValues(alpha: 0.12)
+              : Colors.black.withValues(alpha: 0.08),
           width: 1,
         ),
       ),

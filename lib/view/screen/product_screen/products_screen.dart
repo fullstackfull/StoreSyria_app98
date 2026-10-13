@@ -189,7 +189,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                             height: 42.w,
                             decoration: BoxDecoration(
                               color: AppColor.themeNavyBlueColor
-                                  .withOpacity(.10),
+                                  .withValues(alpha: .10),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -263,7 +263,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
 
                     Divider(
                       height: 1,
-                      color: borderColor.withOpacity(.6),
+                      color: borderColor.withValues(alpha: .6),
                     ),
 
                     verticalSpace(8.h),
@@ -314,7 +314,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? AppColor.themeNavyBlueColor
-                                    .withOpacity(.08)
+                                    .withValues(alpha: .08)
                                     : cardBg,
                                 borderRadius:
                                 BorderRadius.circular(14.r),
@@ -333,10 +333,10 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                                     decoration: BoxDecoration(
                                       color: isSelected
                                           ? AppColor.themeNavyBlueColor
-                                          .withOpacity(.12)
+                                          .withValues(alpha: .12)
                                           : (isDark
-                                          ? Colors.white.withOpacity(.05)
-                                          : Colors.grey.withOpacity(.08)),
+                                          ? Colors.white.withValues(alpha: .05)
+                                          : Colors.grey.withValues(alpha: .08)),
                                       borderRadius:
                                       BorderRadius.circular(10.r),
                                     ),
@@ -532,7 +532,7 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                           border: Border.all(
                             color: hasFilter
                                 ? AppColor.themeNavyBlueColor
-                                : (isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withOpacity(.5)),
+                                : (isDark ? DarkThemeColor.cBorder : AppColor.cBorder.withValues(alpha: .5)),
                           ),
                         ),
                         child: Icon(

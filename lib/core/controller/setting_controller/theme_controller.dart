@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -9,6 +7,7 @@ import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/theme_switch_overlay.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class ThemeController extends GetxController {
   final scrollbarTheme = ScrollbarThemeData(
@@ -121,7 +120,7 @@ class ThemeController extends GetxController {
         backgroundColor: card,
         modalBackgroundColor: card,
         surfaceTintColor: Colors.transparent,
-        modalBarrierColor: Colors.black.withOpacity(dark ? 0.6 : 0.45),
+        modalBarrierColor: Colors.black.withValues(alpha: dark ? 0.6 : 0.45),
         shape: sheetShape,
         dragHandleColor: border,
       ),
@@ -163,7 +162,7 @@ class ThemeController extends GetxController {
       ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: accent,
-        selectionColor: accent.withOpacity(0.3),
+        selectionColor: accent.withValues(alpha: 0.3),
         selectionHandleColor: accent,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: accent),
@@ -177,13 +176,13 @@ class ThemeController extends GetxController {
     Prefs.setBool(AppConstant.isDarkUrl, value);
 
     update();
-    print('Theme Changed to: ${value ? "Dark" : "Light"}');
+    AppLog.d('Theme Changed to: ${value ? "Dark" : "Light"}');
   }
 
   @override
   void onInit() {
     super.onInit();
-    bool savedTheme = Prefs.getBool(AppConstant.isDarkUrl) ?? false;
+    bool savedTheme = Prefs.getBool(AppConstant.isDarkUrl);
     isDark.value = savedTheme;
     if (isDark.value) {
       AppDarkTheme.darkColor();

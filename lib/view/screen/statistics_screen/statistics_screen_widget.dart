@@ -147,7 +147,7 @@ class GlassPanel extends StatelessWidget {
         boxShadow: shadows ??
             [
               BoxShadow(
-                color: Colors.black.withOpacity(isDark ? .18 : .04),
+                color: Colors.black.withValues(alpha: isDark ? .18 : .04),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -249,7 +249,7 @@ class _IconBadge extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color.withOpacity(Glass.isDark(context) ? .18 : .10),
+        color: color.withValues(alpha: Glass.isDark(context) ? .18 : .10),
         borderRadius: BorderRadius.circular(size * .3),
       ),
       child: Icon(icon, size: size * .5, color: color),
@@ -821,7 +821,7 @@ class GlassVisitorChart extends StatelessWidget {
                       maxY: maxY,
                       animation: animation,
                       lineColor: primary,
-                      fillColor: primary.withOpacity(
+                      fillColor: primary.withValues(alpha:
                           Glass.isDark(context) ? .22 : .12),
                       surfaceColor: Glass.surfaceStrong(context),
                       labelColor: Glass.textPrimary(context),
@@ -929,7 +929,7 @@ class _VisitorLinePainter extends CustomPainter {
             ..shader = LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [fillColor, fillColor.withOpacity(0)],
+              colors: [fillColor, fillColor.withValues(alpha: 0)],
             ).createShader(
               Rect.fromLTRB(0, _AxisLayout.top, size.width, baseline),
             ),

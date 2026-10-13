@@ -19,7 +19,19 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.1.3 <4.0.0'
+  # MEASURED, not inherited. The value here was '>=3.1.3 <4.0.0' -- the
+  # boilerplate `flutter create` wrote -- while pubspec.lock's own `sdks:`
+  # block records the floor the resolved package set actually needs. The two
+  # disagreed, and the lock is the one that binds: `pub get
+  # --enforce-lockfile` checks it and refuses below it, so a developer on an
+  # older Dart passed the manifest's check and then failed the lock's, which
+  # is a confusing way to learn the real requirement.
+  #
+  # Both lines are copied from pubspec.lock's `sdks:` block rather than
+  # chosen. The dart floor is written without the `-0` prerelease suffix the
+  # lock carries, because a manifest constraint is about released SDKs.
+  sdk: '>=3.11.0 <4.0.0'
+  flutter: '>=3.35.1'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions

@@ -2,6 +2,7 @@
 
 import 'package:store_go_app/core/model/product_model.dart';
 import 'package:store_go_app/core/model/static_model.dart';
+import 'package:store_go_app/network/result.dart';
 
 class DashboardModel {
   int? status;
@@ -17,8 +18,7 @@ class DashboardModel {
   DashboardModel.fromJson(dynamic json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null
-        ? DashboardData.fromJson(json['data'])
+    data = json['data'] is Map ? DashboardData.fromJson(jsonMap(json['data']))
         : null;
   }
 
@@ -52,8 +52,7 @@ class DashboardData {
   });
 
   DashboardData.fromJson(dynamic json) {
-    user = json['user'] != null
-        ? User.fromJson(json['user'])
+    user = json['user'] is Map ? User.fromJson(jsonMap(json['user']))
         : null;
 
     // Stores
@@ -61,13 +60,13 @@ class DashboardData {
       store = <Store>[];
 
       json['store'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         store!.add(Store.fromJson(v));
       });
     }
 
     // QR Code
-    qrcode = json['qr-code'] != null
-        ? QrCode.fromJson(json['qr-code'])
+    qrcode = json['qr-code'] is Map ? QrCode.fromJson(jsonMap(json['qr-code']))
         : null;
 
     products = json['products'];
@@ -79,6 +78,7 @@ class DashboardData {
       product = <ProductData>[];
 
       json['product'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         product!.add(ProductData.fromJson(v));
       });
     }
@@ -89,6 +89,7 @@ class DashboardData {
       recentOrder = <RecentOrder>[];
 
       json['recent_order'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         recentOrder!.add(
           RecentOrder.fromJson(v),
         );
@@ -101,6 +102,7 @@ class DashboardData {
       coupons = <Coupons>[];
 
       json['coupons'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         coupons!.add(
           Coupons.fromJson(v),
         );
@@ -113,6 +115,7 @@ class DashboardData {
       orderchart = <Orderchart>[];
 
       json['orderchart'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         orderchart!.add(
           Orderchart.fromJson(v),
         );
@@ -125,6 +128,7 @@ class DashboardData {
       visitorchart = <VisitorChartData>[];
 
       json['visitorchart'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         visitorchart!.add(
           VisitorChartData.fromJson(v),
         );

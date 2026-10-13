@@ -131,4 +131,17 @@ class API {
   static String assignOrderUrl = '/assignOrders';
   static String deliveryBoyIdUrl = '/';
 
+  // Order status and order notes.
+  //
+  // These three were written as literals inside order_repository.dart
+  // (lines 87, 108 and 128) instead of here, which took them OUT of the
+  // cross-repo API contract: they are absent from repo A's generated manifest
+  // (tests/Support/ApiContract/manifests/flutter-endpoints.json, 81
+  // uncommented endpoints, none of them these), so the server side had no
+  // record that the shipped app calls them and nothing would fail if a route
+  // rename dropped them. Same bytes on the wire as the literals they replace.
+  static String updateOrderStatusUrl = '/orders/update-status';
+  static String createOrderNoteUrl = '/orders/notes/create';
+  static String deleteOrderNoteUrl = '/orders/notes/delete';
+
 }

@@ -217,8 +217,8 @@ class _CustomerPickerBottomSheetState
                         final name = customer.customerInfo?.name ?? '';
                         final email = customer.email ?? '';
                         final isActive = customer.status == 1;
-                        final statusLabel = customer?.statusText?.isNotEmpty == true
-                            ? customer!.statusText!
+                        final statusLabel = customer.statusText?.isNotEmpty == true
+                            ? customer.statusText!
                             : isActive
                             ? 'active'.tr
                             : 'inactive'.tr;
@@ -227,7 +227,7 @@ class _CustomerPickerBottomSheetState
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
                             backgroundColor:
-                            navyBlue.withOpacity(isDark ? 0.25 : 0.08),
+                            navyBlue.withValues(alpha: isDark ? 0.25 : 0.08),
                             child: Text(
                               name.isNotEmpty ? name[0].toUpperCase() : '?',
                               style: const TextStyle(

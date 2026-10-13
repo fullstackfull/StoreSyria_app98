@@ -8,7 +8,7 @@ import 'package:store_go_app/core/model/review_model.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
+import 'package:store_go_app/network/result.dart';
 
 class AddReviewController extends GetxController {
   ReviewRepository reviewRepository = ReviewRepository();
@@ -28,11 +28,27 @@ class AddReviewController extends GetxController {
   final RxBool isReviewLoading = false.obs;
   final RxBool isAddReviewLoading = false.obs;
 
+  /// Why an error field is needed here when `reviewList` already exists.
+  ///
+  /// `/reviewlist` carries `?store_id=` (review_repository.dart:14), so it is
+  /// one of the admin-API sites repo A now answers 403 on when the store is
+  /// not the caller's. The old `onFailure` cleared `reviewList` and did
+  /// nothing else -- no toast, no state -- and `_buildReviewsList`
+  /// (product_detail_screen.dart:801) renders `'no_reviews_yet'.tr` for an
+  /// empty list. So a 403 arrived as the confident claim "No reviews yet":
+  /// a denial rendered as an empty SUCCESS, which is worse than an error,
+  /// because the merchant has no reason to doubt it or retry.
+  ///
+  /// An empty list cannot carry the distinction on its own -- "no rows" and
+  /// "not allowed to see the rows" are the same empty list -- so the reason
+  /// is held separately and the view branches on it before the empty state.
+  final RxString reviewErrorMessage = ''.obs;
+
 
   @override
   void onInit() {
     super.onInit();
-    userId.value = Prefs.getUserID() ?? '';
+    userId.value = Prefs.getUserID();
 
     userValue.value = Prefs.getString("name") ?? '';
   }
@@ -72,6 +88,8 @@ class AddReviewController extends GetxController {
       response.fold(
         onSuccess: (data) {
           if (data['status'] == 1) {
+            reviewErrorMessage.value = '';
+
             reviewModel = ReviewModel.fromJson(data);
 
             reviewList.assignAll(
@@ -81,15 +99,25 @@ class AddReviewController extends GetxController {
             imageBaseUrl.value =
                 Prefs.getString(AppConstant.imageUrl);
           } else {
-            // إذا ما في reviews
+            // إذا ما في reviews -- a real, authorized "no rows" answer, so the
+            // empty state below is the truthful rendering and the error is
+            // cleared rather than left over from an earlier attempt.
+            reviewErrorMessage.value = '';
             reviewList.clear();
           }
         },
         onFailure: (reason, message, validationErrors) {
+          // 403 (and every other failure) must not masquerade as "no reviews".
+          // `message` is already the per-status wording the network layer
+          // chose -- action_not_permitted for a 403, session_expired for a
+          // 401, too_many_requests for a 429 -- so it is translated and does
+          // not need a fallback here.
+          reviewErrorMessage.value = message;
           reviewList.clear();
         },
       );
     } catch (e) {
+      reviewErrorMessage.value = 'error_occurred'.tr;
       reviewList.clear();
     } finally {
       isReviewLoading.value = false;
@@ -134,9 +162,7 @@ class AddReviewController extends GetxController {
     response.fold(
       onSuccess: (data) async {
         commonToast(type: AppSnackBarType.success, 
-          data['data']?['message'] ??
-              data['message'] ??
-              "Deleted",
+          apiMessage(data, fallback: "Deleted"),
         );
 
         await getReviewData(productId);
@@ -177,9 +203,7 @@ class AddReviewController extends GetxController {
       response.fold(
         onSuccess: (data) async {
           commonToast(type: AppSnackBarType.success, 
-            data['data']?['message'] ??
-                data['message'] ??
-                "Success",
+            apiMessage(data, fallback: "Success"),
           );
 
           await getReviewData(productId);

@@ -395,7 +395,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       decoration: BoxDecoration(
         color: isDark ? DarkThemeColor.cCardBackground : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: child,
     );
@@ -411,7 +411,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
           width: 32.w,
           height: 32.w,
           margin: EdgeInsets.only(top: 2.h),
-          decoration: BoxDecoration(color: AppColor.themeNavyBlueColor.withOpacity(.1), borderRadius: BorderRadius.circular(8.r)),
+          decoration: BoxDecoration(color: AppColor.themeNavyBlueColor.withValues(alpha: .1), borderRadius: BorderRadius.circular(8.r)),
           child: Icon(icon, size: 16.sp, color: AppColor.themeNavyBlueColor),
         ),
         SizedBox(width: 10.w),

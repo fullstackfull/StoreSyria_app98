@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:store_go_app/network/network.dart';
@@ -8,6 +7,7 @@ import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:http/http.dart' as http;
+import 'package:store_go_app/utils/app_log.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
@@ -85,24 +85,19 @@ class AuthController extends GetxController {
     isLoading.value = true;
 
     try {
-      final token = Prefs.getToken();
-
       final url = Uri.parse(
         API.baseUrl + API.logoutUrl,
       );
 
-      log('=== LOGOUT URL === $url');
+      AppLog.d('=== LOGOUT URL === $url');
 
+      // R7-N1: was a hand-rolled Bearer map. Identical bytes, one site.
       final response = await http.post(
         url,
-        headers: {
-          ...NetworkHttps.baseHeaders,
-          'Authorization': 'Bearer $token',
-        },
+        headers: NetworkHttps.authHeaders(),
       );
 
-      log('=== LOGOUT STATUS === ${response.statusCode}');
-      log('=== LOGOUT BODY === ${response.body}');
+      AppLog.d('=== LOGOUT STATUS === ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -131,7 +126,7 @@ class AuthController extends GetxController {
         );
       }
     } catch (e) {
-      log('=== LOGOUT ERROR === $e');
+      AppLog.e('=== LOGOUT ERROR ===', error: e);
       commonToast(
         type: AppSnackBarType.error,
         'logout_error'.tr,
@@ -149,7 +144,7 @@ class AuthController extends GetxController {
       var url = Uri.parse(API.baseUrl + API.loginUrl);
       Map<String, dynamic> data = {"email": email, "password": password};
 
-      log("===url============$url\n data===> ${json.encode(data)}");
+      AppLog.d('=== LOGIN URL === $url');
 
       var response = await http.post(
         url,
@@ -157,11 +152,10 @@ class AuthController extends GetxController {
         headers: NetworkHttps.baseHeaders,
       );
 
-      print('Response status: ${response.statusCode}');
+      AppLog.d('=== LOGIN STATUS === ${response.statusCode}');
 
       if (response.statusCode == 200) {
         var decoded = jsonDecode(response.body);
-        print('Response body: $decoded');
 
         if (decoded['status'] == 1 || decoded['success'] == true) {
 
@@ -172,8 +166,6 @@ class AuthController extends GetxController {
           String storeId = userData['current_store']?.toString() ?? '';
           String userEmail = userData['email'] ?? '';
           String userName = userData['name'] ?? 'User';
-
-          print("===user_id============ $userId");
 
           Prefs.setUserID(userId);
           Prefs.setToken(token);
@@ -213,7 +205,7 @@ class AuthController extends GetxController {
 
     } catch (e) {
       isLoading.value = false;
-      print("===Exception============ $e");
+      AppLog.e('=== LOGIN EXCEPTION ===', error: e);
       commonToast(
         type: AppSnackBarType.error,
         'unexpected_error'.tr,
@@ -227,7 +219,7 @@ class AuthController extends GetxController {
       final fcmService = FcmTokenService();
       await fcmService.sendFcmTokenToServer(storeId: storeId);
     } catch (e) {
-      print('❌ خطأ في إرسال FCM Token بعد تسجيل الدخول: $e');
+      AppLog.e('FCM token dispatch after login failed', error: e);
     }
   }
 
@@ -236,7 +228,7 @@ class AuthController extends GetxController {
     try {
       await FcmTokenService().clearFcmToken();
     } catch (e) {
-      log('FCM clear error: $e');
+      AppLog.e('FCM clear error', error: e);
     }
 
     // Clear notifications

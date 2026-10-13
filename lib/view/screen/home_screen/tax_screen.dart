@@ -281,7 +281,7 @@ class _TaxItemWidget extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              tax.taxName ?? '',
+              tax.taxName,
               style: pMedium16.copyWith(color: itemTextColor, fontSize: 10.sp),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

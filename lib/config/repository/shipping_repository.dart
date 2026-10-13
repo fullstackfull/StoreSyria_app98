@@ -1,14 +1,13 @@
-// ignore_for_file: avoid_print
-
 import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class ShippingRepository {
   getShippingData(int page) async {
     String endPoint = "${API.shippingListUrl}${API.storeIdUrl}${Prefs.getStoreID()}${API.andPageUrl}$page";
     var response = await NetworkHttps.getRequest(endPoint);
-    print("response==========>$response");
+    AppLog.d("response==========>$response");
     return response;
   }
 
@@ -39,7 +38,7 @@ class ShippingRepository {
       endPoint,
       fields,
     );
-    print("response==========>$response");
+    AppLog.d("response==========>$response");
     return response;
   }
 
@@ -50,7 +49,7 @@ class ShippingRepository {
         API.shippingIdUrl +
         shippingId;
     var response = await NetworkHttps.deleteRequest(endPoint);
-    print("response==========>$response");
+    AppLog.d("response==========>$response");
     return response;
   }
 }

@@ -118,12 +118,12 @@ Widget _themeCard({
       borderRadius: BorderRadius.circular(18),
       border: Border.all(
         color: isDark
-            ? AppColor.cFont.withOpacity(0.06)
+            ? AppColor.cFont.withValues(alpha: 0.06)
             : Colors.transparent,
       ),
       boxShadow: [
         BoxShadow(
-          color: AppColor.themeGreenColor.withOpacity(
+          color: AppColor.themeGreenColor.withValues(alpha:
             isDark ? 0.10 : 0.12,
           ),
           offset: const Offset(0, 2),

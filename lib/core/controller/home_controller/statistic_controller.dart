@@ -1,11 +1,8 @@
-import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:store_go_app/config/repository/statistics_repository.dart';
-import 'package:store_go_app/core/model/dashboard_model.dart';
 import 'package:store_go_app/core/model/static_model.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
-import 'package:store_go_app/view/widget/loading_widget.dart';
 
 class StatisticsController extends GetxController {
   StatisticRepository statisticRepository = StatisticRepository();

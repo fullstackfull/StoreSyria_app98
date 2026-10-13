@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_collection_literals, unnecessary_this
 
 import 'coupon_model.dart';
+import 'package:store_go_app/network/result.dart';
 
 class TaxModel {
   int status;
@@ -16,8 +17,7 @@ class TaxModel {
   TaxModel.fromJson(Map<String, dynamic> json)
       : status = json['status'] ?? 0,
         message = json['message'] ?? '',
-        data = json['data'] != null
-            ? TaxModelData.fromJson(json['data'])
+        data = json['data'] is Map ? TaxModelData.fromJson(jsonMap(json['data']))
             : TaxModelData();
 
   Map<String, dynamic> toJson() {
@@ -81,12 +81,14 @@ class TaxModelData {
 
     if (json['data'] != null && json['data'] is List) {
       data = (json['data'] as List)
+          .whereType<Map<String, dynamic>>()
           .map((e) => Tax.fromJson(e))
           .toList();
     }
 
     if (json['links'] != null && json['links'] is List) {
       links = (json['links'] as List)
+          .whereType<Map<String, dynamic>>()
           .map((e) => Links.fromJson(e))
           .toList();
     }

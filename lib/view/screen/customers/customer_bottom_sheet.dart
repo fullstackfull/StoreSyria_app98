@@ -6,6 +6,7 @@ import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
 import '../../../core/controller/customers/customer_controller.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class AddNewCustomerWidget extends StatefulWidget {
   final bool isUpdate;
@@ -200,7 +201,15 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
         Navigator.of(context).pop();
       }
     } catch (e) {
-      debugPrint('Customer submit error: $e');
+      // Was `debugPrint`, which is NOT inert in release: the Flutter SDK in
+      // use documents it at
+      // packages/flutter/lib/src/foundation/print.dart:37 -- "The [debugPrint]
+      // function logs to console even in release mode" -- and its default
+      // implementation `debugPrintThrottled` (:73-85) carries no build-mode
+      // check. This was the one site in lib/ that bypassed the AppLog seam, so
+      // the seam's "release builds emit nothing" guarantee was false while it
+      // stood. AppLog.e short-circuits on kReleaseMode and scrubs the message.
+      AppLog.e('Customer submit error', error: e);
     } finally {
       if (mounted) {
         setState(() {
@@ -255,7 +264,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(isDark ? 0.22 : 0.07),
+              color: navyBlue.withValues(alpha: isDark ? 0.22 : 0.07),
               borderRadius: BorderRadius.circular(11),
             ),
             child: Icon(
@@ -677,7 +686,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+              color: navyBlue.withValues(alpha: isDark ? 0.20 : 0.07),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -716,7 +725,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(
-              color: borderColor.withOpacity(0.6),
+              color: borderColor.withValues(alpha: 0.6),
             ),
           ),
 
@@ -726,7 +735,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
           ),
 
           hintStyle: TextStyle(
-            color: secondaryTextColor.withOpacity(0.75),
+            color: secondaryTextColor.withValues(alpha: 0.75),
             fontSize: 13,
           ),
         ),
@@ -793,7 +802,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: navyBlue.withOpacity(isDark ? 0.20 : 0.07),
+            color: navyBlue.withValues(alpha: isDark ? 0.20 : 0.07),
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(
@@ -832,7 +841,7 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(
-            color: borderColor.withOpacity(0.6),
+            color: borderColor.withValues(alpha: 0.6),
           ),
         ),
 

@@ -176,7 +176,7 @@ class AppTextField extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(11.r),
-                    color: navyBlue.withOpacity(0.07),
+                    color: navyBlue.withValues(alpha: 0.07),
                   ),
                   child: Icon(icon, color: isDark ? Colors.white : AppColor.themeNavyBlueColor, size: 22.w),
                 ),

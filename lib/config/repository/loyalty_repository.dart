@@ -1,8 +1,7 @@
-// ignore_for_file: avoid_print
-
 import 'package:store_go_app/network/network.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class LoyaltyRepository {
   setLoyaltyData({required String status, required String point}) async {
@@ -12,7 +11,7 @@ class LoyaltyRepository {
       'loyality_program_enabled': status,
       'reward_point': point
     });
-    print("response====>$response");
+    AppLog.d("response====>$response");
     return response;
   }
 
@@ -20,7 +19,7 @@ class LoyaltyRepository {
     String endPoint =
         API.getLoyaltySettingUrl + API.storeIdUrl + Prefs.getStoreID();
     var response = await NetworkHttps.getRequest(endPoint);
-    print("response====>$response");
+    AppLog.d("response====>$response");
     return response;
   }
 }

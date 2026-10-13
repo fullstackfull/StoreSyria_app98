@@ -5,7 +5,6 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import '../../../core/model/create_product_model.dart';
 import '../../new_widgets/app_txt_field.dart';
 import '../../widget/app_dialog.dart';
-import 'product_widget.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -151,10 +150,10 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     final textColor = isDark ? Colors.white : AppColor.cText;
     final hintColor = isDark ? Colors.grey.shade400 : AppColor.cFont;
     final borderColor =
-    isDark ? Colors.white.withOpacity(0.08) : AppColor.cBorder;
+    isDark ? Colors.white.withValues(alpha: 0.08) : AppColor.cBorder;
     final softBg = isDark
-        ? AppColor.themeNavyBlueColor.withOpacity(0.16)
-        : AppColor.themeNavyBlueColor.withOpacity(0.07);
+        ? AppColor.themeNavyBlueColor.withValues(alpha: 0.16)
+        : AppColor.themeNavyBlueColor.withValues(alpha: 0.07);
 
     return GestureDetector(
       onTap: () {
@@ -295,7 +294,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -689,7 +688,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           color: Colors.black54,
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4),
           ],
         ),
         child: Icon(Icons.close, size: 14.sp, color: Colors.white),
@@ -714,7 +713,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         duration: const Duration(milliseconds: 150),
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: selected ? navy.withOpacity(0.12) : Colors.transparent,
+          color: selected ? navy.withValues(alpha: 0.12) : Colors.transparent,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(color: selected ? navy : borderColor),
         ),
@@ -884,7 +883,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                 dashPattern: [5, 5],
                 strokeWidth: 1.3,
                 radius: Radius.circular(18.r),
-                color: AppColor.themeNavyBlueColor.withOpacity(0.6),
+                color: AppColor.themeNavyBlueColor.withValues(alpha: 0.6),
               ),
               child: Padding(
                 padding: EdgeInsets.all(15.w),
@@ -971,7 +970,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                 dashPattern: [5, 5],
                 strokeWidth: 1.3,
                 radius: Radius.circular(18.r),
-                color: AppColor.themeNavyBlueColor.withOpacity(0.6),
+                color: AppColor.themeNavyBlueColor.withValues(alpha: 0.6),
               ),
               child: Padding(
                 padding: EdgeInsets.all(15.w),

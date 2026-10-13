@@ -7,6 +7,7 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import '../../core/controller/auth/auth_controller.dart';
 import '../../core/controller/onboarding_controller/onboarding_controller.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class WelComeScreen extends StatefulWidget {
   const WelComeScreen({super.key});
@@ -60,9 +61,9 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
       final isOnboardingCompleted = onboardingController.isOnboardingCompleted;
       final isLoggedIn = Prefs.getToken().isNotEmpty;
 
-      print('🔍 التحقق في Welcome Screen:');
-      print('   OnBoarding: $isOnboardingCompleted');
-      print('   Logged In: $isLoggedIn');
+      AppLog.d('🔍 التحقق في Welcome Screen:');
+      AppLog.d('   OnBoarding: $isOnboardingCompleted');
+      AppLog.d('   Logged In: $isLoggedIn');
 
       if (!isOnboardingCompleted) {
         Get.offAllNamed('/onboarding');
@@ -84,8 +85,6 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final Color bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
-    final Color cardColor = isDark ? DarkThemeColor.cCardBackground : AppColor.cWhite;
-    final Color borderColor = isDark ? DarkThemeColor.cBorder : AppColor.cBorder;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -97,7 +96,7 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
             end: -70.w,
             child: _GlowCircle(
               size: 240.w,
-              color: AppColor.themeGreenColor.withOpacity(isDark ? 0.14 : 0.12),
+              color: AppColor.themeGreenColor.withValues(alpha: isDark ? 0.14 : 0.12),
             ),
           ),
           PositionedDirectional(
@@ -105,7 +104,7 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
             start: -80.w,
             child: _GlowCircle(
               size: 280.w,
-              color: AppColor.themeNavyBlueColor.withOpacity(isDark ? 0.22 : 0.08),
+              color: AppColor.themeNavyBlueColor.withValues(alpha: isDark ? 0.22 : 0.08),
             ),
           ),
 
@@ -140,7 +139,7 @@ class _WelComeScreenState extends State<WelComeScreen> with TickerProviderStateM
                           color: AppColor.themeGreenColor,
                           backgroundColor: isDark
                               ? DarkThemeColor.cBorder
-                              : AppColor.themeGreenColor.withOpacity(0.15),
+                              : AppColor.themeGreenColor.withValues(alpha: 0.15),
                         ),
                       ),
                     ),

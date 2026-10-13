@@ -1,0 +1,18 @@
+# TEMPLATE for android/key.properties — finding SEC-21 / R7-01.
+#
+# Copy this file to android/key.properties and fill in the real values.
+# android/key.properties is gitignored (.gitignore:51, android/.gitignore:12)
+# and MUST NEVER be committed. Neither must the keystore it points at.
+#
+# Leave the placeholder text below exactly as it is in THIS file: it is the
+# tracked template and must contain no real credential.
+#
+# All four keys are required. If any is missing or blank, the release build
+# aborts with instructions instead of falling back to the debug key.
+#
+# storeFile may be absolute (recommended) or relative to the android/ directory.
+
+storeFile=/absolute/path/to/storesyria-release.jks
+storePassword=CHANGE_ME
+keyAlias=storesyria
+keyPassword=CHANGE_ME

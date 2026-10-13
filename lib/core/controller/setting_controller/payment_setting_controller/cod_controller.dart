@@ -49,14 +49,10 @@
 //   }) async {
 //     Loader.showLoader();
 //     String url = API.baseUrl + API.codPaymentUrl;
-//     print(" URL===> $url");
-//     print("authHeaders===>${Prefs.getToken()}");
+//     AppLog.d(" URL===> $url");
 //     var request = http.MultipartRequest('POST', Uri.parse(url));
-//     request.headers.addAll({
-//       "Authorization": 'Bearer ${Prefs.getToken()}',
-//       HttpHeaders.contentTypeHeader: 'application/json',
-//       HttpHeaders.cacheControlHeader: "no-cache",
-//     });
+//     // R7-N1: do NOT hand-roll the Authorization header here.
+//     request.headers.addAll(NetworkHttps.authHeaders());
 //     request.fields.addAll({
 //       'store_id': Prefs.getStoreID(),
 //       'CURRENCY_NAME': currencyName,

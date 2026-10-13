@@ -1,4 +1,4 @@
-// ignore_for_file: must_be_immutable, prefer_const_constructors, avoid_print, prefer_const_constructors_in_immutables
+// ignore_for_file: must_be_immutable, prefer_const_constructors, prefer_const_constructors_in_immutables
 
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +14,7 @@ import 'package:store_go_app/view/widget/common_drop_down_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/shipping_controller.dart';
+import 'package:store_go_app/utils/app_log.dart';
 
 class AddShippingWidget extends StatefulWidget {
   final bool isUpdate;
@@ -167,7 +168,7 @@ class _AddShippingWidgetState extends State<AddShippingWidget> {
                               shippingController.durationController.text.isNotEmpty &&
                               shippingController.descriptionController.text.isNotEmpty &&
                               shippingController.imagePath.isNotEmpty) {
-                            print("----->(${shippingController.imagePath.value})");
+                            AppLog.d("----->(${shippingController.imagePath.value})");
                             if (widget.isUpdate == true) {
                               if (Prefs.getBool(AppConstant.isDemoMode) == true) {
                                 commonToast(type: AppSnackBarType.info, AppConstant.demoString.tr);
