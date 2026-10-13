@@ -285,4 +285,138 @@ void main() {
       }
     });
   });
+
+  // ---------------------------------------------------------------------------
+  group('the release abort covers every way a release is packaged', () {
+    // CANNOT BE EXECUTED HERE, and is not claimed to be. There is no Android
+    // SDK, no Gradle run and no device in this environment, so the guard is
+    // read, not run; apksigner cannot be invoked and no built artifact is
+    // verified by anything in this file. The authoritative check stays
+    //
+    //   apksigner verify --print-certs \
+    //     build/app/outputs/flutter-apk/app-release.apk
+    //
+    // with a certificate subject that must not be
+    // `CN=Android Debug, O=Android, C=US`.
+    //
+    // WHAT CAN STILL BE CHECKED, AND WHY IT IS WORTH CHECKING. The guard fires
+    // only for task names it recognises as release packaging
+    // (build.gradle.kts:156-180). Nothing asserted WHICH names those are, and
+    // the existing coverage stops at `contains('taskGraph')`. Drop one prefix
+    // and the guard still looks present, still compiles, and still passes
+    // every other test in this file -- while the command it no longer covers
+    // produces an unsigned artifact in silence.
+    //
+    // `bundle` is the one that matters most: `flutter build appbundle` runs
+    // bundleRelease, and an App Bundle is what goes to the Play Store. An
+    // unsigned or debug-signed AAB is rejected at upload at best, and at worst
+    // a debug-signed APK is installable as an in-place update by anyone,
+    // inheriting the bearer token already on the device -- which is the whole
+    // reason SEC-21 / R7-01 exists.
+
+    test('all four release packaging prefixes are matched', () {
+      for (final prefix in const [
+        'assemble', // flutter build apk
+        'bundle', // flutter build appbundle  <- the Play Store path
+        'package', // the packaging task itself
+        'install', // flutter install --release
+      ]) {
+        expect(
+          gradle,
+          contains('name.startsWith("$prefix")'),
+          reason: 'The release abort no longer covers $prefix*Release tasks, '
+              'so that command can produce an unsigned artifact without '
+              'failing.',
+        );
+      }
+    });
+
+    test('and it keys on Release, so debug builds still work', () {
+      // The other half of the same property: a guard that fired for every
+      // task would break `flutter run`, `flutter test` and IDE sync on any
+      // machine without a keystore -- which is every developer machine and
+      // every CI runner here. A broken debug build gets the guard deleted.
+      expect(gradle, contains('name.contains("Release")'));
+      expect(
+        gradle,
+        contains('if (hasReleaseSigning) return@whenReady'),
+        reason: 'A correctly configured release machine must not be blocked '
+            'by the guard meant for an unconfigured one.',
+      );
+    });
+
+    test('a release signing config is only built from a real keystore', () {
+      // `hasReleaseSigning` is the single predicate the signingConfig, the
+      // buildType wiring and the abort all read, so what it requires is the
+      // whole precondition. All four parts are asserted, because dropping the
+      // keystoreFile.exists() check alone would let a key.properties pointing
+      // at a missing keystore satisfy it.
+      expect(gradle, contains('keystorePropertiesFile.exists()'));
+      expect(gradle, contains('missingKeystoreKeys.isEmpty()'));
+      expect(gradle, contains('keystoreFile != null'));
+      expect(gradle, contains('keystoreFile.exists()'));
+
+      // And the config is created inside that condition, not unconditionally.
+      final configAt = gradle.indexOf('create("release")');
+      expect(configAt, greaterThan(0));
+
+      final before = gradle.substring(0, configAt);
+      expect(
+        before.lastIndexOf('if (hasReleaseSigning)'),
+        greaterThan(before.lastIndexOf('signingConfigs {')),
+        reason: 'The release signingConfig must be created only when a '
+            'complete key.properties and a real keystore are both present.',
+      );
+    });
+
+    test('every required key.properties field is demanded', () {
+      // A missing keyPassword would otherwise be filled in from storePassword
+      // by some tooling, or left blank, and the build would sign with
+      // something nobody chose.
+      for (final key in const [
+        'storeFile',
+        'storePassword',
+        'keyAlias',
+        'keyPassword',
+      ]) {
+        expect(gradle, contains('"$key"'), reason: '$key is no longer '
+            'required by the signing precondition.');
+      }
+    });
+
+    test('no keystore path is hard-coded in the build file', () {
+      // storeFile must come from key.properties, which is gitignored. A path
+      // written into build.gradle.kts would mean a keystore living at a fixed
+      // place in the tree, which is how one gets committed.
+      final hardCoded = RegExp(
+        r'storeFile\s*=\s*(file\(|rootProject\.file\()?["\x27]',
+      );
+
+      expect(
+        hardCoded.hasMatch(gradle),
+        isFalse,
+        reason: 'storeFile must be read from key.properties, never written '
+            'into the build file.',
+      );
+
+      expect(gradle, contains('keystoreProperties.getProperty("storePassword")'));
+    });
+
+    test('the hard-coded-path detector finds one when it is there', () {
+      final hardCoded = RegExp(
+        r'storeFile\s*=\s*(file\(|rootProject\.file\()?["\x27]',
+      );
+
+      for (final sample in const [
+        'storeFile = file("../app/release.keystore")',
+        "storeFile = rootProject.file('upload.jks')",
+        'storeFile = "/Users/dev/release.jks"',
+      ]) {
+        expect(hardCoded.hasMatch(sample), isTrue, reason: sample);
+      }
+
+      // The real line must not match: it reads from the properties object.
+      expect(hardCoded.hasMatch('storeFile = keystoreFile'), isFalse);
+    });
+  });
 }
