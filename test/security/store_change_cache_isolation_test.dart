@@ -55,6 +55,12 @@ import '../support/source_tree.dart';
 /// no store scoping, which is the server agreeing that it is not tenant data.
 const _globalCacheKeys = <String>{'_cacheImageUrlKey'};
 
+/// Any write to the GetStorage container, by handle name or by a fresh
+/// `GetStorage()`. The last alternative is the one a name-based matcher
+/// misses.
+final _writePattern =
+    RegExp(r'(getStorage|_box|GetStorage\(\))[?!]?\.write\(');
+
 void main() {
   // ---------------------------------------------------------------------------
   group('the store-change wiring is symmetric', () {
@@ -291,10 +297,44 @@ void main() {
 
   // ---------------------------------------------------------------------------
   group('the cache layer cannot be bypassed', () {
-    test('only Prefs and CacheService write to the storage container', () {
-      // A controller writing store-scoped data straight to GetStorage would
-      // be outside both the clear-on-logout allowlist and the
-      // clear-on-store-change wiring, and nothing above would see it.
+    test('nothing but main.dart opens its own GetStorage handle', () {
+      // THE ROOT-CAUSE SHAPE, and the one this file was written after.
+      // `GetStorage()` with no container name returns the same default
+      // container, so an own handle isolates nothing -- it only takes the
+      // keys written through it out of sight of Prefs' logout allowlist and
+      // CacheService's store-change clear. store_setting_controller.dart:17
+      // was exactly this, and its three currency keys were the leak.
+      //
+      // Checked at the INSTANTIATION rather than at the write, because that
+      // is what a name-based write matcher misses: the first version of this
+      // group looked for `(getStorage|_box).write(`, and a probe that wrote
+      // `GetStorage().write(...)` sailed straight past it.
+      final offenders = <String>[];
+
+      for (final file in libDartFiles()) {
+        final path = relative(file);
+        if (path == 'lib/main.dart') continue;
+
+        final lines = codeOnly(file.readAsStringSync()).split('\n');
+
+        for (var i = 0; i < lines.length; i++) {
+          if (lines[i].contains('GetStorage(')) {
+            offenders.add('$path:${i + 1}  ${lines[i].trim()}');
+          }
+        }
+      }
+
+      expect(
+        offenders,
+        isEmpty,
+        reason: 'Use the single container main.dart:31 creates, through Prefs '
+            '(session state, with the logout allowlist) or CacheService '
+            '(store-scoped, with the store-change clear). '
+            'Found:\n${offenders.join('\n')}',
+      );
+    });
+
+    test('and nothing writes to the container directly', () {
       final offenders = <String>[];
 
       for (final file in libDartFiles()) {
@@ -305,7 +345,7 @@ void main() {
         final lines = codeOnly(file.readAsStringSync()).split('\n');
 
         for (var i = 0; i < lines.length; i++) {
-          if (RegExp(r'(getStorage|_box)[?!]?\.write\(').hasMatch(lines[i])) {
+          if (_writePattern.hasMatch(lines[i])) {
             offenders.add('$path:${i + 1}  ${lines[i].trim()}');
           }
         }
@@ -314,40 +354,48 @@ void main() {
       expect(
         offenders,
         isEmpty,
-        reason: 'Persist through Prefs (session state, with the logout '
-            'allowlist) or CacheService (store-scoped, with the '
-            'store-change clear). Found:\n${offenders.join('\n')}',
+        reason: 'Persist through Prefs or CacheService. '
+            'Found:\n${offenders.join('\n')}',
       );
     });
 
-    test('the detector finds a write when there is one', () {
-      // Keeps the assertion above from passing because the pattern stopped
-      // matching rather than because the code is clean.
-      const sample = '''
-        void save() {
-          getStorage?.write('k', 'v');
-        }
-      ''';
+    test('the detectors find each shape when it is there', () {
+      // Keeps both assertions above from passing because a pattern stopped
+      // matching rather than because the code is clean. All four shapes are
+      // ones that really appeared here or in a probe of this file.
+      const shapes = <String>[
+        "getStorage?.write('k', 'v');",
+        "getStorage!.write('k', 'v');",
+        "_box.write('k', 'v');",
+        "GetStorage().write('k', 'v');",
+      ];
 
-      final hits = RegExp(r'(getStorage|_box)[?!]?\.write\(')
-          .allMatches(codeOnly(sample))
-          .length;
+      for (final shape in shapes) {
+        expect(
+          _writePattern.hasMatch(codeOnly('void f() { $shape }')),
+          isTrue,
+          reason: 'The write detector does not see: $shape',
+        );
+      }
 
-      expect(hits, 1);
+      expect(
+        codeOnly("void f() { final b = GetStorage(); }")
+            .contains('GetStorage('),
+        isTrue,
+      );
     });
 
-    test('and ignores the same text in a comment', () {
+    test('and ignore the same text in a comment', () {
       const sample = '''
-        // getStorage?.write('k', 'v') is what this used to do.
+        // getStorage?.write('k', 'v'), and a GetStorage() too, is what this
+        // used to do.
         void save() {}
       ''';
 
-      expect(
-        RegExp(r'(getStorage|_box)[?!]?\.write\(')
-            .allMatches(codeOnly(sample))
-            .length,
-        0,
-      );
+      final stripped = codeOnly(sample);
+
+      expect(_writePattern.hasMatch(stripped), isFalse);
+      expect(stripped.contains('GetStorage('), isFalse);
     });
   });
 }
