@@ -7,7 +7,7 @@ name: CI
 #
 # WHAT IS GATED, AND WHY EACH BAR IS WHERE IT IS
 #
-#   flutter test                   -- blocking, must be 100%. MEASURED 217/217.
+#   flutter test                   -- blocking, must be 100%. MEASURED 1098/1098.
 #   flutter analyze errors         -- blocking, must be 0. MEASURED 0.
 #   flutter analyze warnings       -- blocking, must be 0. MEASURED 0.
 #   flutter analyze infos          -- RATCHET at 248: may fall, never rise.
@@ -71,6 +71,43 @@ name: CI
 #   SDK, so a "the lock did not change" check would fail on every run. That
 #   re-resolution is an owner decision: it is reported for a decision, not
 #   silently committed.
+#
+#   MEASURED, so the decision can be made on numbers rather than on a feeling.
+#   `flutter pub get` on Flutter 3.47.7 / Dart 3.13.5 reports "Changed 7
+#   dependencies!" and rewrites 15 lines:
+#
+#     characters               1.4.0   -> 1.4.1
+#     intl                     0.20.2  -> 0.20.3
+#     matcher                  0.12.17 -> 0.12.20
+#     material_color_utilities 0.11.1  -> 0.13.0
+#     meta                     1.16.0  -> 1.19.0
+#     test_api                 0.7.6   -> 0.7.12
+#     vector_math              2.2.0   -> 2.4.3
+#
+#   Six are `transitive` and SDK-pinned; `intl` is the only `direct main` one
+#   and `pubspec.yaml:75` already declares `intl: ^0.20.2`, which admits
+#   0.20.3 -- so NO pubspec.yaml constraint has to move for any of the seven.
+#   Nothing crosses a major version.
+#
+#   The re-resolved lock was then RUN, not assumed safe: `flutter test` ->
+#   1098/1098 and `flutter analyze` -> 248 issues / 0 errors / 0 warnings,
+#   identical to the committed lock on both counts. The committed lock was
+#   restored afterwards.
+#
+#   RECOMMENDATION, and the one reason it is the owner's call rather than
+#   housekeeping: the re-resolution also moves the lock's own SDK floor,
+#
+#     sdks:
+#       dart: ">=3.9.0 <4.0.0"   ->   dart: ">=3.11.0-0 <4.0.0"
+#
+#   (the `flutter: ">=3.35.1"` line does not move). That floor is what stops a
+#   `pub get` on an older Dart, and `pubspec.yaml:22` still declares
+#   `environment: sdk: '>=3.1.3 <4.0.0'`. Committing the lock therefore
+#   narrows who can build the app while the manifest still says otherwise, so
+#   it should land as ONE owner-approved change: the re-resolved lock together
+#   with a matching `environment: sdk:` floor in pubspec.yaml. Committing the
+#   lock alone leaves the two files disagreeing about the minimum toolchain,
+#   which is worse than the re-resolution it tidies.
 #
 #   analysis_options.yaml cleanliness. `flutter analyze` REWRITES this file:
 #   the SDK's own AnalysisOptionsMigration adds an `analyzer: exclude:` block
@@ -228,8 +265,9 @@ jobs:
 
       - name: flutter test
         # Must be 100%. There is no allowance here and no continue-on-error:
-        # the suite measures 217/217 on this SDK, so a red run is a real
-        # regression rather than inherited debt.
+        # the suite measures 1098/1098 on this SDK (217 at the time this job
+        # was written; the response-shape work added 881), so a red run is a
+        # real regression rather than inherited debt.
         run: flutter test --reporter expanded
 
       # ---------------------------------------------------------------------
