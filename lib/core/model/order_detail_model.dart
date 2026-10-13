@@ -1,4 +1,5 @@
 import 'package:store_go_app/utils/app_log.dart';
+import 'package:store_go_app/network/result.dart';
 
 
 String myPaymnetType = '';
@@ -13,7 +14,7 @@ class OrderDetailModel {
   OrderDetailModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? OrderDetailData.fromJson(json['data']) : null;
+    data = json['data'] is Map ? OrderDetailData.fromJson(jsonMap(json['data'])) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -90,7 +91,7 @@ class OrderDetailData {
       this.finalPrice});
 
   OrderDetailData.fromJson(Map<String, dynamic> json) {
-    myPaymnetType = json["paymnet_type"];
+    myPaymnetType = json["paymnet_type"]?.toString() ?? '';
     AppLog.d('=======myPaymnetType========$myPaymnetType');
     id = json['id'];
     isGuest = json['is_guest'];
@@ -105,44 +106,54 @@ class OrderDetailData {
     currencySymbol = json['currency_symbol'];
     orderStatus = json['order_status'];
     orderStatusMessage = json['order_status_message'];
-    AppLog.d('===============${json['product'].runtimeType}');
-    if (json['product'].runtimeType != List<dynamic>) {
-      AppLog.d('--------> ${json['product']}');
-      product = <Product>[];
-      json['product'].values.map(
-        (v) {
-          product!.add(Product.fromJson(v));
-        },
-      );
-      AppLog.d('-product-===------> ${json['product'].values.map(
-        (v) {
-          AppLog.d('==>$v');
-          product!.add(Product.fromJson(v));
-        },
-      )}');
-      AppLog.d('-product-------> $product');
-    } else {
-      if (json['product'] != null) {
-        AppLog.d('===============${json['product']}');
-        product = <Product>[];
-        json['product'].forEach((v) {
-          product!.add(Product.fromJson(v));
-        });
+    // `product` arrives in TWO shapes and both are supported: a JSON array,
+    // and -- for a POS order -- an object keyed by product id. Three defects
+    // are fixed here, each reproducible:
+    //
+    //  1. the shape test was `json['product'].runtimeType != List<dynamic>`,
+    //     which is TRUE when `product` is absent or null, so the keyed-object
+    //     branch ran on null and `.values` threw
+    //     `NoSuchMethodError: The getter 'values' was called on null`,
+    //     taking the whole order-detail screen down. Reproduced by
+    //     `test/network/response_shape_resilience_test.dart`, row
+    //     "OrderDetailModel survives every container key as empty object".
+    //  2. the keyed-object branch ADDED NOTHING on its own. `Iterable.map` is
+    //     lazy and its result was discarded, so the only thing that ever
+    //     populated `product` for a POS order was the identical `.map` inside
+    //     the `AppLog.d('-product-===------> ...')` interpolation beneath it,
+    //     iterated as a side effect of `Iterable.toString()`. Deleting a
+    //     debug log line would have silently emptied every POS order's
+    //     product list.
+    //  3. neither branch checked the element type.
+    //
+    // `product` is assigned a list unconditionally, as the old keyed-object
+    // branch did, because `order_detail_screen.dart:808` force-unwraps
+    // `detail.product!`.
+    product = <Product>[];
+
+    final Iterable<dynamic> productEntries = json['product'] is Map
+        ? jsonMap(json['product']).values
+        : jsonList(json['product']);
+
+    for (final v in productEntries) {
+      if (v is Map<String, dynamic>) {
+        product!.add(Product.fromJson(v));
       }
     }
     isReview = json['is_review'];
-    billingInformations = json['billing_informations'] != null ? BillingInformations.fromJson(json['billing_informations']) : null;
-    deliveryInformations = json['delivery_informations'] != null ? BillingInformations.fromJson(json['delivery_informations']) : null;
+    billingInformations = json['billing_informations'] is Map ? BillingInformations.fromJson(jsonMap(json['billing_informations'])) : null;
+    deliveryInformations = json['delivery_informations'] is Map ? BillingInformations.fromJson(jsonMap(json['delivery_informations'])) : null;
     paymnetType = json['paymnet_type'];
     paymnet = json['paymnet'];
     paymentStatus = json['payment_status'];
     delivery = json['delivery'];
     deliveryId = json['delivery_id']?.toString();
     deliveredCharge = json['delivered_charge'];
-    couponInfo = json['coupon_info'] != null ? CouponInfo.fromJson(json['coupon_info']) : null;
+    couponInfo = json['coupon_info'] is Map ? CouponInfo.fromJson(jsonMap(json['coupon_info'])) : null;
     if (json['tax'] != null && json['tax'] is List) {
       tax = <Tax>[];
       json['tax'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         tax!.add(Tax.fromJson(v));
       });
     }
@@ -152,6 +163,7 @@ class OrderDetailData {
     if (json['notes'] != null && json['notes'] is List) {
       notes = <Note>[];
       json['notes'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         notes!.add(Note.fromJson(v));
       });
     }

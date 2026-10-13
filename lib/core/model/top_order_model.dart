@@ -1,4 +1,5 @@
 import 'order_model.dart';
+import 'package:store_go_app/network/result.dart';
 
 class TopOrderModel {
   int? status;
@@ -10,8 +11,7 @@ class TopOrderModel {
   TopOrderModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null
-        ? TopOrderData.fromJson(json['data'])
+    data = json['data'] is Map ? TopOrderData.fromJson(jsonMap(json['data']))
         : null;
   }
 }
@@ -37,6 +37,7 @@ class TopOrderData {
     if (json['top_orders'] != null && json['top_orders'] is List) {
       topOrders = <TopOrderItem>[];
       json['top_orders'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         topOrders!.add(TopOrderItem.fromJson(v));
       });
     }

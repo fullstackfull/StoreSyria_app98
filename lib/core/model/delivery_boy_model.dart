@@ -13,9 +13,10 @@ class DeliveryBoyModel {
     status = json['status']?.toString();
     message = json['message']?.toString();
 
-    if (json['data'] != null) {
+    if (json['data'] is List) {
       data = <DeliveryBoyData>[];
       json['data'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         data!.add(DeliveryBoyData.fromJson(v));
       });
     }

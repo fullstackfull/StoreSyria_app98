@@ -1,3 +1,5 @@
+import 'package:store_go_app/network/result.dart';
+
 class ImageBaseUrlModel {
   ImageBaseUrlModel({
       this.status, 
@@ -7,7 +9,7 @@ class ImageBaseUrlModel {
   ImageBaseUrlModel.fromJson(dynamic json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? ImageUrlData.fromJson(json['data']) : null;
+    data = json['data'] is Map ? ImageUrlData.fromJson(jsonMap(json['data'])) : null;
   }
   int? status;
   String? message;

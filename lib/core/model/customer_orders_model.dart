@@ -1,3 +1,5 @@
+import 'package:store_go_app/network/result.dart';
+
 class CustomerOrdersModel {
   int? status;
   String? message;
@@ -13,10 +15,7 @@ class CustomerOrdersModel {
     status = _toInt(json['status']);
     message = json['message']?.toString();
 
-    data = json['data'] != null
-        ? CustomerOrdersData.fromJson(
-      Map<String, dynamic>.from(json['data']),
-    )
+    data = json['data'] is Map ? CustomerOrdersData.fromJson(jsonMap(json['data']))
         : null;
   }
 
@@ -87,10 +86,7 @@ class CustomerOrdersData {
   });
 
   CustomerOrdersData.fromJson(Map<String, dynamic> json) {
-    customer = json['customer'] != null
-        ? CustomerProfile.fromJson(
-      Map<String, dynamic>.from(json['customer']),
-    )
+    customer = json['customer'] is Map ? CustomerProfile.fromJson(jsonMap(json['customer']))
         : null;
 
     if (json['orders'] != null && json['orders'] is List) {
@@ -111,10 +107,7 @@ class CustomerOrdersData {
       orders = [];
     }
 
-    pagination = json['pagination'] != null
-        ? CustomerOrdersPagination.fromJson(
-      Map<String, dynamic>.from(json['pagination']),
-    )
+    pagination = json['pagination'] is Map ? CustomerOrdersPagination.fromJson(jsonMap(json['pagination']))
         : null;
   }
 
@@ -161,12 +154,7 @@ class CustomerProfile {
     email = json['email']?.toString();
     mobile = json['mobile']?.toString();
 
-    defaultAddress = json['default_address'] != null
-        ? CustomerAddress.fromJson(
-      Map<String, dynamic>.from(
-        json['default_address'],
-      ),
-    )
+    defaultAddress = json['default_address'] is Map ? CustomerAddress.fromJson(jsonMap(json['default_address']))
         : null;
 
     orders = _toInt(json['orders']);
@@ -453,12 +441,7 @@ class CustomerOrder {
     // -------------------------------------------------
 
     billingInformations =
-    json['billing_informations'] != null
-        ? CustomerBillingInformation.fromJson(
-      Map<String, dynamic>.from(
-        json['billing_informations'],
-      ),
-    )
+    json['billing_informations'] is Map ? CustomerBillingInformation.fromJson(jsonMap(json['billing_informations']))
         : null;
 
     // -------------------------------------------------
@@ -466,12 +449,7 @@ class CustomerOrder {
     // -------------------------------------------------
 
     deliveryInformations =
-    json['delivery_informations'] != null
-        ? CustomerDeliveryInformation.fromJson(
-      Map<String, dynamic>.from(
-        json['delivery_informations'],
-      ),
-    )
+    json['delivery_informations'] is Map ? CustomerDeliveryInformation.fromJson(jsonMap(json['delivery_informations']))
         : null;
 
     paymnetType =
@@ -493,12 +471,7 @@ class CustomerOrder {
     // TAX
     // -------------------------------------------------
 
-    tax = json['tax'] != null
-        ? CustomerTax.fromJson(
-      Map<String, dynamic>.from(
-        json['tax'],
-      ),
-    )
+    tax = json['tax'] is Map ? CustomerTax.fromJson(jsonMap(json['tax']))
         : null;
 
     subTotal =

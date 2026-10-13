@@ -1,3 +1,5 @@
+import 'package:store_go_app/network/result.dart';
+
 class StoreInfoResponse {
   final String? status;
   final String? message;
@@ -13,8 +15,7 @@ class StoreInfoResponse {
     return StoreInfoResponse(
       status: json['status']?.toString(),
       message: json['message']?.toString(),
-      data: json['data'] != null
-          ? StoreInfoData.fromJson(json['data'])
+      data: json['data'] is Map ? StoreInfoData.fromJson(jsonMap(json['data']))
           : null,
     );
   }
@@ -47,23 +48,17 @@ class StoreInfoData {
 
   factory StoreInfoData.fromJson(Map<String, dynamic> json) {
     return StoreInfoData(
-      store: json['store'] != null
-          ? Store.fromJson(json['store'])
+      store: json['store'] is Map ? Store.fromJson(jsonMap(json['store']))
           : null,
-      owner: json['owner'] != null
-          ? Owner.fromJson(json['owner'])
+      owner: json['owner'] is Map ? Owner.fromJson(jsonMap(json['owner']))
           : null,
-      address: json['address'] != null
-          ? Address.fromJson(json['address'])
+      address: json['address'] is Map ? Address.fromJson(jsonMap(json['address']))
           : null,
-      media: json['media'] != null
-          ? Media.fromJson(json['media'])
+      media: json['media'] is Map ? Media.fromJson(jsonMap(json['media']))
           : null,
-      socialMedia: json['social_media'] != null
-          ? SocialMedia.fromJson(json['social_media'])
+      socialMedia: json['social_media'] is Map ? SocialMedia.fromJson(jsonMap(json['social_media']))
           : null,
-      settings: json['settings'] != null
-          ? StoreSettings.fromJson(json['settings'])
+      settings: json['settings'] is Map ? StoreSettings.fromJson(jsonMap(json['settings']))
           : null,
     );
   }
@@ -241,20 +236,15 @@ class SocialMedia {
 
   factory SocialMedia.fromJson(Map<String, dynamic> json) {
     return SocialMedia(
-      facebook: json['facebook'] != null
-          ? SocialLink.fromJson(json['facebook'])
+      facebook: json['facebook'] is Map ? SocialLink.fromJson(jsonMap(json['facebook']))
           : null,
-      twitter: json['twitter'] != null
-          ? SocialLink.fromJson(json['twitter'])
+      twitter: json['twitter'] is Map ? SocialLink.fromJson(jsonMap(json['twitter']))
           : null,
-      instagram: json['instagram'] != null
-          ? SocialLink.fromJson(json['instagram'])
+      instagram: json['instagram'] is Map ? SocialLink.fromJson(jsonMap(json['instagram']))
           : null,
-      whatsapp: json['whatsapp'] != null
-          ? SocialLink.fromJson(json['whatsapp'])
+      whatsapp: json['whatsapp'] is Map ? SocialLink.fromJson(jsonMap(json['whatsapp']))
           : null,
-      telegram: json['telegram'] != null
-          ? SocialLink.fromJson(json['telegram'])
+      telegram: json['telegram'] is Map ? SocialLink.fromJson(jsonMap(json['telegram']))
           : null,
     );
   }

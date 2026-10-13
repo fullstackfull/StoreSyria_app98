@@ -151,3 +151,45 @@ String apiText(
 
   return text.trim().isEmpty ? fallback : text;
 }
+
+/// [value] as a JSON object, or an empty object when it is anything else.
+///
+/// R7-N6 (third half). The remaining half of the nested-read defect is not the
+/// `data['a']['b']` subscript the ratchet already guards -- it is the
+/// shape-blind handoff to a nested parser:
+///
+///     data = json['data'] != null ? Model.fromJson(json['data']) : null;
+///
+/// `!= null` guards null and NOTHING ELSE, and `Model.fromJson` is declared
+/// `fromJson(Map<String, dynamic> json)`, so a List or a String arriving in
+/// `json['data']` is an implicit-downcast TypeError at the call. `"data": []`
+/// is not hypothetical: Laravel serialises an EMPTY Eloquent collection as a
+/// JSON array, so the endpoint that answers `{"data": {...}}` with one row
+/// answers `{"data": []}` with none, and the parse that worked all through
+/// testing throws in production the first time a merchant has no rows.
+///
+/// Measured before this helper existed, by
+/// `test/network/response_shape_resilience_test.dart`: 132 of 353 rows red
+/// across 25 of 32 response models.
+///
+/// `Map<String, dynamic>.from` rather than a cast, because it also accepts the
+/// `Map<dynamic, dynamic>` that a platform channel or a re-decoded FCM payload
+/// produces -- `customer_orders_model.dart` was already calling `.from` by
+/// hand for exactly that reason, and `.from` on a List throws, which is the
+/// bug this replaces.
+Map<String, dynamic> jsonMap(dynamic value) =>
+    value is Map ? Map<String, dynamic>.from(value) : <String, dynamic>{};
+
+/// [value] as a JSON array, or an empty list when it is anything else.
+///
+/// The mirror image of [jsonMap], and it replaces two shapes that both throw:
+///
+///   * `json['k'] != null` followed by `json['k'].forEach(...)` -- `forEach`
+///     on a String, a number or a bool is a NoSuchMethodError, and on a Map it
+///     is a TypeError because `Map.forEach` takes TWO arguments.
+///   * `json['k'] as List? ?? []` -- the cast throws on a Map or a scalar
+///     before the `??` is consulted, exactly as `['a']['b'] ?? fallback` does.
+///
+/// `const` so the empty case allocates nothing on a hot list parse.
+List<dynamic> jsonList(dynamic value) =>
+    value is List ? value : const <dynamic>[];
