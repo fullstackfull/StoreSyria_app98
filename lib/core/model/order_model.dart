@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_collection_literals, unnecessary_this
 
 import '../../utils/helper.dart';
+import 'package:store_go_app/network/result.dart';
 
 class OrderModel {
   int? status;
@@ -12,7 +13,7 @@ class OrderModel {
   OrderModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? OrderModelData.fromJson(json['data']) : null;
+    data = json['data'] is Map ? OrderModelData.fromJson(jsonMap(json['data'])) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -61,6 +62,7 @@ class OrderModelData {
     if (json['data'] != null && json['data'] is List) {
       data = <OrderData>[];
       json['data'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         data!.add(OrderData.fromJson(v));
       });
     }
@@ -71,6 +73,7 @@ class OrderModelData {
     if (json['links'] != null && json['links'] is List) {
       links = <Links>[];
       json['links'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         links!.add(Links.fromJson(v));
       });
     }

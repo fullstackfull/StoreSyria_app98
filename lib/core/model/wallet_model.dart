@@ -1,3 +1,5 @@
+import 'package:store_go_app/network/result.dart';
+
 class WalletPagination {
   final int total;
   final int perPage;
@@ -90,10 +92,11 @@ class WalletData {
         currencySymbol : json['currency_symbol'] ?? "",
         availableBalance: json['available_balance']?.toString() ?? '0',
       currencyCode: json['currency_code']?.toString() ?? '',
-      transactions: (json['transactions'] as List? ?? [])
+      transactions: jsonList(json['transactions'])
+          .whereType<Map<String, dynamic>>()
           .map((e) => WalletTransaction.fromJson(e))
           .toList(),
-      pagination: WalletPagination.fromJson(json['pagination'] ?? {}),
+      pagination: WalletPagination.fromJson(jsonMap(json['pagination'])),
     );
   }
 }

@@ -24,9 +24,25 @@
 //     (order_controller.dart:632, product_controller.dart:143); both are
 //     listed explicitly below rather than pattern-matched loosely.
 //
-// Comments and string literals are blanked before matching (codeOnly in
+// Comments are blanked before matching (commentsStripped in
 // test/support/source_tree.dart) so the explanatory prose in result.dart,
 // which spells the bad pattern out in full, cannot trip this.
+//
+// IT MUST BE commentsStripped AND NOT codeOnly. This test shipped using
+// codeOnly and was VACUOUS: codeOnly blanks STRING LITERALS, quotes included,
+// so `data['data']['message']` reaches the matcher as `data[      ][         ]`
+// and the pattern -- which requires a quote after `[` -- can never fire.
+// Proven, not deduced: with
+// `String teethProbe(dynamic data) => data['data']['message'] ?? 'x';`
+// appended to lib/utils/prefer.dart, the codeOnly version of this test
+// reported `00:00 +2: All tests passed!`. The same probe against the version
+// below fails and names prefer.dart.
+//
+// The cost of keeping literals is that a Dart STRING containing the pattern
+// would now match. There is no such string in lib/ (measured: switching to
+// commentsStripped adds zero offenders on a clean tree), and a guard test
+// that fires on a string literal is a tolerable failure mode next to one that
+// never fires at all.
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -50,7 +66,8 @@ void main() {
 
     for (final file in libDartFiles()) {
       final path = relative(file);
-      final lines = codeOnly(file.readAsStringSync()).split('\n');
+      final lines =
+          commentsStripped(file.readAsStringSync()).split('\n');
 
       for (var i = 0; i < lines.length; i++) {
         final line = lines[i];

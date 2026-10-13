@@ -1,3 +1,5 @@
+import 'package:store_go_app/network/result.dart';
+
 class LanguageResponse {
   final int status;
   final String message;
@@ -13,7 +15,7 @@ class LanguageResponse {
     return LanguageResponse(
       status: json['status'] ?? 0,
       message: json['message'] ?? '',
-      data: LanguageData.fromJson(json['data'] ?? {}),
+      data: LanguageData.fromJson(jsonMap(json['data'])),
     );
   }
 
@@ -44,20 +46,12 @@ class LanguageData {
       storeId: json['store_id'] ?? 0,
       storeName: json['store_name'] ?? '',
 
-      languages: (json['languages'] as List?)
-          ?.map(
-            (e) => Language.fromJson(
-          Map<String, dynamic>.from(e),
-        ),
-      )
-          .toList() ??
-          [],
+      languages: jsonList(json['languages'])
+          .whereType<Map<String, dynamic>>()
+          .map(Language.fromJson)
+          .toList(),
 
-      currentLanguage: Language.fromJson(
-        Map<String, dynamic>.from(
-          json['current_language'] ?? {},
-        ),
-      ),
+      currentLanguage: Language.fromJson(jsonMap(json['current_language'])),
     );
   }
 

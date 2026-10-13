@@ -109,7 +109,7 @@ class HomeController extends GetxController implements StoreAware {
 
     response.fold(
       onSuccess: (data) {
-        imageUrlData = ImageUrlData.fromJson(data['data']);
+        imageUrlData = ImageUrlData.fromJson(jsonMap(data['data']));
         imageBaseUrl.value = imageUrlData!.imageUrl!;
         Prefs.setString(AppConstant.imageUrl, imageUrlData!.imageUrl!);
         Prefs.setString(AppConstant.paymentUrl, imageUrlData!.paymentUrl!);
@@ -168,7 +168,7 @@ class HomeController extends GetxController implements StoreAware {
 
     response.fold(
       onSuccess: (data) {
-        dashboardData = DashboardData.fromJson(data['data']);
+        dashboardData = DashboardData.fromJson(jsonMap(data['data']));
 
         topProductList.value = dashboardData!.product ?? [];
         recentOrderList.value = dashboardData!.recentOrder ?? [];

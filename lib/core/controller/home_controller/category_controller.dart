@@ -183,16 +183,15 @@ class CategoryController extends GetxController
         categoriesList.clear();
 
         if (data['status'] == 1) {
-          for (
-          int i = 0;
-          i < data['data'].length;
-          i++
-          ) {
-            categoriesList.add(
-              CategoryData.fromJson(
-                data['data'][i],
-              ),
-            );
+          // `data['data'].length` is a NoSuchMethodError on a
+          // `{"status": 1}` body, and `data['data'][i]` is a TypeError when
+          // the server answers `"data": {}` -- an int index on a Map. Neither
+          // is visible to the two-adjacent-STRING-subscript ratchet, because
+          // the second index here is `i`, not a literal.
+          for (final item in jsonList(data['data'])) {
+            if (item is Map<String, dynamic>) {
+              categoriesList.add(CategoryData.fromJson(item));
+            }
           }
 
           categoriesList.refresh();

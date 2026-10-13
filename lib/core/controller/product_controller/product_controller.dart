@@ -195,10 +195,12 @@ class ProductController extends GetxController implements StoreAware {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
-          final List products = data['data'] ?? [];
-
+          // `final List products = data['data'] ?? []` is a TypeError when
+          // `data['data']` is a Map or a scalar: the `??` covers only null,
+          // and the declared `List` forces a downcast on everything else.
           categoryResults.assignAll(
-            products
+            jsonList(data['data'])
+                .whereType<Map<String, dynamic>>()
                 .map((e) => ProductData.fromJson(e))
                 .toList(),
           );

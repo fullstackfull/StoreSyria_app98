@@ -1,3 +1,5 @@
+import 'package:store_go_app/network/result.dart';
+
 class CurrencyResponse {
   final int status;
   final String message;
@@ -13,7 +15,7 @@ class CurrencyResponse {
       CurrencyResponse(
         status: json['status'] ?? 0,
         message: json['message'] ?? '',
-        data: CurrencyData.fromJson(json['data']),
+        data: CurrencyData.fromJson(jsonMap(json['data'])),
       );
 }
 
@@ -30,8 +32,9 @@ class CurrencyData {
 
   factory CurrencyData.fromJson(Map<String, dynamic> json) => CurrencyData(
     storeId: json['store_id'] ?? 0,
-    currentCurrency: Currency.fromJson(json['current_currency'] ?? {}),
-    currencies: (json['currencies'] as List<dynamic>? ?? [])
+    currentCurrency: Currency.fromJson(jsonMap(json['current_currency'])),
+    currencies: jsonList(json['currencies'])
+        .whereType<Map<String, dynamic>>()
         .map((e) => Currency.fromJson(e))
         .toList(),
   );
@@ -88,7 +91,7 @@ class CurrencyRatesResponse {
       CurrencyRatesResponse(
         status: json['status'] ?? 0,
         message: json['message'] ?? '',
-        data: json['data'] != null ? CurrencyRatesData.fromJson(json['data']) : null,
+        data: json['data'] is Map ? CurrencyRatesData.fromJson(jsonMap(json['data'])) : null,
       );
 }
 
@@ -111,7 +114,8 @@ class CurrencyRatesData {
     storeId: json['store_id'] ?? 0,
     storeName: json['store_name'] ?? '',
     defaultCurrency: json['default_currency'] ?? '',
-    currencyRates: (json['currency_rates'] as List<dynamic>? ?? [])
+    currencyRates: jsonList(json['currency_rates'])
+        .whereType<Map<String, dynamic>>()
         .map((e) => CurrencyRateItem.fromJson(e))
         .toList(),
     count: json['count'] ?? 0,

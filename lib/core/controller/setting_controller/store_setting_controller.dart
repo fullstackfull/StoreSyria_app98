@@ -134,7 +134,7 @@ class StoreSettingController extends GetxController {
           final status = data['status'];
 
           if (status == 'success' || status == 1) {
-            storeInfoData.value = StoreInfoData.fromJson(data['data']);
+            storeInfoData.value = StoreInfoData.fromJson(jsonMap(data['data']));
 
             _fillControllers();
 
@@ -495,16 +495,22 @@ class StoreSettingController extends GetxController {
           AppLog.d("Languages & Currency Response =====> $data");
 
           if (data['status'] == 1) {
-            final responseData = data['data'];
+            // `data['data']` reaches a subscript through a LOCAL, which is
+            // the one shape the two-adjacent-subscript ratchet in
+            // test/controllers/no_unguarded_nested_subscript_test.dart cannot
+            // see: `responseData['current_language']` throws on a
+            // `{"status": 1}` or `{"data": []}` body exactly as
+            // `data['data']['current_language']` would.
+            final responseData = jsonMap(data['data']);
 
-            if (responseData['current_language'] != null) {
+            if (responseData['current_language'] is Map) {
               currentLanguage.value = Language.fromJson(
-                responseData['current_language'],
+                jsonMap(responseData['current_language']),
               );
             }
-            if (responseData['current_currency'] != null) {
+            if (responseData['current_currency'] is Map) {
               currentCurrency.value = Currency.fromJson(
-                responseData['current_currency'],
+                jsonMap(responseData['current_currency']),
               );
             }
 

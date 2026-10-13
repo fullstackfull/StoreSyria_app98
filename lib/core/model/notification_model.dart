@@ -242,6 +242,8 @@
 
 // ignore_for_file: prefer_collection_literals, unnecessary_this
 
+import 'package:store_go_app/network/result.dart';
+
 class NotificationModel {
   bool? status;
   NotificationModelData? data;
@@ -250,8 +252,8 @@ class NotificationModel {
   NotificationModel({this.status, this.data, this.count});
 
   NotificationModel.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
-    data = json['data'] != null ? NotificationModelData.fromJson(json['data']) : null;
+    status = json['status'] is bool ? json['status'] as bool : null;
+    data = json['data'] is Map ? NotificationModelData.fromJson(jsonMap(json['data'])) : null;
     count = json['count'];
   }
 
@@ -302,6 +304,7 @@ class NotificationModelData {
     if (json['data'] != null && json['data'] is List) {
       data = <NotificationData>[];
       json['data'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         data!.add(NotificationData.fromJson(v));
       });
     }
@@ -312,6 +315,7 @@ class NotificationModelData {
     if (json['links'] != null && json['links'] is List) {
       links = <Links>[];
       json['links'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         links!.add(Links.fromJson(v));
       });
     }
@@ -386,9 +390,9 @@ class NotificationData {
     message = json['message']?.toString();
     referenceType = json['reference_type']?.toString();
     referenceId = json['reference_id'];
-    data = json['data'] != null ? NotificationDataDetails.fromJson(json['data']) : null;
-    isRead = json['is_read'];
-    pushSent = json['push_sent'];
+    data = json['data'] is Map ? NotificationDataDetails.fromJson(jsonMap(json['data'])) : null;
+    isRead = json['is_read'] is bool ? json['is_read'] as bool : null;
+    pushSent = json['push_sent'] is bool ? json['push_sent'] as bool : null;
     createdAt = json['created_at']?.toString();
     updatedAt = json['updated_at']?.toString();
   }
@@ -470,7 +474,7 @@ class Links {
   Links.fromJson(Map<String, dynamic> json) {
     url = json['url']?.toString();
     label = json['label']?.toString();
-    active = json['active'];
+    active = json['active'] is bool ? json['active'] as bool : null;
   }
 
   Map<String, dynamic> toJson() {

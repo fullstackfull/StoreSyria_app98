@@ -1,3 +1,5 @@
+import 'package:store_go_app/network/result.dart';
+
 class CustomerModel {
   int? maxPrice;
   int? status;
@@ -16,8 +18,7 @@ class CustomerModel {
     status = json['status'];
     message = json['message']?.toString();
 
-    data = json['data'] != null
-        ? CustomerResponse.fromJson(json['data'])
+    data = json['data'] is Map ? CustomerResponse.fromJson(jsonMap(json['data']))
         : null;
   }
 
@@ -41,16 +42,16 @@ class CustomerResponse {
   });
 
   CustomerResponse.fromJson(Map<String, dynamic> json) {
-    if (json['customers'] != null) {
+    if (json['customers'] is List) {
       customers = <CustomerData>[];
 
       json['customers'].forEach((v) {
+        if (v is! Map<String, dynamic>) return;
         customers!.add(CustomerData.fromJson(v));
       });
     }
 
-    pagination = json['pagination'] != null
-        ? CustomerPagination.fromJson(json['pagination'])
+    pagination = json['pagination'] is Map ? CustomerPagination.fromJson(jsonMap(json['pagination']))
         : null;
   }
 
@@ -95,8 +96,7 @@ class CustomerData {
   CustomerData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
 
-    customerInfo = json['customer_info'] != null
-        ? CustomerInfo.fromJson(json['customer_info'])
+    customerInfo = json['customer_info'] is Map ? CustomerInfo.fromJson(jsonMap(json['customer_info']))
         : null;
 
     email = json['email'];
@@ -192,7 +192,8 @@ class CustomerPagination {
 
   factory CustomerCityModel.fromJson(Map<String, dynamic> json) {
   return CustomerCityModel(
-  cities: (json['data'] as List? ?? [])
+  cities: jsonList(json['data'])
+      .whereType<Map<String, dynamic>>()
       .map((e) => CityModel.fromJson(e))
       .toList(),
   );
@@ -210,8 +211,8 @@ class CustomerPagination {
 
   factory CityModel.fromJson(Map<String, dynamic> json) {
   return CityModel(
-  id: json['id'],
-  name: json['name'] ?? '',
+  id: json['id'] is int ? json['id'] as int : 0,
+  name: json['name']?.toString() ?? '',
   );
   }
 }
