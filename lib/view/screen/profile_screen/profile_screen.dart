@@ -572,6 +572,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required VoidCallback onPressed,
   }) {
     return IconButton(
+      // Accessible name: this control has no visible text.
+      tooltip: obscured ? 'show_password'.tr : 'hide_password'.tr,
       onPressed: onPressed,
       splashRadius: 20,
       icon: Icon(

@@ -648,4 +648,11 @@ const Map<String, String> ar = {
   'session_expired': 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى',
   'invalid_server_response': 'أرجع الخادم استجابة غير متوقعة',
   'action_not_permitted': 'ليست لديك صلاحية لتنفيذ هذا الإجراء',
+
+  // Accessible names for icon-only controls (P2-07).
+  'clear': 'مسح',
+  'upload': 'رفع',
+  'add': 'إضافة',
+  'show_password': 'إظهار كلمة المرور',
+  'hide_password': 'إخفاء كلمة المرور',
 };

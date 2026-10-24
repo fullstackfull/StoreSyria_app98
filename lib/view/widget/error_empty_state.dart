@@ -133,6 +133,8 @@ class ErrorState extends StatelessWidget {
 
                   if (onRetry != null)
                     IconButton(
+                      // Accessible name: this control has no visible text.
+                      tooltip: 'retry'.tr,
                       onPressed: onRetry,
                       icon: Icon(Icons.refresh,size: 30.w,),
                       style: ElevatedButton.styleFrom(

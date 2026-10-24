@@ -126,6 +126,8 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                                 validator: (value) =>
                                 value!.isEmpty ? "password is required".tr : null,
                                 suffix: IconButton(
+                                  // Accessible name: this control has no visible text.
+                                  tooltip: authController.isObscure.value ? 'show_password'.tr : 'hide_password'.tr,
                                   onPressed: () {
                                     authController.isObscure.value = !authController.isObscure.value;
                                   },

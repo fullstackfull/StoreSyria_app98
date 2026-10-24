@@ -386,6 +386,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                               ),
                               if (orderController.orderLineItems.length > 1)
                                 IconButton(
+                                  // Accessible name: this control has no visible text.
+                                  tooltip: 'delete'.tr,
                                   icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                                   onPressed: () => orderController.removeLineItem(index),
                                 ),

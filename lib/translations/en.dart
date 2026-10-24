@@ -647,4 +647,11 @@ const Map<String, String> en = {
   'session_expired': 'Your session has expired. Please log in again.',
   'invalid_server_response': 'The server returned an unexpected response.',
   'action_not_permitted': 'You do not have permission to perform this action.',
+
+  // Accessible names for icon-only controls (P2-07).
+  'clear': 'Clear',
+  'upload': 'Upload',
+  'add': 'Add',
+  'show_password': 'Show password',
+  'hide_password': 'Hide password',
 };
