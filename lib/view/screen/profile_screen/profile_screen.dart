@@ -6,7 +6,6 @@ import 'package:store_go_app/core/controller/profile_controller/profile_controll
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/helper.dart';
-import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/utils/validator.dart';
@@ -300,19 +299,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: ShimmerCircle(size: 96),
         );
       },
+      // لا يوجد طلب لطرف ثالث هنا: البديل محلي.
+      //
+      // This used to fetch the UPSTREAM VENDOR's avatar from
+      // apps.rajodiya.com when the merchant had none of their own, and only
+      // fell back to this icon if that third-party request also failed. The
+      // icon was always the real terminal state, so going straight to it
+      // changes nothing a user reaches on purpose -- it removes a request to
+      // a third party nobody here has a contract with, and the traffic leak
+      // that came with it.
       errorWidget: (context, url, error) {
-        return Image.network(
-          DefaultImages.profileImg,
-          width: 96,
-          height: 96,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) {
-            return Icon(
-              Icons.person,
-              size: 44,
-              color: Colors.white,
-            );
-          },
+        return const Icon(
+          Icons.person,
+          size: 44,
+          color: Colors.white,
         );
       },
     );

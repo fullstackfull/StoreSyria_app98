@@ -195,19 +195,13 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
                             height: 56,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                            // البديل محلي، بلا طلب لطرف ثالث. See
+                            // profile_screen.dart for the full reason.
                             errorWidget: (context, url, error) {
-                              return Image.network(
-                                DefaultImages.profileImg,
-                                width: 56,
-                                height: 56,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) {
-                                  return Icon(
-                                    Icons.person,
-                                    size: 30,
-                                    color: Colors.white,
-                                  );
-                                },
+                              return const Icon(
+                                Icons.person,
+                                size: 30,
+                                color: Colors.white,
                               );
                             },
                           ),
