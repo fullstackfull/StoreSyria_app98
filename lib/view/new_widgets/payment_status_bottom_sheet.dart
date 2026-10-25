@@ -704,10 +704,19 @@ class OrderStatusBottomSheet {
                               selectedStatus,
                             );
 
+                            // P2-07-6. `getOrderLabel`, NOT `getOrderName`.
+                            //
+                            // This value is written into
+                            // `model.orderStatusText`, which the order detail
+                            // screen DISPLAYS. The server sends that field
+                            // already translated, so using the hardcoded
+                            // English spelling here made an Arabic merchant's
+                            // status line flip from Arabic to English the
+                            // moment they changed the status themselves.
                             setOrderStatusText(
                               model,
                               StatusBadgeHelper
-                                  .getOrderName(
+                                  .getOrderLabel(
                                 selectedStatus,
                               ),
                             );

@@ -124,6 +124,24 @@ const Map<String, String> ar = {
   'confirmed': 'مؤكد',
   'picked_up': 'تم الاستلام',
   'shipped': 'تم الشحن',
+
+  // P2-07-6. القيمتان اللتان ليستا حالتَي تنفيذ: 7 حالة دفع و8 نوع طلب، وكلتاهما
+  // مسجّلتان في `orders.delivered_status` إلى جانب المراحل السبع.
+  'partially_paid': 'مدفوع جزئياً',
+  'pre_order': 'طلب مسبق',
+  'status_unrecognised': 'حالة غير معروفة',
+
+  // أوصاف الحالات في ورقة الحالة.
+  'order_desc_pending': 'الطلب قيد الانتظار',
+  'order_desc_delivered': 'تم التوصيل بنجاح',
+  'order_desc_cancelled': 'تم إلغاء الطلب',
+  'order_desc_return': 'طلب إرجاع',
+  'order_desc_confirmed': 'تم تأكيد الطلب',
+  'order_desc_picked_up': 'تم الاستلام من المتجر',
+  'order_desc_shipped': 'تم الشحن',
+  'order_desc_partially_paid': 'تم دفع جزء من المبلغ',
+  'order_desc_pre_order': 'طلب مُقدَّم قبل توفّر المنتج',
+  'order_desc_unrecognised': 'هذه الحالة غير معروفة للتطبيق',
   "search" : "بحث",
   "new_order" : "طلب جديد",
   'top_orders': 'أهم الطلبات',
