@@ -330,7 +330,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         if (latestOrder != null && showOrdersSection) ...[
           Padding(
             padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 8.h),
-            child: Align(alignment: Alignment.centerLeft, child: Text('latest_order'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
+            // P2-07 RTL: AlignmentDirectional, so an Arabic heading sits at the
+            // START of the row rather than being pinned to the physical left.
+            child: Align(alignment: AlignmentDirectional.centerStart, child: Text('latest_order'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
           ),
           if (!_isOrdersExpanded) Padding(padding: EdgeInsets.symmetric(horizontal: 20.w), child: _orderItem(latestOrder, customer)),
           Padding(
@@ -359,7 +361,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       children: [
         Padding(
           padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 8.h),
-          child: Align(alignment: Alignment.centerLeft, child: Text('personal_data'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
+          // P2-07 RTL: see the note on the 'latest_order' heading above.
+          child: Align(alignment: AlignmentDirectional.centerStart, child: Text('personal_data'.tr, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: textColor))),
         ),
         _card(
           isDark: isDark,
