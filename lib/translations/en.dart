@@ -106,6 +106,8 @@ const Map<String, String> en = {
   "buy_now": "Buy Now",
   "demo_mode_message": "This action is disabled in demo mode",
   "created_at": "Created at",
+  'no_dashboard_data_yet': 'Nothing to show here yet',
+  'no_statistics_yet': 'No visitor statistics yet',
   'disabled' : "disabled",
   'delivery_man_added_successfully' : "Delivery Man added successfully",
   'enabled' : "enabled",

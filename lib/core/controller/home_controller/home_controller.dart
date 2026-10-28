@@ -25,6 +25,16 @@ class HomeController extends GetxController implements StoreAware {
   RxString imageBaseUrl = ''.obs;
   RxBool isStore = false.obs;
   RxBool isDataAvailable = false.obs;
+
+  /// P2-07-14. The dashboard rendered a shimmer whenever `dashboardData` was null, and a failed
+  /// request leaves it null -- so ANY dashboard failure showed the merchant a loading skeleton
+  /// that never resolved, on the first screen they see. The toast that fired alongside it is
+  /// gone seconds later, and nothing on the screen says what happened or offers a retry.
+  RxString dashboardError = ''.obs;
+
+  /// True once a dashboard response has settled, so "still loading" can be told apart from
+  /// "loaded and there is nothing" -- which a null model alone cannot express.
+  RxBool dashboardLoadedOnce = false.obs;
   DashboardData? dashboardData;
   ImageUrlData? imageUrlData;
   List<Store> myStoreList = [Store(name: 'Grocery', id: 3), Store(id: 7, name: "Babycare")];
@@ -175,6 +185,7 @@ class HomeController extends GetxController implements StoreAware {
   }
   getDashboardData() async {
     isDataAvailable.value = true;
+    dashboardError.value = '';
 
     final response = await dashboardRepository.getDashBoardData();
 
@@ -198,10 +209,18 @@ class HomeController extends GetxController implements StoreAware {
       },
       onFailure: (reason, message, errors) {
         commonToast(type: AppSnackBarType.error, message);
+        // The toast is the immediate feedback and stays; the message is kept so the screen can
+        // offer a retry after it has gone. Only when there is nothing cached to show, so a
+        // failed refresh never replaces a dashboard the merchant is already reading.
+        if (dashboardData == null) {
+          dashboardError.value = message;
+        }
       },
     );
 
     isDataAvailable.value = false;
+    dashboardLoadedOnce.value = true;
+    update();
   }
 
   /// إرسال FCM Token للسيرفر بعد تغيير المتجر

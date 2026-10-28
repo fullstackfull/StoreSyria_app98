@@ -111,6 +111,8 @@ const Map<String, String> ar = {
   "demo_mode_message": "هذا الإجراء معطل في وضع العرض التجريبي",
   "created_at": "تاريخ الإنشاء",
   "Already Reviewed" : "تم التقييم",
+  'no_dashboard_data_yet': 'لا يوجد ما يُعرض هنا بعد',
+  'no_statistics_yet': 'لا توجد إحصاءات زوّار بعد',
   'please_select_category': 'الرجاء اختيار الفئة',
   'Products' : "المنتجات",
   "Orders" : "الطلبات",

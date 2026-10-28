@@ -19,6 +19,7 @@ import '../../../core/controller/home_controller/category_controller.dart';
 import '../../../core/model/static_model.dart';
 import '../../new_widgets/shimmer.dart';
 import '../statistics_screen/statistics_screen_widget.dart';
+import 'package:store_go_app/view/widget/error_empty_state.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -79,10 +80,45 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
           return GetBuilder<HomeController>(
               builder: (controller) {
-                if (controller.dashboardData == null) {
+                /* P2-07-14. THIS WAS AN INFINITE SHIMMER ON ANY DASHBOARD FAILURE, on the
+                   first screen a merchant sees. `dashboardData` is only assigned on success, so
+                   a failed request left it null and this branch animated a loading skeleton
+                   forever -- no error, no retry, and the toast that fired gone within seconds.
+
+                   Now the three states are distinguished. `dashboardLoadedOnce` is what tells
+                   "still loading" from "loaded and empty", which a null model alone cannot. */
+                if (!controller.dashboardLoadedOnce.value ||
+                    (controller.dashboardData == null &&
+                        controller.dashboardError.value.isEmpty)) {
                   return Scaffold(
                     backgroundColor: bgColor,
                     body: const SafeArea(child: ShimmerDashboard()),
+                  );
+                }
+
+                // Error before empty: a failed request also leaves the model null.
+                if (controller.dashboardError.value.isNotEmpty &&
+                    controller.dashboardData == null) {
+                  return Scaffold(
+                    backgroundColor: bgColor,
+                    body: SafeArea(
+                      child: ErrorState(
+                        message: controller.dashboardError.value,
+                        onRetry: controller.getDashboardData,
+                      ),
+                    ),
+                  );
+                }
+
+                if (controller.dashboardData == null) {
+                  return Scaffold(
+                    backgroundColor: bgColor,
+                    body: SafeArea(
+                      child: EmptyState(
+                        message: 'no_dashboard_data_yet'.tr,
+                        icon: Icons.dashboard_outlined,
+                      ),
+                    ),
                   );
                 }
                 return Scaffold(
