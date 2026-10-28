@@ -23,6 +23,11 @@ class ProductController extends GetxController implements StoreAware {
   final RxList<ProductData> categoryResults = <ProductData>[].obs;
   RxString currencySymbol = ''.obs;
 
+  /// P2-07-10. The per-store quantity at or below which a TRACKED product is out of stock, as the
+  /// server reports it. 0 is both the fallback and this setting's own default, so an older server
+  /// that does not send it behaves as it always did.
+  RxInt outOfStockThreshold = 0.obs;
+
   ProductModel? productModel;
   RxString filterCategory = ''.obs;
   RxString filterCategoryId = ''.obs;
@@ -69,6 +74,7 @@ class ProductController extends GetxController implements StoreAware {
 
       currencySymbol.value =
           productModel?.data?.currencySymbol ?? '';
+      outOfStockThreshold.value = productModel?.data?.outOfStockThreshold ?? 0;
 
       productList.value =
           productModel?.data?.data ?? [];
@@ -79,6 +85,7 @@ class ProductController extends GetxController implements StoreAware {
     } catch (_) {
       productModel = null;
       currencySymbol.value = '';
+      outOfStockThreshold.value = 0;
     }
   }
 
