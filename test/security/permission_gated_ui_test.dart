@@ -202,6 +202,30 @@ void main() {
       expect(operator.mayOffer('Manage Something Added Next Year'), isTrue);
     });
 
+    /// P2-04-10's app half: the "new order" button.
+    ///
+    /// `api/admin/createOrderViaApi` had NO permission check — tenancy was its only control — so
+    /// a staff member with no order permission could create a real order with a real price and
+    /// payment status. It refuses with 403 now, and the button is hidden to match: without that,
+    /// the employee fills the whole form and is turned away at submit, which is the
+    /// "offered but refused" shape the requirement exists to end.
+    test('the new-order button follows the order permission', () {
+      final ordersOnly = MerchantPermissions.fromJson(<String, dynamic>{
+        'permissions': <String>[Permissions.manageOrder],
+      });
+      final productsOnly = MerchantPermissions.fromJson(<String, dynamic>{
+        'permissions': <String>[Permissions.manageProducts],
+      });
+
+      expect(ordersOnly.mayOffer(Permissions.manageOrder), isTrue);
+      expect(productsOnly.mayOffer(Permissions.manageOrder), isFalse,
+          reason: 'a product-only employee was offered manual order entry, which the server '
+              'now refuses with 403');
+
+      // And an uninformed client still offers it, because the server is the control.
+      expect(const MerchantPermissions.none().mayOffer(Permissions.manageOrder), isTrue);
+    });
+
     /// `current` is what the screens read, so the memo must follow a persist and a forget or a
     /// store switch would leave the previous store's grid on screen.
     test('current follows persist and forget', () {

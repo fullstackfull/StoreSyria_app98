@@ -19,6 +19,7 @@ import '../../widget/common_appbar_widget.dart';
 import '../../widget/error_empty_state.dart';
 import '../../new_widgets/date_filter.dart';
 import 'create_order_screen.dart';
+import 'package:store_go_app/core/permissions/merchant_permissions.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen({super.key});
@@ -197,7 +198,20 @@ class _OrderScreenState extends State<OrderScreen>
         appBar: simpleAppBar(
           title: "orders".tr,
           isBold: true,
-          label: "new_order".tr,
+          // P2-04-10 / P2-07-13. HIDDEN AND REFUSED, not one or the other.
+          //
+          // `api/admin/createOrderViaApi` had NO permission check at all — tenancy was its only
+          // control — so a staff member with no order permission could create a real order with
+          // a real price and payment status. It refuses with 403 now. Hiding the button is the
+          // other half: without it that employee fills the entire form and is turned away at
+          // submit, which is the "offered but refused" shape this requirement exists to end.
+          //
+          // `mayOffer`, not `may`: a client shipped ahead of its backend receives no permission
+          // list, and gating strictly would hide order creation from merchants against a server
+          // that does not gate it. The server is the control; this is the courtesy.
+          label: MerchantPermissions.current.mayOffer(Permissions.manageOrder)
+              ? "new_order".tr
+              : null,
           onNewLabelTap: () {
             Get.to(() => const CreateOrderScreen());
           },
