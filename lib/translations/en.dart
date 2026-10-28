@@ -679,4 +679,8 @@ const Map<String, String> en = {
   'add': 'Add',
   'show_password': 'Show password',
   'hide_password': 'Hide password',
+  'stat_period_all_time': 'all time',
+  'stat_period_in_this_store': 'in this store',
+  'page_views_between': 'Page views, @from to @to',
+  'page_views_no_period': 'Page views',
 };

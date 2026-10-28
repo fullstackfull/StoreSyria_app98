@@ -14,13 +14,23 @@
 //   en.dart                                    640    646
 //   ar.dart                                    642    648
 //   distinct literal `.tr` keys used in lib/    523    527
-//   used but defined in NEITHER map              47     47
+//   used but defined in NEITHER map              47     46  <- P2-07-9 removed one
 //   defined on one side only                      2      2
 //
 // The gap did not grow: both baselines below are exactly as large as they
 // were, and the two one-sided keys are still `add_delivery_men` and
 // `price_label`. Ten keys of copy were added and four new `.tr` sites landed,
 // all of them translated -- which is the ratchet working, not slipping.
+//
+// 2026-10-28, P2-07-9: the untranslated baseline FELL BY ONE. `'Page views over
+// the selected period'` was a raw English `.tr` key with no entry in either map,
+// and it was also a FALSE STATEMENT -- there is no period selector anywhere in
+// this app. Removing its call site (the chart now derives its window from the
+// data it plots, with `page_views_between` / `page_views_no_period` translated
+// in both maps) left the baseline entry stale, and `the baselines are not stale`
+// failed until it was deleted. That is the ratchet doing the second half of its
+// job: it refuses a baseline that has outlived its gap, not only a gap that
+// grows.
 //
 // GetX's `.tr` returns the KEY ITSELF when a translation is missing, so each of
 // those 47 keys shows the merchant a raw identifier like `cost_price`, or an
@@ -70,7 +80,6 @@ const Set<String> knownUntranslatedKeys = <String>{
     'No_payment_methods_available',
     'Other',
     'Overview',
-    'Page views over the selected period',
     'Please fill all field',
     'Return Order Duration',
     'Top links',

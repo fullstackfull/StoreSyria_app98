@@ -15,6 +15,29 @@ enum FailureReason {
   unknown,
 }
 
+/// P2-07-13. The message to show for a failure, keeping a REFUSAL distinguishable from a fault.
+///
+/// WHY THIS EXISTS. Several screens discarded the server's message and showed their own
+/// ("Failed to load orders") for every failure alike. That was fine while the only failures were
+/// network faults — and became wrong the moment the API started refusing on permission: a staff
+/// member who may not read orders was told the orders *failed to load*, which is the same
+/// dishonesty as a withheld figure rendered as `0`. They would retry, and retry, and the screen
+/// would keep blaming itself for a refusal.
+///
+/// [FailureReason.unauthorized] covers 401 and 403 both. For a 401 the session is already being
+/// cleared and the user bounced to the login screen, so which string shows barely matters; for a
+/// 403 the server's own message ("You do not have permission to perform this action.", or
+/// `action_not_permitted` when the server sent none) is the only honest thing to say.
+///
+/// Every other reason keeps the caller's [fallback], which stays specific to the screen.
+String failureMessage(FailureReason reason, String message, String fallback) {
+  if (reason == FailureReason.unauthorized && message.trim().isNotEmpty) {
+    return message;
+  }
+
+  return fallback;
+}
+
 sealed class Result<T> {
   const Result();
 

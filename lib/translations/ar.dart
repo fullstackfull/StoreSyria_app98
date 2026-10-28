@@ -675,4 +675,8 @@ const Map<String, String> ar = {
   'add': 'إضافة',
   'show_password': 'إظهار كلمة المرور',
   'hide_password': 'إخفاء كلمة المرور',
+  'stat_period_all_time': 'منذ البداية',
+  'stat_period_in_this_store': 'في هذا المتجر',
+  'page_views_between': 'مشاهدات الصفحات، من @from إلى @to',
+  'page_views_no_period': 'مشاهدات الصفحات',
 };

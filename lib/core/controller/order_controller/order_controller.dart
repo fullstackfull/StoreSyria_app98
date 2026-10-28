@@ -15,6 +15,7 @@ import '../../model/customer_model.dart';
 import '../../model/top_order_model.dart';
 
 import 'package:store_go_app/utils/app_log.dart';
+import 'package:store_go_app/network/result.dart';
 
 enum OrderListMode {
   normal,
@@ -493,8 +494,13 @@ class OrderController extends GetxController implements StoreAware {
           }
         },
         onFailure: (reason, message, validationErrors) {
-          errorMessage.value = 'failed_to_load_orders'.tr;
-          commonToast(type: AppSnackBarType.error, 'failed_to_load_orders'.tr);
+          // A PERMISSION REFUSAL IS NOT A LOAD FAILURE. `orderlist` is permission-gated now
+          // (P2-07-13), so a staff member without `Manage Order`/`Show Order` gets a 403 -- and
+          // telling them the orders "failed to load" invites them to retry something that will
+          // never work.
+          final shown = failureMessage(reason, message, 'failed_to_load_orders'.tr);
+          errorMessage.value = shown;
+          commonToast(type: AppSnackBarType.error, shown);
         },
       );
     } catch (e) {
@@ -524,7 +530,11 @@ class OrderController extends GetxController implements StoreAware {
           topOrderList.value = items.map((e) => e.toOrderData()).toList();
         },
         onFailure: (reason, message, validationErrors) {
-          commonToast(type: AppSnackBarType.error, 'failed_to_load_orders'.tr);
+          // `Top_orders` is permission-gated too -- same reasoning as above.
+          commonToast(
+            type: AppSnackBarType.error,
+            failureMessage(reason, message, 'failed_to_load_orders'.tr),
+          );
         },
       );
     } catch (e) {
@@ -579,8 +589,9 @@ class OrderController extends GetxController implements StoreAware {
         },
         onFailure: (reason, message, validationErrors) {
           searchResults.clear();
-          errorMessage.value = 'failed_to_search_orders'.tr;
-          commonToast(type: AppSnackBarType.error, 'failed_to_search_orders'.tr);
+          final shown = failureMessage(reason, message, 'failed_to_search_orders'.tr);
+          errorMessage.value = shown;
+          commonToast(type: AppSnackBarType.error, shown);
         },
       );
     } catch (e) {

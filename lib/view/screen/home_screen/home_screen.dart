@@ -381,15 +381,40 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                     title: "Total".tr,
                                     subTitle: "Products".tr,
                                     accentColor: AppColor.themeGreenColor,
+                                    period: 'stat_period_in_this_store'.tr,
+                                    // P2-07-13. The server OMITS a figure this principal may not
+                                    // see, and `?? "0"` turned that omission into a confident
+                                    // zero. The tile now says "withheld" rather than "none".
+                                    //
+                                    // READ FROM THE FIGURE'S PRESENCE, not from the permission
+                                    // list, and deliberately: presence is correct against EVERY
+                                    // server version. An older backend that does not gate sends
+                                    // the figure, and a permission-list test would then blank a
+                                    // tile whose data is right there; a newer one omits exactly
+                                    // what it withheld. The list drives NAVIGATION, where there
+                                    // is no data presence to read.
+                                    permitted:
+                                        homeController.dashboardData?.products != null,
                                     total: homeController.dashboardData?.products
                                         ?.toString() ?? "0"),
                               ),
                               horizontalSpace(10),
                               Expanded(
                                 child: totalProductWidget(context,image: DefaultImages.listIcn,
+                                    // P2-07-9. NOT "Sales", which reads as revenue. The server
+                                    // sends `Order::where('delivered_status', 1)->count()` — a
+                                    // COUNT of delivered orders, no money in it at all. A tile
+                                    // labelled "Total Sales" over a count of 17 tells the
+                                    // merchant their store has taken 17 of something, and they
+                                    // cannot tell what. The web dashboard has no such tile; its
+                                    // money figure is labelled "Order value" and carries
+                                    // "all time, gross" plus a hint that it is neither payments
+                                    // received nor profit.
                                     title: "Total".tr,
-                                    subTitle: "Sales".tr,
+                                    subTitle: 'delivered'.tr,
                                     accentColor: AppColor.blueColor,
+                                    period: 'stat_period_all_time'.tr,
+                                    permitted: homeController.dashboardData?.sales != null,
                                     total: homeController.dashboardData?.sales
                                         ?.toString() ?? "0"),
                               ),
@@ -399,6 +424,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                     title: "Total".tr,
                                     subTitle: "Orders".tr,
                                     accentColor: AppColor.cRed,
+                                    period: 'stat_period_all_time'.tr,
+                                    permitted: homeController.dashboardData?.order != null,
                                     total: homeController.dashboardData?.order
                                         ?.toString() ?? "0"),
                               ),
