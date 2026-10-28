@@ -24,7 +24,29 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return CustomScrollView(
+    /* P2-07-8. ANNOUNCED, because replacing a list with this widget is a state change a screen
+       reader is otherwise never told about. The merchant hears the list, the list is swapped for
+       "no customers found", and nothing is said: as far as the reader is concerned the screen
+       simply went quiet. `liveRegion` makes the framework announce the label when this subtree
+       appears or its text changes.
+
+       Measured before writing it: `liveRegion`, `Semantics(`, `semanticLabel`, `MergeSemantics`
+       and `ExcludeSemantics` each appeared ZERO times across lib/, so nothing in this app
+       announced any state change at all.
+
+       It goes on the shared widget rather than on each screen, so every list that adopts
+       `EmptyState` or `ErrorState` gets it -- the same leverage the web used by putting the
+       announcement in one place instead of at sixty call sites.
+
+       NO `label:` HERE, DELIBERATELY. Setting one duplicated the message: this node carried it
+       AND the `Text` below carried it, so a reader met the same sentence twice and
+       `find.bySemanticsLabel` matched two elements -- which is how the duplication surfaced.
+       `container: true` gives the flag a node of its own and lets the visible text remain the
+       thing that is read. */
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverFillRemaining(
@@ -61,6 +83,7 @@ class EmptyState extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }
@@ -79,7 +102,12 @@ class ErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return CustomScrollView(
+    // P2-07-8. Announced for the same reason as EmptyState above -- and more urgently, since a
+    // failure the merchant is never told about leaves them waiting for data that is not coming.
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverFillRemaining(
@@ -152,6 +180,7 @@ class ErrorState extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }
