@@ -106,6 +106,8 @@ const Map<String, String> en = {
   "buy_now": "Buy Now",
   "demo_mode_message": "This action is disabled in demo mode",
   "created_at": "Created at",
+  'no_dashboard_data_yet': 'Nothing to show here yet',
+  'no_statistics_yet': 'No visitor statistics yet',
   'disabled' : "disabled",
   'delivery_man_added_successfully' : "Delivery Man added successfully",
   'enabled' : "enabled",
@@ -126,6 +128,29 @@ const Map<String, String> en = {
   'confirmed': 'Confirmed',
   'picked_up': 'Picked Up',
   'shipped': 'Shipped',
+
+  // P2-07-6. The two values that are NOT fulfilment states: 7 is a PAYMENT
+  // state and 8 is an order TYPE, both recorded in `orders.delivered_status`
+  // beside the seven stages (host ledger F0). The badge used to say "unknown"
+  // about them, and `'unknown'` had no key in either file, so it rendered the
+  // raw lowercase word.
+  'partially_paid': 'Partially Paid',
+  'pre_order': 'Pre Order',
+  'status_unrecognised': 'Status not recognised',
+
+  // The status sheet's one-line descriptions. Every one of these was an ARABIC
+  // STRING LITERAL with no `.tr` at all, so an English-locale merchant read
+  // them in Arabic.
+  'order_desc_pending': 'The order is waiting to be confirmed',
+  'order_desc_delivered': 'Delivered successfully',
+  'order_desc_cancelled': 'The order was cancelled',
+  'order_desc_return': 'A return has been requested',
+  'order_desc_confirmed': 'The order has been confirmed',
+  'order_desc_picked_up': 'Picked up from the store',
+  'order_desc_shipped': 'The order has shipped',
+  'order_desc_partially_paid': 'Part of the amount has been paid',
+  'order_desc_pre_order': 'Placed in advance of availability',
+  'order_desc_unrecognised': 'This status is not one the app recognises',
   "search" : "Search",
   "new_order" : "New Order",
   "filter_by_date" : "Filter by date",
@@ -647,4 +672,15 @@ const Map<String, String> en = {
   'session_expired': 'Your session has expired. Please log in again.',
   'invalid_server_response': 'The server returned an unexpected response.',
   'action_not_permitted': 'You do not have permission to perform this action.',
+
+  // Accessible names for icon-only controls (P2-07).
+  'clear': 'Clear',
+  'upload': 'Upload',
+  'add': 'Add',
+  'show_password': 'Show password',
+  'hide_password': 'Hide password',
+  'stat_period_all_time': 'all time',
+  'stat_period_in_this_store': 'in this store',
+  'page_views_between': 'Page views, @from to @to',
+  'page_views_no_period': 'Page views',
 };

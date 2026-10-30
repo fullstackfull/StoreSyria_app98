@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../utils/colors.dart';
 import 'app_txt_field.dart';
@@ -19,6 +20,8 @@ Widget SearchRowWidget({
     onChanged: onChanged,
     textInputAction: TextInputAction.search,
     suffix: IconButton(
+      // Accessible name: this control has no visible text.
+      tooltip: 'search'.tr,
       onPressed: onClear,
       splashRadius: 20,
       icon: Icon(

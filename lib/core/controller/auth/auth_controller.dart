@@ -12,6 +12,7 @@ import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
 import '../notification_controller/notification_controller.dart';
+import '../../permissions/merchant_permissions.dart';
 
 class AuthController extends GetxController {
   TextEditingController emailController = TextEditingController();
@@ -172,6 +173,15 @@ class AuthController extends GetxController {
           Prefs.setStoreID(storeId);
           Prefs.setString(AppConstant.name, userName);
           Prefs.setString(AppConstant.emailId, userEmail);
+
+          // P2-07-13 / WS K13. What this principal may do, as the SERVER reported it. Persisted
+          // here so a screen opening before the first dashboard call still knows what to offer;
+          // refreshed from the dashboard response afterwards, because permissions belong to the
+          // CURRENT STORE and a store switch changes them.
+          //
+          // A server that does not send the key yields "nothing held", which hides merchant
+          // surfaces rather than revealing them -- the safe direction for a missing field.
+          MerchantPermissions.fromJson(userData).persist();
 
           emailController.clear();
           passwordController.clear();

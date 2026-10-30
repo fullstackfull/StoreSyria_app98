@@ -195,19 +195,13 @@ Widget buildProfileTitle(BuildContext context,{String? profileImage, String? nam
                             height: 56,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                            // البديل محلي، بلا طلب لطرف ثالث. See
+                            // profile_screen.dart for the full reason.
                             errorWidget: (context, url, error) {
-                              return Image.network(
-                                DefaultImages.profileImg,
-                                width: 56,
-                                height: 56,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) {
-                                  return Icon(
-                                    Icons.person,
-                                    size: 30,
-                                    color: Colors.white,
-                                  );
-                                },
+                              return const Icon(
+                                Icons.person,
+                                size: 30,
+                                color: Colors.white,
                               );
                             },
                           ),
@@ -372,15 +366,27 @@ Widget qrCodeWidget(BuildContext context,{String? qrString, String? title}) {
   );
 }
 
+/// A dashboard figure tile.
+///
+/// P2-07-9 + P2-07-13. [permitted] is NOT cosmetic. Every caller used to pass
+/// `dashboardData?.products?.toString() ?? "0"`, so a figure the server WITHHELD from a limited
+/// employee rendered as a confident `0` — a store with hidden orders read as a store with none.
+/// That is wrong information, which is worse than withheld information. When the principal may
+/// not see the figure the tile shows a long dash and tells a screen reader why, instead of
+/// inventing a zero.
 Widget totalProductWidget(BuildContext context,{
   String? image,
   String? title,
   String? subTitle,
   String? total,
   Color? accentColor,
+  bool permitted = true,
+  String? period,
 }) {
       final isDark = Theme.of(context).brightness == Brightness.dark;;
   final Color accent = accentColor ?? AppColor.themeGreenColor;
+  // U+2014, not "0" and not an empty string: an empty tile reads as a rendering failure.
+  final String shown = permitted ? (total ?? '0') : '\u2014';
   return Container(
     width: double.infinity,
     clipBehavior: Clip.antiAlias,
@@ -434,21 +440,64 @@ Widget totalProductWidget(BuildContext context,{
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.centerStart,
                 child: Text(
-                  total!,
+                  shown,
                   style: pBold24.copyWith(
                     fontSize: 22,
                     height: 1.1,
-                    color: isDark ? Colors.white : AppColor.cLabel,
+                    // Dimmed when withheld so the dash does not read as a real, emphatic figure.
+                    color: permitted
+                        ? (isDark ? Colors.white : AppColor.cLabel)
+                        : (isDark ? Colors.white54 : AppColor.cDarkGreyFont),
                   ),
                 ),
               ),
               verticalSpace(4),
-              Text(
-                "${title!} ${subTitle!}",
-                style: pSemiBold12.copyWith(color: isDark ? Colors.white70 : AppColor.cDarkGreyFont),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              // ONE merged label per tile. Read separately a screen reader says "—", then
+              // "Total Orders", and the merchant learns nothing about why the figure is a dash;
+              // merged, it reads "Total Orders, all time, you do not have permission...".
+              //
+              // P2-07-9. [period] states WHAT WINDOW the figure covers, which is the web
+              // dashboard's established pattern — `<x-ss.stat :period="__('all time')">` in
+              // resources/views/dashboard/overview.blade.php. A bare number on a dashboard is
+              // ambiguous: "17 orders" could be today's or the store's lifetime, and the
+              // merchant cannot tell which decision it supports.
+              Semantics(
+                  // excludeSemantics, not MergeSemantics. A `Semantics(label:)` wrapping text
+                  // COMBINES with its children rather than replacing them, so the reader got
+                  // "Total Orders, all time" and then "Total Orders" and "all time" again as
+                  // separate fragments. Measured: the exact-label assertion found nothing until
+                  // the children were excluded.
+                  excludeSemantics: true,
+                  label: <String>[
+                    '${title!} ${subTitle!}',
+                    if (period != null && period.isNotEmpty) period,
+                    if (!permitted) 'action_not_permitted'.tr,
+                  ].join(', '),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        // No `!` here: the label list above already dereferenced both, which
+                        // promotes them for the rest of the expression, so a second `!` is dead
+                        // code the analyser reports as a warning.
+                        "$title $subTitle",
+                        style: pSemiBold12.copyWith(color: isDark ? Colors.white70 : AppColor.cDarkGreyFont),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (period != null && period.isNotEmpty)
+                        Text(
+                          period,
+                          style: pSemiBold12.copyWith(
+                            fontSize: 9.5,
+                            color: isDark ? Colors.white54 : AppColor.cDarkGreyFont,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
               verticalSpace(8),
               Container(
                 height: 3,

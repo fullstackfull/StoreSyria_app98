@@ -664,6 +664,10 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                                   price: "${product.salePrice?.toString() ?? ""}  ${productController.currencySymbol.value}",
                                   stock: product.productStock?.toString() ?? '-',
                                   stockStatus: product.stockStatus,
+                                  // P2-07-10: the per-store threshold the web compares against,
+                                  // so the two surfaces agree about "out of stock".
+                                  outOfStockThreshold: productController
+                                      .outOfStockThreshold.value,
                                   rating: product.averageRating?.toDouble() ?? 0.0,
                                   hasVariant: product.variantProduct == 1,
                                   onTap: () => Get.to(

@@ -165,7 +165,10 @@ class SmallCommonIconButton extends StatelessWidget {
             color: btnColor ?? AppColor.themeNavyBlueColor,
             borderRadius: BorderRadius.circular(radius ?? 35),
             border: Border.all(color: bColor ?? AppColor.cTransparent, width: 1)),
-        padding: EdgeInsets.only(top: 3, bottom: 3, right: 10),
+        // Directional: the Row is mainAxisAlignment.start with an icon circle then a label, so
+        // in Arabic the content runs right-to-left and this trailing padding belongs on the END.
+        // Physical `right` put it on the icon's side in RTL.
+        padding: EdgeInsetsDirectional.only(top: 3, bottom: 3, end: 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [

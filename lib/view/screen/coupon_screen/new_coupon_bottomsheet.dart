@@ -169,6 +169,8 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
             borderRadius: BorderRadius.circular(12),
           ),
           child: IconButton(
+            // Accessible name: this control has no visible text.
+            tooltip: 'close'.tr,
             onPressed: _close,
             icon: const Icon(
               Icons.close_rounded,

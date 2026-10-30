@@ -11,6 +11,7 @@ import '../../../utils/text_style.dart';
 import '../../new_widgets/network_image_widget.dart';
 import '../../new_widgets/pop_up_menu.dart';
 import '../../widget/icon_and_image.dart';
+import 'package:store_go_app/core/stock/stock_state.dart';
 
 Widget allProductsListItemWidget({
   required BuildContext context,
@@ -24,6 +25,7 @@ Widget allProductsListItemWidget({
   String? salePrice,
   required String stock,
   String? stockStatus,
+  int? outOfStockThreshold,
   double? rating,
   bool? hasVariant,
   VoidCallback? onTap,
@@ -49,17 +51,28 @@ Widget allProductsListItemWidget({
   final variant = hasVariant == true;
   final isHidden = status == 0;
 
-  final stockValue = stockStatus ?? '';
-  final isInStock = stockValue == 'in_stock';
-  final isBackorder = stockValue == 'on_backorder';
-  final isOutOfStock = stockValue == 'out_of_stock' || stockValue == '0';
+  // P2-07-10. ONE RULE, SHARED WITH THE WEB. This read `stock_status` unconditionally; the web
+  // ignores that column for a TRACKED product and derives the badge from the live quantity. The
+  // column is never recomputed when stock drains, so the app was calling sold-out products
+  // "In stock" while the web called them "Out of stock". See resolveStockState().
+  final stockState = resolveStockState(
+    hasVariant: variant,
+    trackStock: trackStock,
+    productStock: int.tryParse(stock),
+    stockStatus: stockStatus,
+    outOfStockThreshold: outOfStockThreshold,
+  );
+
+  final isInStock = stockState == StockState.inStock;
+  final isBackorder = stockState == StockState.onBackorder;
+  final isOutOfStock = stockState == StockState.outOfStock;
 
   final displayPrice = parsePriceSafe(price);
 
   final isValidImageUrl = imageUrl.trim().isNotEmpty &&
       (imageUrl.startsWith('http') || imageUrl.startsWith('assets'));
 
-  final Color statusColor = (variant || isInStock)
+  final Color statusColor = (stockState == StockState.inVariant || isInStock)
       ? accentColor
       : isBackorder
       ? warningColor
@@ -71,8 +84,9 @@ Widget allProductsListItemWidget({
       ? 'on_backorder'.tr
       : 'out_of_stock'.tr;
 
-  final String stockText =
-  (variant || !trackStock) ? '${'stock'.tr}: -' : '${'stock'.tr}: $stock';
+  final String stockText = (stockState == StockState.inVariant || !trackStock)
+      ? '${'stock'.tr}: -'
+      : '${'stock'.tr}: $stock';
 
   // نص لا يُقطع: يصغّر تلقائياً إذا ضاق المكان
   Widget fitText(
@@ -199,24 +213,24 @@ Widget allProductsListItemWidget({
                           ),
                         ),
 
-                      // hidden (top-left)
+                      // hidden (top-start)
                       if (isHidden)
-                        Positioned(
+                        PositionedDirectional(
                           top: 8.h,
-                          left: 8.w,
+                          start: 8.w,
                           child: _overlayChip(
                             label: 'hidden'.tr,
                             icon: Icons.visibility_off_outlined,
                           ),
                         ),
 
-                      // menu (top-right)
+                      // menu (top-end)
                       if (viewFun != null ||
                           (showChangeAction && changeFun != null) ||
                           deleteFun != null)
-                        Positioned(
+                        PositionedDirectional(
                           top: 4.h,
-                          right: 4.w,
+                          end: 4.w,
                           child: AppPopupMenu(
                             color: Colors.white,
                             viewFun: viewFun,
@@ -225,9 +239,9 @@ Widget allProductsListItemWidget({
                           ),
                         ),
 
-                      // rating (bottom-left)
-                      Positioned(
-                        left: 8.w,
+                      // rating (bottom-start)
+                      PositionedDirectional(
+                        start: 8.w,
                         bottom: 8.h,
                         child: Container(
                           padding: EdgeInsets.symmetric(

@@ -111,6 +111,8 @@ class _DeliveryBoyPickerBottomSheetState
                         ),
                       ),
                       IconButton(
+                        // Accessible name: this control has no visible text.
+                        tooltip: 'close'.tr,
                         icon: Icon(Icons.close, color: secondaryTextColor),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
@@ -130,6 +132,8 @@ class _DeliveryBoyPickerBottomSheetState
                       suffixIcon: Obx(() {
                         if (query.value.isEmpty) return const SizedBox.shrink();
                         return IconButton(
+                          // Accessible name: this control has no visible text.
+                          tooltip: 'clear'.tr,
                           icon: Icon(Icons.clear, color: secondaryTextColor),
                           onPressed: () {
                             searchController.clear();

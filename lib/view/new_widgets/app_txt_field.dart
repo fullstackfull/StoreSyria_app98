@@ -94,7 +94,9 @@ class AppTextField extends StatelessWidget {
     Widget? suffixWidget = suffix;
     if (suffixWidget == null && _has(suffixText)) {
       suffixWidget = Padding(
-        padding: const EdgeInsets.only(left: 8, right: 12),
+        // P2-07 RTL: the suffix sits inside the field, so its breathing room
+        // has to follow the text direction -- 8 before it, 12 after it.
+        padding: const EdgeInsetsDirectional.only(start: 8, end: 12),
         child: Center(
           widthFactor: 1,
           child: Text(

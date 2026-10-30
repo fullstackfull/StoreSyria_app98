@@ -68,6 +68,16 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
               );
             }
 
+            // P2-07-14. Error before empty: a failed fetch also leaves the list empty, so the
+            // other order tells a merchant whose request failed that they have no notifications.
+            if (notificationController.errorMessage.value.isNotEmpty &&
+                notificationController.notificationList.isEmpty) {
+              return ErrorState(
+                message: notificationController.errorMessage.value,
+                onRetry: () => notificationController.getNotifications(),
+              );
+            }
+
             if (notificationController.notificationList.isEmpty) {
               return EmptyState(
                 message: "no_notifications".tr,

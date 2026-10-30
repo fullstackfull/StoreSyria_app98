@@ -102,6 +102,33 @@ class _DeliveryBoyScreenState extends State<DeliveryBoyScreen>
                       return const ShimmerList();
                     }
 
+                    // P2-07-14. Error before empty -- a failed request also leaves the list
+                    // empty, so the other order tells a merchant whose network dropped that
+                    // they have no delivery staff.
+                    if (deliveryBoyController.errorMessage.value.isNotEmpty &&
+                        deliveryBoys.isEmpty) {
+                      return RefreshIndicator(
+                        backgroundColor: isDark
+                            ? DarkThemeColor.cCardBackground
+                            : Colors.white,
+                        onRefresh: _fetchInitialData,
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * .5,
+                              child: Center(
+                                child: ErrorState(
+                                  message: deliveryBoyController.errorMessage.value,
+                                  onRetry: _fetchInitialData,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
                     if (deliveryBoys.isEmpty) {
                       return RefreshIndicator(
                         backgroundColor: isDark

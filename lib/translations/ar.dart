@@ -111,6 +111,8 @@ const Map<String, String> ar = {
   "demo_mode_message": "هذا الإجراء معطل في وضع العرض التجريبي",
   "created_at": "تاريخ الإنشاء",
   "Already Reviewed" : "تم التقييم",
+  'no_dashboard_data_yet': 'لا يوجد ما يُعرض هنا بعد',
+  'no_statistics_yet': 'لا توجد إحصاءات زوّار بعد',
   'please_select_category': 'الرجاء اختيار الفئة',
   'Products' : "المنتجات",
   "Orders" : "الطلبات",
@@ -124,6 +126,24 @@ const Map<String, String> ar = {
   'confirmed': 'مؤكد',
   'picked_up': 'تم الاستلام',
   'shipped': 'تم الشحن',
+
+  // P2-07-6. القيمتان اللتان ليستا حالتَي تنفيذ: 7 حالة دفع و8 نوع طلب، وكلتاهما
+  // مسجّلتان في `orders.delivered_status` إلى جانب المراحل السبع.
+  'partially_paid': 'مدفوع جزئياً',
+  'pre_order': 'طلب مسبق',
+  'status_unrecognised': 'حالة غير معروفة',
+
+  // أوصاف الحالات في ورقة الحالة.
+  'order_desc_pending': 'الطلب قيد الانتظار',
+  'order_desc_delivered': 'تم التوصيل بنجاح',
+  'order_desc_cancelled': 'تم إلغاء الطلب',
+  'order_desc_return': 'طلب إرجاع',
+  'order_desc_confirmed': 'تم تأكيد الطلب',
+  'order_desc_picked_up': 'تم الاستلام من المتجر',
+  'order_desc_shipped': 'تم الشحن',
+  'order_desc_partially_paid': 'تم دفع جزء من المبلغ',
+  'order_desc_pre_order': 'طلب مُقدَّم قبل توفّر المنتج',
+  'order_desc_unrecognised': 'هذه الحالة غير معروفة للتطبيق',
   "search" : "بحث",
   "new_order" : "طلب جديد",
   'top_orders': 'أهم الطلبات',
@@ -648,4 +668,15 @@ const Map<String, String> ar = {
   'session_expired': 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى',
   'invalid_server_response': 'أرجع الخادم استجابة غير متوقعة',
   'action_not_permitted': 'ليست لديك صلاحية لتنفيذ هذا الإجراء',
+
+  // Accessible names for icon-only controls (P2-07).
+  'clear': 'مسح',
+  'upload': 'رفع',
+  'add': 'إضافة',
+  'show_password': 'إظهار كلمة المرور',
+  'hide_password': 'إخفاء كلمة المرور',
+  'stat_period_all_time': 'منذ البداية',
+  'stat_period_in_this_store': 'في هذا المتجر',
+  'page_views_between': 'مشاهدات الصفحات، من @from إلى @to',
+  'page_views_no_period': 'مشاهدات الصفحات',
 };

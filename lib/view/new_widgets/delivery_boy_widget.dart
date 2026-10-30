@@ -84,7 +84,7 @@ Widget deliveryBoyWidget({
                     displayName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.left,
+                    textAlign: TextAlign.start,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -210,7 +210,7 @@ Widget _deliveryBoyInfoRow({
           text,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.right,
+          textAlign: TextAlign.end,
           style: TextStyle(
             fontSize: 13.5.sp,
             fontWeight: FontWeight.w500,

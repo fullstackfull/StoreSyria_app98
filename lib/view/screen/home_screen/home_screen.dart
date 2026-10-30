@@ -19,6 +19,7 @@ import '../../../core/controller/home_controller/category_controller.dart';
 import '../../../core/model/static_model.dart';
 import '../../new_widgets/shimmer.dart';
 import '../statistics_screen/statistics_screen_widget.dart';
+import 'package:store_go_app/view/widget/error_empty_state.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -79,10 +80,45 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
           return GetBuilder<HomeController>(
               builder: (controller) {
-                if (controller.dashboardData == null) {
+                /* P2-07-14. THIS WAS AN INFINITE SHIMMER ON ANY DASHBOARD FAILURE, on the
+                   first screen a merchant sees. `dashboardData` is only assigned on success, so
+                   a failed request left it null and this branch animated a loading skeleton
+                   forever -- no error, no retry, and the toast that fired gone within seconds.
+
+                   Now the three states are distinguished. `dashboardLoadedOnce` is what tells
+                   "still loading" from "loaded and empty", which a null model alone cannot. */
+                if (!controller.dashboardLoadedOnce.value ||
+                    (controller.dashboardData == null &&
+                        controller.dashboardError.value.isEmpty)) {
                   return Scaffold(
                     backgroundColor: bgColor,
                     body: const SafeArea(child: ShimmerDashboard()),
+                  );
+                }
+
+                // Error before empty: a failed request also leaves the model null.
+                if (controller.dashboardError.value.isNotEmpty &&
+                    controller.dashboardData == null) {
+                  return Scaffold(
+                    backgroundColor: bgColor,
+                    body: SafeArea(
+                      child: ErrorState(
+                        message: controller.dashboardError.value,
+                        onRetry: controller.getDashboardData,
+                      ),
+                    ),
+                  );
+                }
+
+                if (controller.dashboardData == null) {
+                  return Scaffold(
+                    backgroundColor: bgColor,
+                    body: SafeArea(
+                      child: EmptyState(
+                        message: 'no_dashboard_data_yet'.tr,
+                        icon: Icons.dashboard_outlined,
+                      ),
+                    ),
                   );
                 }
                 return Scaffold(
@@ -345,15 +381,40 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                     title: "Total".tr,
                                     subTitle: "Products".tr,
                                     accentColor: AppColor.themeGreenColor,
+                                    period: 'stat_period_in_this_store'.tr,
+                                    // P2-07-13. The server OMITS a figure this principal may not
+                                    // see, and `?? "0"` turned that omission into a confident
+                                    // zero. The tile now says "withheld" rather than "none".
+                                    //
+                                    // READ FROM THE FIGURE'S PRESENCE, not from the permission
+                                    // list, and deliberately: presence is correct against EVERY
+                                    // server version. An older backend that does not gate sends
+                                    // the figure, and a permission-list test would then blank a
+                                    // tile whose data is right there; a newer one omits exactly
+                                    // what it withheld. The list drives NAVIGATION, where there
+                                    // is no data presence to read.
+                                    permitted:
+                                        homeController.dashboardData?.products != null,
                                     total: homeController.dashboardData?.products
                                         ?.toString() ?? "0"),
                               ),
                               horizontalSpace(10),
                               Expanded(
                                 child: totalProductWidget(context,image: DefaultImages.listIcn,
+                                    // P2-07-9. NOT "Sales", which reads as revenue. The server
+                                    // sends `Order::where('delivered_status', 1)->count()` — a
+                                    // COUNT of delivered orders, no money in it at all. A tile
+                                    // labelled "Total Sales" over a count of 17 tells the
+                                    // merchant their store has taken 17 of something, and they
+                                    // cannot tell what. The web dashboard has no such tile; its
+                                    // money figure is labelled "Order value" and carries
+                                    // "all time, gross" plus a hint that it is neither payments
+                                    // received nor profit.
                                     title: "Total".tr,
-                                    subTitle: "Sales".tr,
+                                    subTitle: 'delivered'.tr,
                                     accentColor: AppColor.blueColor,
+                                    period: 'stat_period_all_time'.tr,
+                                    permitted: homeController.dashboardData?.sales != null,
                                     total: homeController.dashboardData?.sales
                                         ?.toString() ?? "0"),
                               ),
@@ -363,6 +424,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                     title: "Total".tr,
                                     subTitle: "Orders".tr,
                                     accentColor: AppColor.cRed,
+                                    period: 'stat_period_all_time'.tr,
+                                    permitted: homeController.dashboardData?.order != null,
                                     total: homeController.dashboardData?.order
                                         ?.toString() ?? "0"),
                               ),
