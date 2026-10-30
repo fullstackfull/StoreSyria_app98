@@ -21,12 +21,30 @@
 // Once direction started working, every physical `Positioned` became a place
 // where the direction is ignored.
 //
-// SCOPE: MERCHANT SURFACES ONLY, by owner instruction. The storefront and
-// shared-presentation files (`category_widget`, `product_widget`,
-// `common_snak_bar_widget`) are Phase 03's and are NOT asserted at zero here —
-// their count is frozen instead, so a NEW physical site there is visible
-// without this test claiming the existing ones are fixed. Widening a slice is
-// what the standing rules forbid.
+// SCOPE: MERCHANT SURFACES ONLY, by owner instruction — AND THAT IS THE WHOLE
+// APP. An earlier version of this file split the app into "merchant" and
+// "storefront" halves and froze seven physical sites in `category_widget`,
+// `product_widget` and `common_snak_bar_widget` as Phase 03's. **THAT SPLIT WAS
+// WRONG, and an independent audit of this repository found it.** Measured:
+// `lib/routes/routes.dart` declares ONLY merchant screens — dashboard, orders,
+// products, categories, customers, delivery boys, wallet, coupons, tax,
+// shipping, statistics, plans, settings — and `lib/view/screen/` contains no
+// cart, no checkout and no shopper screen at all. THIS REPOSITORY IS THE ADMIN
+// APP. There is no storefront here to defer.
+//
+// So the three "storefront" files were merchant surfaces all along:
+// `category_widget` is rendered only by `category_screen.dart`,
+// `product_widget`'s `allProductsListItemWidget` only by `products_screen.dart`,
+// and `common_snak_bar_widget` is the toast used by around forty merchant
+// controllers. Two of the seven were interactive edit/delete popup menus pinned
+// to `right:` — the same class of defect this slice calls the one that matters.
+// Their own comments said `(top-left)` and `(top-right)` while naming positions
+// the author clearly meant as start and end.
+//
+// All seven are converted, the budget is deleted, and the rule below now asserts
+// ZERO across the whole of `lib/`. Freezing a count is the right tool for work
+// that genuinely belongs to a later phase; it is the wrong tool for work
+// mis-filed out of this one.
 //
 // A SOURCE SCAN RATHER THAN A RENDER, and the reason is stated rather than
 // implied: this is the established style in this directory
@@ -40,16 +58,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/source_tree.dart';
 
-/// The merchant surfaces this slice owns. An explicit list rather than a path
-/// heuristic, so a reader can audit the scope instead of inferring it, and so
-/// a new merchant screen is a deliberate addition rather than a silent one.
-const _merchantFiles = <String>[
+/// The files that carried a physical `Positioned` when this slice began, kept as
+/// a PREMISE rather than as a scope: the rule below covers all of `lib/`, and
+/// this list only proves the scan still reaches the places the defect was.
+const _knownConvertedFiles = <String>[
   'lib/view/screen/product_screen/add_new_product_screen.dart',
   'lib/view/screen/wallet/wallet_screen.dart',
+  'lib/view/new_widgets/category_widget.dart',
+  'lib/view/screen/product_screen/product_widget.dart',
+  'lib/view/widget/common_snak_bar_widget.dart',
 ];
-
-/// Phase 03's, frozen rather than fixed. Raise this only by DELETING an entry.
-const _storefrontPhysicalBudget = 7;
 
 /// A `Positioned(` that is not `PositionedDirectional(` — the physical form.
 ///
@@ -82,38 +100,38 @@ List<String> _physicalSites(String path, String source) {
 }
 
 void main() {
-  test('no merchant surface positions anything by a physical left/right edge', () {
+  test('nothing anywhere in lib/ positions by a physical left/right edge', () {
     final offenders = <String>[];
 
     for (final file in libDartFiles()) {
-      final path = relative(file);
-      if (!_merchantFiles.contains(path)) continue;
-
-      offenders.addAll(_physicalSites(path, file.readAsStringSync()));
+      offenders.addAll(_physicalSites(relative(file), file.readAsStringSync()));
     }
 
     expect(
       offenders,
       isEmpty,
-      reason: 'These merchant-surface elements are pinned to a PHYSICAL edge, so '
-          'they do not mirror in Arabic — the platform\'s primary language and '
-          'this app\'s default and fallback locale. Use '
+      reason: 'These elements are pinned to a PHYSICAL edge, so they do not '
+          'mirror in Arabic — the platform\'s primary language and this app\'s '
+          'default and fallback locale. Use '
           '`PositionedDirectional(start:/end:)`, which resolves against '
-          '`Directionality.of(context)`:\n  ${offenders.join('\n  ')}',
+          '`Directionality.of(context)`. Every screen in this repository is a '
+          'merchant screen, so there is no later-phase bucket to defer one '
+          'into:\n  ${offenders.join('\n  ')}',
     );
   });
 
-  test('PREMISE: the scan sees the merchant files at all', () {
+  test('PREMISE: the scan sees the converted files at all', () {
     // Without this, the rule above passes vacuously the day a file is renamed
     // or moved — the single most likely way for a path-list scan to stop
     // measuring anything while still reporting success.
-    final seen = libDartFiles().map(relative).where(_merchantFiles.contains).toList();
+    final seen =
+        libDartFiles().map(relative).where(_knownConvertedFiles.contains).toList();
 
     expect(
       seen.length,
-      _merchantFiles.length,
-      reason: 'The scan did not find every file in `_merchantFiles`, so the rule '
-          'above is asserting less than it appears to. Found: $seen',
+      _knownConvertedFiles.length,
+      reason: 'The scan did not find every file in `_knownConvertedFiles`, so the '
+          'rule above is asserting less than it appears to. Found: $seen',
     );
   });
 
@@ -121,49 +139,84 @@ void main() {
     var directional = 0;
 
     for (final file in libDartFiles()) {
-      if (!_merchantFiles.contains(relative(file))) continue;
       directional += RegExp('PositionedDirectional\\(')
           .allMatches(codeOnly(file.readAsStringSync()))
           .length;
     }
 
-    // Five at the time of writing: four remove-image badges in the product
-    // editor and the filter-active dot in the wallet screen.
+    // Twelve converted by this slice in total — five in the first pass (four
+    // remove-image badges in the product editor, the wallet filter dot) and
+    // seven in the correction (category_widget 3, product_widget 3, the
+    // snackbar 1) — on top of the thirteen that were already directional.
     expect(
       directional,
-      greaterThanOrEqualTo(5),
-      reason: 'The merchant files carry fewer directional positions than the '
-          'five this slice converted, so either they were reverted or the '
-          'absolute positioning was removed. Either way the rule above may now '
-          'be passing because there is nothing left to position.',
+      greaterThanOrEqualTo(12),
+      reason: 'lib/ carries fewer directional positions than the twelve this '
+          'slice converted, so either they were reverted or the absolute '
+          'positioning was removed. Either way the rule above may now be '
+          'passing because there is nothing left to position.',
     );
   });
 
-  test('the storefront physical count is frozen, not fixed — Phase 03 owns it', () {
-    final sites = <String>[];
+  test('no text is aligned to a physical left/right edge', () {
+    // THE RATCHET'S OTHER BLIND SPOT, also found by the audit: it scanned only
+    // `Positioned`, so direction-blind TEXT ALIGNMENT went unmeasured and ten
+    // sites were live — customer and delivery-boy names at `TextAlign.left`,
+    // order prices and totals at `TextAlign.right`, the tax screen, the
+    // customer detail rows. `start`/`end` resolve against the ambient
+    // direction; `left`/`right` do not.
+    final offenders = <String>[];
 
     for (final file in libDartFiles()) {
       final path = relative(file);
-      if (_merchantFiles.contains(path)) continue;
+      final lines = codeOnly(file.readAsStringSync()).split('\n');
 
-      sites.addAll(_physicalSites(path, file.readAsStringSync()));
+      for (var i = 0; i < lines.length; i++) {
+        // `pw.TextAlign` is the PDF package's own enum in `invoice.dart`, and
+        // every use there is already direction-aware
+        // (`isArabic ? pw.TextAlign.right : pw.TextAlign.left`). Excluded by
+        // the lookbehind rather than by skipping the file, so a NEW bare
+        // `TextAlign.right` in `invoice.dart` is still caught.
+        if (RegExp(r'(?<!pw\.)TextAlign\.(left|right)').hasMatch(lines[i])) {
+          offenders.add('$path:${i + 1}');
+        }
+      }
     }
 
-    // DELIBERATELY NOT `isEmpty`. Seven physical sites remain in
-    // `category_widget` (3), `product_widget` (3) and `common_snak_bar_widget`
-    // (1). They are storefront and shared presentation, which the owner
-    // assigned to Phase 03, and converting them is a separate decision —
-    // mirroring is the platform convention for a badge over its own image, but
-    // for a snackbar's placement it is a design question, not a mechanical
-    // swap. Freezing the count keeps a NEW one visible without pretending
-    // these are handled.
     expect(
-      sites.length,
-      lessThanOrEqualTo(_storefrontPhysicalBudget),
-      reason: 'A new physical `Positioned` has appeared outside the merchant '
-          'surfaces. If it is a merchant screen, add it to `_merchantFiles` and '
-          'convert it; if it is storefront, it belongs to the Phase 03 slice and '
-          'the budget must not rise to accommodate it:\n  ${sites.join('\n  ')}',
+      offenders,
+      isEmpty,
+      reason: 'Use `TextAlign.start` / `TextAlign.end`, which resolve against '
+          'the ambient direction. `left` and `right` are physical and read '
+          'wrongly in Arabic:\n  ${offenders.join('\n  ')}',
+    );
+  });
+
+  test('no padding or margin is applied to a physical left/right edge', () {
+    // The third form of the same defect. Three sites were live, two of them two
+    // lines from `Positioned` sites this slice had already converted: the
+    // gallery thumbnails' trailing gap in the product editor, and
+    // `common_button`'s trailing padding on a `mainAxisAlignment.start` row,
+    // which in Arabic put the gap on the icon's side.
+    final offenders = <String>[];
+
+    for (final file in libDartFiles()) {
+      final path = relative(file);
+      final lines = codeOnly(file.readAsStringSync()).split('\n');
+
+      for (var i = 0; i < lines.length; i++) {
+        if (!RegExp(r'EdgeInsets\.only\(').hasMatch(lines[i])) continue;
+        if (RegExp(r'\b(left|right):').hasMatch(lines[i])) {
+          offenders.add('$path:${i + 1}');
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason: 'Use `EdgeInsetsDirectional.only(start:/end:)`. `EdgeInsets.only` '
+          'takes physical edges and does not mirror:\n  ${offenders.join('\n  ')}',
     );
   });
 

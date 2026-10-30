@@ -1003,7 +1003,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                         ...List.generate(existing.length, (index) {
                           final url = existing[index];
                           return Padding(
-                            padding: EdgeInsets.only(right: 10.w),
+                            padding: EdgeInsetsDirectional.only(end: 10.w),
                             child: Stack(
                               children: [
                                 ClipRRect(
@@ -1038,7 +1038,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                         ...List.generate(selected.length, (index) {
                           final path = selected[index];
                           return Padding(
-                            padding: EdgeInsets.only(right: 10.w),
+                            padding: EdgeInsetsDirectional.only(end: 10.w),
                             child: Stack(
                               children: [
                                 ClipRRect(

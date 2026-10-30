@@ -213,24 +213,24 @@ Widget allProductsListItemWidget({
                           ),
                         ),
 
-                      // hidden (top-left)
+                      // hidden (top-start)
                       if (isHidden)
-                        Positioned(
+                        PositionedDirectional(
                           top: 8.h,
-                          left: 8.w,
+                          start: 8.w,
                           child: _overlayChip(
                             label: 'hidden'.tr,
                             icon: Icons.visibility_off_outlined,
                           ),
                         ),
 
-                      // menu (top-right)
+                      // menu (top-end)
                       if (viewFun != null ||
                           (showChangeAction && changeFun != null) ||
                           deleteFun != null)
-                        Positioned(
+                        PositionedDirectional(
                           top: 4.h,
-                          right: 4.w,
+                          end: 4.w,
                           child: AppPopupMenu(
                             color: Colors.white,
                             viewFun: viewFun,
@@ -239,9 +239,9 @@ Widget allProductsListItemWidget({
                           ),
                         ),
 
-                      // rating (bottom-left)
-                      Positioned(
-                        left: 8.w,
+                      // rating (bottom-start)
+                      PositionedDirectional(
+                        start: 8.w,
                         bottom: 8.h,
                         child: Container(
                           padding: EdgeInsets.symmetric(

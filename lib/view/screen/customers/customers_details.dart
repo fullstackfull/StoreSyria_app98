@@ -439,7 +439,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 100.w, child: Text(label, style: TextStyle(fontSize: 13.sp, color: subColor))),
-          Expanded(child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textColor))),
+          Expanded(child: Text(value, textAlign: TextAlign.end, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textColor))),
         ],
       ),
     );

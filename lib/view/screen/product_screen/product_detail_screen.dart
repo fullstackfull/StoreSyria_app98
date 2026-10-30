@@ -1353,7 +1353,7 @@ class _ProductDetailScreenState
             child: Text(
               value,
               textAlign:
-              TextAlign.right,
+              TextAlign.end,
               style:
               pSemiBold12.copyWith(
                 color:

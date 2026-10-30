@@ -298,10 +298,14 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
 
   final messageColor = isDark ? const Color(0xFFA9B8D0) : const Color(0xFF6B7280);
 
-  return Positioned(
+  // Converted for consistency rather than to fix a bug: 16 on both sides is SYMMETRIC, so
+  // mirroring it is a measured no-op. It is converted so that no physical `Positioned` is left in
+  // lib/ at all, which lets the ratchet assert zero instead of carrying an exception nobody
+  // re-reads.
+  return PositionedDirectional(
    top: MediaQuery.of(context).padding.top + 12,
-   left: 16,
-   right: 16,
+   start: 16,
+   end: 16,
    child: SafeArea(
     bottom: false,
     child: SlideTransition(
