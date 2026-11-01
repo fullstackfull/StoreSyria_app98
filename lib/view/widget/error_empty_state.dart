@@ -210,6 +210,23 @@ class StaleDataNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    /* F277's LESSON, APPLIED TO MY OWN WIDGET. The amber below was a single
+       `#D97706` for both themes, and measured on this notice's own surfaces it
+       read **2.8561 in light mode** -- under WCAG 1.4.11's 3:1 for an icon that
+       conveys meaning, which this one does. Exactly the defect F277 records for
+       the toast palette, shipped by me a few hours earlier in the same session.
+
+       Fixed the same way and from the same source: the Store Syria design
+       system's per-theme semantic foregrounds, `--ss-amber-900` on light and
+       its dark-mode counterpart. Measured after: 8.6432 light, 8.3955 dark.
+
+       The BORDER keeps the mid-tone `#D97706` deliberately -- a border is
+       decorative here (the icon and the text carry the meaning), so 1.4.11 does
+       not apply to it, and keeping it preserves the notice's amber identity. */
+    final Color accent = isDark
+        ? const Color(0xFFF0C674)
+        : const Color(0xFF5D3F04);
+
     return Semantics(
       liveRegion: true,
       container: true,
@@ -228,7 +245,7 @@ class StaleDataNotice extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.history_rounded, size: 20.sp, color: const Color(0xFFD97706)),
+            Icon(Icons.history_rounded, size: 20.sp, color: accent),
             SizedBox(width: 10.w),
             Expanded(
               child: Column(
@@ -249,9 +266,16 @@ class StaleDataNotice extends StatelessWidget {
                     textAlign: TextAlign.start,
                     style: TextStyle(
                       fontSize: 12.sp,
+                      /* 12sp body text, so WCAG 1.4.3 asks 4.5:1. The previous
+                         `#777777` measured **4.0146** against this notice's
+                         amber panel — a second contrast defect of mine in the
+                         same widget, found by the test below and not by
+                         review. `--ss-grey-700` from the design system gives
+                         7.8295. The dark side already measured 6.7332 and is
+                         unchanged, so only the light shade moves. */
                       color: isDark
                           ? DarkThemeColor.cSecondaryText
-                          : const Color(0xFF777777),
+                          : const Color(0xFF434D4C),
                     ),
                   ),
                 ],
@@ -266,7 +290,7 @@ class StaleDataNotice extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFFD97706),
+                    color: accent,
                   ),
                 ),
               ),

@@ -57,32 +57,90 @@ void commonToast(
 // STYLE
 // ============================================================
 
+/// F277 — THE TYPE COLOUR IS PER THEME, AND IT HAS TO BE.
+///
+/// ══════════════════════════════════════════════════════════════════════════════════════════════
+/// WHY ONE COLOUR PER TYPE COULD NEVER HAVE WORKED
+/// ══════════════════════════════════════════════════════════════════════════════════════════════
+///
+/// The icon is painted in the type colour, on a circle of the SAME colour at 10% alpha, over the
+/// toast surface — white in light mode, `#18263F` in dark. So the icon's own backdrop is a tint of
+/// itself, and WCAG 2.1 SC 1.4.11 asks 3:1 for an icon that conveys meaning.
+///
+/// A mid-tone colour is too close to its own 10% tint over WHITE, and too close to its own 10% tint
+/// over a DARK surface — in opposite directions. One value cannot satisfy both backdrops, which is
+/// why exactly FOUR of the eight type/theme combinations failed and four passed. Measured on the
+/// real composited backdrop by `test/a11y/toast_type_contrast_test.dart`:
+///
+///     success  light  2.9562  FAIL     success  dark  4.0608  ok
+///     error    light  4.1329  ok       error    dark  2.9997  FAIL
+///     warning  light  2.8561  FAIL     warning  dark  4.2456  ok
+///     info     light  5.7945  ok       info     dark  2.1063  FAIL
+///
+/// `error` dark is the one worth pausing on: rounded to two places it reads 3.00 and looks like a
+/// pass. It is 2.9997. The test caught it after I had already written "error passes in both
+/// themes", and `error` is the type every refusal is routed to.
+///
+/// ══════════════════════════════════════════════════════════════════════════════════════════════
+/// THE VALUES COME FROM THE STORE SYRIA DESIGN SYSTEM, NOT FROM A NEW PALETTE
+/// ══════════════════════════════════════════════════════════════════════════════════════════════
+///
+/// `public/css/store-syria-ds.css` already defines a per-theme semantic FOREGROUND for each of
+/// these four meanings, and its own comment says why: *"--ss-danger inverts between themes: dark
+/// mode needs a light red that reads as text on a dark surface"*. The web had solved this; the app
+/// had not. So these are that solution, transcribed:
+///
+///     light  success --ss-green-800 #165e34 · warning --ss-amber-900 #5d3f04
+///            danger  --ss-red-800   #8c1d17 · info    --ss-blue-800  #15558f
+///     dark   success #7fd6a0 · warning #f0c674 · danger #f3a9a4 · info #9cc6ef
+///
+/// No competing design system is introduced: the semantics are unchanged (green means success, red
+/// means error, amber warns, blue informs) and only the SHADE moves with the theme — which is what
+/// the design system already does on the web.
+///
+/// MEASURED AFTER THE CHANGE, all eight combinations clear 3:1 with room: 6.53 to 8.16. The
+/// contrast test asserts every one of them in both directions, so a colour cannot regress silently
+/// and a future shade change has to come past it.
 class _SnackStyle {
  final IconData icon;
- final Color color;
+
+ /// The icon colour on a LIGHT surface — a dark shade, because its own 10% tint over white is
+ /// almost white.
+ final Color light;
+
+ /// The icon colour on a DARK surface — a light shade, for the mirror-image reason.
+ final Color dark;
 
  const _SnackStyle({
   required this.icon,
-  required this.color,
+  required this.light,
+  required this.dark,
  });
+
+ /// The one accessor every consumer uses, so no site can read a theme-inappropriate shade.
+ Color on(bool isDark) => isDark ? dark : light;
 }
 
 const Map<_SnackType, _SnackStyle> _styles = {
  _SnackType.success: _SnackStyle(
   icon: Icons.check_circle_rounded,
-  color: Color(0xFF16A34A),
+  light: Color(0xFF165E34),   // --ss-green-800
+  dark: Color(0xFF7FD6A0),
  ),
  _SnackType.error: _SnackStyle(
   icon: Icons.error_rounded,
-  color: Color(0xFFDC2626),
+  light: Color(0xFF8C1D17),   // --ss-red-800
+  dark: Color(0xFFF3A9A4),
  ),
  _SnackType.warning: _SnackStyle(
   icon: Icons.warning_rounded,
-  color: Color(0xFFD97706),
+  light: Color(0xFF5D3F04),   // --ss-amber-900
+  dark: Color(0xFFF0C674),
  ),
  _SnackType.info: _SnackStyle(
   icon: Icons.info_rounded,
-  color: Color(0xFF1C53C7),
+  light: Color(0xFF15558F),   // --ss-blue-800
+  dark: Color(0xFF9CC6EF),
  ),
 };
 
@@ -326,12 +384,12 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
          // تعديل الحواف لتكون بلون النوع (Type Color)
          // ==================================================
          border: Border.all(
-          color: style.color.withValues(alpha: isDark ? 0.6 : 0.3),
+          color: style.on(isDark).withValues(alpha: isDark ? 0.6 : 0.3),
           width: 1.2,
          ),
          boxShadow: [
           BoxShadow(
-           color: style.color.withValues(alpha: isDark ? 0.18 : 0.10),
+           color: style.on(isDark).withValues(alpha: isDark ? 0.18 : 0.10),
            blurRadius: 18,
            offset: const Offset(0, 6),
           ),
@@ -347,12 +405,12 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
            width: 34,
            height: 34,
            decoration: BoxDecoration(
-            color: style.color.withValues(alpha: .10),
+            color: style.on(isDark).withValues(alpha: .10),
             shape: BoxShape.circle,
            ),
            child: Icon(
             style.icon,
-            color: style.color,
+            color: style.on(isDark),
             size: 20,
            ),
           ),
