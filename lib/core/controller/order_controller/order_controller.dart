@@ -537,7 +537,15 @@ class OrderController extends GetxController implements StoreAware {
         onSuccess: (data) {
           final model = TopOrderModel.fromJson(data);
           final items = model.data?.topOrders ?? [];
-          topOrderList.value = items.map((e) => e.toOrderData()).toList();
+          /* WS K. The envelope's symbol, which is the only place the backend
+             sends it. Without this the strip rendered "1250.00 null". */
+          topOrderList.value = items
+              .map(
+                (e) => e.toOrderData(
+                  fallbackCurrencySymbol: model.data?.currencySymbol,
+                ),
+              )
+              .toList();
         },
         onFailure: (reason, message, validationErrors) {
           // `Top_orders` is permission-gated too -- same reasoning as above.
