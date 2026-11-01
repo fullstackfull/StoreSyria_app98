@@ -295,6 +295,24 @@ void main() {
   //                     FcmTokenService, the one owner of deleteToken().
   //
   // Neither alone is evidence. Together they are.
+  //
+  // AND TOGETHER THEY ARE STILL NOT AN END-TO-END RESULT. State this plainly
+  // rather than let the green tick imply more than it earned: these tests
+  // establish that the forced-logout path calls the teardown and that the
+  // teardown calls `clearFcmToken()`. They do NOT establish that
+  // `FirebaseMessaging.deleteToken()` reached Firebase, that the registration
+  // was actually revoked, or that a push addressed to the previous merchant
+  // stops being delivered to the device. No test in this repository can: there
+  // is no Firebase in a unit test, `deleteToken()` is swallowed by its own
+  // try/catch (fcm_token_service.dart:198-204) precisely so a Firebase failure
+  // cannot strand the local clear, and the server half -- `ApiController`
+  // deactivating the StoreDevice row only within `user_id` -- is a separate
+  // backend concern.
+  //
+  // What would settle it is a manual check on a real device, or a staged pair
+  // of accounts against a real Firebase project. Until then the honest claim
+  // is "the forced logout now does what the deliberate logout always did",
+  // not "the previous merchant's pushes are proven to stop".
   group('a forced logout destroys the push registration', () {
     setUp(() {
       // `handleUnauthorized()` ends in `Get.offAll(() => NormalLoginWidget())`,
