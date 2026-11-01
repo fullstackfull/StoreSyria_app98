@@ -11,7 +11,6 @@ import 'package:store_go_app/utils/app_log.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/services/fcm_token_service.dart';
-import '../notification_controller/notification_controller.dart';
 import '../../permissions/merchant_permissions.dart';
 
 class AuthController extends GetxController {
@@ -234,22 +233,21 @@ class AuthController extends GetxController {
   }
 
   Future<void> _clearLocalSession() async {
-    // Clear FCM token
-    try {
-      await FcmTokenService().clearFcmToken();
-    } catch (e) {
-      AppLog.e('FCM clear error', error: e);
-    }
+    /// ONE TEARDOWN, SHARED WITH THE FORCED LOGOUT.
+    ///
+    /// This method used to own the full teardown while `handleUnauthorized()`
+    /// -- the path a 401 takes -- did only `Prefs.clear()`. The two drifted
+    /// because nothing compared them, and what the forced path skipped was the
+    /// FCM token: `Prefs.clear()` forgets it locally while the registration on
+    /// Firebase survives, so the device kept receiving the previous merchant's
+    /// order notifications.
+    ///
+    /// The steps are unchanged and in the same order; they just live in one
+    /// place now.
+    await NetworkHttps.clearSession();
 
-    // Clear notifications
-    if (Get.isRegistered<NotificationController>()) {
-      Get.find<NotificationController>().clearNotificationData();
-    }
-
-    // Clear ALL local storage
-    await Prefs.clear();
-
-    // Clear controllers
+    // Controller state is this class's own and is not part of the shared
+    // teardown -- `handleUnauthorized()` has no AuthController to clear.
     clear();
   }
 

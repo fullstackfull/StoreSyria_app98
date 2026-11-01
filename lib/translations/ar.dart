@@ -678,5 +678,6 @@ const Map<String, String> ar = {
   'stat_period_all_time': 'منذ البداية',
   'stat_period_in_this_store': 'في هذا المتجر',
   'page_views_between': 'مشاهدات الصفحات، من @from إلى @to',
+  'plan_limit_unlimited': 'غير محدود',
   'page_views_no_period': 'مشاهدات الصفحات',
 };

@@ -9,6 +9,13 @@ import 'package:store_go_app/utils/app_log.dart';
 import 'package:store_go_app/utils/base_api.dart';
 import 'package:store_go_app/utils/prefer.dart';
 import 'package:store_go_app/view/screen/auth/login_widget.dart';
+/* These two are back-edges: both files import this one. Dart resolves library
+   cycles without trouble -- neither is touched at library-load time, only
+   inside defaultClearSession() -- and the alternative, a hook wired from
+   main(), defaults to doing nothing when somebody forgets to wire it, which is
+   the "inert in production" failure this project has already met. */
+import 'package:store_go_app/core/services/fcm_token_service.dart';
+import 'package:store_go_app/core/controller/notification_controller/notification_controller.dart';
 
 class NetworkHttps {
   NetworkHttps._privateConstructor();
@@ -475,6 +482,63 @@ $error
   @visibleForTesting
   static Future<void> Function() onUnauthorized = handleUnauthorized;
 
+  /// Everything a logout must destroy, as one reference both logout paths use.
+  ///
+  /// WHY THIS EXISTS. There are two ways a merchant's session ends, and until
+  /// now they tore down different amounts of it:
+  ///
+  ///   deliberate  AuthController._clearLocalSession() -- FCM token destroyed
+  ///               on Firebase, NotificationController emptied, Prefs cleared.
+  ///   forced      handleUnauthorized() -- Prefs.clear() and navigate. That is
+  ///               all it did.
+  ///
+  /// `Prefs.clear()` only forgets the FCM token LOCALLY. The registration on
+  /// Firebase survives, `getToken()` returns the same token, and `device_id` is
+  /// derived from the hardware -- so after a forced logout the device kept
+  /// receiving the PREVIOUS merchant's order notifications, titles and bodies
+  /// included, and the next merchant to sign in on that device got them.
+  /// `FcmTokenService.clearFcmToken()`'s own comment says exactly this is what
+  /// destroying the token prevents; the forced path simply never called it.
+  ///
+  /// ONE DEFINITION, TWO CALLERS, for the reason the Laravel half of this
+  /// project has now been bitten by twice: the two paths were written
+  /// separately and drifted, and nothing compared them.
+  ///
+  /// It is a replaceable field rather than a direct call so a test can observe
+  /// that a 401 really reaches it -- the same seam shape as [onUnauthorized]
+  /// above, and for the same reason: a unit test has neither GetStorage nor
+  /// Firebase. What the DEFAULT does is asserted separately, because a test
+  /// that only proves a hook fires proves nothing about what the hook does.
+  ///
+  /// NOT `@visibleForTesting`, unlike [onUnauthorized] directly above. That one
+  /// is a pure observation point with no production caller. This one IS the
+  /// production teardown, called by both logout paths; annotating it would make
+  /// `AuthController._clearLocalSession()` an analyzer warning for doing
+  /// exactly what it is supposed to do.
+  static Future<void> Function() clearSession = defaultClearSession;
+
+  /// The real teardown. Each step is independently guarded: a Firebase failure
+  /// must not stop the local storage being cleared, because a half-cleared
+  /// session is worse than either outcome -- the merchant stays signed in with
+  /// a token the server has already rejected.
+  static Future<void> defaultClearSession() async {
+    try {
+      await FcmTokenService().clearFcmToken();
+    } catch (e) {
+      AppLog.e('FCM clear on forced logout failed', error: e);
+    }
+
+    try {
+      if (Get.isRegistered<NotificationController>()) {
+        Get.find<NotificationController>().clearNotificationData();
+      }
+    } catch (e) {
+      AppLog.e('Notification clear on forced logout failed', error: e);
+    }
+
+    await Prefs.clear();
+  }
+
   /// Classifies an error response exactly as the request verbs do.
   ///
   /// A seam for tests only: the status-code mapping is otherwise private and
@@ -492,7 +556,7 @@ $error
     _unauthorizedInFlight = true;
 
     try {
-      await Prefs.clear();
+      await clearSession();
 
       // Kept exactly as it was, including the ineffective route comparison:
       // Get.offAll with a widget builder yields an unnamed route, so this

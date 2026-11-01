@@ -341,4 +341,106 @@ void main() {
       }
     }
   });
+
+  // ===========================================================================
+  // SCALARS THE SERVER REALLY SENDS, which the sweep above cannot reach
+  // ===========================================================================
+  //
+  // `_containerKeysReadBy` harvests only the keys a model reads as a MAP or a
+  // LIST (`:165-170`), deliberately — the sweep is about container shape. So a
+  // model whose scalar field receives a type it was not declared for is
+  // invisible to every case above, however many thousands of them run.
+  //
+  // That blind spot hides a live crash. `Api\DashboardController` returns the
+  // STRING 'Unlimited' for an unlimited plan, in six places:
+  //
+  //     'max'       => $maxProducts  == -1 ? 'Unlimited' : $maxProducts,
+  //     'remaining' => $remainingProducts == -1 ? 'Unlimited' : $remainingProducts,
+  //     … the same for stores and users (DashboardController.php:7505-7519)
+  //
+  // and `PlanLimit.fromJson` declares `final int max` and writes
+  // `max: json['max'] ?? 0`. `??` substitutes for null ONLY, so the String goes
+  // straight into an `int` field: a TypeError thrown inside fromJson, which
+  // means **a merchant on a top-tier plan cannot open the My Plan screen at
+  // all**.
+  //
+  // The sentinel is the server's and must stay the server's: changing it to
+  // send -1 is an API response-shape change that the shipped app depends on,
+  // which is an owner decision, not an engineering one. So the app tolerates
+  // what the server sends.
+  group('a scalar the server really sends', () {
+    test('PlanLimit accepts the Unlimited sentinel without throwing', () {
+      final payload = jsonDecode(jsonEncode(<String, dynamic>{
+        'max': 'Unlimited',
+        'used': 3,
+        'remaining': 'Unlimited',
+        'percentage': 0,
+      })) as Map<String, dynamic>;
+
+      expect(() => PlanLimit.fromJson(payload), returnsNormally);
+    });
+
+    test('and reports it as unlimited rather than as a number', () {
+      final limit = PlanLimit.fromJson(<String, dynamic>{
+        'max': 'Unlimited',
+        'used': 3,
+        'remaining': 'Unlimited',
+        'percentage': 0,
+      });
+
+      expect(limit.isUnlimited, isTrue);
+      expect(limit.used, 3);
+      // A plan with no ceiling has no meaningful "max" number. Rendering 0 —
+      // which is what `?? 0` would have produced had the types allowed it —
+      // would read as a quota of zero already exceeded, the same defect the
+      // Laravel dashboard's storage card carried (F249).
+      expect(limit.max, isNot(0));
+    });
+
+    test('a numbered plan is still a number', () {
+      final limit = PlanLimit.fromJson(<String, dynamic>{
+        'max': 50,
+        'used': 3,
+        'remaining': 47,
+        'percentage': 6.0,
+      });
+
+      expect(limit.isUnlimited, isFalse);
+      expect(limit.max, 50);
+      expect(limit.remaining, 47);
+    });
+
+    test('a numeric string is read as the number it is', () {
+      // PHP's JSON encoding of a DECIMAL column arrives as a string often
+      // enough in this backend that it is worth pinning rather than assuming.
+      final limit = PlanLimit.fromJson(<String, dynamic>{
+        'max': '50',
+        'used': '3',
+        'remaining': '47',
+        'percentage': '6.0',
+      });
+
+      expect(limit.isUnlimited, isFalse);
+      expect(limit.max, 50);
+      expect(limit.used, 3);
+      expect(limit.percentage, 6.0);
+    });
+
+    test('the whole plan response survives the sentinel end to end', () {
+      // The sweep's own CurrentPlanResponse entry cannot produce this, because
+      // it only ever skews CONTAINER keys.
+      final payload = jsonDecode(jsonEncode(<String, dynamic>{
+        'status': 1,
+        'data': <String, dynamic>{
+          'limits': <String, dynamic>{
+            'products': {'max': 'Unlimited', 'used': 12, 'remaining': 'Unlimited', 'percentage': 0},
+            'stores': {'max': 1, 'used': 1, 'remaining': 0, 'percentage': 100},
+            'users': {'max': 'Unlimited', 'used': 4, 'remaining': 'Unlimited', 'percentage': 0},
+          },
+        },
+      })) as Map<String, dynamic>;
+
+      expect(() => CurrentPlanResponse.fromJson(payload), returnsNormally);
+    });
+  });
 }

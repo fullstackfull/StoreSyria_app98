@@ -682,5 +682,6 @@ const Map<String, String> en = {
   'stat_period_all_time': 'all time',
   'stat_period_in_this_store': 'in this store',
   'page_views_between': 'Page views, @from to @to',
+  'plan_limit_unlimited': 'Unlimited',
   'page_views_no_period': 'Page views',
 };
