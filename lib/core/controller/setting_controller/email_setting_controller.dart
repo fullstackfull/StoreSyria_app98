@@ -48,11 +48,30 @@ class EmailSettingController extends GetxController {
     isLoading.value = false;
     response.fold(
       onSuccess: (data) {
-        commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: 'Success'));
+        /* WS K. The backend refuses at HTTP 200, so a refusal lands here. This one
+           already showed the SERVER'S OWN message -- but in a GREEN toast, so the
+           merchant read "SMTP credentials rejected" as confirmation that the
+           settings had saved. */
+        if (apiRefused(data)) {
+          errorMessage.value = apiMessage(
+            data,
+            fallback: 'Error saving email setting',
+          );
+          commonToast(type: AppSnackBarType.error, errorMessage.value);
+          return;
+        }
+
+        commonToast(
+          type: AppSnackBarType.success,
+          apiMessage(data, fallback: 'Success'),
+        );
       },
-      onFailure: (reason,message,errors) {
+      onFailure: (reason, message, errors) {
         errorMessage.value = message ?? 'Error saving email setting';
-        commonToast(type: AppSnackBarType.error, message ?? 'Error saving email setting');
+        commonToast(
+          type: AppSnackBarType.error,
+          message ?? 'Error saving email setting',
+        );
       },
     );
   }
@@ -63,7 +82,7 @@ class EmailSettingController extends GetxController {
     isLoading.value = false;
     response.fold(
       onSuccess: (data) {
-        if(data['status'] == 1) {
+        if (data['status'] == 1) {
           emailSettingModel = EmailSettingModel.fromJson(data);
           emailSetting = emailSettingModel!.data;
           mailDriver.text = emailSetting?.mailDriver ?? '';
@@ -75,12 +94,18 @@ class EmailSettingController extends GetxController {
           mailFromAddress.text = emailSetting?.mailFromAddress ?? '';
           mailFromName.text = emailSetting?.mailFromName ?? '';
         } else {
-          commonToast(type: AppSnackBarType.error, apiMessage(data, fallback: 'Failed'));
+          commonToast(
+            type: AppSnackBarType.error,
+            apiMessage(data, fallback: 'Failed'),
+          );
         }
       },
-      onFailure: (reason,message,errors) {
+      onFailure: (reason, message, errors) {
         errorMessage.value = message ?? 'Error loading email setting';
-        commonToast(type: AppSnackBarType.error, message ?? 'Error loading email setting');
+        commonToast(
+          type: AppSnackBarType.error,
+          message ?? 'Error loading email setting',
+        );
       },
     );
   }
@@ -91,11 +116,29 @@ class EmailSettingController extends GetxController {
     isLoading.value = false;
     response.fold(
       onSuccess: (data) {
-        commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: 'Success'));
+        /* WS K. A test email the SMTP server bounced came back as a green
+           "Success", which is the one case where the toast IS the whole feature:
+           the merchant sends a test precisely to learn whether delivery works. */
+        if (apiRefused(data)) {
+          errorMessage.value = apiMessage(
+            data,
+            fallback: 'Error sending email',
+          );
+          commonToast(type: AppSnackBarType.error, errorMessage.value);
+          return;
+        }
+
+        commonToast(
+          type: AppSnackBarType.success,
+          apiMessage(data, fallback: 'Success'),
+        );
       },
-      onFailure: (reason,message,errors) {
+      onFailure: (reason, message, errors) {
         errorMessage.value = message ?? 'Error sending email';
-        commonToast(type: AppSnackBarType.error, message ?? 'Error sending email');
+        commonToast(
+          type: AppSnackBarType.error,
+          message ?? 'Error sending email',
+        );
       },
     );
   }

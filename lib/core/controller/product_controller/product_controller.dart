@@ -10,11 +10,7 @@ import 'package:store_go_app/core/controller/home_controller/store_change_servic
 
 import '../../../network/result.dart';
 
-enum ProductListMode {
-  normal,
-  search,
-  category,
-}
+enum ProductListMode { normal, search, category }
 
 class ProductController extends GetxController implements StoreAware {
   static const String _cacheProductKey = 'home_product_list_data';
@@ -54,7 +50,6 @@ class ProductController extends GetxController implements StoreAware {
   bool _isNotFound(Object? m) =>
       m is String && m.toLowerCase().contains('not found');
 
-
   @override
   void onInit() {
     super.onInit();
@@ -64,24 +59,20 @@ class ProductController extends GetxController implements StoreAware {
   }
 
   void _loadCachedProducts() {
-    final cached =
-    CacheService.get<Map<String, dynamic>>(_cacheProductKey);
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheProductKey);
 
     if (cached == null) return;
 
     try {
       productModel = ProductModel.fromJson(cached);
 
-      currencySymbol.value =
-          productModel?.data?.currencySymbol ?? '';
+      currencySymbol.value = productModel?.data?.currencySymbol ?? '';
       outOfStockThreshold.value = productModel?.data?.outOfStockThreshold ?? 0;
 
-      productList.value =
-          productModel?.data?.data ?? [];
+      productList.value = productModel?.data?.data ?? [];
 
       isScroll.value =
-          productModel?.data?.currentPage !=
-              productModel?.data?.lastPage;
+          productModel?.data?.currentPage != productModel?.data?.lastPage;
     } catch (_) {
       productModel = null;
       currencySymbol.value = '';
@@ -126,11 +117,9 @@ class ProductController extends GetxController implements StoreAware {
           if (data['status'] == 1) {
             productModel = ProductModel.fromJson(data);
 
-            currencySymbol.value =
-                productModel?.data?.currencySymbol ?? '';
+            currencySymbol.value = productModel?.data?.currencySymbol ?? '';
 
-            final newProducts =
-                productModel?.data?.data ?? <ProductData>[];
+            final newProducts = productModel?.data?.data ?? <ProductData>[];
 
             if (page == 1) {
               productList.clear();
@@ -147,7 +136,8 @@ class ProductController extends GetxController implements StoreAware {
             return;
           }
 
-          final message = (data['data'] is Map ? data['data']['message'] : null) ??
+          final message =
+              (data['data'] is Map ? data['data']['message'] : null) ??
               data['message'] ??
               'Error';
 
@@ -212,7 +202,8 @@ class ProductController extends GetxController implements StoreAware {
                 .toList(),
           );
         } else {
-          commonToast(type: AppSnackBarType.error, 
+          commonToast(
+            type: AppSnackBarType.error,
             apiMessage(data, fallback: 'Error'),
           );
         }
@@ -230,20 +221,16 @@ class ProductController extends GetxController implements StoreAware {
     final query = value.trim();
 
     if (query.length < 3) {
-      if (query.isEmpty &&
-          listMode.value == ProductListMode.search) {
+      if (query.isEmpty && listMode.value == ProductListMode.search) {
         clearSearch();
       }
 
       return;
     }
 
-    _productSearchDebounce = Timer(
-      const Duration(milliseconds: 600),
-          () {
-        searchProductName(query);
-      },
-    );
+    _productSearchDebounce = Timer(const Duration(milliseconds: 600), () {
+      searchProductName(query);
+    });
   }
 
   Future<void> searchProductName(String name) async {
@@ -261,8 +248,7 @@ class ProductController extends GetxController implements StoreAware {
     errorMessage.value = '';
     isDataAvailable2.value = true;
 
-    final response =
-    await productRepository.searchProductByName(name.trim());
+    final response = await productRepository.searchProductByName(name.trim());
 
     isDataAvailable2.value = false;
 
@@ -271,13 +257,10 @@ class ProductController extends GetxController implements StoreAware {
         if (data['status'] == 1) {
           searchTotal.value = apiValueAt(data, ['data', 'total']) ?? 0;
 
-          final List products =
-              apiValueAt(data, ['data', 'data']) ?? [];
+          final List products = apiValueAt(data, ['data', 'data']) ?? [];
 
           searchResults.assignAll(
-            products
-                .map((e) => ProductData.fromJson(e))
-                .toList(),
+            products.map((e) => ProductData.fromJson(e)).toList(),
           );
 
           errorMessage.value = '';
@@ -303,20 +286,28 @@ class ProductController extends GetxController implements StoreAware {
     );
   }
 
-  Future<void> deleteProductData({
-    required String productId,
-  }) async {
+  Future<void> deleteProductData({required String productId}) async {
     //Loader.showLoader();
 
-    final response =
-    await productRepository.deleteProductData(productId);
-
+    final response = await productRepository.deleteProductData(productId);
 
     //Loader.hideLoader();
 
     response.fold(
       onSuccess: (data) async {
-        commonToast(type: AppSnackBarType.success, 
+        /* WS K. THE BACKEND REFUSES AT HTTP 200, so a refusal lands HERE, not in
+         `onFailure`. Without this the merchant got a green "Deleted" for an
+         operation the server declined. */
+        if (apiRefused(data)) {
+          commonToast(
+            type: AppSnackBarType.error,
+            apiMessage(data, fallback: 'failed_to_delete'.tr),
+          );
+          return;
+        }
+
+        commonToast(
+          type: AppSnackBarType.success,
           apiMessage(data, fallback: 'Deleted'),
         );
 
@@ -349,7 +340,6 @@ class ProductController extends GetxController implements StoreAware {
     currantPage.value = 1;
     isScroll.value = true;
   }
-
 
   void clearSearch() {
     _productSearchDebounce?.cancel();

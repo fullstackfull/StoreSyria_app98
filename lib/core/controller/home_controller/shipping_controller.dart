@@ -38,7 +38,6 @@ class ShippingController extends GetxController {
   }
 
   getShippingData(page) async {
-
     final response = await shippingRepository.getShippingData(page);
 
     response.fold(
@@ -56,7 +55,7 @@ class ShippingController extends GetxController {
         } else {
           commonToast(type: AppSnackBarType.error, data['message'] ?? '');
         }
-        },
+      },
       onFailure: (reason, message, errors) {
         commonToast(type: AppSnackBarType.error, message);
       },
@@ -69,7 +68,6 @@ class ShippingController extends GetxController {
     required String name,
     required String description,
   }) async {
-
     final response = await shippingRepository.addShippingData(
       isUpdate: isUpdate,
       shippingId: shippingId,
@@ -79,7 +77,21 @@ class ShippingController extends GetxController {
 
     response.fold(
       onSuccess: (data) {
-        commonToast(type: AppSnackBarType.success, apiMessage(data, fallback: ''));
+        /* WS K. THE BACKEND REFUSES AT HTTP 200, so a refusal lands HERE, not in
+         `onFailure`. Without this the merchant got a green "saved" for an
+         operation the server declined. */
+        if (apiRefused(data)) {
+          commonToast(
+            type: AppSnackBarType.error,
+            apiMessage(data, fallback: 'error_occurred'.tr),
+          );
+          return;
+        }
+
+        commonToast(
+          type: AppSnackBarType.success,
+          apiMessage(data, fallback: ''),
+        );
         getShippingData(currantPage.value);
       },
       onFailure: (reason, message, errors) {
@@ -89,12 +101,21 @@ class ShippingController extends GetxController {
   }
 
   deleteShippingData({required String shippingId}) async {
-
-    final response =
-    await shippingRepository.deleteShippingData(shippingId);
+    final response = await shippingRepository.deleteShippingData(shippingId);
 
     response.fold(
       onSuccess: (data) {
+        /* WS K. THE BACKEND REFUSES AT HTTP 200, so a refusal lands HERE, not in
+         `onFailure`. Without this the merchant got a green "Deleted" for an
+         operation the server declined. */
+        if (apiRefused(data)) {
+          commonToast(
+            type: AppSnackBarType.error,
+            apiMessage(data, fallback: 'error_occurred'.tr),
+          );
+          return;
+        }
+
         commonToast(type: AppSnackBarType.success, data['message'] ?? '');
         getShippingData(currantPage.value);
       },

@@ -463,6 +463,14 @@ const Map<String, String> en = {
   'failed_to_delete_order_note': 'Failed to delete order note.',
   'order_deleted_successfully': 'Order deleted successfully.',
   'failed_to_delete_order': 'Failed to delete order.',
+  // WS K. The generic one, used by the refusal guards on the customer, delivery-boy,
+  // review and product deletes -- each of which previously showed a GREEN "Deleted"
+  // for a delete the server declined.
+  'failed_to_delete': 'Failed to delete.',
+  // Already referenced by `createOrderData`'s onFailure and grandfathered in
+  // knownUntranslatedKeys, so it has been rendering as the raw key. Defined now
+  // rather than grandfathered again, because the new refusal guard uses it too.
+  'failed_to_create_order': 'Failed to create order.',
   "change_payment_status"  : "payment status",
   "change_order_status"  : "order status",
   "customers": "Customers",

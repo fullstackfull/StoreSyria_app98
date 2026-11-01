@@ -92,7 +92,6 @@ const Set<String> knownUntranslatedKeys = <String>{
     'enter_product_weight',
     'enter_shipping_id',
     'enter_tax_id',
-    'failed_to_create_order',
     'final_price',
     'invalid_price',
     'invalid_product_weight',

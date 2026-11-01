@@ -455,6 +455,8 @@ const Map<String, String> ar = {
   'failed_to_delete_order_note': 'فشل حذف ملاحظة الطلب.',
   'order_deleted_successfully': 'تم حذف الطلب بنجاح.',
   'failed_to_delete_order': 'فشل حذف الطلب.',
+  'failed_to_delete': 'فشل الحذف.',
+  'failed_to_create_order': 'فشل إنشاء الطلب.',
   "change_payment_status"  : "حالة الدفع",
   "change_order_status"  : "حالة الطلب",
   "add_customer" : "إضافة عميل",

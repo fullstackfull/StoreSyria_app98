@@ -44,7 +44,6 @@ class AddReviewController extends GetxController {
   /// is held separately and the view branches on it before the empty state.
   final RxString reviewErrorMessage = ''.obs;
 
-
   @override
   void onInit() {
     super.onInit();
@@ -92,12 +91,9 @@ class AddReviewController extends GetxController {
 
             reviewModel = ReviewModel.fromJson(data);
 
-            reviewList.assignAll(
-              reviewModel?.data ?? [],
-            );
+            reviewList.assignAll(reviewModel?.data ?? []);
 
-            imageBaseUrl.value =
-                Prefs.getString(AppConstant.imageUrl);
+            imageBaseUrl.value = Prefs.getString(AppConstant.imageUrl);
           } else {
             // إذا ما في reviews -- a real, authorized "no rows" answer, so the
             // empty state below is the truthful rendering and the error is
@@ -123,7 +119,6 @@ class AddReviewController extends GetxController {
       isReviewLoading.value = false;
     }
   }
-
 
   // Future<void> changeReviewData(
   //     int reviewId, {
@@ -152,16 +147,26 @@ class AddReviewController extends GetxController {
   //   );
   // }
 
-
   Future<void> deleteReviewData({
     required String reviewId,
     required String productId,
   }) async {
-
     final response = await reviewRepository.deleteReviewData(reviewId);
     response.fold(
       onSuccess: (data) async {
-        commonToast(type: AppSnackBarType.success, 
+        /* WS K. THE BACKEND REFUSES AT HTTP 200, so a refusal lands HERE, not in
+         `onFailure`. Without this the merchant got a green "Deleted" for an
+         operation the server declined. */
+        if (apiRefused(data)) {
+          commonToast(
+            type: AppSnackBarType.error,
+            apiMessage(data, fallback: 'failed_to_delete'.tr),
+          );
+          return;
+        }
+
+        commonToast(
+          type: AppSnackBarType.success,
           apiMessage(data, fallback: "Deleted"),
         );
 
@@ -202,7 +207,18 @@ class AddReviewController extends GetxController {
 
       response.fold(
         onSuccess: (data) async {
-          commonToast(type: AppSnackBarType.success, 
+          /* WS K. `Get.back()` below closes the sheet. On a refusal the merchant's
+             typed review was dismissed along with it, with a green toast. */
+          if (apiRefused(data)) {
+            commonToast(
+              type: AppSnackBarType.error,
+              apiMessage(data, fallback: 'error_occurred'.tr),
+            );
+            return;
+          }
+
+          commonToast(
+            type: AppSnackBarType.success,
             apiMessage(data, fallback: "Success"),
           );
 
