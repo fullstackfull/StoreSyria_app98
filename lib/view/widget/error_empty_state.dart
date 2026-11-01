@@ -184,3 +184,96 @@ class ErrorState extends StatelessWidget {
     );
   }
 }
+
+/// WS K. An INLINE notice that the list below may be out of date.
+///
+/// `ErrorState` above answers the case where a failure left NOTHING to show.
+/// This answers the other one: the refresh failed and the previous rows are
+/// still on screen. Keeping them is right -- blanking a list on a transient
+/// network failure is worse than holding it -- but until now the only signal
+/// was a three-second toast, after which the screen was indistinguishable from
+/// a successful refresh. The merchant acted on rows that could be hours old,
+/// and the header's counts were the old counts.
+///
+/// It is a NOTICE, not a blocker: the list stays scrollable and usable beneath
+/// it, because stale data a merchant knows is stale is still useful.
+///
+/// `liveRegion`, for the same reason `ErrorState` carries one -- a merchant
+/// using a screen reader is the one most likely to have missed the toast too.
+class StaleDataNotice extends StatelessWidget {
+  final String message;
+  final VoidCallback? onRetry;
+
+  const StaleDataNotice({super.key, required this.message, this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: Container(
+        width: double.infinity,
+        // Directional, so the inset follows the reading direction in Arabic.
+        margin: EdgeInsetsDirectional.only(start: 16.w, end: 16.w, top: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF2B2E39) : const Color(0xFFFBF1E6),
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(
+            color: const Color(0xFFD97706).withValues(alpha: isDark ? .45 : .30),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.history_rounded, size: 20.sp, color: const Color(0xFFD97706)),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'showing_older_data'.tr,
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? DarkThemeColor.cText : const Color(0xFF0F1A2E),
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    message,
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: isDark
+                          ? DarkThemeColor.cSecondaryText
+                          : const Color(0xFF777777),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (onRetry != null) ...[
+              SizedBox(width: 8.w),
+              TextButton(
+                onPressed: onRetry,
+                child: Text(
+                  'retry'.tr,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFD97706),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}

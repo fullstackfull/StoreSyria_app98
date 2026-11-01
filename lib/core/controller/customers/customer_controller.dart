@@ -211,6 +211,13 @@ class CustomerController extends GetxController implements StoreAware {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 1) {
+          /* WS K. A SUCCESSFUL PAGE RETIRES THE LAST FAILURE. `onSuccess` never
+             cleared this, so the stale-data notice keyed on it would appear
+             after the first failed refresh and stay for the rest of the
+             session — a screen permanently claiming to be out of date while
+             showing fresh rows. */
+          errorMessage.value = '';
+
           customerModel = CustomerModel.fromJson(data);
 
           if (page == 1) {

@@ -58,6 +58,7 @@ const Map<String, String> ar = {
   "please_add_sub_image": "يرجى إضافة صور فرعية",
   "please_add_cover_image": "يرجى إضافة صورة غلاف",
   "something_went_wrong": "حدث خطأ ما",
+  "showing_older_data": "يتم عرض بيانات أقدم. تعذّر تحميل أحدث البيانات.",
   "retry": "إعادة المحاولة",
   "sub_total": "المجموع الفرعي",
   "shipping": "الشحن",

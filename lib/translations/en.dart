@@ -58,6 +58,7 @@ const Map<String, String> en = {
   "please_add_sub_image": "Please add Sub Image",
   "please_add_cover_image": "Please add Cover Image",
   "something_went_wrong": "Something went wrong",
+  "showing_older_data": "Showing older data. The latest could not be loaded.",
   "retry": "Retry",
   "sub_total": "Sub Total",
   "shipping": "Shipping",

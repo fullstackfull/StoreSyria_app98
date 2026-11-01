@@ -69,6 +69,13 @@ class DeliveryBoyController extends GetxController implements StoreAware {
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 'success' || data['status'] == 1) {
+          /* WS K. A SUCCESSFUL LOAD RETIRES THE LAST FAILURE. This limb never
+             cleared it, so the stale-data notice keyed on `errorMessage` would
+             appear after the first failed refresh and stay for the rest of the
+             session — a screen permanently claiming to be out of date while
+             showing fresh rows. */
+          errorMessage.value = '';
+
           deliveryBoyModel = DeliveryBoyModel.fromJson(data);
           deliveryBoyList.value = deliveryBoyModel?.data ?? [];
 

@@ -219,6 +219,29 @@ class _CustomerScreenState extends State<CustomerScreen>
                       controller: scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
                       slivers: [
+                        /*
+                         * WS K. THE LIST IS NOT EMPTY AND THE LAST REFRESH
+                         * FAILED.
+                         *
+                         * The branch above handles error-AND-empty by showing
+                         * `ErrorState`. This is the other half: the rows are
+                         * still here, which is right -- blanking a list on a
+                         * transient network failure is worse than holding it --
+                         * but the only signal used to be a three-second toast,
+                         * after which the screen was indistinguishable from a
+                         * successful refresh.
+                         *
+                         * `errorMessage` is cleared by `onSuccess` now, so this
+                         * leaves as soon as a page loads.
+                         */
+                        if (!isSearchMode &&
+                            customerController.errorMessage.value.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: StaleDataNotice(
+                              message: customerController.errorMessage.value,
+                              onRetry: _fetchInitialData,
+                            ),
+                          ),
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: EdgeInsets.only(
