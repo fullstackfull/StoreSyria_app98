@@ -14,7 +14,13 @@
 //     EdgeInsetsDirectional) resolve start/end as left/right, so layouts
 //     written to mirror did not mirror -- direction-aware code, inert;
 //   * only four files self-corrected by wrapping themselves in an explicit
-//     Directionality, and two of those pin LTR deliberately for numeric rows;
+//     Directionality. TWO OF THOSE WERE DESCRIBED HERE AS PINNING LTR
+//     "deliberately for numeric rows", AND THAT WAS NOT TRUE -- the pinned
+//     region in customer_widget and delivery_boy_widget held a name, a status
+//     pill and a menu, with every number outside it. Both pins are gone now
+//     (WS K); see test/rtl/customer_card_direction_test.dart, which pumps the
+//     cards and measures the resolved direction. The two that remain --
+//     wallet_screen and language_screen -- derive from the locale;
 //   * Material and Cupertino built-ins -- date pickers, text-selection menus,
 //     tooltips -- rendered ENGLISH labels regardless of the app locale.
 //

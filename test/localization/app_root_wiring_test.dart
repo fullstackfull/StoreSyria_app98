@@ -53,10 +53,31 @@ void main() {
     expect(code, contains('TranslationService.supportedLocales'));
   });
 
-  test('the two deliberate LTR pins are still deliberate', () {
-    // delivery_boy_widget and customer_widget pin LTR for numeric rows. Those
-    // are correct and must survive the ambient direction becoming RTL -- a
-    // phone number or an amount reads left-to-right in an Arabic UI too.
+  test('the two cards do NOT pin a direction -- the old premise was false', () {
+    // THIS CASE USED TO ASSERT THE OPPOSITE, AND ITS REASON WAS UNTRUE OF THE
+    // CODE IT POINTED AT. It read:
+    //
+    //     "delivery_boy_widget and customer_widget pin LTR for numeric rows.
+    //      Those are correct and must survive the ambient direction becoming
+    //      RTL -- a phone number or an amount reads left-to-right in an Arabic
+    //      UI too."
+    //
+    // The pinned region contained NO NUMBER. In customer_widget.dart the
+    // wrapper opened at :76 and closed at :113, and between them were exactly
+    // three things: the name Text, a statusPill and an AppPopupMenu. The
+    // numbers -- city, order count, phone -- are `_customerInfoRow` calls that
+    // began at :114, OUTSIDE it. The delivery-man card was identical.
+    //
+    // So this test was green, the justification it stated was false, and it
+    // BLOCKED the fix: in Arabic the name sat flush left while every row
+    // beneath it ran right, and the card read as two layouts stacked. It also
+    // made an earlier fix inert -- `textAlign: TextAlign.start` on the name
+    // resolves against the ambient Directionality, which was the hard-coded LTR
+    // two lines above it.
+    //
+    // Inverted rather than deleted, so the premise cannot come back quietly.
+    // test/rtl/customer_card_direction_test.dart pumps both cards and measures
+    // the resolved direction, which is the half source inspection cannot see.
     for (final path in const [
       'lib/view/new_widgets/delivery_boy_widget.dart',
       'lib/view/new_widgets/customer_widget.dart',
@@ -64,8 +85,10 @@ void main() {
       final src = codeOnly(File('${packageRoot().path}/$path').readAsStringSync());
       expect(
         src,
-        contains('TextDirection.ltr'),
-        reason: '$path pins LTR deliberately for a numeric row.',
+        isNot(contains('TextDirection.ltr')),
+        reason: '$path pins a direction again. If a NUMERIC row ever genuinely '
+            'needs one, pin that row -- not the header -- and say which line '
+            'here.',
       );
     }
   });
