@@ -5,22 +5,44 @@
 // things that silently degrade the Arabic build and locks the measurements in
 // as a ratchet.
 //
-// WHAT WAS MEASURED when these baselines were taken, and RE-MEASURED this
-// phase with this file's own `_declaredKeys` / `_usedKeys` helpers. Three of
-// the five totals had drifted while the ratchet itself stayed intact, so they
-// are corrected here rather than left to be quoted:
+// WHAT WAS MEASURED, as a DATED SNAPSHOT. Read the warning under the table
+// before quoting any of these numbers.
 //
-//                                             then    now
-//   en.dart                                    640    646
-//   ar.dart                                    642    648
-//   distinct literal `.tr` keys used in lib/    523    527
-//   used but defined in NEITHER map              47     46  <- P2-07-9 removed one
-//   defined on one side only                      2      2
+//                                           taken   2026-10   2026-11-02
+//   en.dart                                   640       646          676
+//   ar.dart                                   642       648          678
+//   distinct literal `.tr` keys used in lib/  523       527          550
+//   used but defined in NEITHER map            47        46           44
+//   defined on one side only                    2         2            2
 //
-// The gap did not grow: both baselines below are exactly as large as they
-// were, and the two one-sided keys are still `add_delivery_men` and
-// `price_label`. Ten keys of copy were added and four new `.tr` sites landed,
-// all of them translated -- which is the ratchet working, not slipping.
+// NOTHING IN THIS SUITE ASSERTS THESE FIVE NUMBERS, and that is why the middle
+// column is wrong. It was written under a sentence reading "three of the five
+// totals had drifted ... so they are corrected here rather than left to be
+// quoted" -- and then FOUR of the five drifted again, en.dart and ar.dart by
+// thirty keys each. The ratchet below never noticed, correctly: it asserts
+// SET properties (did the gap grow, is a baseline stale, is a key one-sided),
+// and a count in a comment is not one of them.
+//
+// So treat the right-hand column as what it is -- a measurement taken on one
+// day, reproducible with this file's own `_declaredKeys` / `_usedKeys` helpers
+// against `lib/`, and stale the moment copy is added. The invariants that are
+// actually enforced are the three tests below, not this table. The two
+// one-sided keys are still `add_delivery_men` and `price_label`, and that one
+// IS asserted, by `knownOneSidedKeys`.
+//
+// 2026-11-02, P1-SEC-46 client half: the untranslated baseline FELL BY ONE
+// AGAIN, and this time CI found it rather than a reading. `cost_price` was
+// declared here as a known gap. `product_detail_screen` asks for it as
+// `'cost_price'.tr` while `add_new_product_screen` asks for `'costPrice'.tr`,
+// and only the second spelling was in either map -- so that screen rendered the
+// raw identifier to the merchant, in BOTH languages. Supplying `cost_price` in
+// en.dart and ar.dart made this baseline entry stale, `the baselines are not
+// stale` failed on a real runner with `Actual: ['cost_price']`, and the entry
+// was deleted. SAME SHAPE AS THE 2026-10-28 NOTE BELOW, and the second half of
+// the ratchet's job both times: it refuses a baseline that has outlived its
+// gap, not only a gap that grows. Worth noting that the Laravel repository's
+// known-test-outcomes gate asserts its declared set in both directions for
+// exactly the same reason, and failed in exactly the same way the same day.
 //
 // 2026-10-28, P2-07-9: the untranslated baseline FELL BY ONE. `'Page views over
 // the selected period'` was a raw English `.tr` key with no entry in either map,
@@ -33,8 +55,10 @@
 // grows.
 //
 // GetX's `.tr` returns the KEY ITSELF when a translation is missing, so each of
-// those 47 keys shows the merchant a raw identifier like `cost_price`, or an
+// those 44 keys shows the merchant a raw identifier like `stock_status`, or an
 // untranslated English fragment like `Please fill all field`, in BOTH languages.
+// (This sentence used to say 47 and cite `cost_price`. The count was stale, and
+// `cost_price` now HAS copy in both maps -- see the 2026-11-02 note below.)
 // It is not a crash and it is not a security problem, which is why it is a
 // ratchet rather than a hard failure: filling the gap needs real Arabic and
 // English copy, which is the owner's to approve, not something to invent in a
@@ -87,7 +111,6 @@ const Set<String> knownUntranslatedKeys = <String>{
     'Unique visitors',
     'change2',
     'confirm',
-    'cost_price',
     'enter_name',
     'enter_product_weight',
     'enter_shipping_id',
