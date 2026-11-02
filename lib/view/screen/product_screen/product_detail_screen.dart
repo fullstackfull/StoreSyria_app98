@@ -386,15 +386,28 @@ class _ProductDetailScreenState
               ),
             ],
 
-            _thinDivider(borderColor),
+            // COST PRICE IS NOW CONDITIONAL, exactly as `sale_price` above already is.
+            //
+            // The server omits `cost_price` from `api/admin/viewproduct` for a principal that does
+            // not hold `Manage Products` (P1-SEC-46: it is the store's margin, and the sibling
+            // `productlist` endpoint has always gated it). `ProductModel` parses the absent key
+            // through `formatPriceRaw(null)`, which returns an EMPTY STRING rather than null -- so
+            // this row did not crash, it rendered a labelled blank followed by the currency, which
+            // reads as "this product costs nothing" rather than "you may not see this".
+            //
+            // The row is hidden instead. The same `.trim().isNotEmpty` test the sale-price row
+            // uses, so there is one shape on this screen rather than two.
+            if (costPrice.trim().isNotEmpty) ...[
+              _thinDivider(borderColor),
 
-            _infoRow(
-              label: 'cost_price'.tr,
-              value: '$costPrice $currency',
-              primaryTextColor: primaryTextColor,
-              secondaryTextColor: secondaryTextColor,
-              leadingIcon: Icons.monetization_on,
-            ),
+              _infoRow(
+                label: 'cost_price'.tr,
+                value: '$costPrice $currency',
+                primaryTextColor: primaryTextColor,
+                secondaryTextColor: secondaryTextColor,
+                leadingIcon: Icons.monetization_on,
+              ),
+            ],
 
             _thinDivider(borderColor),
 
