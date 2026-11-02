@@ -223,13 +223,18 @@ void main() {
     test('the log-only handlers are pinned to the two that have no store_id',
         () {
       // Writing to the log is not nothing, but it is not visible to a
-      // merchant either, so the set is held at exactly the two endpoints that
-      // are NOT store-ownership sites and therefore not in the 403 blast
-      // radius: `/notification` takes no store_id, and the FCM token POST
-      // reports through its own return value.
+      // merchant either, so the set is held at the endpoints that are NOT
+      // store-ownership sites and therefore not in the 403 blast radius.
       //
-      // A new log-only handler on a store_id-bearing endpoint has to come
-      // through this expectation, which is the point.
+      // ONE, DOWN FROM TWO. P2-07-14 gave the notification controller a real
+      // `errorMessage`, so its handler is no longer log-only: a merchant whose
+      // notification fetch fails now sees an error with a retry instead of the
+      // empty-list state, which previously read as "you have no notifications".
+      // Only the FCM token POST remains, and it reports through its own return
+      // value rather than to a screen.
+      //
+      // This list may only FALL. A new log-only handler on a store_id-bearing
+      // endpoint has to come through this expectation, which is the point.
       final logOnly = handlers
           .where(
             (h) =>
@@ -246,8 +251,6 @@ void main() {
       expect(
         logOnly,
         const <String>[
-          'lib/core/controller/notification_controller/'
-              'notification_controller.dart',
           'lib/core/services/fcm_token_service.dart',
         ],
         reason: 'A failure handler reports only to the log. If its endpoint '

@@ -45,6 +45,25 @@ class StoreGoApp extends StatelessWidget {
             locale: TranslationService.currentLocale, // تحديد اللغة الافتراضية
             fallbackLocale: TranslationService.fallbackLocale,
 
+            // بدون هذين السطرين يبقى اتجاه الواجهة من اليسار إلى اليمين
+            // مهما كانت اللغة، لأن MaterialApp يعود إلى
+            // DefaultWidgetsLocalizations واتجاهه LTR دائماً.
+            //
+            // Without these two the ambient Directionality stays LTR whatever
+            // the locale: MaterialApp falls back to
+            // DefaultWidgetsLocalizations, whose textDirection is always
+            // TextDirection.ltr. Arabic is this app's default AND fallback
+            // locale, so every EdgeInsetsDirectional / PositionedDirectional
+            // in lib/ was resolving the wrong way round, and Material's own
+            // date pickers and selection menus were rendering English labels
+            // to an Arabic merchant.
+            //
+            // Guarded by test/localization/ambient_direction_test.dart
+            // (behaviour) and test/localization/app_root_wiring_test.dart
+            // (that this file still passes them).
+            localizationsDelegates: TranslationService.localizationsDelegates,
+            supportedLocales: TranslationService.supportedLocales,
+
             // 2. الثيم الداكن (تم إصلاح الخطأ هنا)
             darkTheme: themeController.theme,
 

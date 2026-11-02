@@ -26,12 +26,28 @@ class StatusBadgeHelper {
   // ORDER STATUS CONFIG
   // =========================================================
 
+  /// CONTRAST-CHECKED, every pair, by `test/widgets/order_status_label_test.dart`.
+  ///
+  /// These are hardcoded colour pairs rather than theme tokens, so nothing
+  /// else was ever going to check them -- and MEASURED, three of the original
+  /// seven were below WCAG AA for small text:
+  ///
+  ///     status 0  Pending     #EF6C00 on #FFF3E0  2.81:1
+  ///     status 5  Picked Up   #00838F on #E0F7FA  4.06:1
+  ///     status 6  Shipped     #F9A825 on #FFF8E1  1.85:1
+  ///
+  /// Status 6 at 1.85:1 was effectively unreadable: a pale amber word on a
+  /// pale amber chip. THE HUE IS KEPT AND ONLY THE TEXT DARKENS -- the tinted
+  /// backgrounds are what make a status column scannable and they are
+  /// unchanged, so the badges look like themselves, just legible. The new
+  /// values are the darkest step that clears 4.5:1 with margin (5.75, 6.60 and
+  /// 5.86 respectively) rather than the first one that scrapes past it.
   static StatusBadgeConfig getOrderConfig(int status) {
     switch (status) {
       case 0:
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFFFF3E0),
-          textColor: Color(0xFFEF6C00),
+          textColor: Color(0xFFA63F00),   // was #EF6C00 -- 2.81:1
           borderColor: Color(0xFFFFCC80),
           icon: Icons.access_time_rounded,
         );
@@ -71,7 +87,7 @@ class StatusBadgeHelper {
       case 5:
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFE0F7FA),
-          textColor: Color(0xFF00838F),
+          textColor: Color(0xFF006064),   // was #00838F -- 4.06:1
           borderColor: Color(0xFFB2EBF2),
           icon: Icons.inventory_2_outlined,
         );
@@ -79,9 +95,36 @@ class StatusBadgeHelper {
       case 6:
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFFFF8E1),
-          textColor: Color(0xFFF9A825),
+          textColor: Color(0xFF8F5200),   // was #F9A825 -- 1.85:1, unreadable
           borderColor: Color(0xFFFFE082),
           icon: Icons.local_shipping_outlined,
+        );
+
+      /*
+       * 7 AND 8 ARE NOT FULFILMENT STATES, and their colours say so.
+       *
+       * 7 is Partially Paid -- a PAYMENT state -- and 8 is Pre Order, an order
+       * TYPE. Both live in the same integer column as the seven above (host
+       * ledger F0). They were falling through to the grey default, which is
+       * also what a corrupt value gets, so a real Pre Order looked like an
+       * error. Indigo and brown: deliberately outside the warm-to-green
+       * progression the fulfilment states use, so they do not read as a stage
+       * of delivery.
+       */
+      case 7:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFFE8EAF6),
+          textColor: Color(0xFF283593),   // 8.68:1
+          borderColor: Color(0xFFC5CAE9),
+          icon: Icons.payments_outlined,
+        );
+
+      case 8:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFFEFEBE9),
+          textColor: Color(0xFF4E342E),   // 9.56:1
+          borderColor: Color(0xFFD7CCC8),
+          icon: Icons.event_available_outlined,
         );
 
       default:
@@ -98,6 +141,18 @@ class StatusBadgeHelper {
   // ORDER STATUS LABEL
   // =========================================================
 
+  /// NINE VALUES, NOT SEVEN. `orders.delivered_status` carries 0..8, and the
+  /// two this used to miss are the awkward ones: **7 is Partially Paid, a
+  /// PAYMENT state, and 8 is Pre Order, an order TYPE** -- both recorded in
+  /// the same integer column as the seven fulfilment states. That is a schema
+  /// problem (host ledger F0) and splitting the column is Phase 04; naming
+  /// them is not, and saying "unknown" about a value the database knows is
+  /// worse than saying nothing.
+  ///
+  /// `'cancelled'`, NOT `'cancel'`. Both keys exist in en.dart and ar.dart and
+  /// they mean different things: `'cancelled'` is "Cancelled" / "ملغى", the
+  /// state of an order, and `'cancel'` is "Cancel" / "إلغاء", the word on a
+  /// button. This asked for the button.
   static String getOrderLabel(int status) {
     switch (status) {
       case 0:
@@ -105,7 +160,7 @@ class StatusBadgeHelper {
       case 1:
         return 'delivered'.tr;
       case 2:
-        return 'cancel'.tr;
+        return 'cancelled'.tr;
       case 3:
         return 'return'.tr;
       case 4:
@@ -114,15 +169,34 @@ class StatusBadgeHelper {
         return 'picked_up'.tr;
       case 6:
         return 'shipped'.tr;
+      case 7:
+        return 'partially_paid'.tr;
+      case 8:
+        return 'pre_order'.tr;
       default:
-        return 'unknown'.tr;
+        // `'unknown'` HAS NO KEY in either translation file, and GetX returns
+        // the key when a lookup misses -- so this branch used to render the
+        // literal lowercase word `unknown` in both languages.
+        return 'status_unrecognised'.tr;
     }
   }
 
   // =========================================================
-  // ORDER STATUS API NAME
+  // ORDER STATUS -- THE SERVER'S OWN SPELLING
   // =========================================================
 
+  /// The host's English spelling of a status.
+  ///
+  /// THIS IS NOT AN "API NAME", despite what the heading said for a long time:
+  /// nothing sends it anywhere. Its one caller writes the result into
+  /// `model.orderStatusText`, a DISPLAY field -- so after a merchant changed a
+  /// status, the order detail screen's status line flipped from the Arabic the
+  /// server had sent to a hardcoded English word. Two of the three call sites
+  /// discard the value entirely.
+  ///
+  /// The display call site now uses [getOrderLabel] instead. This is kept for
+  /// anything that genuinely needs the server's spelling, extended to 7 and 8
+  /// so it no longer answers "Unknown" either.
   static String getOrderName(int status) {
     switch (status) {
       case 0:
@@ -139,6 +213,10 @@ class StatusBadgeHelper {
         return 'Picked Up';
       case 6:
         return 'Shipped';
+      case 7:
+        return 'Partially Paid';
+      case 8:
+        return 'Pre Order';
       default:
         return 'Unknown';
     }
@@ -148,24 +226,34 @@ class StatusBadgeHelper {
   // ORDER STATUS DESCRIPTION
   // =========================================================
 
+  /// TRANSLATED, not hardcoded Arabic.
+  ///
+  /// Every one of these was an Arabic string literal with no `.tr` at all, in
+  /// a bilingual app -- so an English-locale merchant read the status
+  /// descriptions in Arabic on the status sheet. The reverse of the host's own
+  /// "has variant" defect, found the same week.
   static String getOrderDescription(int status) {
     switch (status) {
       case 0:
-        return 'الطلب قيد الانتظار';
+        return 'order_desc_pending'.tr;
       case 1:
-        return 'تم التوصيل بنجاح';
+        return 'order_desc_delivered'.tr;
       case 2:
-        return 'تم إلغاء الطلب';
+        return 'order_desc_cancelled'.tr;
       case 3:
-        return 'طلب إرجاع';
+        return 'order_desc_return'.tr;
       case 4:
-        return 'تم تأكيد الطلب';
+        return 'order_desc_confirmed'.tr;
       case 5:
-        return 'تم الاستلام من المتجر';
+        return 'order_desc_picked_up'.tr;
       case 6:
-        return 'تم الشحن';
+        return 'order_desc_shipped'.tr;
+      case 7:
+        return 'order_desc_partially_paid'.tr;
+      case 8:
+        return 'order_desc_pre_order'.tr;
       default:
-        return '';
+        return 'order_desc_unrecognised'.tr;
     }
   }
 

@@ -155,6 +155,35 @@ class _CustomerScreenState extends State<CustomerScreen>
                     return const ShimmerList();
                   }
 
+                  // P2-07-14. THE ERROR BRANCH COMES BEFORE THE EMPTY ONE, and the order is
+                  // the whole point rather than a detail: a failed request also leaves the list
+                  // empty, so checking `isEmpty` first tells a merchant whose network dropped
+                  // that they have NO CUSTOMERS. That is the same defect the web's empty states
+                  // fixed (P2-06-11) -- "your data is gone" is worse than saying nothing.
+                  if (customerController.errorMessage.value.isNotEmpty &&
+                      customers.isEmpty) {
+                    return RefreshIndicator(
+                      backgroundColor: isDark
+                          ? DarkThemeColor.cCardBackground
+                          : Colors.white,
+                      onRefresh: _fetchInitialData,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * .5,
+                            child: Center(
+                              child: ErrorState(
+                                message: customerController.errorMessage.value,
+                                onRetry: _fetchInitialData,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   if (customers.isEmpty) {
                     return RefreshIndicator(
                       backgroundColor: isDark
@@ -190,6 +219,29 @@ class _CustomerScreenState extends State<CustomerScreen>
                       controller: scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
                       slivers: [
+                        /*
+                         * WS K. THE LIST IS NOT EMPTY AND THE LAST REFRESH
+                         * FAILED.
+                         *
+                         * The branch above handles error-AND-empty by showing
+                         * `ErrorState`. This is the other half: the rows are
+                         * still here, which is right -- blanking a list on a
+                         * transient network failure is worse than holding it --
+                         * but the only signal used to be a three-second toast,
+                         * after which the screen was indistinguishable from a
+                         * successful refresh.
+                         *
+                         * `errorMessage` is cleared by `onSuccess` now, so this
+                         * leaves as soon as a page loads.
+                         */
+                        if (!isSearchMode &&
+                            customerController.errorMessage.value.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: StaleDataNotice(
+                              message: customerController.errorMessage.value,
+                              onRetry: _fetchInitialData,
+                            ),
+                          ),
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: EdgeInsets.only(

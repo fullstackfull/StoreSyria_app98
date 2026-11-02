@@ -120,6 +120,8 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                         ),
                       ),
                       IconButton(
+                        // Accessible name: this control has no visible text.
+                        tooltip: 'close'.tr,
                         icon: Icon(Icons.close, color: secondaryTextColor),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
@@ -148,6 +150,8 @@ class _ProductPickerBottomSheetState extends State<ProductPickerBottomSheet> {
                         }
                         if (productController.searchController.text.isNotEmpty) {
                           return IconButton(
+                            // Accessible name: this control has no visible text.
+                            tooltip: 'clear'.tr,
                             icon: const Icon(Icons.clear),
                             onPressed: () async {
                               productController.searchController.clear();

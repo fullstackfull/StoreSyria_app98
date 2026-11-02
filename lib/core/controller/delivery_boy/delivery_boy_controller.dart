@@ -4,9 +4,9 @@ import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/cahe.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
 import '../../model/delivery_boy_model.dart';
+import 'package:store_go_app/network/result.dart';
 
 class DeliveryBoyController extends GetxController implements StoreAware {
-
   static const String _cacheDeliveryBoyKey = 'delivery_boy_list_data';
 
   DeliveryBoyRepository deliveryBoyRepository = DeliveryBoyRepository();
@@ -29,8 +29,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
   // =========================
 
   void _loadCachedDeliveryBoys() {
-    final cached =
-    CacheService.get<Map<String, dynamic>>(_cacheDeliveryBoyKey);
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheDeliveryBoyKey);
 
     if (cached == null) return;
 
@@ -63,33 +62,33 @@ class DeliveryBoyController extends GetxController implements StoreAware {
 
     isLoading.value = true;
 
-    final response =
-    await deliveryBoyRepository.getDeliveryBoysData();
+    final response = await deliveryBoyRepository.getDeliveryBoysData();
 
     isLoading.value = false;
 
     response.fold(
       onSuccess: (data) {
         if (data['status'] == 'success' || data['status'] == 1) {
+          /* WS K. A SUCCESSFUL LOAD RETIRES THE LAST FAILURE. This limb never
+             cleared it, so the stale-data notice keyed on `errorMessage` would
+             appear after the first failed refresh and stay for the rest of the
+             session — a screen permanently claiming to be out of date while
+             showing fresh rows. */
+          errorMessage.value = '';
+
           deliveryBoyModel = DeliveryBoyModel.fromJson(data);
           deliveryBoyList.value = deliveryBoyModel?.data ?? [];
 
-          CacheService.save(
-            _cacheDeliveryBoyKey,
-            data,
-          );
+          CacheService.save(_cacheDeliveryBoyKey, data);
         } else {
-          commonToast(type: AppSnackBarType.error, 
+          commonToast(
+            type: AppSnackBarType.error,
             data['message']?.toString() ?? 'Error',
           );
         }
       },
 
-      onFailure: (
-          reason,
-          message,
-          validationErrors,
-          ) {
+      onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
         commonToast(type: AppSnackBarType.error, message);
       },
@@ -137,24 +136,20 @@ class DeliveryBoyController extends GetxController implements StoreAware {
             CacheService.clear(_cacheDeliveryBoyKey);
             Get.back();
             await getDeliveryBoysData();
-            commonToast(type: AppSnackBarType.success, 
+            commonToast(
+              type: AppSnackBarType.success,
               data['message']?.toString() ??
                   'delivery_man_added_successfully'.tr,
             );
           } else {
             commonToast(
               type: AppSnackBarType.error,
-              data['message']?.toString() ??
-                  'Error',
+              data['message']?.toString() ?? 'Error',
             );
           }
         },
 
-        onFailure: (
-            reason,
-            message,
-            validationErrors,
-            ) {
+        onFailure: (reason, message, validationErrors) {
           errorMessage.value = message;
 
           commonToast(type: AppSnackBarType.error, message);
@@ -165,10 +160,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
     } catch (e) {
       errorMessage.value = e.toString();
 
-      commonToast(
-        type: AppSnackBarType.error,
-        "error"
-      );
+      commonToast(type: AppSnackBarType.error, "error");
 
       return false;
     } finally {
@@ -218,32 +210,24 @@ class DeliveryBoyController extends GetxController implements StoreAware {
             deliveryBoyList.clear();
             errorMessage.value = '';
             Get.back();
-            commonToast(type: AppSnackBarType.success, 
+            commonToast(
+              type: AppSnackBarType.success,
               data['message']?.toString() ??
                   'Delivery Boy updated successfully',
             );
 
             await getDeliveryBoysData();
-
           } else {
             commonToast(
               type: AppSnackBarType.error,
-              data['message']?.toString() ??
-                  'Error',
+              data['message']?.toString() ?? 'Error',
             );
           }
         },
-        onFailure: (
-            reason,
-            message,
-            validationErrors,
-            ) {
+        onFailure: (reason, message, validationErrors) {
           errorMessage.value = message;
 
-          commonToast(
-            type: AppSnackBarType.error,
-            message,
-          );
+          commonToast(type: AppSnackBarType.error, message);
         },
       );
 
@@ -251,10 +235,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
     } catch (e) {
       errorMessage.value = e.toString();
 
-      commonToast(
-        type: AppSnackBarType.error,
-        'error',
-      );
+      commonToast(type: AppSnackBarType.error, 'error');
 
       return false;
     } finally {
@@ -278,7 +259,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
     try {
       final Map<String, dynamic> data = {
         'password': password,
-        'password_confirmation' : passwordConfirm
+        'password_confirmation': passwordConfirm,
       };
 
       final response = await deliveryBoyRepository.updatePassDeliveryBoyData(
@@ -298,32 +279,24 @@ class DeliveryBoyController extends GetxController implements StoreAware {
             deliveryBoyList.clear();
             errorMessage.value = '';
             Get.back();
-            commonToast(type: AppSnackBarType.success,
+            commonToast(
+              type: AppSnackBarType.success,
               data['message']?.toString() ??
                   'Delivery Boy Password updated successfully',
             );
 
             await getDeliveryBoysData();
-
           } else {
             commonToast(
               type: AppSnackBarType.error,
-              data['message']?.toString() ??
-                  'Error',
+              data['message']?.toString() ?? 'Error',
             );
           }
         },
-        onFailure: (
-            reason,
-            message,
-            validationErrors,
-            ) {
+        onFailure: (reason, message, validationErrors) {
           errorMessage.value = message;
 
-          commonToast(
-            type: AppSnackBarType.error,
-            message,
-          );
+          commonToast(type: AppSnackBarType.error, message);
         },
       );
 
@@ -331,10 +304,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
     } catch (e) {
       errorMessage.value = e.toString();
 
-      commonToast(
-        type: AppSnackBarType.error,
-        'error',
-      );
+      commonToast(type: AppSnackBarType.error, 'error');
 
       return false;
     } finally {
@@ -346,19 +316,27 @@ class DeliveryBoyController extends GetxController implements StoreAware {
   // DELETE DELIVERY BOY
   // =========================
 
-  Future<void> deleteDeliveryBoyData({
-    required String deliveryBoyId,
-  }) async {
-    final response =
-    await deliveryBoyRepository.deleteDeliveryBoyData(
+  Future<void> deleteDeliveryBoyData({required String deliveryBoyId}) async {
+    final response = await deliveryBoyRepository.deleteDeliveryBoyData(
       deliveryBoyId: deliveryBoyId,
     );
 
     response.fold(
       onSuccess: (data) async {
-        commonToast(type: AppSnackBarType.success, 
-          data['message']?.toString() ??
-              'Deleted',
+        /* WS K. THE BACKEND REFUSES AT HTTP 200, so a refusal lands HERE, not in
+         `onFailure`. Without this the merchant got a green "Deleted" for an
+         operation the server declined. */
+        if (apiRefused(data)) {
+          commonToast(
+            type: AppSnackBarType.error,
+            apiMessage(data, fallback: 'failed_to_delete'.tr),
+          );
+          return;
+        }
+
+        commonToast(
+          type: AppSnackBarType.success,
+          data['message']?.toString() ?? 'Deleted',
         );
 
         deliveryBoyList.clear();
@@ -368,11 +346,7 @@ class DeliveryBoyController extends GetxController implements StoreAware {
         await getDeliveryBoysData();
       },
 
-      onFailure: (
-          reason,
-          message,
-          validationErrors,
-          ) {
+      onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
         commonToast(type: AppSnackBarType.error, message);
       },

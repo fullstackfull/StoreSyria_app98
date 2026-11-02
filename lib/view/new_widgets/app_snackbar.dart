@@ -196,6 +196,8 @@ class _SnackBarContent extends StatelessWidget {
                 ),
 
                 IconButton(
+                  // Accessible name: this control has no visible text.
+                  tooltip: 'close'.tr,
                   onPressed: Get.closeCurrentSnackbar,
                   splashRadius: 20,
                   padding: const EdgeInsets.all(10),

@@ -166,6 +166,13 @@ Widget sectionTitle({
   );
 }
 
+/// One quota row on the My Plan screen.
+///
+/// `max` and `remaining` carry `-1` for a plan with no ceiling — see
+/// [PlanLimit], which normalises the server's `'Unlimited'` string to that
+/// sentinel. Rendering it as a number produces `12 / -1`, which is the same
+/// defect the Laravel dashboard's storage card carried before F249: a sentinel
+/// printed as a quantity, next to a percentage of nothing.
 Widget usageCard({
   required String title,
   required int used,
@@ -175,6 +182,7 @@ Widget usageCard({
   required IconData icon,
   required bool isDark,
 }) {
+  final bool isUnlimited = max < 0;
   final Color cardColor =
   isDark ? const Color(0xFF18263F) : Colors.white;
 
@@ -184,8 +192,10 @@ Widget usageCard({
   final Color secondaryColor =
   isDark ? const Color(0xFFA9B8D0) : const Color(0xFF777D87);
 
+  /// A percentage of an unlimited quota is not a number. The bar renders empty
+  /// rather than at whatever `percentage` happened to contain.
   final double progress =
-  (percentage / 100).clamp(0.0, 1.0);
+  isUnlimited ? 0.0 : (percentage / 100).clamp(0.0, 1.0);
 
   return Container(
     padding: EdgeInsets.all(16.w),
@@ -231,7 +241,9 @@ Widget usageCard({
             ),
 
             Text(
-              '$used / $max',
+              isUnlimited
+                  ? '$used / ${'plan_limit_unlimited'.tr}'
+                  : '$used / $max',
               style: TextStyle(
                 color: textColor,
                 fontSize: 13.sp,
@@ -274,7 +286,13 @@ Widget usageCard({
               ),
             ),
             Text(
-              '$remaining ${'remaining'.tr}',
+              // `remaining` carries the same sentinel as `max`, and it is a
+              // SEPARATE field — fixing only the "12 / 50" line left this one
+              // reading "-1 remaining". Caught by the widget test, not by
+              // reading the file.
+              isUnlimited
+                  ? '${'plan_limit_unlimited'.tr} ${'remaining'.tr}'
+                  : '$remaining ${'remaining'.tr}',
               style: TextStyle(
                 color: secondaryColor,
                 fontSize: 11.sp,

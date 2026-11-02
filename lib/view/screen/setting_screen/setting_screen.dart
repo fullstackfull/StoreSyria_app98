@@ -12,6 +12,7 @@ import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import '../../../core/controller/auth/auth_controller.dart';
 import '../../new_widgets/settings_card.dart';
+import '../../../core/permissions/merchant_permissions.dart';
 
 class SettingScreen extends StatelessWidget {
   final bool isBack;
@@ -55,56 +56,79 @@ class SettingScreen extends StatelessWidget {
                   crossAxisSpacing: 14,
                   mainAxisSpacing: 14,
                   childAspectRatio: 1.2,
-                  children: [
-                    settingCard(
-                      isDark: isDark,
-                      icon: DefaultImages.statisticIcn,
-                      title: 'analytics'.tr,
-                      subtitle: 'view_store_performance'.tr,
-                      function: () {
-                        Get.toNamed(AppRoutes.statistics);
-                      },
-                    ),
+                  // P2-07-13 / WS K13. These five cards were shown to every principal, because
+                  // the app had no permission model at all -- `adminlogin` returned nothing about
+                  // what the employee may do, so a staff member with orders-only access was
+                  // offered Analytics, Shipping, Customers, Delivery Men and Coupons, and learned
+                  // they could not use them only by tapping one.
+                  //
+                  // THE GATE IS COSMETIC AND MEANT TO BE. The permission list lives in
+                  // unencrypted local storage, so on a rooted device it is attacker-controlled,
+                  // and a route can be reached by other means. The control is server-side. This
+                  // is here so a limited employee is not offered screens that will refuse them.
+                  //
+                  // `mayOffer`, NOT `may`: a server that has not been updated sends no list, and
+                  // gating strictly on an empty list would empty this grid for everyone.
+                  children: <Widget>[
+                    if (MerchantPermissions.current
+                        .mayOffer(Permissions.manageStoreAnalytics))
+                      settingCard(
+                        isDark: isDark,
+                        icon: DefaultImages.statisticIcn,
+                        title: 'analytics'.tr,
+                        subtitle: 'view_store_performance'.tr,
+                        function: () {
+                          Get.toNamed(AppRoutes.statistics);
+                        },
+                      ),
 
-                    settingCard(
-                      isDark: isDark,
-                      icon: DefaultImages.shippingIcn,
-                      title: 'shipping'.tr,
-                      subtitle: 'manage_shipping'.tr,
-                      function: () {
-                        Get.toNamed(AppRoutes.shipping);
-                      },
-                    ),
+                    if (MerchantPermissions.current
+                        .mayOffer(Permissions.manageShipping))
+                      settingCard(
+                        isDark: isDark,
+                        icon: DefaultImages.shippingIcn,
+                        title: 'shipping'.tr,
+                        subtitle: 'manage_shipping'.tr,
+                        function: () {
+                          Get.toNamed(AppRoutes.shipping);
+                        },
+                      ),
 
-                    settingCard(
-                      isDark: isDark,
-                      icon: DefaultImages.groupImg,
-                      title: 'customers'.tr,
-                      subtitle: 'manage_customer'.tr,
-                      function: () {
-                        Get.toNamed(AppRoutes.customers);
-                      },
-                    ),
+                    if (MerchantPermissions.current
+                        .mayOffer(Permissions.manageCustomer))
+                      settingCard(
+                        isDark: isDark,
+                        icon: DefaultImages.groupImg,
+                        title: 'customers'.tr,
+                        subtitle: 'manage_customer'.tr,
+                        function: () {
+                          Get.toNamed(AppRoutes.customers);
+                        },
+                      ),
 
-                    settingCard(
-                      isDark: isDark,
-                      icon: DefaultImages.deliveryManIcn,
-                      title: 'delivery_men'.tr,
-                      subtitle: 'manage_delivery_men'.tr,
-                      function: () {
-                        Get.toNamed(AppRoutes.deliveryBoys);
-                      },
-                    ),
+                    if (MerchantPermissions.current
+                        .mayOffer(Permissions.manageDeliveryboy))
+                      settingCard(
+                        isDark: isDark,
+                        icon: DefaultImages.deliveryManIcn,
+                        title: 'delivery_men'.tr,
+                        subtitle: 'manage_delivery_men'.tr,
+                        function: () {
+                          Get.toNamed(AppRoutes.deliveryBoys);
+                        },
+                      ),
 
-                    settingCard(
-                      isDark: isDark,
-                      icon: DefaultImages.couponIcn,
-                      title: 'coupon'.tr,
-                      subtitle: 'manage_coupons'.tr,
-                      function: () {
-                        Get.toNamed(AppRoutes.coupon);
-                      },
-                    ),
+                    if (MerchantPermissions.current
+                        .mayOffer(Permissions.manageCoupon))
+                      settingCard(
+                        isDark: isDark,
+                        icon: DefaultImages.couponIcn,
+                        title: 'coupon'.tr,
+                        subtitle: 'manage_coupons'.tr,
+                        function: () {
+                          Get.toNamed(AppRoutes.coupon);
+                        },
+                      ),
                   ],
                 ),
 

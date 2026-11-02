@@ -16,6 +16,11 @@ class NotificationController extends GetxController
 
   RxList<NotificationData> notificationList = <NotificationData>[].obs;
   RxBool isLoading = false.obs;
+
+  /// P2-07-14. Empty while a request is FAILING is not the same as empty because there is
+  /// nothing. `onFailure` only wrote to the log, so a merchant whose network dropped saw the
+  /// "no notifications" state and concluded they had none.
+  RxString errorMessage = ''.obs;
   RxInt unreadCount = 0.obs;
   NotificationModelData? notificationData;
   int? lastSavedCount;
@@ -74,6 +79,8 @@ class NotificationController extends GetxController
       isLoading.value = true;
     }
 
+    errorMessage.value = '';
+
     try {
       final response = await NetworkHttps.getRequest(API.notificationUrl);
 
@@ -95,10 +102,18 @@ class NotificationController extends GetxController
         },
         onFailure: (reason, message, errors) {
           AppLog.d('❌ فشل جلب الإشعارات: $message');
+          // Only surface the failure when there is nothing cached to show: a refresh that
+          // fails behind a populated list should not replace it with an error screen.
+          if (notificationList.isEmpty) {
+            errorMessage.value = message;
+          }
         },
       );
     } catch (e) {
       AppLog.d('❌ استثناء في جلب الإشعارات: $e');
+      if (notificationList.isEmpty) {
+        errorMessage.value = 'connection_failed'.tr;
+      }
     }
 
     isLoading.value = false;

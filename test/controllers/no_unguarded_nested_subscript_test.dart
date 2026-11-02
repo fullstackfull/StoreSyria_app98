@@ -54,10 +54,23 @@ void main() {
   final nested =
       RegExp(r"""\[\s*['"][^'"\[\]]*['"]\s*\]\s*\??\s*\[\s*['"]""");
 
-  // The two hand-written guarded reads. Keyed by file so a MOVE still passes
-  // and a new file never does.
+  // The ONE remaining hand-written guarded read. Keyed by file so a MOVE still
+  // passes and a new file never does.
+  //
+  // WS K SHRANK THIS SET FROM TWO, and the reason is worth keeping. The
+  // order_controller entry covered
+  //
+  //     if (data['status'] != 1 || data['data'] is! Map || data['data']['id'] == null)
+  //
+  // which was genuinely safe -- the type test short-circuits the subscript --
+  // but ONLY while both halves sat on one line, because that is the only shape
+  // this test can recognise. `dart format`, run over the file for an unrelated
+  // change, reflowed it across three lines and this ratchet fired. It was right
+  // to: a guard a formatter can silently separate from the read it protects is
+  // not a guard anybody should rely on. That site now uses `apiValueAt`, which
+  // walks the path and type-checks every level, so there is nothing left to
+  // separate -- and the exemption went with it.
   const guardedByHand = <String>{
-    'lib/core/controller/order_controller/order_controller.dart',
     'lib/core/controller/product_controller/product_controller.dart',
   };
 

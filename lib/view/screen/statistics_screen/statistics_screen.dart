@@ -6,6 +6,7 @@ import 'package:store_go_app/core/model/static_model.dart';
 import 'package:store_go_app/view/new_widgets/shimmer.dart';
 import 'package:store_go_app/view/screen/statistics_screen/statistics_screen_widget.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
+import 'package:store_go_app/view/widget/error_empty_state.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -142,12 +143,40 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Obx(() {
-                  final isLoading = statisticsController.isDataAvailable.value ||
-                      statisticsController.staticsDataModel == null;
+                  /* P2-07-14. THE OLD CONDITION WAS AN INFINITE SHIMMER ON ANY FAILURE, and that
+                     is a defect rather than a missing nicety:
 
-                  if (isLoading) {
+                         isDataAvailable.value || staticsDataModel == null
+
+                     On failure the controller sets `isDataAvailable` false but never assigns
+                     `staticsDataModel`, so the second limb stays true and the skeleton animates
+                     forever. The merchant is shown a screen that is permanently "about to load",
+                     with no error, no retry, and no way to tell it will never finish -- the
+                     toast that fired has long gone.
+
+                     Replaced by the three real states. `hasLoadedOnce` is what distinguishes
+                     "not asked yet" from "asked and got nothing", which the null model alone
+                     could not. */
+                  if (statisticsController.isDataAvailable.value ||
+                      !statisticsController.hasLoadedOnce.value) {
                     return const ShimmerDashboard(padding: EdgeInsets.zero);
                   }
+
+                  // Error before empty: a failed request also leaves the model null.
+                  if (statisticsController.errorMessage.value.isNotEmpty) {
+                    return ErrorState(
+                      message: statisticsController.errorMessage.value,
+                      onRetry: statisticsController.getStaticData,
+                    );
+                  }
+
+                  if (statisticsController.staticsDataModel == null) {
+                    return EmptyState(
+                      message: 'no_statistics_yet'.tr,
+                      icon: Icons.insights_outlined,
+                    );
+                  }
+
                   return _buildContent(context);
                 }),
               ),

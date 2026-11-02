@@ -79,9 +79,22 @@ class DefaultImages {
   static String welcomeImg = "assets/svg/welcome.svg";
   static String groupImg = "assets/svg/group.svg";
   static String walletImg = "assets/svg/wallet.svg";
-  static String profileImg = "https://apps.rajodiya.com/ecommercego-saas/storage/uploads/profile/avatar.png";
-  static String productImg = "https://apps.rajodiya.com/ecommercego-saas/themes/grocery/uploads/11_1684295865_1.png";
-  static String codImg = "https://apps.rajodiya.com/ecommercego-flutter/storage/uploads/cod.png";
-  static String bankTransferImg = "https://apps.rajodiya.com/ecommercego-flutter/storage/uploads/bank.png";
-  static String stripeImg = "https://apps.rajodiya.com/ecommercego-flutter/themes/grocery/uploads/08820230705_1688548685.png";
+  // Five absolute URLs on apps.rajodiya.com -- the upstream eCommerceGo
+  // vendor's own demo installation -- used to live here: profileImg,
+  // productImg, codImg, bankTransferImg and stripeImg.
+  //
+  // Only profileImg was live, as the errorWidget of the merchant avatar on
+  // two production screens, so every avatar miss sent a request to a third
+  // party nobody here has a contract with: an availability dependency, a
+  // traffic and IP signal about this product's user base, and another
+  // company's demo face shipped to Syrian merchants. Both call sites now fall
+  // straight through to the local Icon(Icons.person) that was already their
+  // terminal fallback.
+  //
+  // The other four were referenced only from commented-out lines in the
+  // payment-setting controllers and are simply gone.
+  //
+  // Guarded by test/security/no_vendor_asset_hosts_test.dart, which fails on
+  // ANY vendor or placeholder image host rather than on these five strings --
+  // the defect was a habit, and a sixth would be just as wrong.
 }

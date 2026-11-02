@@ -12,13 +12,12 @@ import '../../model/customer_model.dart';
 import '../../model/customer_orders_model.dart';
 
 class CustomerController extends GetxController implements StoreAware {
+  static const String _cacheCustomerKey = 'home_customer_list_data';
 
-static const String _cacheCustomerKey = 'home_customer_list_data';
-
- SearchRepository searchRepository = SearchRepository();
+  SearchRepository searchRepository = SearchRepository();
   CustomerRepository customerRepository = CustomerRepository();
 
-final TextEditingController searchController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
   CustomerModel? customerModel;
   CustomerCityModel? customerCityModel;
   RxList<CustomerData> customerList = <CustomerData>[].obs;
@@ -42,36 +41,29 @@ final TextEditingController searchController = TextEditingController();
   RxBool isCustomerSearchActive = false.obs;
   Timer? _searchDebounce;
 
-
-@override
+  @override
   void onInit() {
     super.onInit();
     _loadCachedCustomers();
     StoreChangeService.instance.register(() => this);
   }
 
-
   void onCustomerSearchChanged(String value) {
-  _searchDebounce?.cancel();
+    _searchDebounce?.cancel();
 
-  final query = value.trim();
+    final query = value.trim();
 
-  if (query.length < 3) {
-    clearCustomerSearch();
-    return;
+    if (query.length < 3) {
+      clearCustomerSearch();
+      return;
+    }
+
+    _searchDebounce = Timer(const Duration(milliseconds: 600), () {
+      searchCustomerData(name: query);
+    });
   }
 
-  _searchDebounce = Timer(
-    const Duration(milliseconds: 600),
-        () {
-      searchCustomerData(name: query);
-    },
-  );
-}
-
-  Future<void> searchCustomerData({
-    required String name,
-  }) async {
+  Future<void> searchCustomerData({required String name}) async {
     final searchText = name.trim();
 
     if (searchText.length < 3) {
@@ -83,8 +75,7 @@ final TextEditingController searchController = TextEditingController();
     isSearchingCustomers.value = true;
 
     try {
-      final response =
-      await customerRepository.searchCustomerData(searchText);
+      final response = await customerRepository.searchCustomerData(searchText);
 
       response.fold(
         onSuccess: (data) {
@@ -101,21 +92,16 @@ final TextEditingController searchController = TextEditingController();
                   customers.map((item) {
                     final json = Map<String, dynamic>.from(item);
 
-                    final firstName =
-                        json['first_name']?.toString() ?? '';
+                    final firstName = json['first_name']?.toString() ?? '';
 
-                    final lastName =
-                        json['last_name']?.toString() ?? '';
+                    final lastName = json['last_name']?.toString() ?? '';
 
-                    final phone =
-                        json['phone']?.toString() ?? '';
+                    final phone = json['phone']?.toString() ?? '';
 
                     return CustomerData(
                       id: json['id'] is int
                           ? json['id']
-                          : int.tryParse(
-                        json['id']?.toString() ?? '',
-                      ),
+                          : int.tryParse(json['id']?.toString() ?? ''),
 
                       email: json['email']?.toString(),
 
@@ -126,32 +112,26 @@ final TextEditingController searchController = TextEditingController();
 
                       status: json['status'] is int
                           ? json['status']
-                          : int.tryParse(
-                        json['status']?.toString() ?? '',
-                      ),
+                          : int.tryParse(json['status']?.toString() ?? ''),
                     );
                   }).toList(),
                 );
               }
             }
           } else {
-            commonToast(type: AppSnackBarType.error, 
+            commonToast(
+              type: AppSnackBarType.error,
               apiMessage(data, fallback: 'Error'),
             );
           }
         },
 
-        onFailure: (
-            reason,
-            message,
-            validationErrors,
-            ) {
+        onFailure: (reason, message, validationErrors) {
           searchResults.clear();
 
-          commonToast(type: AppSnackBarType.error, 
-            message.isNotEmpty
-                ? message
-                : 'search_failed'.tr,
+          commonToast(
+            type: AppSnackBarType.error,
+            message.isNotEmpty ? message : 'search_failed'.tr,
           );
         },
       );
@@ -164,34 +144,30 @@ final TextEditingController searchController = TextEditingController();
     }
   }
 
-
-void clearCustomerSearch() {
-  _searchDebounce?.cancel();
-  isCustomerSearchActive.value = false;
-  isSearchingCustomers.value = false;
-  searchResults.clear();
-}
+  void clearCustomerSearch() {
+    _searchDebounce?.cancel();
+    isCustomerSearchActive.value = false;
+    isSearchingCustomers.value = false;
+    searchResults.clear();
+  }
 
   // =========================
   // CACHE
   // =========================
 
   void _loadCachedCustomers() {
-    final cached =
-    CacheService.get<Map<String, dynamic>>(_cacheCustomerKey);
+    final cached = CacheService.get<Map<String, dynamic>>(_cacheCustomerKey);
 
     if (cached == null) return;
 
     try {
       customerModel = CustomerModel.fromJson(cached);
 
-      customerList.value =
-          customerModel?.data?.customers ?? [];
+      customerList.value = customerModel?.data?.customers ?? [];
 
       isScroll.value =
           customerModel?.data?.pagination?.currentPage !=
-              customerModel?.data?.pagination?.lastPage;
-
+          customerModel?.data?.pagination?.lastPage;
     } catch (_) {
       customerModel = null;
     }
@@ -200,10 +176,10 @@ void clearCustomerSearch() {
   // =========================
   // STORE CHANGE
   // =========================
-void resetCustomerSearch() {
-  searchController.clear();
-  clearCustomerSearch();
-}
+  void resetCustomerSearch() {
+    searchController.clear();
+    clearCustomerSearch();
+  }
 
   @override
   void resetForStoreChange() {
@@ -224,46 +200,40 @@ void resetCustomerSearch() {
   // =========================
 
   Future<void> getCustomersData(int page) async {
-
     if (isLoading.value) return;
 
     isLoading.value = true;
 
-    final response =
-    await customerRepository.getCustomersData(page);
+    final response = await customerRepository.getCustomersData(page);
 
     isLoading.value = false;
 
     response.fold(
       onSuccess: (data) {
-
         if (data['status'] == 1) {
+          /* WS K. A SUCCESSFUL PAGE RETIRES THE LAST FAILURE. `onSuccess` never
+             cleared this, so the stale-data notice keyed on it would appear
+             after the first failed refresh and stay for the rest of the
+             session — a screen permanently claiming to be out of date while
+             showing fresh rows. */
+          errorMessage.value = '';
 
-          customerModel =
-              CustomerModel.fromJson(data);
+          customerModel = CustomerModel.fromJson(data);
 
           if (page == 1) {
-
             customerList.clear();
 
-            CacheService.save(
-              _cacheCustomerKey,
-              data,
-            );
+            CacheService.save(_cacheCustomerKey, data);
           }
 
-          customerList.addAll(
-            customerModel?.data?.customers?? [],
-          );
+          customerList.addAll(customerModel?.data?.customers ?? []);
 
           currantPage.value = page;
 
-          isScroll.value =
-              page != customerModel?.data?.pagination?.lastPage;
-
+          isScroll.value = page != customerModel?.data?.pagination?.lastPage;
         } else {
-
-          commonToast(type: AppSnackBarType.error, 
+          commonToast(
+            type: AppSnackBarType.error,
             apiMessage(data, fallback: 'Error'),
           );
 
@@ -273,12 +243,7 @@ void resetCustomerSearch() {
         }
       },
 
-      onFailure: (
-          reason,
-          message,
-          validationErrors,
-          ) {
-
+      onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
 
         commonToast(type: AppSnackBarType.error, message);
@@ -290,35 +255,27 @@ void resetCustomerSearch() {
     );
   }
 
-
   Future<void> getStatesData() async {
-
     if (isLoading2.value) return;
 
     isLoading2.value = true;
 
-    final response =
-    await customerRepository.getStatesData();
+    final response = await customerRepository.getStatesData();
 
     isLoading2.value = false;
 
     response.fold(
       onSuccess: (data) {
-
         if (data['status'] == 1) {
           customerCityModel = CustomerCityModel.fromJson(data);
-
         } else {
-          commonToast(type: AppSnackBarType.error, 
+          commonToast(
+            type: AppSnackBarType.error,
             apiMessage(data, fallback: 'Error'),
           );
         }
       },
-      onFailure: (
-          reason,
-          message,
-          validationErrors,
-          ) {
+      onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
         commonToast(type: AppSnackBarType.error, message);
       },
@@ -377,7 +334,8 @@ void resetCustomerSearch() {
           if (data['status'] == 1) {
             success = true;
 
-            commonToast(type: AppSnackBarType.success, 
+            commonToast(
+              type: AppSnackBarType.success,
               apiMessage(data, fallback: 'Customer added successfully'),
             );
 
@@ -397,14 +355,10 @@ void resetCustomerSearch() {
           }
         },
 
-        onFailure: (
-            reason,
-            message,
-            validationErrors,
-            ) {
+        onFailure: (reason, message, validationErrors) {
           errorMessage.value = message;
 
-          commonToast(type: AppSnackBarType.error,message);
+          commonToast(type: AppSnackBarType.error, message);
         },
       );
 
@@ -412,10 +366,7 @@ void resetCustomerSearch() {
     } catch (e) {
       errorMessage.value = e.toString();
 
-      commonToast(
-        type: AppSnackBarType.error,
-        "error"
-      );
+      commonToast(type: AppSnackBarType.error, "error");
 
       return false;
     } finally {
@@ -423,113 +374,113 @@ void resetCustomerSearch() {
     }
   }
 
-Future<bool> updateCustomerData({
-  required String customerId,
-  required String firstName,
-  required String lastName,
-  required String email,
-  required String mobile,
-  String password = '',
-  int status = 1,
-
-  required String address,
-  required String cityId,
-  String deliveryInstructions = '',
-  int type = 1,
-}) async {
-  if (isDataAvailable.value) return false;
-
-  isDataAvailable.value = true;
-
-  try {
-    final Map<String, dynamic> data = {
-      'customer_id': customerId,
-      'first_name': firstName,
-      'last_name': lastName,
-      'email': email,
-      'mobile': mobile,
-      'status': status,
-      'address': address,
-      'city_id': cityId,
-      'delivery_instructions': deliveryInstructions,
-      'type': type,
-    };
-
-    if (password.trim().isNotEmpty) {
-      data['password'] = password.trim();
-    }
-
-    final response = await customerRepository.updateCustomerData(
-      customerId: customerId,
-      data: data,
-    );
-
-    bool success = false;
-
-    await response.fold(
-      onSuccess: (data) async {
-        if (data['status'] == 1) {
-          success = true;
-
-          commonToast(type: AppSnackBarType.success, 
-            apiMessage(data, fallback: 'Customer updated successfully'),
-          );
-
-          CacheService.clear(_cacheCustomerKey);
-
-          customerList.clear();
-          currantPage.value = 1;
-          isScroll.value = true;
-          errorMessage.value = '';
-
-          await getCustomersData(1);
-        } else {
-          commonToast(
-            type: AppSnackBarType.error,
-            apiMessage(data, fallback: 'Error'),
-          );
-        }
-      },
-      onFailure: (
-          reason,
-          message,
-          validationErrors,
-          ) {
-        errorMessage.value = message;
-
-        commonToast(
-          type: AppSnackBarType.error,
-          message,
-        );
-      },
-    );
-
-    return success;
-  } catch (e) {
-    errorMessage.value = e.toString();
-
-    commonToast(
-      type: AppSnackBarType.error,
-      'error',
-    );
-
-    return false;
-  } finally {
-    isDataAvailable.value = false;
-  }
-}
-
-  Future<void> deleteCustomerData({
+  Future<bool> updateCustomerData({
     required String customerId,
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String mobile,
+    String password = '',
+    int status = 1,
+
+    required String address,
+    required String cityId,
+    String deliveryInstructions = '',
+    int type = 1,
   }) async {
-    final response =
-    await customerRepository.deleteCustomerData(
+    if (isDataAvailable.value) return false;
+
+    isDataAvailable.value = true;
+
+    try {
+      final Map<String, dynamic> data = {
+        'customer_id': customerId,
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'mobile': mobile,
+        'status': status,
+        'address': address,
+        'city_id': cityId,
+        'delivery_instructions': deliveryInstructions,
+        'type': type,
+      };
+
+      if (password.trim().isNotEmpty) {
+        data['password'] = password.trim();
+      }
+
+      final response = await customerRepository.updateCustomerData(
+        customerId: customerId,
+        data: data,
+      );
+
+      bool success = false;
+
+      await response.fold(
+        onSuccess: (data) async {
+          if (data['status'] == 1) {
+            success = true;
+
+            commonToast(
+              type: AppSnackBarType.success,
+              apiMessage(data, fallback: 'Customer updated successfully'),
+            );
+
+            CacheService.clear(_cacheCustomerKey);
+
+            customerList.clear();
+            currantPage.value = 1;
+            isScroll.value = true;
+            errorMessage.value = '';
+
+            await getCustomersData(1);
+          } else {
+            commonToast(
+              type: AppSnackBarType.error,
+              apiMessage(data, fallback: 'Error'),
+            );
+          }
+        },
+        onFailure: (reason, message, validationErrors) {
+          errorMessage.value = message;
+
+          commonToast(type: AppSnackBarType.error, message);
+        },
+      );
+
+      return success;
+    } catch (e) {
+      errorMessage.value = e.toString();
+
+      commonToast(type: AppSnackBarType.error, 'error');
+
+      return false;
+    } finally {
+      isDataAvailable.value = false;
+    }
+  }
+
+  Future<void> deleteCustomerData({required String customerId}) async {
+    final response = await customerRepository.deleteCustomerData(
       customerId: customerId,
     );
 
     response.fold(
       onSuccess: (data) async {
-        commonToast(type: AppSnackBarType.success, 
+        /* WS K. THE BACKEND REFUSES AT HTTP 200, so a refusal lands HERE, not in
+         `onFailure`. Without this the merchant got a green "Deleted" for an
+         operation the server declined. */
+        if (apiRefused(data)) {
+          commonToast(
+            type: AppSnackBarType.error,
+            apiMessage(data, fallback: 'failed_to_delete'.tr),
+          );
+          return;
+        }
+
+        commonToast(
+          type: AppSnackBarType.success,
           apiMessage(data, fallback: 'Deleted'),
         );
 
@@ -542,11 +493,7 @@ Future<bool> updateCustomerData({
         await getCustomersData(1);
       },
 
-      onFailure: (
-          reason,
-          message,
-          validationErrors,
-          ) {
+      onFailure: (reason, message, validationErrors) {
         errorMessage.value = message;
         commonToast(type: AppSnackBarType.error, message);
       },
@@ -558,7 +505,6 @@ Future<bool> updateCustomerData({
     searchController.dispose();
     super.onClose();
   }
-
 
   void clearCustomerOrders() {
     customerOrdersModel = null;
@@ -616,16 +562,13 @@ Future<bool> updateCustomerData({
 
             final pagination = model.data?.pagination;
 
-            customerOrdersCurrentPage.value =
-                pagination?.currentPage ?? page;
+            customerOrdersCurrentPage.value = pagination?.currentPage ?? page;
 
             if (pagination != null) {
               if (pagination.hasMore != null) {
                 isCustomerOrdersScroll.value = pagination.hasMore!;
-              } else if (
-              pagination.currentPage != null &&
-                  pagination.lastPage != null
-              ) {
+              } else if (pagination.currentPage != null &&
+                  pagination.lastPage != null) {
                 isCustomerOrdersScroll.value =
                     pagination.currentPage! < pagination.lastPage!;
               } else {
@@ -643,11 +586,7 @@ Future<bool> updateCustomerData({
             commonToast(type: AppSnackBarType.error, msg);
           }
         },
-        onFailure: (
-            reason,
-            message,
-            validationErrors,
-            ) {
+        onFailure: (reason, message, validationErrors) {
           if (page == 1) {
             customerOrdersErrorMessage.value = message;
           }

@@ -225,9 +225,9 @@ class _WalletScreenState extends State<WalletScreen> {
                 color: hasActiveFilters ? Colors.white : textColor,
               ),
               if (hasActiveFilters)
-                Positioned(
+                PositionedDirectional(
                   top: -4.h,
-                  right: -4.w,
+                  end: -4.w,
                   child: Container(
                     width: 8.w,
                     height: 8.w,

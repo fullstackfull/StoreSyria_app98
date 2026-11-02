@@ -16,25 +16,22 @@ Widget customerWidget({
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  final cardColor =
-  isDark ? DarkThemeColor.cCardBackground : Colors.white;
+  final cardColor = isDark ? DarkThemeColor.cCardBackground : Colors.white;
 
-  final textColor =
-  isDark ? DarkThemeColor.cText : const Color(0xFF0F1A2E);
+  final textColor = isDark ? DarkThemeColor.cText : const Color(0xFF0F1A2E);
 
-  final subTextColor =
-  isDark ? DarkThemeColor.cSecondaryText : const Color(0xFF777777);
+  final subTextColor = isDark
+      ? DarkThemeColor.cSecondaryText
+      : const Color(0xFF777777);
 
-  final name =
-      customer?.customerInfo?.name?.replaceAll('"', '').trim() ?? '';
+  final name = customer?.customerInfo?.name?.replaceAll('"', '').trim() ?? '';
 
   final mobile =
       customer?.customerInfo?.mobile?.replaceAll('"', '').trim() ?? '';
 
   final orders = customer?.orders ?? 0;
 
-  final city =
-      customer?.city?.replaceAll('"', '').trim() ?? '';
+  final city = customer?.city?.replaceAll('"', '').trim() ?? '';
 
   final bool isActive = customer?.status == 1;
 
@@ -44,28 +41,20 @@ Widget customerWidget({
       ? 'active'.tr
       : 'inactive'.tr;
 
-  final displayName =
-  name.isNotEmpty ? name : 'no_customer_name'.tr;
+  final displayName = name.isNotEmpty ? name : 'no_customer_name'.tr;
 
   return GestureDetector(
     onTap: onTap,
     child: Container(
       width: double.infinity,
       margin: EdgeInsets.only(bottom: 1.h),
-      padding: EdgeInsets.fromLTRB(
-        18.w,
-        6.h,
-        18.w,
-        8.h,
-      ),
+      padding: EdgeInsets.fromLTRB(18.w, 6.h, 18.w, 8.h),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:
-              isDark ? .10 : .035,
-            ),
+            color: Colors.black.withValues(alpha: isDark ? .10 : .035),
             blurRadius: 12,
             offset: const Offset(0, 3),
           ),
@@ -73,43 +62,37 @@ Widget customerWidget({
       ),
       child: Column(
         children: [
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    displayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
-                    ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
                   ),
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    statusPill(
-                      label: statusLabel,
-                      isActive: isActive,
-                    ),
-                    AppPopupMenu(
-                      viewFun: viewFun,
-                      changeFun: changeFun,
-                      deleteFun: deleteFun,
-                      viewText: 'view'.tr,
-                      changeText: 'change'.tr,
-                      deleteText: 'delete'.tr,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  statusPill(label: statusLabel, isActive: isActive),
+                  AppPopupMenu(
+                    viewFun: viewFun,
+                    changeFun: changeFun,
+                    deleteFun: deleteFun,
+                    viewText: 'view'.tr,
+                    changeText: 'change'.tr,
+                    deleteText: 'delete'.tr,
+                  ),
+                ],
+              ),
+            ],
           ),
           _customerInfoRow(
             context: context,
@@ -144,6 +127,7 @@ Widget customerWidget({
     ),
   );
 }
+
 Widget _customerInfoRow({
   required BuildContext context,
   required IconData icon,
@@ -161,11 +145,7 @@ Widget _customerInfoRow({
           color: iconColor.withValues(alpha: .07),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          size: 15.sp,
-          color: iconColor,
-        ),
+        child: Icon(icon, size: 15.sp, color: iconColor),
       ),
       SizedBox(width: 8.w),
       Flexible(
@@ -173,7 +153,7 @@ Widget _customerInfoRow({
           text,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.right,
+          textAlign: TextAlign.end,
           style: TextStyle(
             fontSize: 13.5.sp,
             fontWeight: FontWeight.w500,

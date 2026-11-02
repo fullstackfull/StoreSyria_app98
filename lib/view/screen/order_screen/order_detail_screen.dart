@@ -950,7 +950,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   flex: 2,
                   child: Text(
                     "price".tr,
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.end,
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -1080,7 +1080,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   price,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.end,
                   style: TextStyle(
                     fontSize: 11.sp,
                     color: secondaryText,
@@ -1091,7 +1091,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   total,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.end,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,

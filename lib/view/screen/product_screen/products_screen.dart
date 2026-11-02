@@ -620,6 +620,39 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                       controller: scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
                       slivers: [
+                        /*
+                         * WS K. THE CATALOGUE IS NOT EMPTY AND THE LAST REFRESH
+                         * FAILED.
+                         *
+                         * The branch above handles error-AND-empty with
+                         * `ErrorState`. This is the other half: `getProductData`
+                         * clears `productList` only inside `onSuccess`, so a
+                         * failed page-1 refresh leaves the PREVIOUS rows on
+                         * screen. Keeping them is right; saying nothing was not
+                         * -- after the three-second toast the screen was
+                         * indistinguishable from a successful refresh, and the
+                         * header's total was the old total.
+                         *
+                         * NORMAL MODE ONLY, and that is measured rather than
+                         * cautious: `searchProductData` clears `searchResults`
+                         * in its failure limb and `searchProductByCategory`
+                         * clears `categoryResults` before the request, so
+                         * error-with-rows cannot arise in either mode. The
+                         * notice there could only ever be wrong.
+                         *
+                         * `getProductData` already clears `errorMessage` at
+                         * request start, so this leaves on the next attempt
+                         * without a controller change.
+                         */
+                        if (productController.listMode.value ==
+                                ProductListMode.normal &&
+                            productController.errorMessage.value.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: StaleDataNotice(
+                              message: productController.errorMessage.value,
+                              onRetry: _fetchInitialData,
+                            ),
+                          ),
                         // Header
                         SliverToBoxAdapter(
                           child: Padding(
@@ -664,6 +697,10 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                                   price: "${product.salePrice?.toString() ?? ""}  ${productController.currencySymbol.value}",
                                   stock: product.productStock?.toString() ?? '-',
                                   stockStatus: product.stockStatus,
+                                  // P2-07-10: the per-store threshold the web compares against,
+                                  // so the two surfaces agree about "out of stock".
+                                  outOfStockThreshold: productController
+                                      .outOfStockThreshold.value,
                                   rating: product.averageRating?.toDouble() ?? 0.0,
                                   hasVariant: product.variantProduct == 1,
                                   onTap: () => Get.to(

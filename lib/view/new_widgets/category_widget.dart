@@ -106,9 +106,9 @@ Widget buildCategoryWidget({
               ),
 
               // STATUS chip (top-start)
-              Positioned(
+              PositionedDirectional(
                 top: 9.h,
-                left: 9.w,
+                start: 9.w,
                 child: _chip(
                   label: isActive ? 'Active'.tr : 'Inactive'.tr,
                   color: isActive ? success : danger,
@@ -117,9 +117,9 @@ Widget buildCategoryWidget({
               ),
 
               // MENU (top-end)
-              Positioned(
+              PositionedDirectional(
                 top: 6.h,
-                right: 6.w,
+                end: 6.w,
                 child: _categoryMenu(
                   context: context,
                   category: category,
@@ -132,8 +132,8 @@ Widget buildCategoryWidget({
 
               // TRENDING chip (bottom-start) - only when trending
               if (isTrending)
-                Positioned(
-                  left: 9.w,
+                PositionedDirectional(
+                  start: 9.w,
                   bottom: 9.h,
                   child: _chip(
                     label: 'Trending'.tr,

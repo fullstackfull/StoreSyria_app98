@@ -133,7 +133,7 @@ class _TaxScreenState extends State<TaxScreen> {
             "Action".tr,
             style: pBold12.copyWith(
                 color: headerColor, fontSize: 10.sp),
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.end,
           ),
         ),
       ],

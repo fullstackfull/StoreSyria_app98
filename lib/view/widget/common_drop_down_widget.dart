@@ -52,7 +52,9 @@ Widget commonDropdownButtonWidget<T>({
           }).toList(),
           dropdownColor: fieldBg,
           icon: Padding(
-            padding: const EdgeInsets.only(right: 4),
+            // P2-07 RTL: the chevron's inset follows the direction, so it is not
+            // flush against the field edge in Arabic and gapped in English.
+            padding: const EdgeInsetsDirectional.only(end: 4),
             child: assetSvdImageWidget(
               image: DefaultImages.dropDownIcn,
               colorFilter: ColorFilter.mode(

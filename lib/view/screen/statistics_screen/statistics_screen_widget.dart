@@ -788,9 +788,26 @@ class GlassVisitorChart extends StatelessWidget {
     }
     final maxY = _AxisLayout.niceMax(maxValue);
 
+    // P2-07-9. "over the selected period" WAS NOT TRUE: there is no selector anywhere in this
+    // app, and the dashboard endpoint hardcodes its own window (`['duration' => 'month']`, which
+    // it then walks as 15 days). The period is DERIVED FROM THE DATA instead of named here,
+    // because this same widget is rendered by two screens fed by two different endpoints — any
+    // hardcoded window would be wrong on one of them. First label to last label is the window the
+    // merchant is actually looking at, whatever the server chose to send.
+    // FROM THE PLOTTED LABELS, not from `visitorChart`. `_loadChartData()` above keeps only the
+    // LAST SEVEN entries, while the dashboard endpoint sends fifteen — so a subtitle built from
+    // the raw list would announce a 15-day window over a chart showing 7 days, which is the same
+    // dishonesty as "the selected period" pointing the other way.
+    final String subtitle = chartData.isEmpty
+        ? 'page_views_no_period'.tr
+        : 'page_views_between'.trParams(<String, String>{
+            'from': chartData.first.x,
+            'to': chartData.last.x,
+          });
+
     return GlassCard(
       title: 'Visitors'.tr,
-      subtitle: 'Page views over the selected period'.tr,
+      subtitle: subtitle,
       icon: Icons.show_chart_rounded,
       child: chartData.isEmpty
           ? const _EmptyChart(height: 220)

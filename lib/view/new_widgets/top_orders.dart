@@ -32,7 +32,9 @@ Widget topOrderCardWidget({
         vertical: 18.h,
         horizontal: 15.w,
       ),
-      margin: EdgeInsets.only(right: 12.w),
+      // P2-07 RTL: the gap between cards belongs on the END side, so a
+      // right-to-left row is spaced the same way a left-to-right one is.
+      margin: EdgeInsetsDirectional.only(end: 12.w),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(18.r),
@@ -127,7 +129,8 @@ Widget topOrderCardWidget({
           /// ================= DATE =================
 
           Align(
-            alignment: Alignment.centerLeft,
+            // P2-07 RTL: the date reads from the start of the card, not the left.
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
               date,
               maxLines: 1,

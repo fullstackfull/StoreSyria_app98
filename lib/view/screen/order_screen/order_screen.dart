@@ -19,6 +19,7 @@ import '../../widget/common_appbar_widget.dart';
 import '../../widget/error_empty_state.dart';
 import '../../new_widgets/date_filter.dart';
 import 'create_order_screen.dart';
+import 'package:store_go_app/core/permissions/merchant_permissions.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen({super.key});
@@ -29,7 +30,6 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen>
     with AutomaticKeepAliveClientMixin {
-
   final OrderController orderController = Get.find<OrderController>();
 
   late ScrollController scrollController;
@@ -37,7 +37,7 @@ class _OrderScreenState extends State<OrderScreen>
   bool _isFirstLoad = true;
 
   final DeliveryBoyController deliveryBoyController =
-  Get.isRegistered<DeliveryBoyController>()
+      Get.isRegistered<DeliveryBoyController>()
       ? Get.find<DeliveryBoyController>()
       : Get.put(DeliveryBoyController());
 
@@ -93,13 +93,11 @@ class _OrderScreenState extends State<OrderScreen>
         scrollController.position.maxScrollExtent - 200) {
       if (orderController.isLoadingMoreOrders.value) return;
 
-      final nextPage =
-          orderController.currantPage.value + 1;
+      final nextPage = orderController.currantPage.value + 1;
 
       orderController.getOrderData(
         nextPage,
-        deliveredStatus:
-        orderController.selectedStatus.value == 0
+        deliveredStatus: orderController.selectedStatus.value == 0
             ? null
             : orderController.selectedStatus.value - 1,
         fromDate: selectedDateRange?.start,
@@ -123,8 +121,7 @@ class _OrderScreenState extends State<OrderScreen>
 
     orderController.searchResults.clear();
 
-    final hasDateFilter =
-        useDateFilter && selectedDateRange != null;
+    final hasDateFilter = useDateFilter && selectedDateRange != null;
 
     // لا تمسح القائمة الأصلية إذا عم نجيب date-filtered data
     if (hasDateFilter) {
@@ -136,12 +133,8 @@ class _OrderScreenState extends State<OrderScreen>
     await orderController.getOrderData(
       1,
       deliveredStatus: deliveredStatus,
-      fromDate: hasDateFilter
-          ? selectedDateRange?.start
-          : null,
-      toDate: hasDateFilter
-          ? selectedDateRange?.end
-          : null,
+      fromDate: hasDateFilter ? selectedDateRange?.start : null,
+      toDate: hasDateFilter ? selectedDateRange?.end : null,
     );
   }
 
@@ -197,17 +190,27 @@ class _OrderScreenState extends State<OrderScreen>
         appBar: simpleAppBar(
           title: "orders".tr,
           isBold: true,
-          label: "new_order".tr,
+          // P2-04-10 / P2-07-13. HIDDEN AND REFUSED, not one or the other.
+          //
+          // `api/admin/createOrderViaApi` had NO permission check at all — tenancy was its only
+          // control — so a staff member with no order permission could create a real order with
+          // a real price and payment status. It refuses with 403 now. Hiding the button is the
+          // other half: without it that employee fills the entire form and is turned away at
+          // submit, which is the "offered but refused" shape this requirement exists to end.
+          //
+          // `mayOffer`, not `may`: a client shipped ahead of its backend receives no permission
+          // list, and gating strictly would hide order creation from merchants against a server
+          // that does not gate it. The server is the control; this is the courtesy.
+          label: MerchantPermissions.current.mayOffer(Permissions.manageOrder)
+              ? "new_order".tr
+              : null,
           onNewLabelTap: () {
             Get.to(() => const CreateOrderScreen());
           },
         ),
-        backgroundColor: isDark  ? DarkThemeColor.cBackGround : AppColor.cLight,
+        backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cLight,
         body: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 20.w,
-            vertical: 10.h,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -218,11 +221,9 @@ class _OrderScreenState extends State<OrderScreen>
               Obx(() {
                 return orderStatusTabsWidget(
                   context: context,
-                  selectedIndex:
-                  orderController.selectedStatus.value,
+                  selectedIndex: orderController.selectedStatus.value,
                   onChanged: (index) {
-                    orderController.selectedStatus.value =
-                        index;
+                    orderController.selectedStatus.value = index;
 
                     setState(() {
                       selectedDateRange = null;
@@ -248,7 +249,6 @@ class _OrderScreenState extends State<OrderScreen>
               // ==================================================
               // SEARCH
               // ==================================================
-
               SizedBox(
                 width: double.infinity,
                 child: SearchRowWidget(
@@ -274,7 +274,6 @@ class _OrderScreenState extends State<OrderScreen>
               // ==================================================
               // ORDERS
               // ==================================================
-
               Expanded(
                 child: Obx(() {
                   final isSearchMode =
@@ -286,17 +285,14 @@ class _OrderScreenState extends State<OrderScreen>
                       ? orderController.filteredOrderList
                       : orderController.orderList;
 
-                  final topOrders =
-                      orderController.topOrderList;
+                  final topOrders = orderController.topOrderList;
 
-                  final isLoadingOrders =
-                      orderController.isLoadingOrders.value;
+                  final isLoadingOrders = orderController.isLoadingOrders.value;
 
                   final isSearchingOrders =
                       orderController.isSearchingOrders.value;
 
-                  final hasTopOrders =
-                      !isSearchMode && topOrders.isNotEmpty;
+                  final hasTopOrders = !isSearchMode && topOrders.isNotEmpty;
 
                   // ==================================================
                   // MAIN LOADING
@@ -320,20 +316,13 @@ class _OrderScreenState extends State<OrderScreen>
                     return RefreshIndicator(
                       onRefresh: _refreshOrders,
                       child: ListView(
-                        physics:
-                        const AlwaysScrollableScrollPhysics(),
+                        physics: const AlwaysScrollableScrollPhysics(),
                         children: [
                           SizedBox(
-                            height:
-                            MediaQuery.of(context)
-                                .size
-                                .height *
-                                .6,
+                            height: MediaQuery.of(context).size.height * .6,
                             child: Center(
                               child: ErrorState(
-                                message: orderController
-                                    .errorMessage
-                                    .value,
+                                message: orderController.errorMessage.value,
                                 onRetry: () {
                                   _fetchInitialData();
                                 },
@@ -355,21 +344,14 @@ class _OrderScreenState extends State<OrderScreen>
                     return RefreshIndicator(
                       onRefresh: _refreshOrders,
                       child: ListView(
-                        physics:
-                        const AlwaysScrollableScrollPhysics(),
+                        physics: const AlwaysScrollableScrollPhysics(),
                         children: [
                           SizedBox(
-                            height:
-                            MediaQuery.of(context)
-                                .size
-                                .height *
-                                .6,
+                            height: MediaQuery.of(context).size.height * .6,
                             child: Center(
                               child: EmptyState(
-                                message:
-                                "no_orders_found".tr,
-                                icon: Icons
-                                    .receipt_long_outlined,
+                                message: "no_orders_found".tr,
+                                icon: Icons.receipt_long_outlined,
                               ),
                             ),
                           ),
@@ -380,9 +362,9 @@ class _OrderScreenState extends State<OrderScreen>
 
                   final itemCount =
                       (hasTopOrders ? 1 : 0) + // Top Orders
-                          1 + // All Orders Header
-                          orderList.length +
-                          (orderController.isScroll.value ? 1 : 0);
+                      1 + // All Orders Header
+                      orderList.length +
+                      (orderController.isScroll.value ? 1 : 0);
 
                   return RefreshIndicator(
                     backgroundColor: Colors.white,
@@ -405,9 +387,9 @@ class _OrderScreenState extends State<OrderScreen>
                                 child: Text(
                                   "top_orders".tr,
                                   style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColor.themeNavyBlueColor
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColor.themeNavyBlueColor,
                                   ),
                                 ),
                               ),
@@ -434,17 +416,19 @@ class _OrderScreenState extends State<OrderScreen>
                                         ),
                                       ),
                                       maskedName:
-                                      order.userName == 'Deleted Customer'
+                                          order.userName == 'Deleted Customer'
                                           ? 'deleted_customer'.tr
                                           : (order.userName?.isEmpty ?? true)
                                           ? 'no_name'.tr
                                           : order.userName ?? '',
-                                      price:'${order.finalPrice} ${order.currencySymbol}',
+                                      price:
+                                          '${order.finalPrice} ${order.currencySymbol ?? ''}'
+                                              .trim(),
                                       primaryBadgeLabel: order.deliveredStatus,
                                       secondaryBadgeLabel: order.paymentStatus,
                                       onTap: () {
                                         Get.to(
-                                              () => OrderDetailScreen(
+                                          () => OrderDetailScreen(
                                             orderId: order.id.toString(),
                                           ),
                                         );
@@ -470,18 +454,13 @@ class _OrderScreenState extends State<OrderScreen>
                                   ? orderController.searchResults.length
                                   : selectedDateRange != null
                                   ? orderController.filteredOrderList.length
-                                  : orderController.orderModel?.data?.total ?? 0,
+                                  : orderController.orderModel?.data?.total ??
+                                        0,
                               context: context,
                               title: "all_orders".tr,
 
                               filterLabel: selectedDateRange != null
-                                  ? "${dateFormatted(
-                                date: selectedDateRange!.start.toString(),
-                                formatType: formatForDateTime(FormatType.date),
-                              )} - ${dateFormatted(
-                                date: selectedDateRange!.end.toString(),
-                                formatType: formatForDateTime(FormatType.date),
-                              )}"
+                                  ? "${dateFormatted(date: selectedDateRange!.start.toString(), formatType: formatForDateTime(FormatType.date))} - ${dateFormatted(date: selectedDateRange!.end.toString(), formatType: formatForDateTime(FormatType.date))}"
                                   : "filter_by_date".tr,
 
                               onFilterTap: () async {
@@ -513,9 +492,11 @@ class _OrderScreenState extends State<OrderScreen>
 
                                   await _fetchInitialData(
                                     deliveredStatus:
-                                    orderController.selectedStatus.value == 0
+                                        orderController.selectedStatus.value ==
+                                            0
                                         ? null
-                                        : orderController.selectedStatus.value - 1,
+                                        : orderController.selectedStatus.value -
+                                              1,
                                   );
                                 }
                               },
@@ -540,8 +521,8 @@ class _OrderScreenState extends State<OrderScreen>
                             child: Center(
                               child: orderController.isLoadingMoreOrders.value
                                   ? CircularProgressIndicator(
-                                color: AppColor.themeNavyBlueColor,
-                              )
+                                      color: AppColor.themeNavyBlueColor,
+                                    )
                                   : const SizedBox.shrink(),
                             ),
                           );
@@ -557,7 +538,9 @@ class _OrderScreenState extends State<OrderScreen>
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: allOrdersListItemWidget(
                             isAssigned: _assignedId(order) != null,
-                            deliveryBoyName: _deliveryBoyName(_assignedId(order)),
+                            deliveryBoyName: _deliveryBoyName(
+                              _assignedId(order),
+                            ),
                             changeText3: 'assign_delivery_boy'.tr,
                             changeFun3: () => _assignDelivery(order),
                             showChangeAction: true,
@@ -572,20 +555,19 @@ class _OrderScreenState extends State<OrderScreen>
                                 order,
 
                                 getOrderStatus: (model) =>
-                                model.deliveredStatus ?? 0,
+                                    model.deliveredStatus ?? 0,
 
                                 getProductOrderId: (model) =>
-                                model.productOrderId ?? '',
+                                    model.productOrderId ?? '',
 
                                 getPaymentStatus: (model) =>
-                                model.paymentStatus ?? '',
+                                    model.paymentStatus ?? '',
 
                                 setOrderStatus: (model, newStatus) {
                                   model.deliveredStatus = newStatus;
                                 },
 
-                                setOrderStatusText: (model, newStatusText) {
-                                },
+                                setOrderStatusText: (model, newStatusText) {},
 
                                 onUpdated: () {
                                   orderController.orderList.refresh();
@@ -596,9 +578,12 @@ class _OrderScreenState extends State<OrderScreen>
                               showPaymentStatusBottomSheet<OrderData>(
                                 context,
                                 order,
-                                getPaymentStatus: (model) => model.paymentStatus ?? '',
-                                getProductOrderId: (model) => model.productOrderId ?? '',
-                                getDeliveredStatus: (model) => model.deliveredStatus ?? 0,
+                                getPaymentStatus: (model) =>
+                                    model.paymentStatus ?? '',
+                                getProductOrderId: (model) =>
+                                    model.productOrderId ?? '',
+                                getDeliveredStatus: (model) =>
+                                    model.deliveredStatus ?? 0,
                                 setPaymentStatus: (model, newStatus) {
                                   model.paymentStatus = newStatus;
                                 },
@@ -610,24 +595,27 @@ class _OrderScreenState extends State<OrderScreen>
                             orderId: order.productOrderId ?? '',
                             date: dateFormatted(
                               date: order.orderDate!,
-                              formatType: formatForDateTime(FormatType.dateTime2),
+                              formatType: formatForDateTime(
+                                FormatType.dateTime2,
+                              ),
                             ),
-                            maskedName:
-                            order.userName == 'Deleted Customer'
+                            maskedName: order.userName == 'Deleted Customer'
                                 ? 'deleted_customer'.tr
                                 : (order.userName?.isEmpty ?? true)
                                 ? 'no_name'.tr
                                 : order.userName ?? '',
-                            price: "${order.finalPrice} ${order.currencySymbol}",
+                            price:
+                                "${order.finalPrice} ${order.currencySymbol ?? ''}"
+                                    .trim(),
                             secondaryBadgeLabel: "${order.paymentStatus}",
                             primaryBadgeLabel: order.deliveredStatus,
                             onTap: () => Get.to(
-                                  () => OrderDetailScreen(
+                              () => OrderDetailScreen(
                                 orderId: order.id.toString(),
                               ),
                             ),
                             viewFun: () => Get.to(
-                                  () => OrderDetailScreen(
+                              () => OrderDetailScreen(
                                 orderId: order.id.toString(),
                               ),
                             ),
@@ -638,9 +626,10 @@ class _OrderScreenState extends State<OrderScreen>
                                 iconColor: AppColor.cRedText,
                                 confirmColor: AppColor.cRedText,
                                 context: context,
-                                onConfirm: () => orderController.deleteOrderData(
-                                  orderId: order.id.toString(),
-                                ),
+                                onConfirm: () =>
+                                    orderController.deleteOrderData(
+                                      orderId: order.id.toString(),
+                                    ),
                               );
                             },
                           ),
@@ -656,16 +645,13 @@ class _OrderScreenState extends State<OrderScreen>
       ),
     );
   }
+
   Future<void> _refreshOrders() async {
-    if (orderController.listMode.value ==
-        OrderListMode.search) {
-      final query =
-      orderController.searchController.text.trim();
+    if (orderController.listMode.value == OrderListMode.search) {
+      final query = orderController.searchController.text.trim();
 
       if (query.isNotEmpty) {
-        await orderController.searchOrderData(
-          name: query,
-        );
+        await orderController.searchOrderData(name: query);
       }
 
       return;
@@ -673,8 +659,7 @@ class _OrderScreenState extends State<OrderScreen>
 
     await Future.wait([
       _fetchInitialData(
-        deliveredStatus:
-        orderController.selectedStatus.value == 0
+        deliveredStatus: orderController.selectedStatus.value == 0
             ? null
             : orderController.selectedStatus.value - 1,
       ),

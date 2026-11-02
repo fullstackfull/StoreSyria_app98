@@ -102,6 +102,33 @@ class _DeliveryBoyScreenState extends State<DeliveryBoyScreen>
                       return const ShimmerList();
                     }
 
+                    // P2-07-14. Error before empty -- a failed request also leaves the list
+                    // empty, so the other order tells a merchant whose network dropped that
+                    // they have no delivery staff.
+                    if (deliveryBoyController.errorMessage.value.isNotEmpty &&
+                        deliveryBoys.isEmpty) {
+                      return RefreshIndicator(
+                        backgroundColor: isDark
+                            ? DarkThemeColor.cCardBackground
+                            : Colors.white,
+                        onRefresh: _fetchInitialData,
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * .5,
+                              child: Center(
+                                child: ErrorState(
+                                  message: deliveryBoyController.errorMessage.value,
+                                  onRetry: _fetchInitialData,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
                     if (deliveryBoys.isEmpty) {
                       return RefreshIndicator(
                         backgroundColor: isDark
@@ -134,6 +161,33 @@ class _DeliveryBoyScreenState extends State<DeliveryBoyScreen>
                       child: CustomScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         slivers: [
+                          /*
+                           * WS K. THE LIST IS NOT EMPTY AND THE LAST REFRESH
+                           * FAILED.
+                           *
+                           * `getDeliveryBoysData`'s failure limb sets
+                           * `errorMessage` and leaves `deliveryBoyList` alone,
+                           * so the previous drivers stay on screen -- right,
+                           * but silent once the toast expired. A merchant
+                           * assigning an order to a driver who has since been
+                           * removed is the concrete cost.
+                           *
+                           * The success limb had to start clearing
+                           * `errorMessage` as well; it never did, so a notice
+                           * keyed on it would have arrived with the first
+                           * failure and stayed for the session.
+                           */
+                          if (deliveryBoyController
+                              .errorMessage
+                              .value
+                              .isNotEmpty)
+                            SliverToBoxAdapter(
+                              child: StaleDataNotice(
+                                message:
+                                    deliveryBoyController.errorMessage.value,
+                                onRetry: _fetchInitialData,
+                              ),
+                            ),
                           SliverToBoxAdapter(
                             child: Padding(
                               padding: EdgeInsets.only(

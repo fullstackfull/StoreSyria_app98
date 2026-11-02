@@ -904,9 +904,9 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                               height: double.infinity,
                             ),
                           ),
-                          Positioned(
+                          PositionedDirectional(
                             top: 6,
-                            right: 6,
+                            end: 6,
                             child: _removeImageButton(
                               onTap: () {
                                 addProductController.coverImage.value = '';
@@ -933,9 +933,9 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                                   _uploadPlaceholder(textColor),
                             ),
                           ),
-                          Positioned(
+                          PositionedDirectional(
                             top: 6,
-                            right: 6,
+                            end: 6,
                             child: _removeImageButton(
                               onTap: () {
                                 addProductController
@@ -1003,7 +1003,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                         ...List.generate(existing.length, (index) {
                           final url = existing[index];
                           return Padding(
-                            padding: EdgeInsets.only(right: 10.w),
+                            padding: EdgeInsetsDirectional.only(end: 10.w),
                             child: Stack(
                               children: [
                                 ClipRRect(
@@ -1022,9 +1022,9 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                                     ),
                                   ),
                                 ),
-                                Positioned(
+                                PositionedDirectional(
                                   top: 4,
-                                  right: 4,
+                                  end: 4,
                                   child: _removeImageButton(
                                     onTap: () => addProductController
                                         .existingSubImages
@@ -1038,7 +1038,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                         ...List.generate(selected.length, (index) {
                           final path = selected[index];
                           return Padding(
-                            padding: EdgeInsets.only(right: 10.w),
+                            padding: EdgeInsetsDirectional.only(end: 10.w),
                             child: Stack(
                               children: [
                                 ClipRRect(
@@ -1050,9 +1050,9 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                                     height: 108.h,
                                   ),
                                 ),
-                                Positioned(
+                                PositionedDirectional(
                                   top: 4,
-                                  right: 4,
+                                  end: 4,
                                   child: _removeImageButton(
                                     onTap: () => addProductController
                                         .selectedSubImages

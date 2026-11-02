@@ -166,7 +166,35 @@ class PlanLimits {
   }
 }
 
+/// A single quota on the merchant's plan: products, stores or users.
+///
+/// THE SERVER SENDS A STRING FOR AN UNLIMITED PLAN, and this model used to
+/// crash on it. `Api\DashboardController` writes
+///
+///     'max'       => $maxProducts == -1 ? 'Unlimited' : $maxProducts,
+///     'remaining' => $remainingProducts == -1 ? 'Unlimited' : $remainingProducts,
+///
+/// in six places (DashboardController.php:7505-7519), while this class declared
+/// `final int max` and parsed it as `json['max'] ?? 0`. `??` substitutes for
+/// null ONLY, so the String went straight into an `int`: a TypeError thrown
+/// inside `fromJson`, which meant **a merchant on a top-tier plan could not
+/// open the My Plan screen at all**.
+///
+/// THE SENTINEL STAYS THE SERVER'S. Changing the API to send `-1` is a
+/// response-shape change that the shipped app depends on, which is an owner
+/// decision rather than an engineering one. So the app tolerates what the
+/// server sends, and normalises it to the backend's OWN internal sentinel
+/// (`-1`, the value `Utility::updateStorageLimit()` and the plan controller
+/// already treat as "no ceiling"), exposed through [isUnlimited] so no caller
+/// has to know the number.
+///
+/// Why not `int?` with null for unlimited: `used` and `percentage` stay
+/// non-null, and a nullable `max` would push a `?? 0` into every call site —
+/// which is how "unlimited" would come to render as a quota of ZERO already
+/// exceeded. That is the exact defect the Laravel dashboard's storage card
+/// carried (F249), printing the same sentinel as `(MB / -1MB)` over a 0% donut.
 class PlanLimit {
+  /// `-1` means no ceiling. Read [isUnlimited] rather than comparing.
   final int max;
   final int used;
   final int remaining;
@@ -179,12 +207,42 @@ class PlanLimit {
     required this.percentage,
   });
 
+  /// True when the plan sets no ceiling on this quota.
+  bool get isUnlimited => max < 0;
+
+  /// True when [remaining] is not a number because the quota has no ceiling.
+  bool get remainingIsUnlimited => remaining < 0;
+
+  /// Reads an int from whatever the API sent: a number, a numeric string, or
+  /// the literal `'Unlimited'`.
+  ///
+  /// Anything it cannot read becomes [fallback] rather than throwing — a plan
+  /// screen that renders a wrong number is bad; one that cannot render at all
+  /// is worse, and this model is parsed on a screen the merchant opened
+  /// deliberately.
+  static int _int(dynamic value, {int fallback = 0}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) {
+      final trimmed = value.trim();
+      if (trimmed.toLowerCase() == 'unlimited') return -1;
+      return int.tryParse(trimmed) ?? double.tryParse(trimmed)?.toInt() ?? fallback;
+    }
+    return fallback;
+  }
+
+  static double _double(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value.trim()) ?? 0;
+    return 0;
+  }
+
   factory PlanLimit.fromJson(Map<String, dynamic> json) {
     return PlanLimit(
-      max: json['max'] ?? 0,
-      used: json['used'] ?? 0,
-      remaining: json['remaining'] ?? 0,
-      percentage: (json['percentage'] ?? 0).toDouble(),
+      max: _int(json['max']),
+      used: _int(json['used']),
+      remaining: _int(json['remaining']),
+      percentage: _double(json['percentage']),
     );
   }
 

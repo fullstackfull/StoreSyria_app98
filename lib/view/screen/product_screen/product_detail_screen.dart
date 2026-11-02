@@ -17,6 +17,7 @@ import '../../../utils/helper.dart';
 import '../../new_widgets/convert_to_ago.dart';
 import '../../new_widgets/shimmer.dart';
 import '../../widget/app_dialog.dart';
+import 'package:store_go_app/core/stock/stock_state.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String categoryId;
@@ -547,18 +548,30 @@ class _ProductDetailScreenState
     final bool isVisible = status == '1';
     final bool isTrending = trending == '1';
 
-    final bool isInStock =
-        stockStatus == 'in_stock';
-
-    final bool isOutOfStock =
-        stockStatus == 'out_of_stock';
-
-    final bool isOnBackorder =
-        stockStatus == 'on_backorder';
-
     final bool isTrackStock =
         trackStock == '1' ||
             trackStock.toLowerCase() == 'true';
+
+    // P2-07-10. THE SAME RULE AS THE LIST CARD AND THE WEB. This screen read `stock_status`
+    // unconditionally too, and that column is never recomputed when stock drains through an
+    // order -- so a sold-out tracked product was labelled In stock here as well. The threshold
+    // is not available on this screen (the detail response does not carry it), so 0 is used,
+    // which is the setting's own default and the value for any store that has not changed it.
+    // A store with a non-zero threshold therefore still sees the list card as authoritative;
+    // recorded rather than guessed, because inventing a threshold would be worse than using the
+    // default.
+    final stockState = resolveStockState(
+      hasVariant: (product.variantProduct ?? 0) == 1,
+      trackStock: isTrackStock,
+      productStock: product.productStock,
+      stockStatus: stockStatus,
+    );
+
+    final bool isInStock = stockState == StockState.inStock;
+
+    final bool isOutOfStock = stockState == StockState.outOfStock;
+
+    final bool isOnBackorder = stockState == StockState.onBackorder;
 
     IconData stockIcon;
     String stockLabel;
@@ -1340,7 +1353,7 @@ class _ProductDetailScreenState
             child: Text(
               value,
               textAlign:
-              TextAlign.right,
+              TextAlign.end,
               style:
               pSemiBold12.copyWith(
                 color:

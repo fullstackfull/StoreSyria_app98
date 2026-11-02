@@ -110,6 +110,8 @@ class _CustomerPickerBottomSheetState
                         ),
                       ),
                       IconButton(
+                        // Accessible name: this control has no visible text.
+                        tooltip: 'close'.tr,
                         icon: Icon(Icons.close, color: secondaryTextColor),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
@@ -137,6 +139,8 @@ class _CustomerPickerBottomSheetState
                         }
                         if (customerController.searchController.text.isNotEmpty) {
                           return IconButton(
+                            // Accessible name: this control has no visible text.
+                            tooltip: 'clear'.tr,
                             icon: const Icon(Icons.clear),
                             onPressed: customerController.resetCustomerSearch,
                           );

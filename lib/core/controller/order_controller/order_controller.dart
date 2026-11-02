@@ -15,16 +15,13 @@ import '../../model/customer_model.dart';
 import '../../model/top_order_model.dart';
 
 import 'package:store_go_app/utils/app_log.dart';
+import 'package:store_go_app/network/result.dart';
 
-enum OrderListMode {
-  normal,
-  search,
-}
+enum OrderListMode { normal, search }
 
 class OrderLineItem {
   final Rx<ProductData?> product = Rx<ProductData?>(null);
-  final TextEditingController qtyController =
-  TextEditingController(text: '1');
+  final TextEditingController qtyController = TextEditingController(text: '1');
   final TextEditingController priceController = TextEditingController();
 
   void dispose() {
@@ -41,8 +38,7 @@ class OrderController extends GetxController implements StoreAware {
   final TextEditingController searchController = TextEditingController();
   final SearchRepository searchRepository = SearchRepository();
   final OrderRepository orderRepository = OrderRepository();
-  final OrderDetailRepository orderDetailRepository =
-  OrderDetailRepository();
+  final OrderDetailRepository orderDetailRepository = OrderDetailRepository();
   final RxList<OrderData> searchResults = <OrderData>[].obs;
   final Rx<OrderListMode> listMode = OrderListMode.normal.obs;
 
@@ -135,7 +131,6 @@ class OrderController extends GetxController implements StoreAware {
     isScroll.value = true;
   }
 
-
   double get productsTotal {
     double total = 0;
     for (final line in orderLineItems) {
@@ -166,7 +161,6 @@ class OrderController extends GetxController implements StoreAware {
   final TextEditingController countryController = TextEditingController();
   final TextEditingController postcodeController = TextEditingController();
 
-
   void fillShippingFromCustomer(CustomerData customer) {
     final fullName = customer.customerInfo?.name?.trim() ?? '';
 
@@ -174,8 +168,9 @@ class OrderController extends GetxController implements StoreAware {
       final parts = fullName.split(RegExp(r'\s+'));
 
       firstNameController.text = parts.first;
-      lastNameController.text =
-      parts.length > 1 ? parts.sublist(1).join(' ') : '';
+      lastNameController.text = parts.length > 1
+          ? parts.sublist(1).join(' ')
+          : '';
     } else {
       firstNameController.clear();
       lastNameController.clear();
@@ -215,9 +210,7 @@ class OrderController extends GetxController implements StoreAware {
     postcodeController.clear();
   }
 
-  Future<bool> createOrderData({
-    required List<dynamic> productList,
-  }) async {
+  Future<bool> createOrderData({required List<dynamic> productList}) async {
     isCreatingOrder.value = true;
 
     bool success = false;
@@ -236,7 +229,8 @@ class OrderController extends GetxController implements StoreAware {
         products: products,
         paymentType: paymentType.value,
         paymentStatus: paymentStatus.value,
-        deliveryPrice: double.tryParse(deliveryPriceController.text.trim()) ?? 0,
+        deliveryPrice:
+            double.tryParse(deliveryPriceController.text.trim()) ?? 0,
         taxPrice: double.tryParse(taxPriceController.text.trim()) ?? 0,
         firstName: firstNameController.text.trim(),
         lastName: lastNameController.text.trim(),
@@ -253,14 +247,28 @@ class OrderController extends GetxController implements StoreAware {
 
       result.fold(
         onSuccess: (data) {
+          /* WS K. The backend refuses at HTTP 200, so a refusal lands HERE and not in `onFailure`. Without this the merchant got a green success toast — and, worse, the local state below was mutated as though the write had happened. */
+          if (apiRefused(data)) {
+            success = false;
+            commonToast(
+              type: AppSnackBarType.error,
+              apiMessage(data, fallback: 'failed_to_create_order'.tr),
+            );
+            return;
+          }
+
           success = true;
-          commonToast(type: AppSnackBarType.success, 'order_created_successfully'.tr);
+          commonToast(
+            type: AppSnackBarType.success,
+            'order_created_successfully'.tr,
+          );
           resetCreateOrderForm();
           resetPagination();
         },
         onFailure: (reason, message, validationErrors) {
           success = false;
-          commonToast(type: AppSnackBarType.error,
+          commonToast(
+            type: AppSnackBarType.error,
             message.isNotEmpty ? message : 'failed_to_create_order'.tr,
           );
         },
@@ -378,10 +386,7 @@ class OrderController extends GetxController implements StoreAware {
 
     try {
       final response = await orderRepository.assignOrderToDelivery(
-        data: {
-          'delivery_boy': deliveryBoyId,
-          'order_id': orderId,
-        },
+        data: {'delivery_boy': deliveryBoyId, 'order_id': orderId},
       );
 
       bool success = false;
@@ -418,11 +423,11 @@ class OrderController extends GetxController implements StoreAware {
   // ==================== Orders List & Pagination ====================
 
   Future<void> getOrderData(
-      int page, {
-        int? deliveredStatus,
-        DateTime? fromDate,
-        DateTime? toDate,
-      }) async {
+    int page, {
+    int? deliveredStatus,
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) async {
     if (listMode.value != OrderListMode.normal) return;
 
     if (page > 1 && isLoadingMoreOrders.value) return;
@@ -493,15 +498,26 @@ class OrderController extends GetxController implements StoreAware {
           }
         },
         onFailure: (reason, message, validationErrors) {
-          errorMessage.value = 'failed_to_load_orders'.tr;
-          commonToast(type: AppSnackBarType.error, 'failed_to_load_orders'.tr);
+          // A PERMISSION REFUSAL IS NOT A LOAD FAILURE. `orderlist` is permission-gated now
+          // (P2-07-13), so a staff member without `Manage Order`/`Show Order` gets a 403 -- and
+          // telling them the orders "failed to load" invites them to retry something that will
+          // never work.
+          final shown = failureMessage(
+            reason,
+            message,
+            'failed_to_load_orders'.tr,
+          );
+          errorMessage.value = shown;
+          commonToast(type: AppSnackBarType.error, shown);
         },
       );
     } catch (e) {
-      errorMessage.value =
-          'unexpected_error_loading_orders'.tr;
+      errorMessage.value = 'unexpected_error_loading_orders'.tr;
 
-      commonToast(type: AppSnackBarType.error, 'unexpected_error_loading_orders'.tr);
+      commonToast(
+        type: AppSnackBarType.error,
+        'unexpected_error_loading_orders'.tr,
+      );
 
       AppLog.d('❌ getOrderData Error: $e');
     } finally {
@@ -521,14 +537,29 @@ class OrderController extends GetxController implements StoreAware {
         onSuccess: (data) {
           final model = TopOrderModel.fromJson(data);
           final items = model.data?.topOrders ?? [];
-          topOrderList.value = items.map((e) => e.toOrderData()).toList();
+          /* WS K. The envelope's symbol, which is the only place the backend
+             sends it. Without this the strip rendered "1250.00 null". */
+          topOrderList.value = items
+              .map(
+                (e) => e.toOrderData(
+                  fallbackCurrencySymbol: model.data?.currencySymbol,
+                ),
+              )
+              .toList();
         },
         onFailure: (reason, message, validationErrors) {
-          commonToast(type: AppSnackBarType.error, 'failed_to_load_orders'.tr);
+          // `Top_orders` is permission-gated too -- same reasoning as above.
+          commonToast(
+            type: AppSnackBarType.error,
+            failureMessage(reason, message, 'failed_to_load_orders'.tr),
+          );
         },
       );
     } catch (e) {
-      commonToast(type: AppSnackBarType.error, 'unexpected_error_loading_orders'.tr);
+      commonToast(
+        type: AppSnackBarType.error,
+        'unexpected_error_loading_orders'.tr,
+      );
       AppLog.d('❌ getTopOrderData Error: $e');
     } finally {
       isLoadingTopOrders.value = false;
@@ -537,9 +568,7 @@ class OrderController extends GetxController implements StoreAware {
 
   // ==================== Search ====================
 
-  Future<void> searchOrderData({
-    required String name,
-  }) async {
+  Future<void> searchOrderData({required String name}) async {
     final query = name.trim();
 
     if (query.isEmpty) {
@@ -571,16 +600,19 @@ class OrderController extends GetxController implements StoreAware {
           if (responseData is List) {
             for (final item in responseData) {
               if (item is! Map<String, dynamic>) continue;
-              searchResults.add(
-                OrderData.fromJson(item),
-              );
+              searchResults.add(OrderData.fromJson(item));
             }
           }
         },
         onFailure: (reason, message, validationErrors) {
           searchResults.clear();
-          errorMessage.value = 'failed_to_search_orders'.tr;
-          commonToast(type: AppSnackBarType.error, 'failed_to_search_orders'.tr);
+          final shown = failureMessage(
+            reason,
+            message,
+            'failed_to_search_orders'.tr,
+          );
+          errorMessage.value = shown;
+          commonToast(type: AppSnackBarType.error, shown);
         },
       );
     } catch (e) {
@@ -601,20 +633,16 @@ class OrderController extends GetxController implements StoreAware {
     final query = value.trim();
 
     if (query.length < 3) {
-      if (query.isEmpty &&
-          listMode.value == OrderListMode.search) {
+      if (query.isEmpty && listMode.value == OrderListMode.search) {
         clearOrderSearch();
       }
 
       return;
     }
 
-    _orderSearchDebounce = Timer(
-      const Duration(milliseconds: 600),
-          () {
-        searchOrderData(name: query);
-      },
-    );
+    _orderSearchDebounce = Timer(const Duration(milliseconds: 600), () {
+      searchOrderData(name: query);
+    });
   }
   // ==================== Order Details ====================
 
@@ -630,13 +658,22 @@ class OrderController extends GetxController implements StoreAware {
 
       result.fold(
         onSuccess: (data) {
-          if (data['status'] != 1 || data['data'] is! Map || data['data']['id'] == null) {
+          /* WS K. `apiValueAt` rather than the hand-written `is! Map` guard this used
+             to carry. The old form was SAFE -- the type test short-circuited the
+             subscript -- but only because both sat on ONE LINE, which is the only
+             shape `no_unguarded_nested_subscript_test` can recognise. `dart format`
+             reflowed it across three lines while formatting this file and the ratchet
+             fired, correctly: a guard a formatter can silently separate from the read
+             it protects is not a guard anybody should rely on. The helper walks the
+             path and type-checks every level, so there is nothing left to separate. */
+          if (data['status'] != 1 || apiValueAt(data, ['data', 'id']) == null) {
             orderNotFound.value = true;
             return;
           }
           orderDetailModel = OrderDetailModel.fromJson(data);
           orderDetail = orderDetailModel?.data;
-          currencySymbol.value = orderDetail?.currencySymbol ?? currencySymbol.value;
+          currencySymbol.value =
+              orderDetail?.currencySymbol ?? currencySymbol.value;
 
           // if (orderDetail?.tax != null) {
           //   double totalTax = 0;
@@ -648,12 +685,18 @@ class OrderController extends GetxController implements StoreAware {
         },
         onFailure: (reason, message, validationErrors) {
           errorMessage.value = 'failed_to_load_order_details'.tr;
-          commonToast(type: AppSnackBarType.error, 'failed_to_load_order_details'.tr);
+          commonToast(
+            type: AppSnackBarType.error,
+            'failed_to_load_order_details'.tr,
+          );
         },
       );
     } catch (e) {
       errorMessage.value = 'failed_to_process_order_details'.tr;
-      commonToast(type: AppSnackBarType.error, 'failed_to_process_order_details'.tr);
+      commonToast(
+        type: AppSnackBarType.error,
+        'failed_to_process_order_details'.tr,
+      );
       AppLog.d('❌ getOrderDetailData Error: $e');
     } finally {
       isLoadingOrderDetails.value = false;
@@ -685,6 +728,16 @@ class OrderController extends GetxController implements StoreAware {
 
       await result.fold(
         onSuccess: (data) async {
+          /* WS K. The backend refuses at HTTP 200, so a refusal lands HERE and not in `onFailure`. Without this the merchant got a green success toast — and, worse, the local state below was mutated as though the write had happened. */
+          if (apiRefused(data)) {
+            success = false;
+            commonToast(
+              type: AppSnackBarType.error,
+              apiMessage(data, fallback: 'failed_to_update_order_status'.tr),
+            );
+            return;
+          }
+
           success = true;
 
           if (orderDetail != null) {
@@ -694,16 +747,25 @@ class OrderController extends GetxController implements StoreAware {
 
           resetPagination();
           await getOrderData(1);
-          commonToast(type: AppSnackBarType.success, 'order_status_updated_successfully'.tr);
+          commonToast(
+            type: AppSnackBarType.success,
+            'order_status_updated_successfully'.tr,
+          );
         },
         onFailure: (reason, message, validationErrors) async {
           success = false;
-          commonToast(type: AppSnackBarType.error, 'failed_to_update_order_status'.tr);
+          commonToast(
+            type: AppSnackBarType.error,
+            'failed_to_update_order_status'.tr,
+          );
         },
       );
     } catch (e) {
       success = false;
-      commonToast(type: AppSnackBarType.error, 'failed_to_update_order_status'.tr);
+      commonToast(
+        type: AppSnackBarType.error,
+        'failed_to_update_order_status'.tr,
+      );
       AppLog.d('❌ updateOrderStatus Error: $e');
     } finally {
       isUpdatingOrderStatus.value = false;
@@ -731,12 +793,27 @@ class OrderController extends GetxController implements StoreAware {
 
       result.fold(
         onSuccess: (data) {
+          if (apiRefused(data)) {
+            success = false;
+            commonToast(
+              type: AppSnackBarType.error,
+              apiMessage(data, fallback: 'failed_to_add_order_note'.tr),
+            );
+            return;
+          }
+
           success = true;
-          commonToast(type: AppSnackBarType.success, 'order_note_added_successfully'.tr);
+          commonToast(
+            type: AppSnackBarType.success,
+            'order_note_added_successfully'.tr,
+          );
         },
         onFailure: (reason, message, validationErrors) {
           success = false;
-          commonToast(type: AppSnackBarType.error, 'failed_to_add_order_note'.tr);
+          commonToast(
+            type: AppSnackBarType.error,
+            'failed_to_add_order_note'.tr,
+          );
         },
       );
     } catch (e) {
@@ -767,17 +844,35 @@ class OrderController extends GetxController implements StoreAware {
 
       result.fold(
         onSuccess: (data) {
+          if (apiRefused(data)) {
+            success = false;
+            commonToast(
+              type: AppSnackBarType.error,
+              apiMessage(data, fallback: 'failed_to_delete_order_note'.tr),
+            );
+            return;
+          }
+
           success = true;
-          commonToast(type: AppSnackBarType.success, 'order_note_deleted_successfully'.tr);
+          commonToast(
+            type: AppSnackBarType.success,
+            'order_note_deleted_successfully'.tr,
+          );
         },
         onFailure: (reason, message, validationErrors) {
           success = false;
-          commonToast(type: AppSnackBarType.error, 'failed_to_delete_order_note'.tr);
+          commonToast(
+            type: AppSnackBarType.error,
+            'failed_to_delete_order_note'.tr,
+          );
         },
       );
     } catch (e) {
       success = false;
-      commonToast(type: AppSnackBarType.error, 'failed_to_delete_order_note'.tr);
+      commonToast(
+        type: AppSnackBarType.error,
+        'failed_to_delete_order_note'.tr,
+      );
       AppLog.d('❌ deleteOrderNote Error: $e');
     } finally {
       isDeletingOrderNote.value = false;
@@ -796,7 +891,23 @@ class OrderController extends GetxController implements StoreAware {
 
       result.fold(
         onSuccess: (data) {
-          commonToast(type: AppSnackBarType.success, 'order_deleted_successfully'.tr);
+          /* WS K, AND THIS IS THE WORST OF THE FOURTEEN. The line below takes the
+             order off the list the merchant is looking at. For a refused delete
+             that meant watching the row disappear and finding it still there on
+             the next refresh — the app disagreeing with the server about whether
+             an order exists. */
+          if (apiRefused(data)) {
+            commonToast(
+              type: AppSnackBarType.error,
+              apiMessage(data, fallback: 'failed_to_delete_order'.tr),
+            );
+            return;
+          }
+
+          commonToast(
+            type: AppSnackBarType.success,
+            'order_deleted_successfully'.tr,
+          );
           orderList.removeWhere((element) => element.id.toString() == orderId);
           isDataAvailable.value = orderList.isNotEmpty;
           resetPagination();
@@ -814,18 +925,13 @@ class OrderController extends GetxController implements StoreAware {
     }
   }
 
-  void fillCustomerShippingData(
-      CustomerData customer,
-      List<CityModel> cities,
-      ) {
+  void fillCustomerShippingData(CustomerData customer, List<CityModel> cities) {
     fillShippingFromCustomer(customer);
 
-    final customerStateName =
-    (customer.city ?? '').trim().toLowerCase();
+    final customerStateName = (customer.city ?? '').trim().toLowerCase();
 
     final matchedCity = cities.firstWhereOrNull(
-          (city) =>
-      city.name.trim().toLowerCase() == customerStateName,
+      (city) => city.name.trim().toLowerCase() == customerStateName,
     );
 
     if (matchedCity != null) {

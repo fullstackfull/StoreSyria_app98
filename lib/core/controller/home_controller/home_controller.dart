@@ -12,6 +12,7 @@ import 'package:store_go_app/core/services/fcm_token_service.dart';
 import 'store_change_service.dart';
 import 'cahe.dart';
 import 'package:store_go_app/utils/app_log.dart';
+import '../../permissions/merchant_permissions.dart';
 
 class HomeController extends GetxController implements StoreAware {
   // مفاتيح الكاش الخاصة بهاد الكنترولر
@@ -25,6 +26,26 @@ class HomeController extends GetxController implements StoreAware {
   RxString imageBaseUrl = ''.obs;
   RxBool isStore = false.obs;
   RxBool isDataAvailable = false.obs;
+
+  /// P2-07-14. The dashboard rendered a shimmer whenever `dashboardData` was null, and a failed
+  /// request leaves it null -- so ANY dashboard failure showed the merchant a loading skeleton
+  /// that never resolved, on the first screen they see. The toast that fired alongside it is
+  /// gone seconds later, and nothing on the screen says what happened or offers a retry.
+  RxString dashboardError = ''.obs;
+
+  /// True once a dashboard response has settled, so "still loading" can be told apart from
+  /// "loaded and there is nothing" -- which a null model alone cannot express.
+  RxBool dashboardLoadedOnce = false.obs;
+
+  /// P2-07-13 / WS K13. What this principal may do IN THE CURRENT STORE, as the server reported
+  /// it. Seeded from what login persisted so the first frame is not blank, then replaced by every
+  /// fresh dashboard response — which is how a STORE SWITCH refreshes it, since permissions
+  /// belong to the store and a list handed out once at login could not express the change.
+  ///
+  /// NOT a security boundary: it decides what the UI OFFERS, while the server independently
+  /// enforces the same names (`Api\DashboardController`, and the dashboard now WITHHOLDS the
+  /// money rather than trusting the app to hide it).
+  Rx<MerchantPermissions> permissions = MerchantPermissions.restore().obs;
   DashboardData? dashboardData;
   ImageUrlData? imageUrlData;
   List<Store> myStoreList = [Store(name: 'Grocery', id: 3), Store(id: 7, name: "Babycare")];
@@ -88,6 +109,13 @@ class HomeController extends GetxController implements StoreAware {
   /// ظاهرة أو محفوظة بالكاش لحد ما يوصل رد المتجر الجديد.
   void _resetDashboardData() {
     dashboardData = null;
+
+    // FAIL CLOSED across the switch. Until the new store's dashboard answers, the app holds
+    // nothing: offering the PREVIOUS store's permissions for the few hundred milliseconds in
+    // between would be offering the wrong store's surfaces. Persisted as well as cleared in
+    // memory, so a screen that reads storage directly does not see the stale set either.
+    permissions.value = const MerchantPermissions.none();
+    MerchantPermissions.forget();
 
     topProductList.clear();
     recentOrderList.clear();
@@ -175,12 +203,19 @@ class HomeController extends GetxController implements StoreAware {
   }
   getDashboardData() async {
     isDataAvailable.value = true;
+    dashboardError.value = '';
 
     final response = await dashboardRepository.getDashBoardData();
 
     response.fold(
       onSuccess: (data) {
         dashboardData = DashboardData.fromJson(jsonMap(data['data']));
+
+        // Adopted from the FRESH response only, never from the cache below: a cached dashboard
+        // can belong to the store the merchant just switched away from, and permissions that lag
+        // a store switch would offer surfaces for the wrong store.
+        permissions.value = MerchantPermissions.fromJson(jsonMap(data['data']));
+        permissions.value.persist();
 
         topProductList.value = dashboardData!.product ?? [];
         recentOrderList.value = dashboardData!.recentOrder ?? [];
@@ -198,10 +233,18 @@ class HomeController extends GetxController implements StoreAware {
       },
       onFailure: (reason, message, errors) {
         commonToast(type: AppSnackBarType.error, message);
+        // The toast is the immediate feedback and stays; the message is kept so the screen can
+        // offer a retry after it has gone. Only when there is nothing cached to show, so a
+        // failed refresh never replaces a dashboard the merchant is already reading.
+        if (dashboardData == null) {
+          dashboardError.value = message;
+        }
       },
     );
 
     isDataAvailable.value = false;
+    dashboardLoadedOnce.value = true;
+    update();
   }
 
   /// إرسال FCM Token للسيرفر بعد تغيير المتجر

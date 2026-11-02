@@ -15,18 +15,50 @@ enum FailureReason {
   unknown,
 }
 
+/// P2-07-13. The message to show for a failure, keeping a REFUSAL distinguishable from a fault.
+///
+/// WHY THIS EXISTS. Several screens discarded the server's message and showed their own
+/// ("Failed to load orders") for every failure alike. That was fine while the only failures were
+/// network faults — and became wrong the moment the API started refusing on permission: a staff
+/// member who may not read orders was told the orders *failed to load*, which is the same
+/// dishonesty as a withheld figure rendered as `0`. They would retry, and retry, and the screen
+/// would keep blaming itself for a refusal.
+///
+/// [FailureReason.unauthorized] covers 401 and 403 both. For a 401 the session is already being
+/// cleared and the user bounced to the login screen, so which string shows barely matters; for a
+/// 403 the server's own message ("You do not have permission to perform this action.", or
+/// `action_not_permitted` when the server sent none) is the only honest thing to say.
+///
+/// Every other reason keeps the caller's [fallback], which stays specific to the screen.
+String failureMessage(FailureReason reason, String message, String fallback) {
+  if (reason == FailureReason.unauthorized && message.trim().isNotEmpty) {
+    return message;
+  }
+
+  return fallback;
+}
+
 sealed class Result<T> {
   const Result();
 
   R fold<R>({
     required R Function(T data) onSuccess,
-    required R Function(FailureReason reason, String message, Map<String, dynamic>? validationErrors) onFailure,
+    required R Function(
+      FailureReason reason,
+      String message,
+      Map<String, dynamic>? validationErrors,
+    )
+    onFailure,
   }) {
     if (this is Success<T>) {
       return onSuccess((this as Success<T>).data);
     } else {
       final failure = this as Failure<T>;
-      return onFailure(failure.reason, failure.message, failure.validationErrors);
+      return onFailure(
+        failure.reason,
+        failure.message,
+        failure.validationErrors,
+      );
     }
   }
 }
@@ -41,12 +73,9 @@ class Failure<T> extends Result<T> {
   final String message;
   final Map<String, dynamic>? validationErrors;
 
-  const Failure(
-      this.reason,
-      this.message, {
-        this.validationErrors,
-      });
+  const Failure(this.reason, this.message, {this.validationErrors});
 }
+
 /// Reads a human-readable message out of a decoded API response body.
 ///
 /// R7-N6. Twenty-six call sites across twelve controllers read the message as
@@ -138,11 +167,7 @@ dynamic apiValueAt(dynamic body, List<String> path) {
 /// likely to hand back unquoted: `loyality_controller.dart:45` assigned
 /// `data['data']['reward_point']` directly to `.text`, so a server answering
 /// `"reward_point": 150` instead of `"150"` crashed the settings screen.
-String apiText(
-  dynamic body,
-  List<String> path, {
-  String fallback = '',
-}) {
+String apiText(dynamic body, List<String> path, {String fallback = ''}) {
   final value = apiValueAt(body, path);
 
   if (value == null) return fallback;
@@ -193,3 +218,47 @@ Map<String, dynamic> jsonMap(dynamic value) =>
 /// `const` so the empty case allocates nothing on a hot list parse.
 List<dynamic> jsonList(dynamic value) =>
     value is List ? value : const <dynamic>[];
+
+/// Whether a decoded body is the backend REFUSING, rather than succeeding.
+///
+/// WS K. `ApiResponser::error()` on the Laravel side returns **HTTP 200** with
+/// `{"status": 0, ...}` by default — 401 has to be passed explicitly, and
+/// mostly is not (CLAUDE.md records this, and the shipped app force-logs-out on
+/// any 401, which is why the backend avoids them). So a refusal arrives at
+/// `onSuccess`, not `onFailure`: the transport succeeded, the operation did
+/// not.
+///
+/// Measured: 22 `onSuccess` closures in lib/ already check `data['status']`
+/// before acting, and 14 that show a GREEN SUCCESS TOAST did not. Several of
+/// those also mutated local state as though the write had happened —
+/// `orderList.removeWhere(...)` took the row off the list for an order the
+/// server declined to delete, and `Get.back()` closed the sheet. The merchant
+/// watched the thing disappear and found it still there on refresh.
+///
+/// ------------------------------------------------------------------------
+/// THE PRECEDENCE IS DELIBERATELY ASYMMETRIC: it fails OPEN on absence and
+/// CLOSED only on an explicit refusal.
+///
+/// Not every endpoint this app calls sends `status`. Treating a missing field
+/// as a refusal would break every one of those screens at once — which is the
+/// opposite of the compatibility this change has to preserve. So the question
+/// asked is narrow: *did the server say no?* Anything that is not an explicit
+/// no is left exactly as it behaves today.
+///
+/// The refusal values are the ones the backend really emits, not a guess:
+/// `ApiResponser` writes `0`, `FlashSaleController::updateStatus` writes
+/// `false`, and a JSON-encoded form post can deliver either as a string.
+/// ------------------------------------------------------------------------
+bool apiRefused(dynamic body) {
+  if (body is! Map) return false;
+  if (!body.containsKey('status')) return false;
+
+  final status = body['status'];
+  if (status == null) return false;
+
+  if (status is bool) return status == false;
+  if (status is num) return status == 0;
+
+  final text = status.toString().trim().toLowerCase();
+  return text == '0' || text == 'false' || text == 'error' || text == 'fail';
+}
