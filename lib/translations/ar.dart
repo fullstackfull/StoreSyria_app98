@@ -625,6 +625,12 @@ const Map<String, String> ar = {
   'variant_type': 'نوع المتغير',
   'enter_sale_price': 'أدخل سعر البيع',
   'costPrice': 'سعر التكلفة',
+  // `cost_price` AS WELL AS `costPrice`, because two screens ask for two spellings of the
+  // same label and only one of them was in this map. `add_new_product_screen` uses
+  // `'costPrice'.tr`; `product_detail_screen` uses `'cost_price'.tr`, so that screen rendered the
+  // RAW KEY to the merchant -- in both languages. Adding the key rather than renaming the usage,
+  // because a rename would silently change whichever screen was not re-read.
+  'cost_price': 'سعر التكلفة',
   'enter_cost_price': 'أدخل سعر التكلفة',
   'search_by_id': 'البحث برقم العملية...',
   'no_transactions_found': 'لا توجد عمليات مالية',
