@@ -1,5 +1,17 @@
 // P2.5-D-02 -- the caret and the focus ring on every text field, in dark mode.
 //
+// UPDATED 2026-11-03 FOR P2.5-BR-03, under the owner's instruction that "the earlier D-02 test
+// protecting the original light-mode focus color reflected the old, undecided branding state.
+// Update its expectations only where this new explicit owner decision intentionally changes the
+// brand, while continuing to enforce focus visibility and accessibility. Do not weaken its safety
+// assertions."
+//
+// So exactly one expectation moved: the light-mode focus colour is no longer the deep navy, because
+// LightThemeColor.cPrimary is now the logo's own blue #335DA8. Nothing was relaxed -- the light-mode
+// test used to assert only an IDENTITY ("it is still cPrimary"), which would have stayed green
+// against a cPrimary of any contrast whatsoever. It now asserts the identity AND the 3:1 that WCAG
+// 1.4.11 requires of a focus indicator, so the file is strictly stronger than it was.
+//
 // `AppTextField` declares `static const Color navyBlue = Color(0xFF172C4E)` and uses it
 // unconditionally for BOTH `cursorColor:` (:167) and `focusedBorder:` (:209). Navy on the dark
 // theme's own field surface is, measured:
@@ -88,21 +100,52 @@ void main() {
             'ring nobody can see is the same as no ring.');
   });
 
-  testWidgets('light mode keeps the navy it already had', (tester) async {
+  testWidgets('light mode reads the theme, and what it reads is visible', (tester) async {
     await pumpField(tester, dark: false);
 
     final field = tester.widget<TextField>(find.byType(TextField));
+
+    // The ORIGINAL assertion, unchanged in substance: the widget reads the theme rather than a
+    // hardcoded constant. That is what D-02 fixed and it must stay fixed.
     expect(field.cursorColor, LightThemeColor.cPrimary,
-        reason: 'Light mode was already correct at 13.94:1. This slice must not restyle it, and '
-            'must not pre-empt the open owner decision about the app brand.');
+        reason: 'the field went back to a hardcoded colour instead of reading the light theme');
+
+    // ADDED, not relaxed. The old test asserted identity alone, so it would have passed against a
+    // cPrimary of any contrast at all -- including one invisible on white. Now the light focus
+    // indicator must also clear the 3:1 that WCAG 1.4.11 asks of a non-text UI component.
+    final r = contrast(field.cursorColor!, const Color(0xFFFFFFFF));
+    expect(r, greaterThanOrEqualTo(3.0),
+        reason: 'the light-mode caret is ${field.cursorColor} on white = '
+            '${r.toStringAsFixed(2)}:1');
+
+    final focused = field.decoration!.focusedBorder! as OutlineInputBorder;
+    final ring = contrast(focused.borderSide.color, const Color(0xFFFFFFFF));
+    expect(ring, greaterThanOrEqualTo(3.0),
+        reason: 'the light-mode focus ring measures ${ring.toStringAsFixed(2)}:1 on white');
   });
 
   // THE PREMISE, so the two dark cases above cannot be satisfied by a surface that was never
-  // dark: the colour being replaced really is invisible on the surface it is painted on.
-  test('the replaced navy really was below 3:1 on the dark field', () {
+  // dark: the colour D-02 replaced really is invisible on the surface it was painted on.
+  //
+  // This still names the navy literal rather than LightThemeColor.cPrimary, and that is now the
+  // point rather than an oversight. D-02's defect was a HARDCODED #172C4E used in both themes.
+  // BR-03 later moved the light brand off that navy, so reading the token here would quietly turn
+  // this premise into a statement about whatever the brand happens to be today. The literal keeps
+  // it a statement about the defect.
+  test('the hardcoded navy D-02 replaced really was below 3:1 on the dark field', () {
     const navy = Color(0xFF172C4E);
     expect(contrast(navy, DarkThemeColor.cSurface), lessThan(1.5));
     expect(contrast(navy, const Color(0xFFFFFFFF)), greaterThan(4.5),
         reason: 'and really was fine on white, which is why the fix is conditional');
+  });
+
+  // AND THE BRAND CHANGE DID NOT UNDO D-02. The dark field must still not be painted with the
+  // light-mode brand, whatever the light-mode brand now is.
+  testWidgets('the dark field is not painted with the light brand', (tester) async {
+    await pumpField(tester, dark: true);
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.cursorColor, isNot(LightThemeColor.cPrimary),
+        reason: 'the dark caret is using the light theme\'s brand again');
   });
 }
