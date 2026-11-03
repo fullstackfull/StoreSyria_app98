@@ -42,7 +42,12 @@ class CommonButton extends StatelessWidget {
         onTap: isLoading ? null : onPressed,
         child: Container(
           width: width ?? Get.width,
-          height: height ?? 42,
+          // P2.5-D-01. 48 is Material's kMinInteractiveDimension. MEASURED by rendering
+          // this widget: it was 42.0dp -- below Material's 48, and below Apple HIG's 44.
+          // All SIX shared buttons in this file were under the minimum; the newer AppButton
+          // (app_dialog.dart) already uses 48, so this was an internal inconsistency as much
+          // as an accessibility gap. Guarded by test/a11y/tap_target_size_test.dart.
+          height: height ?? 48,
           decoration: BoxDecoration(
             color: btnColor ?? AppColor.themeNavyBlueColor,
             borderRadius: BorderRadius.circular(35),
@@ -104,7 +109,12 @@ class CommonIconButton extends StatelessWidget {
       child: Container(
         width: width ?? Get.width,
         // height: height ?? Get.height * 0.07,
-        height: height ?? 43,
+        // P2.5-D-01. 48 is Material's kMinInteractiveDimension. MEASURED by rendering
+        // this widget: it was 43.0dp -- below Material's 48, and below Apple HIG's 44.
+        // All SIX shared buttons in this file were under the minimum; the newer AppButton
+        // (app_dialog.dart) already uses 48, so this was an internal inconsistency as much
+        // as an accessibility gap. Guarded by test/a11y/tap_target_size_test.dart.
+        height: height ?? 48,
         decoration: BoxDecoration(
             color: btnColor ?? AppColor.themeNavyBlueColor,
             borderRadius: BorderRadius.circular(radius ?? 35),
@@ -156,11 +166,30 @@ class SmallCommonIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // P2.5-D-01. THIS ONE KEEPS ITS SIZE AND GAINS ITS TAP TARGET, which is the opposite
+    // decision from the five buttons around it and is deliberate. It is called "Small" and it
+    // is small on purpose: measured at 35.0dp, below all three thresholds (Material 48,
+    // Apple HIG 44, and WCAG 2.2 AA 2.5.8's 24 floor). Enlarging the painted box would overturn
+    // a visual decision somebody made; enlarging the HIT AREA fixes the accessibility defect and
+    // changes nothing a merchant sees.
+    //
+    // `HitTestBehavior.opaque` is what makes the transparent margin tappable. Without it the
+    // gesture only fires over the painted child and the SizedBox is decoration -- which is the
+    // way this fix is usually written wrong, and it looks identical on screen.
+    // Guarded by test/a11y/tap_target_size_test.dart.
+    final double paintedHeight = height ?? 35;
+
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onPressed,
-      child: Container(
+      child: SizedBox(
+        height: paintedHeight > kMinInteractiveDimension
+            ? paintedHeight
+            : kMinInteractiveDimension,
+        child: Center(
+          child: Container(
         // width: width ?? 180,
-        height: height ?? 35,
+        height: paintedHeight,
         decoration: BoxDecoration(
             color: btnColor ?? AppColor.themeNavyBlueColor,
             borderRadius: BorderRadius.circular(radius ?? 35),
@@ -188,6 +217,8 @@ class SmallCommonIconButton extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ],
+        ),
+          ),
         ),
       ),
     );
@@ -223,7 +254,12 @@ class CommonBorderButton extends StatelessWidget {
       child: Container(
         width: width ?? Get.width,
         // height: height ?? Get.height * 0.07,
-        height: height ?? 43,
+        // P2.5-D-01. 48 is Material's kMinInteractiveDimension. MEASURED by rendering
+        // this widget: it was 43.0dp -- below Material's 48, and below Apple HIG's 44.
+        // All SIX shared buttons in this file were under the minimum; the newer AppButton
+        // (app_dialog.dart) already uses 48, so this was an internal inconsistency as much
+        // as an accessibility gap. Guarded by test/a11y/tap_target_size_test.dart.
+        height: height ?? 48,
         decoration: BoxDecoration(
             color: btnColor ?? AppColor.cWhite,
             borderRadius: BorderRadius.circular(radius ?? 10),
@@ -274,7 +310,12 @@ class CommonIconBorderButton extends StatelessWidget {
       child: Container(
         width: width ?? Get.width,
         // height: height ?? Get.height * 0.07,
-        height: height ?? 43,
+        // P2.5-D-01. 48 is Material's kMinInteractiveDimension. MEASURED by rendering
+        // this widget: it was 43.0dp -- below Material's 48, and below Apple HIG's 44.
+        // All SIX shared buttons in this file were under the minimum; the newer AppButton
+        // (app_dialog.dart) already uses 48, so this was an internal inconsistency as much
+        // as an accessibility gap. Guarded by test/a11y/tap_target_size_test.dart.
+        height: height ?? 48,
         decoration: BoxDecoration(
             color: btnColor ?? AppColor.cWhite,
             borderRadius: BorderRadius.circular(radius ?? 10),
@@ -331,7 +372,12 @@ class CommonSocialButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        height: height ?? 45,
+        // P2.5-D-01. 48 is Material's kMinInteractiveDimension. MEASURED by rendering
+        // this widget: it was 45.0dp -- below Material's 48, and below Apple HIG's 44.
+        // All SIX shared buttons in this file were under the minimum; the newer AppButton
+        // (app_dialog.dart) already uses 48, so this was an internal inconsistency as much
+        // as an accessibility gap. Guarded by test/a11y/tap_target_size_test.dart.
+        height: height ?? 48,
         width: width ?? 272,
         decoration: BoxDecoration(
             color: btnColor ?? AppColor.themeGreenColor,
