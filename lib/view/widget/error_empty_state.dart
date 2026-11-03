@@ -58,10 +58,28 @@ class EmptyState extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  /* P2.5-A-04. BOTH OF THESE WERE Colors.grey.shade400 (#BDBDBD) IN LIGHT MODE,
+                     which measures 1.88:1 on the light background -- against 4.5:1 for the text
+                     and 3:1 for the icon. Not "low contrast": a merchant whose list is empty was
+                     shown a sentence they could not read telling them why. The dark side was
+                     already fine at 8.94:1 and 3.54:1, which is the usual shape of this defect.
+
+                     They now read the app's OWN secondary-text colours rather than naming a grey
+                     -- LightThemeColor.cFont (#66728C, 4.83:1) and DarkThemeColor.cSecondaryText
+                     (#A9B8D0, 8.66:1) -- the same correction P2.5-D-02 made to the text fields,
+                     so the empty state matches every other muted line instead of being its own
+                     grey.
+
+                     THE ICON IS AS DARK AS THE TEXT, deliberately. An empty-state icon is usually
+                     lighter than its label, but it carries the meaning of the screen, so 3:1 is a
+                     floor and no tint of this colour clears it while still reading as lighter.
+                     The hierarchy comes from size -- 72r against 16sp -- which costs no contrast.
+                     `iconColor` still overrides, and a test asserts it does. */
                   Icon(
                     icon,
                     size: iconSize ?? 72.r,
-                    color: iconColor ?? (isDark ? Colors.white38 : Colors.grey.shade400),
+                    color: iconColor ??
+                        (isDark ? DarkThemeColor.cSecondaryText : LightThemeColor.cFont),
                   ),
                   SizedBox(height: 20.h),
                   Text(
@@ -69,7 +87,7 @@ class EmptyState extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16.sp,
-                      color: isDark ? Colors.white70 : Colors.grey.shade400,
+                      color: isDark ? DarkThemeColor.cSecondaryText : LightThemeColor.cFont,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -126,10 +144,13 @@ class ErrorState extends StatelessWidget {
                       color: Colors.grey.withValues(alpha: .08),
                       shape: BoxShape.circle,
                     ),
+                    // P2.5-A-04. Was Colors.grey (#9E9E9E) -- 2.68:1 on the light background,
+                    // under the 3:1 WCAG 1.4.11 asks of a graphic that carries meaning. The tinted
+                    // circle behind it is only 8% grey, so it does not lift the pairing.
                     child: Icon(
                       Icons.wifi_off_rounded,
                       size: 46.sp,
-                      color: Colors.grey,
+                      color: isDark ? DarkThemeColor.cSecondaryText : LightThemeColor.cFont,
                     ),
                   ),
 
