@@ -17,12 +17,24 @@
 // `SmallCommonIconButton` (lib/view/widget/common_button.dart). Their names
 // end in "IconButton(" -- which is how a first version of this sweep matched
 // them and tried to pass them a `tooltip` they do not accept, producing 36
-// analyzer errors -- but they render a visible `Text(title!)`, so they already
-// have an accessible name and are not icon-only.
+// analyzer errors -- but they render a visible title, so they already have an
+// accessible name and are not icon-only.
+//
+// THAT EXCLUSION IS TIED TO A RENDER, not to a substring, since P2.5-R-04.
+// It used to be pinned by `src.contains('title!')` -- the force-unwrap was
+// standing in for "renders a title". R-04 repaired those force-unwraps
+// (the widgets declared the parameter optional and then crashed without it),
+// which broke the proxy while the property it stood for was still true. The
+// test below now PUMPS the widget and looks for the text, which is what the
+// exclusion actually depends on and cannot be falsified by a refactor.
 //
 // Comments are blanked (codeOnly) so the prose above cannot satisfy it.
 
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:store_go_app/view/widget/common_button.dart';
 
 import '../support/source_tree.dart';
 
@@ -62,9 +74,7 @@ void main() {
     );
   });
 
-  test('the custom button classes are excluded, and still carry a title', () {
-    // If CommonIconButton ever stops rendering its title, the exclusion above
-    // becomes a hole. This is what keeps the two facts tied together.
+  test('the custom button classes still exist to be excluded', () {
     final src = codeOnly(
       libDartFiles()
           .firstWhere(
@@ -72,12 +82,37 @@ void main() {
           .readAsStringSync(),
     );
     expect(src.contains('CommonIconButton'), isTrue);
-    expect(
-      src.contains('title!'),
-      isTrue,
-      reason: 'CommonIconButton is excluded from the tooltip sweep because it '
-          'renders a visible title. If it stops, it needs its own name.',
-    );
+    expect(src.contains('SmallCommonIconButton'), isTrue);
+  });
+
+  // THE EXCLUSION, ASSERTED BY RENDERING. If either widget ever stops painting
+  // its title, it becomes icon-only and the sweep above has a hole -- so this
+  // pumps them and looks for the text a screen reader would announce.
+  testWidgets('the excluded buttons really do render their title', (tester) async {
+    for (final entry in <String, Widget>{
+      'CommonIconButton': CommonIconButton(title: 'Save order', onPressed: () {}),
+      'SmallCommonIconButton':
+          SmallCommonIconButton(title: 'Edit order', onPressed: () {}),
+    }.entries) {
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(360, 800),
+          minTextAdapt: true,
+          splitScreenMode: true,
+          builder: (_, __) =>
+              GetMaterialApp(home: Scaffold(body: Center(child: entry.value))),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('order'),
+        findsOneWidget,
+        reason: '${entry.key} is excluded from the tooltip sweep because it '
+            'renders a visible title. It no longer renders one, so it is now '
+            'icon-only and needs its own accessible name.',
+      );
+    }
   });
 
   test('the detector finds an unlabelled IconButton when one is there', () {

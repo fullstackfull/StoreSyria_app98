@@ -65,7 +65,7 @@ class CommonButton extends StatelessWidget {
               ),
             )
                 : Text(
-              title!,
+              title ?? '',
               style: pBold14.copyWith(
                   color: textColor ?? AppColor.cWhite,
                   fontSize: fontSize ?? 14
@@ -122,12 +122,20 @@ class CommonIconButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            assetSvdImageWidget(
-              image: iconData!,
-            ),
-            horizontalSpace(10),
+            // P2.5-R-04. `iconData` is declared `String?` and was dereferenced `iconData!`, so a
+            // caller who took the signature at its word got "Null check operator used on a null
+            // value" at build time. The icon and the gap it needs are now conditional together --
+            // a button with no icon must not keep the icon's spacing. When an icon IS passed the
+            // tree is byte-for-byte what it was, which is what makes this safe for all 145
+            // existing call sites.
+            if (iconData != null) ...[
+              assetSvdImageWidget(
+                image: iconData!,
+              ),
+              horizontalSpace(10),
+            ],
             Text(
-              title!,
+              title ?? '',
               style: pBold12.copyWith(color: textColor ?? AppColor.cWhite),
               textAlign: TextAlign.center,
             ),
@@ -201,18 +209,22 @@ class SmallCommonIconButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Container(
-              height: 35,
-              width: 35,
-              decoration: BoxDecoration(color: circleColor ?? AppColor.cWhite, shape: BoxShape.circle),
-              padding: EdgeInsets.all(3),
-              child: assetSvdImageWidget(
-                image: iconData!,
+            // P2.5-R-04 -- see CommonIconButton above. The circular plate goes with the icon:
+            // an empty 35dp circle beside a label would be a worse answer than no icon at all.
+            if (iconData != null) ...[
+              Container(
+                height: 35,
+                width: 35,
+                decoration: BoxDecoration(color: circleColor ?? AppColor.cWhite, shape: BoxShape.circle),
+                padding: EdgeInsets.all(3),
+                child: assetSvdImageWidget(
+                  image: iconData!,
+                ),
               ),
-            ),
-            horizontalSpace(10),
+              horizontalSpace(10),
+            ],
             Text(
-              title!,
+              title ?? '',
               style: pMedium12.copyWith(color: textColor ?? AppColor.cWhiteFont),
               textAlign: TextAlign.center,
             ),
@@ -268,7 +280,7 @@ class CommonBorderButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              title!,
+              title ?? '',
               style: pBold14.copyWith(color: textColor ?? AppColor.cText),
               textAlign: TextAlign.center,
             ),
@@ -324,14 +336,17 @@ class CommonIconBorderButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              title!,
+              title ?? '',
               style: pBold14.copyWith(color: textColor ?? AppColor.cText),
               textAlign: TextAlign.center,
             ),
-            horizontalSpace(10),
-            assetSvdImageWidget(
-              image: iconData!,
-            )
+            // P2.5-R-04 -- the icon trails the label here, so the gap leads it.
+            if (iconData != null) ...[
+              horizontalSpace(10),
+              assetSvdImageWidget(
+                image: iconData!,
+              ),
+            ],
           ],
         ),
       ),
@@ -397,16 +412,21 @@ class CommonSocialButton extends StatelessWidget {
                     border: Border.all(color: AppColor.cBorder, width: 1)),
                 padding: const EdgeInsets.all(3),
                 child: Center(
-                  child: assetSvdImageWidget(
-                    image: icon!,
-                  ),
+                  // P2.5-R-04 -- `icon` is `String?` here rather than `iconData`, and was
+                  // force-unwrapped the same way. SizedBox.shrink() keeps the Expanded's flex
+                  // slot, so an icon-less social button stays the same width as its siblings.
+                  child: icon != null
+                      ? assetSvdImageWidget(
+                          image: icon!,
+                        )
+                      : const SizedBox.shrink(),
                 )),
             Expanded(
               flex: 3,
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  title!,
+                  title ?? '',
                   style: pMedium10.copyWith(color: textColor ?? AppColor.cFont),
                   textAlign: TextAlign.center,
                 ),
