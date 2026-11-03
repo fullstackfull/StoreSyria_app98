@@ -30,6 +30,11 @@ class AppColor {
   static Color cDarkGreyFont = Color(0xff717887);
   static Color cLabel = Color(0xff172C4E);
   static Color cRedText = Color(0xffdc0303);
+  // P2.5-A-06 -- WHITE, and reassigned by NEITHER AppLightTheme.lightThemeColor() nor
+  // AppDarkTheme.darkColor(), so it stays white in both themes while every field around it swaps.
+  // It is therefore invisible as a foreground on any light surface. Its one consumer
+  // (common_drop_down_widget.dart) painted a white hint on a white field at 1.00:1 and has been
+  // moved to LightThemeColor.cFont. Nothing reads this now; do not reach for it as a text colour.
   static Color cHintFont = Color(0xffFFFFFF);
   static Color cShadow = Color.fromRGBO(0, 0, 0, 0.04);
   static Color cDivider = Color(0xffDCE2ED);
