@@ -206,7 +206,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                                                   Expanded(
                                                     flex: 1,
                                                     child: CommonIconButton(
-                                                        title: 'Close',
+                                                        title: 'close'.tr,
                                                         iconData: DefaultImages.closeIcn,
                                                         onPressed: () {
                                                           Get.back();

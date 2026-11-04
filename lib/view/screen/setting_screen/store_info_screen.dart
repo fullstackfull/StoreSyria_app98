@@ -13,6 +13,16 @@ import '../../widget/app_dialog.dart';
 import '../../widget/error_empty_state.dart';
 import '../../widget/icon_and_image.dart';
 
+/* P2.5-B-12 slice one. These labels were hard-coded English passed straight to a
+   widget that renders them verbatim, so an Arabic merchant read them in English and a
+   screen reader announced them in English. Converted here because each key ALREADY has
+   copy in both en.dart and ar.dart AND its existing English value is byte-identical to
+   the literal replaced -- `.tr` on a key with no copy renders the raw identifier, which
+   is worse than the English it replaces. The other 27 strings in this file need new
+   Arabic copy and are in docs/development/phase-2.5/COPY-DECK-UNTRANSLATED-SCREENS.md,
+   awaiting the owner. 'Created At' is deliberately NOT converted: en.dart carries
+   "Created at", so converting it would re-word the English screen. */
+
 class StoreInfoScreen extends StatefulWidget {
   const StoreInfoScreen({super.key});
 
@@ -46,7 +56,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
           ? DarkThemeColor.cBackGround
           : const Color(0xFFF6F7F9),
       appBar: simpleAppBar(
-        title: 'Store Information',
+        title: 'store_information'.tr,
         label: null,
         isBack: true,
         isBold: true,
@@ -74,7 +84,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
               actionWidget: ElevatedButton.icon(
                 onPressed: controller.getStoreInfoData,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text('retry'.tr),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                   AppColor.themeNavyBlueColor,
@@ -113,7 +123,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                   children: [
                     _sectionCard(
                       context: context,
-                      title: 'Store Information',
+                      title: 'store_information'.tr,
                       icon: Icons.store_outlined,
                       children: [
                         _field(
@@ -222,13 +232,13 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
 
                     _sectionCard(
                       context: context,
-                      title: 'Address',
+                      title: 'address'.tr,
                       icon:
                       Icons.location_on_outlined,
                       children: [
 
                         _field(
-                          title: 'City',
+                          title: 'city'.tr,
                           hint: 'Enter city',
                           controller:
                           controller.cityController,
@@ -265,7 +275,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Address',
+                          title: 'address'.tr,
                           hint: 'Enter store address',
                           controller:
                           controller.addressController,
