@@ -24,6 +24,14 @@ class ShippingController extends GetxController {
   RxString imagePath = ''.obs;
   RxInt currantPage = 1.obs;
   RxBool isScroll = true.obs;
+
+  /* P2.5. THE SCREEN HAD NOTHING TO BRANCH ON, which is why in-flight, empty and failed all
+     painted the same blank area under the "Shipping" heading. These two are the same pair
+     `TaxController` already declares (tax_controller.dart:19 and :30) and `tax_screen` already
+     branches on; nothing here is invented. */
+  RxBool isLoading = false.obs;
+  RxString errorMessage = ''.obs;
+
   pickFile() async {
     FilePickerResult? result = await FilePicker.pickFiles();
 
@@ -38,7 +46,12 @@ class ShippingController extends GetxController {
   }
 
   getShippingData(page) async {
+    isLoading.value = true;
+    errorMessage.value = '';
+
     final response = await shippingRepository.getShippingData(page);
+
+    isLoading.value = false;
 
     response.fold(
       onSuccess: (data) {
@@ -53,10 +66,20 @@ class ShippingController extends GetxController {
             isScroll.value = false;
           }
         } else {
+          /* THE REFUSAL MUST SET AN ERROR, and this is the line that stops the new empty state
+             lying. `shippingList.clear()` above runs BEFORE this status check, so a refusal always
+             arrives with an empty list — indistinguishable from a merchant who has no shipping
+             methods. Until now that painted a blank area; with an `EmptyState` wired it would
+             assert "no shipping methods found", announced to a screen reader, to a merchant who
+             has several. */
+          errorMessage.value = data['message'] ?? 'connection_failed'.tr;
           commonToast(type: AppSnackBarType.error, data['message'] ?? '');
         }
       },
       onFailure: (reason, message, errors) {
+        // `Failure.message` is a non-nullable String (result.dart:73) and is already translated at
+        // construction, so no `??` and no second `.tr`.
+        errorMessage.value = message;
         commonToast(type: AppSnackBarType.error, message);
       },
     );

@@ -322,6 +322,7 @@ const Map<String, String> en = {
   "Dashboard": "Dashboard",
   "Welcome back": "Welcome Back",
   "no_taxs_found": "No Taxes Found",
+  "no_shipping_methods_found": "No shipping methods found",
   "no_notifications": "No Notifications",
   "notifications": "Notifications",
   "mark_all_tapped": "Mark All Read",
