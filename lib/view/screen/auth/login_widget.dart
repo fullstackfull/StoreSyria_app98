@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:store_go_app/core/controller/auth/auth_controller.dart';
 import 'package:store_go_app/utils/images.dart';
+import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
@@ -94,9 +95,22 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                             Text(
                               "please login to continue to your store!".tr,
                               textAlign: TextAlign.center,
+                              /* P2.5-A-11. This WAS the literal Colors.grey (#9E9E9E), which is
+                                 2.68:1 on the opaque white card at :61-64 -- against the 4.5:1 of
+                                 WCAG 1.4.3, at 15.sp/w500, nowhere near the large-text exemption.
+                                 Now the app's OWN secondary-text colours, the idiom the shipped
+                                 siblings use (error_empty_state.dart:81-93,
+                                 common_drop_down_widget.dart:39): #66728C = 4.83:1 light,
+                                 #A9B8D0 = 6.18:1 dark. NOT Theme.of(context).hintColor -- same
+                                 painted values, but it would couple this prose to the
+                                 dropdown-hint channel pinned by
+                                 dropdown_hint_contrast_test.dart:152-159. NOT AppColor.cFont --
+                                 a mutable global, reassigned on every theme switch. */
                               style: pMedium14.copyWith(
                                 fontSize: 15.sp,
-                                color: Colors.grey,
+                                color: isDark
+                                    ? DarkThemeColor.cSecondaryText
+                                    : LightThemeColor.cFont,
                               ),
                             ),
 
@@ -186,9 +200,13 @@ class _NormalLoginWidgetState extends State<NormalLoginWidget> {
                               EdgeInsets.symmetric(horizontal: 10.h),
                               child: Text(
                                 "or continue with".tr,
+                                // P2.5-A-11, the same #9E9E9E at 2.68:1 -- see the note at the
+                                // sub-heading above. 13.sp/w400.
                                 style: pRegular12.copyWith(
                                   fontSize: 13.sp,
-                                  color: Colors.grey,
+                                  color: isDark
+                                      ? DarkThemeColor.cSecondaryText
+                                      : LightThemeColor.cFont,
                                 ),
                               ),
                             ),
