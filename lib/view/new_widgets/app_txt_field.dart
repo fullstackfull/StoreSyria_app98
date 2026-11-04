@@ -10,6 +10,13 @@ class AppTextField extends StatelessWidget {
   // ── الأساسيات ──
   final String? title;
   final String? hint;
+
+  /// The accessible name, for the sites that render their visible label at the
+  /// call site instead of passing [title] -- `_requiredLabel` in
+  /// add_new_product_screen.dart is a RichText with a red asterisk that [title]
+  /// cannot express. Falls back to [title]; when both are absent no annotation
+  /// is added at all, so the sites that pass neither are untouched.
+  final String? semanticLabel;
   final TextEditingController? controller;
   final IconData? icon;
 
@@ -46,6 +53,7 @@ class AppTextField extends StatelessWidget {
     super.key,
     this.title,
     this.hint,
+    this.semanticLabel,
     this.controller,
     this.icon,
     this.validator,
@@ -164,7 +172,20 @@ class AppTextField extends StatelessWidget {
             ),
           )
         else
-          TextFormField(
+          // Names the field with its own visible label. `Semantics` defaults to
+          // `container: false`, so this MERGES into the field's node rather
+          // than adding a sibling -- which is what keeps the TEXTFIELD role,
+          // the OBSCURED flag, the value and the validator's error intact.
+          //
+          // Deliberately no `textField: true`: RenderEditable already sets it,
+          // two nodes carrying the same flag conflict, and the conflict forces
+          // the field to form its own node -- measured, the label then never
+          // arrives and a phantom edit box appears beside it.
+          Semantics(
+            label: _has(semanticLabel)
+                ? semanticLabel
+                : (_has(title) ? title : null),
+            child: TextFormField(
             controller: controller,
             focusNode: focusNode,
             enabled: enabled,
@@ -228,6 +249,7 @@ class AppTextField extends StatelessWidget {
               errorBorder: border(Colors.red),
               focusedErrorBorder: border(Colors.red, 1.5),
             ),
+          ),
           ),
       ],
     );

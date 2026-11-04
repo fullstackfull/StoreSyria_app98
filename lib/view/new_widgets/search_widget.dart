@@ -16,6 +16,12 @@ Widget SearchRowWidget({
   return AppTextField(
     controller: controller,
     hint: hint,
+    // This widget has no `title`, so without a name of its own the field would
+    // be announced by its placeholder when empty and by nothing at all once
+    // something is typed. 'search' is the key already used by the clear button
+    // below, so no new translation key is introduced -- and it is deliberately
+    // not `hint`, which would make the field announce the same sentence twice.
+    semanticLabel: 'search'.tr,
     icon: Icons.search_rounded,
     onChanged: onChanged,
     textInputAction: TextInputAction.search,

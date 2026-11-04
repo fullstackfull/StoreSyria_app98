@@ -264,7 +264,15 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
 
         const SizedBox(height: 8),
 
-        TextFormField(
+          // Names the field with the label rendered above it. The Column
+          // does no semantics merging, so without this the field is
+          // announced by its placeholder when empty and by nothing at all
+          // once something is typed. No `textField: true`: the field
+          // already carries that flag and a second one would conflict,
+          // forcing it onto its own node where this label never arrives.
+          Semantics(
+            label: title,
+            child: TextFormField(
           controller: controller,
           validator: validator,
           keyboardType: keyboardType,
@@ -318,6 +326,7 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
               ),
             ),
           ),
+        ),
         ),
       ],
     );
@@ -512,7 +521,9 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
         Row(
           children: [
             Expanded(
-              child: TextFormField(
+              child: Semantics(
+                label: 'coupon_code'.tr,
+                child: TextFormField(
                 controller:
                 couponController.couponController,
                 validator: (value) {
@@ -568,6 +579,7 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
                     ),
                   ),
                 ),
+              ),
               ),
             ),
 
