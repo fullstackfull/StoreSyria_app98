@@ -74,14 +74,22 @@ class _SpyTaxRepository extends TaxRepository {
   }) async {
     addCalls++;
     lastName = taxName;
-    // NEVER COMPLETES, on purpose. The call is what is under test, and it has
-    // already been recorded. Completing it -- with a Failure OR a success --
-    // sends the controller into a branch that calls `commonToast`, and an
-    // overlay toast cannot be pumped in this harness (see
-    // _drainUnpumpableToast), so the exception lands asynchronously after the
-    // assertions and fails the test for a reason that has nothing to do with
-    // the gate. A pending Future is not a pending Timer, so it does not fail
-    // the test either.
+    // NEVER COMPLETES, on purpose -- AND THE REASON RECORDED HERE WAS WRONG
+    // UNTIL D-42.6. It used to say that completing the Future sends the
+    // controller into a branch that calls `commonToast`, and that "an overlay
+    // toast cannot be pumped in this harness", so the exception would land
+    // asynchronously after the assertions. The toast CAN be pumped now: the
+    // overlay defect it was describing is repaired in
+    // `common_snak_bar_widget.dart` and every refusal toast in this file is
+    // asserted rather than swallowed.
+    //
+    // The Future still must not complete, for a different and smaller reason:
+    // the toast it would raise owns a 3-second `Timer`, and a test that ends
+    // with a pending timer fails on `!timersPending` -- measured, three cases
+    // in this file did exactly that the moment the repair landed. The call is
+    // what is under test and it has already been recorded, so there is nothing
+    // to gain by completing it. A pending Future is not a pending Timer, so it
+    // does not fail the test either.
     return Completer<Result<Map<String, dynamic>>>().future;
   }
 
@@ -134,11 +142,17 @@ Future<_SpyTaxRepository> _pumpSheet(
   );
   await tester.pumpAndSettle();
 
-  // PUSHED, not used as `home:`. The sheet is opened over the app in
-  // production, and the failure toast resolves its overlay through
-  // `Get.overlayContext` -- which throws "No Overlay widget found" when the
-  // sheet IS the home widget. A harness that cannot show the toast cannot see
-  // the feedback this repair adds.
+  // PUSHED, not used as `home:`, because that is how production opens the sheet
+  // -- over the app, from the tax list.
+  //
+  // THE REASON THIS COMMENT USED TO GIVE WAS FALSE, and it is corrected rather
+  // than quietly rewritten. It said the failure toast "throws No Overlay widget
+  // found when the sheet IS the home widget", implying that pushing it fixed
+  // that. Pushing changed nothing: `Get.overlayContext` is the root
+  // `OverlayState`'s `_Theater` child either way, and `Overlay.of` on a
+  // `_Theater` could not resolve in EITHER shape -- measured in both. The toast
+  // was broken for all 271 call sites, not for un-pushed ones. That is D-42.6,
+  // repaired in `common_snak_bar_widget.dart`.
   Get.to(
     () => Scaffold(
       body: AddTaxWidget(
@@ -155,29 +169,91 @@ Future<_SpyTaxRepository> _pumpSheet(
   return spy;
 }
 
-/// Swallows the ONE exception the refusal path raises in this harness, and
-/// asserts it is that one and not something else.
+/// Asserts that the refusal the merchant is owed ACTUALLY APPEARS.
 ///
-/// test/README.md records the limit: `Get.overlayContext` resolves to a
-/// `_Theater` with no `Overlay` ancestor under `flutter_test`, so an
-/// overlay-based toast cannot be pumped -- `a11y/toast_type_contrast_test.dart`
-/// measured the same failure twice and pins its palette at source instead.
-/// Production code was NOT widened to make the toast testable.
+/// ──────────────────────────────────────────────────────────────────────────
+/// WHAT THIS REPLACES, AND WHY THE REPLACEMENT IS STRONGER
+/// ──────────────────────────────────────────────────────────────────────────
 ///
-/// So the toast's PIXELS are not verified here. What is verified is that the
-/// refusal path reached `commonToast` at all, which is what this exception
-/// proves, plus the inline validator text, which does render.
-void _drainUnpumpableToast(WidgetTester tester) {
-  final thrown = tester.takeException();
-  if (thrown == null) {
-    return;
-  }
+/// This was `_drainUnpumpableToast`, and it asserted
+///
+///     expect(thrown.toString(), contains('No Overlay widget found'))
+///
+/// -- i.e. it took a real production failure and pinned it as expected
+/// behaviour. The reasoning it carried was that `Get.overlayContext` has no
+/// `Overlay` ancestor "under `flutter_test`", so an overlay toast "cannot be
+/// pumped". The first half is true and the second half does not follow: the
+/// same lookup fails in the SHIPPED APP, where `GetMaterialApp`'s `builder:`
+/// installs `ThemeSwitchOverlay` -- a `Stack`, not an `Overlay`. It was never a
+/// harness limit. It was the toast being broken for all 271 call sites, and
+/// this file was the place it had been written down as normal.
+///
+/// Repaired in `common_snak_bar_widget.dart` (D-42.6), proved in
+/// `test/ui/toast_overlay_test.dart` against the real app shape with no
+/// harness-supplied `Overlay`.
+///
+/// The assertion is not weakened by the correction, it is widened. The old
+/// version proved only that the refusal branch REACHED `commonToast`, by
+/// catching the exception that call raised. This proves the refusal branch
+/// reached `commonToast` AND that an error-variant toast rendered AND that it
+/// carries the words the merchant needs -- the same proof plus two facts the
+/// old one could not reach. Nothing is swallowed: an unexpected exception now
+/// fails the case instead of being inspected and discarded.
+Future<void> _expectRefusalToast(WidgetTester tester) async {
+  await tester.pumpAndSettle();
+
   expect(
-    thrown.toString(),
-    contains('No Overlay widget found'),
-    reason: 'The refusal path threw something other than the documented '
-        'un-pumpable-toast failure.',
+    tester.takeException(),
+    isNull,
+    reason: 'The refusal path raised instead of showing a toast. Before D-42.6 '
+        'this was `No Overlay widget found` from `Overlay.of(Get.overlayContext, '
+        'rootOverlay: true)`, on every one of the 271 toast call sites.',
   );
+
+  // PREMISE, before the message assertion: the ERROR variant of the toast is on
+  // screen. `Icons.error_rounded` belongs to `_SnackType.error` alone and
+  // appears nowhere else in this tree -- `CommonIconButton` takes a `String?
+  // iconData` asset path, not an `IconData` -- so this cannot match the sheet's
+  // own Close control.
+  final Finder toast = find.ancestor(
+    of: find.byIcon(Icons.error_rounded),
+    matching: find.byWidgetPredicate(
+      (Widget w) =>
+          w is Container &&
+          w.decoration is BoxDecoration &&
+          (w.decoration! as BoxDecoration).borderRadius ==
+              BorderRadius.circular(14),
+      description: 'the toast surface (14px radius)',
+    ),
+  );
+  expect(
+    toast,
+    findsOneWidget,
+    reason: 'premise: no error toast rendered, so the assertion below would be '
+        'reading some other widget',
+  );
+
+  // THE REAL ASSERTION, read from INSIDE the toast rather than from the whole
+  // tree. `find.text('Field is required')` alone would be satisfied by the
+  // inline validator text, which renders either way -- that is the vacuous pass
+  // this descendant scope exists to make impossible.
+  expect(
+    find.descendant(of: toast, matching: find.text('Field is required')),
+    findsOneWidget,
+    reason: "the refusal toast does not carry 'field_required'.tr. It must be a "
+        'key present in BOTH translation maps: "Please fill all field" was in '
+        'knownUntranslatedKeys and rendered raw English to an Arabic merchant.',
+  );
+}
+
+/// Lets the toast's own 3-second `Timer` fire, the way production dismisses it.
+///
+/// Required now that the toast really renders: a case that ends with the timer
+/// still pending fails on `!timersPending`, which is what all three refusal
+/// cases in this file did the moment D-42.6 landed.
+Future<void> _letTheToastExpire(WidgetTester tester) async {
+  await tester.pump(const Duration(seconds: 4));
+  await tester.pumpAndSettle();
 }
 
 Future<void> _tapSubmit(WidgetTester tester) async {
@@ -215,13 +291,15 @@ void main() {
 
     await _tapSubmit(tester);
 
-    _drainUnpumpableToast(tester);
+    await _expectRefusalToast(tester);
 
     expect(spy.addCalls, 0,
         reason: 'The sheet posted a blank name. The OR gate is constant true on '
             'a fresh sheet, so this is the defect itself; and if it fails after '
             'the repair it means the validator was added WITHOUT a Form '
             'ancestor, which decorates the field and submits anyway.');
+
+    await _letTheToastExpire(tester);
   });
 
   testWidgets('UPDATE with the name cleared does not reach the network',
@@ -241,11 +319,13 @@ void main() {
 
     await _tapSubmit(tester);
 
-    _drainUnpumpableToast(tester);
+    await _expectRefusalToast(tester);
 
     expect(spy.addCalls, 0,
         reason: 'Clearing the name on the Update sheet still posted. The gate '
             'governs both branches, so the update path must be covered too.');
+
+    await _letTheToastExpire(tester);
   });
 
   testWidgets('a name with a BLANK AMOUNT still submits -- Amount stays optional',
@@ -282,15 +362,24 @@ void main() {
     await _pumpSheet(tester);
 
     await _tapSubmit(tester);
-    _drainUnpumpableToast(tester);
-    await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('Field is required'), findsWidgets,
+    // THE TOAST, asserted from inside the toast subtree.
+    await _expectRefusalToast(tester);
+
+    // AND THE INLINE ERROR BESIDE IT. Two sites now, where this case could
+    // previously only reach one: `findsNWidgets(2)` rather than `findsWidgets`,
+    // because the count is the thing that changed and a lenient matcher would
+    // hide a regression in either half. The inline text is the `validator:` at
+    // add_tax_bottomsheet.dart:117; the toast is the `else` at :224.
+    expect(find.text('Field is required'), findsNWidgets(2),
         reason: 'A blank name must produce VISIBLE feedback in words that exist '
             "in BOTH translation maps. 'Please fill all field' is in "
             'knownUntranslatedKeys and rendered raw English to an Arabic '
-            'merchant. This asserts the INLINE error, which does render; the '
-            'toast beside it cannot be pumped in this harness -- see '
-            '_drainUnpumpableToast.');
+            'merchant. Exactly two renderings are expected: the inline '
+            'validator, which rendered before D-42.6 too, and the toast, which '
+            'did not render at all because `Overlay.of(Get.overlayContext)` '
+            'could not resolve.');
+
+    await _letTheToastExpire(tester);
   });
 }
