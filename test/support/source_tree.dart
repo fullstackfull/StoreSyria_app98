@@ -7,6 +7,7 @@
 // "can a credential reach a log call at all?" — is decidable statically, and it
 // is the one that actually regresses when somebody adds a debugging line.
 
+import 'dart:convert';
 import 'dart:io';
 
 /// Package root, found by walking up until `pubspec.yaml` appears.
@@ -255,4 +256,66 @@ List<int> matchingLines(String source, Pattern pattern) {
   }
 
   return hits;
+}
+
+/// The on-disk root of a resolved package, read from `.dart_tool/package_config.json`.
+///
+/// WHY THIS EXISTS rather than a path literal, and it is a defect this suite shipped.
+/// `test/localization/nav_labels_follow_locale_test.dart` pinned a GetX implementation detail by
+/// reading the vendored source, and named it:
+///
+///     File('/root/.pub-cache/hosted/pub.dev/get-4.7.3/lib/get_navigation/src/'
+///          'extension_navigation.dart')
+///
+/// That is real in the development container, whose `HOME` is `/root`, and absent on the GitHub
+/// runner, whose `HOME` is `/home/runner`. So the test's own premise assertion failed there and
+/// PR #7 went red on a case that had just passed locally 1484/1484. The assertion was right; the
+/// path was not. A test that is green on one machine only is worse than one that fails on all of
+/// them, because the green run is the one people believe.
+///
+/// `.dart_tool/package_config.json` is what `flutter pub get` writes and what the analyzer itself
+/// uses, so it names wherever THIS machine's pub cache really put the package, and it follows
+/// `pubspec.lock` without restating a version inside a string.
+///
+/// Ratcheted by `test/support/no_hardcoded_host_paths_test.dart`.
+Uri packageSourceRoot(String packageName) {
+  final config = File('${packageRoot().path}/.dart_tool/package_config.json');
+
+  if (!config.existsSync()) {
+    throw StateError(
+      'No .dart_tool/package_config.json at ${config.path}. Run `flutter pub get` first: '
+      'this resolves a dependency the way the toolchain does, so the toolchain has to have run.',
+    );
+  }
+
+  return packageSourceRootFrom(config, packageName);
+}
+
+/// The resolution itself, taking the config file explicitly so it can be exercised against a
+/// synthetic one. `flutter test` REGENERATES `.dart_tool/package_config.json` before the suite
+/// runs -- measured: an edited `rootUri` was replaced by the real one before any test read it --
+/// so the only way to prove this is host-independent is to point it at a different file.
+Uri packageSourceRootFrom(File config, String packageName) {
+  final packages = (jsonDecode(config.readAsStringSync())
+      as Map<String, dynamic>)['packages'] as List<dynamic>;
+
+  final entry = packages.cast<Map<String, dynamic>>().firstWhere(
+        (p) => p['name'] == packageName,
+        orElse: () => throw StateError(
+          "'$packageName' is not in ${config.path}, so it is not a dependency of this package.",
+        ),
+      );
+
+  // `rootUri` MAY be relative to the directory holding package_config.json -- the spec allows
+  // either form -- so resolve against that directory rather than assuming it is absolute.
+  final resolved = config.parent.uri.resolve(entry['rootUri'] as String);
+
+  // THE TRAILING SLASH IS LOAD-BEARING, and leaving it out cost a run. `rootUri` carries none, so
+  // `Uri.resolve` treats the last segment as a FILE and replaces it: resolving 'lib/x.dart'
+  // against `file:///root/.pub-cache/hosted/pub.dev/get-4.7.3` yields
+  // `file:///root/.pub-cache/hosted/pub.dev/lib/x.dart` -- the version directory silently gone.
+  // Measured, as a failing premise on exactly that path.
+  return resolved.path.endsWith('/')
+      ? resolved
+      : resolved.replace(path: '${resolved.path}/');
 }

@@ -92,6 +92,8 @@ import 'package:store_go_app/core/controller/dashboard_manager_controller/dashbo
 import 'package:store_go_app/translations/translation_service.dart';
 import 'package:store_go_app/utils/images.dart';
 
+import '../support/source_tree.dart';
+
 const _ar = Locale('ar', 'AE');
 const _en = Locale('en', 'US');
 
@@ -247,12 +249,29 @@ void main() {
   // no longer does, and every case in it would still pass. So assert it against the vendored
   // source, which is pinned by pubspec.lock.
   test('Get.updateLocale still assigns Get.locale synchronously, before the reassemble', () {
-    final get = File(
-      '/root/.pub-cache/hosted/pub.dev/get-4.7.3/lib/get_navigation/src/'
-      'extension_navigation.dart',
-    );
+    // RESOLVED, NOT HARD-CODED, and the first version of this got it wrong in a way only CI
+    // could see: it read a literal `/root/.pub-cache/...` path, which is real in the development
+    // container (HOME=/root) and absent on the GitHub runner (HOME=/home/runner). The premise
+    // assertion below failed there and PR #7 went red on a case that had just passed locally
+    // 1484/1484. The assertion was right; the path was not. `packageSourceRoot` resolves through
+    // `.dart_tool/package_config.json`, the file the toolchain itself uses -- see its own
+    // docstring for the full account, and test/support/no_hardcoded_host_paths_test.dart for the
+    // ratchet that stops this recurring.
+    final root = packageSourceRoot('get');
+
+    // THE VERSION PIN IS NOW ASSERTED AS A PIN rather than smuggled into a path string. The old
+    // path encoded `get-4.7.3`, so a GetX bump turned this case into a PREMISE failure ("the file
+    // is not there"), which says nothing about GetX's behaviour. Stated separately, a bump fails
+    // HERE with the version in the message, while the property below is still measured against
+    // whatever is actually installed.
+    expect(root.path, contains('get-4.7.3'),
+        reason: 'pubspec.lock pins get 4.7.3; resolved $root. If GetX was bumped deliberately, '
+            'update this expectation and re-measure the property below against the new source.');
+
+    final get = File.fromUri(root.resolve('lib/get_navigation/src/extension_navigation.dart'));
     expect(get.existsSync(), isTrue,
-        reason: 'premise: the vendored GetX source is where pubspec.lock pins it');
+        reason: 'premise: the vendored GetX source is where package_config.json resolves it '
+            '(${get.path})');
 
     final body = RegExp(
       r'Future<void>\s+updateLocale\(Locale\s+l\)\s+async\s*\{([^}]*)\}',
