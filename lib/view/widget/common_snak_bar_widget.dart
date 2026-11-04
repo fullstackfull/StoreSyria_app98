@@ -364,118 +364,150 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
    top: MediaQuery.of(context).padding.top + 12,
    start: 16,
    end: 16,
-   child: SafeArea(
-    bottom: false,
-    child: SlideTransition(
-     position: _slideAnimation,
-     child: FadeTransition(
-      opacity: _fadeAnimation,
-      child: Material(
-       color: Colors.transparent,
-       child: Container(
-        padding: const EdgeInsets.symmetric(
-         horizontal: 12,
-         vertical: 10,
-        ),
-        decoration: BoxDecoration(
-         color: backgroundColor,
-         borderRadius: BorderRadius.circular(14),
-         // ==================================================
-         // تعديل الحواف لتكون بلون النوع (Type Color)
-         // ==================================================
-         border: Border.all(
-          color: style.on(isDark).withValues(alpha: isDark ? 0.6 : 0.3),
-          width: 1.2,
+   /* P2.5 a11y -- ANNOUNCED, because until this node existed the toast was not announced at all.
+      This widget is inserted as a raw `OverlayEntry` (`_AppSnackBarController.show`), and a raw
+      overlay subtree with no live region is silent to TalkBack and VoiceOver. It is the ONLY
+      feedback path for roughly 270 `commonToast` call sites -- every save, every refusal, every
+      403, every "action not permitted" and every demo-mode block -- so a merchant using a screen
+      reader pressed Save and was told nothing, with success and failure indistinguishable.
+
+      Measured before writing it: a case-insensitive sweep of this file for
+      semantic|liveRegion|announce|accessib|a11y|screen.reader|talkback|voiceover matched nothing,
+      and `_SimpleSnackBar`'s subtree carried no `Semantics` node at any level.
+
+      SAME SHAPE AS THE REST OF THE APP AND AS THE FRAMEWORK. `EmptyState`, `ErrorState` and
+      `StaleDataNotice` (`error_empty_state.dart`) each carry `liveRegion: true, container: true`,
+      and so does Flutter's own `SnackBar` (`material/snack_bar.dart:830`). NO `label:` HERE,
+      deliberately and for the reason `error_empty_state.dart` records: a label on this node would
+      duplicate the sentence the visible `Text` already carries, so a reader would meet it twice.
+      `container: true` gives the flag a node of its own and lets the visible text be what is read.
+
+      IT GOES INSIDE `PositionedDirectional`, NOT AROUND IT, and that is a layout requirement
+      rather than a preference. `PositionedDirectional` builds a `Positioned`, a `ParentDataWidget`
+      that applies `StackParentData` to the render object directly beneath it, and that render
+      object has to be a child of the overlay's own Stack-like `_RenderTheatre`. Wrapping the root
+      instead puts `RenderSemanticsAnnotations` in between and throws "Incorrect use of
+      ParentDataWidget ... incompatible type ParentData" on every toast -- measured, not assumed.
+      Placed here it still covers the entire visible toast, which is what a live region needs.
+
+      Guarded by `test/a11y/toast_announcement_test.dart`, which drives `commonToast` for all four
+      types and reads the live-region flag off the real semantics tree rather than off this source. */
+   child: Semantics(
+    liveRegion: true,
+    container: true,
+    child: SafeArea(
+     bottom: false,
+     child: SlideTransition(
+      position: _slideAnimation,
+      child: FadeTransition(
+       opacity: _fadeAnimation,
+       child: Material(
+        color: Colors.transparent,
+        child: Container(
+         padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
          ),
-         boxShadow: [
-          BoxShadow(
-           color: style.on(isDark).withValues(alpha: isDark ? 0.18 : 0.10),
-           blurRadius: 18,
-           offset: const Offset(0, 6),
+         decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(14),
+          // ==================================================
+          // تعديل الحواف لتكون بلون النوع (Type Color)
+          // ==================================================
+          border: Border.all(
+           color: style.on(isDark).withValues(alpha: isDark ? 0.6 : 0.3),
+           width: 1.2,
           ),
-         ],
-        ),
-        child: Row(
-         children: [
-          // ==================================================
-          // ICON
-          // ==================================================
-
-          Container(
-           width: 34,
-           height: 34,
-           decoration: BoxDecoration(
-            color: style.on(isDark).withValues(alpha: .10),
-            shape: BoxShape.circle,
+          boxShadow: [
+           BoxShadow(
+            color: style.on(isDark).withValues(alpha: isDark ? 0.18 : 0.10),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
            ),
-           child: Icon(
-            style.icon,
-            color: style.on(isDark),
-            size: 20,
+          ],
+         ),
+         child: Row(
+          children: [
+           // ==================================================
+           // ICON
+           // ==================================================
+
+           Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+             color: style.on(isDark).withValues(alpha: .10),
+             shape: BoxShape.circle,
+            ),
+            child: Icon(
+             style.icon,
+             color: style.on(isDark),
+             size: 20,
+            ),
            ),
-          ),
 
-          const SizedBox(width: 10),
+           const SizedBox(width: 10),
 
-          // ==================================================
-          // TEXT
-          // ==================================================
+           // ==================================================
+           // TEXT
+           // ==================================================
 
-          Expanded(
-           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-             Text(
-              widget.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-               fontSize: 13.5,
-               fontWeight: FontWeight.w700,
-               color: titleColor,
-               height: 1.2,
-              ),
-             ),
-
-             if (widget.message.trim().isNotEmpty) ...[
-              const SizedBox(height: 2),
+           Expanded(
+            child: Column(
+             mainAxisSize: MainAxisSize.min,
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
               Text(
-               widget.message,
+               widget.title,
                maxLines: 2,
                overflow: TextOverflow.ellipsis,
                style: TextStyle(
-                fontSize: 11.5,
-                color: messageColor,
-                height: 1.3,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+                color: titleColor,
+                height: 1.2,
                ),
               ),
+
+              if (widget.message.trim().isNotEmpty) ...[
+               const SizedBox(height: 2),
+               Text(
+                widget.message,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                 fontSize: 11.5,
+                 color: messageColor,
+                 height: 1.3,
+                ),
+               ),
+              ],
              ],
-            ],
-           ),
-          ),
-
-          const SizedBox(width: 6),
-
-          // ==================================================
-          // CLOSE
-          // ==================================================
-
-          InkWell(
-           onTap: widget.onClose,
-           borderRadius: BorderRadius.circular(20),
-           child: Padding(
-            padding: const EdgeInsets.all(5),
-            child: Icon(
-             Icons.close_rounded,
-             size: 18,
-             color: isDark
-                 ? const Color(0xFFA9B8D0)
-                 : const Color(0xFF9CA3AF),
             ),
            ),
-          ),
-         ],
+
+           const SizedBox(width: 6),
+
+           // ==================================================
+           // CLOSE
+           // ==================================================
+
+           InkWell(
+            onTap: widget.onClose,
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+             padding: const EdgeInsets.all(5),
+             child: Icon(
+              Icons.close_rounded,
+              size: 18,
+              color: isDark
+                  ? const Color(0xFFA9B8D0)
+                  : const Color(0xFF9CA3AF),
+             ),
+            ),
+           ),
+          ],
+         ),
         ),
        ),
       ),
