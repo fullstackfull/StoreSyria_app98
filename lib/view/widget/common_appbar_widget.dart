@@ -23,7 +23,14 @@ simpleAppBar({
   final accent = AppColor.themeNavyBlueColor;
 
   return PreferredSize(
-    preferredSize: const Size.fromHeight(70),
+    // Scaffold CAPS this slot rather than taking it as a hint: it wraps the
+    // appBar in ConstrainedBox(maxHeight: preferredSize.height + topPadding)
+    // (material/scaffold.dart). A declared 70 with `top: Get.height * 0.05`
+    // spending 40 of it leaves the back control 30dp and clamps its 48dp
+    // minimum DOWN -- silently, with no overflow error. So this is derived from
+    // the SAME expression as the padding below: a literal 88 would be correct
+    // at exactly one device height.
+    preferredSize: Size.fromHeight(Get.height * 0.05 + kMinInteractiveDimension),
     child: Padding(
       padding: EdgeInsets.only(
         top: Get.height * 0.05,
@@ -38,11 +45,27 @@ simpleAppBar({
             child: Row(
               children: [
                 if (isBack)
-                  GestureDetector(
-                    onTap: () {
+                  // The painted box stays 30x40; the HIT AREA grows to 48.
+                  // Enlarging what a merchant sees would overturn a visual
+                  // decision on 23 screens; enlarging the target fixes the
+                  // accessibility defect and changes nothing but the press
+                  // ripple. `tooltip:` is the sighted hint and what iOS folds
+                  // into accessibilityLabel; `semanticLabel:` on the Icon is
+                  // what gives ANDROID a name at all, because the engine's
+                  // AccessibilityBridge composes its content description from
+                  // value+label+hint and never reads a tooltip. Both, or
+                  // TalkBack says "button" and nothing else.
+                  IconButton(
+                    tooltip: 'back'.tr,
+                    onPressed: () {
                       Get.back();
                     },
-                    child: Container(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: kMinInteractiveDimension,
+                      minHeight: kMinInteractiveDimension,
+                    ),
+                    icon: Container(
                       height: 30.h,
                       width: 40.w,
                       decoration: BoxDecoration(
@@ -54,6 +77,7 @@ simpleAppBar({
                       ),
                       child: Icon(
                         Icons.arrow_back,
+                        semanticLabel: 'back'.tr,
                         color: AppColor.themeNavyBlueColor,
                       ),
                     ),
