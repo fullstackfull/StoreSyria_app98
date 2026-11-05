@@ -15,9 +15,15 @@
 // measurement corrected the first version of this file. That version demanded `ErrorState` on
 // forms too and named twelve screens as gaps. They are not: a form is ALWAYS ON SCREEN, so it is
 // never the blank page the acceptance is about, and these screens already report failure through
-// the app's snackbar helper — `profile_controller` calls it ten times, `shipping_controller`
-// seven, `add_review_controller` four. Replacing that with a full-screen `ErrorState` would
+// the app's snackbar helper — measured on the controllers today, `profile_controller` calls it ten
+// times and `add_review_controller` nine. Replacing that with a full-screen `ErrorState` would
 // throw away the merchant's typed input to show an error, which is worse than the gap it closed.
+//
+// THIS SENTENCE USED TO CITE `shipping_controller` AS THE SECOND EXAMPLE, at "seven" calls — which
+// was wrong twice over. The count is NINE, and more to the point `shipping_screen` is not a form:
+// it is a paginated list and it is classified as a collection below. The toast was the only thing
+// reporting a failed list load there, and a toast gone in three seconds is not a state — which is
+// the defect the reclassification records. Numbers in a comment go stale; these were re-measured.
 //
 // A collection is the opposite case and keeps the strict rule: with nothing to render it IS a
 // blank page, which is exactly when a merchant needs to be told whether their catalogue is empty
@@ -57,6 +63,13 @@ const Map<String, ScreenKind> kScreenKinds = {
   'delivery_boys/delivery_boy_screen.dart': ScreenKind.collection,
   'home_screen/home_screen.dart': ScreenKind.collection,
   'home_screen/tax_screen.dart': ScreenKind.collection,
+
+  // MOVED OUT OF THE FORMS BLOCK. It was never a form: it has a ScrollController, an
+  // infinite-scroll listener, Slidable rows and a paginated model, and the `form` entry was what
+  // let it ship with none of the three states — the form rule is satisfied by any toast anywhere
+  // in the controller, and `shipping_controller` has nine. Reclassifying it is what makes this
+  // census name the gap instead of excusing it.
+  'home_screen/shipping_screen.dart': ScreenKind.collection,
   'notification_screen/notification_screen.dart': ScreenKind.collection,
   'order_screen/order_screen.dart': ScreenKind.collection,
   'plans/my_plan_screen.dart': ScreenKind.collection,
@@ -77,7 +90,6 @@ const Map<String, ScreenKind> kScreenKinds = {
   // rather than my reading of the file names.
 
   // ---- forms and single records: loading + error, but nothing to be "empty" of ----
-  'home_screen/shipping_screen.dart': ScreenKind.form,
   'order_screen/create_order_screen.dart': ScreenKind.form,
   'product_screen/add_new_product_screen.dart': ScreenKind.form,
   'product_screen/add_rating_screen.dart': ScreenKind.form,

@@ -50,15 +50,45 @@ Widget topOrderCardWidget({
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// ================= ORDER ID =================
-          Text(
-            "🔥 $orderId",
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w800,
-              color: textColor,
-            ),
+          //
+          // P2.5-WAVE-5. This read `Text("\u{1F525} $orderId")` -- a FLAME EMOJI inside the
+          // text content. Two problems in one character:
+          //
+            //   * the directive forbids emoji as interface icons outright, and an emoji is not
+            //     an icon: it renders in the platform's own emoji font, so it carries none of
+            //     the stroke weight, grid or colour of the Material set beside it, and it looks
+            //     different on every device.
+            //   * being inside the STRING, a screen reader announces it. The card's heading was
+            //     literally read out as "fire 12345".
+          //
+          // `local_fire_department_rounded` is Material's own equivalent and keeps the intent
+          // ("this is a hot order"). `_rounded` matches `delivery_dining_rounded` already in
+          // this file rather than introducing a third style. `excludeSemantics` because the
+          // order id beside it already says what the card is, and the flame never carried
+          // information a merchant could act on.
+          Row(
+            children: [
+              ExcludeSemantics(
+                child: Icon(
+                  Icons.local_fire_department_rounded,
+                  size: 18.sp,
+                  color: AppColor.themeGreenColor,
+                ),
+              ),
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Text(
+                  orderId,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: textColor,
+                  ),
+                ),
+              ),
+            ],
           ),
 
           SizedBox(height: 14.h),

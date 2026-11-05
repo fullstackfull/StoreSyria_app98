@@ -434,7 +434,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 16),
             AppTextField(
-              title: 'Email Address',
+              title: 'email'.tr,
               hint: 'Enter email',
               icon: Icons.email_outlined,
               controller: profileController.emailController,
@@ -514,7 +514,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 16),
             AppTextField(
-              title: 'Confirm Password',
+              title: 'confirm_password'.tr,
               hint: '*************',
               icon: Icons.verified_user_outlined,
               controller: profileController.confirmPasswordController,

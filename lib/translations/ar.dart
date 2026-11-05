@@ -315,6 +315,7 @@ const Map<String, String> ar = {
   "Dashboard": "لوحة التحكم",
   "Welcome back": "مرحباً بعودتك",
   "no_taxs_found": "لم يتم العثور على ضرائب",
+  "no_shipping_methods_found": "لا توجد طرق شحن",
   "no_notifications": "لا توجد إشعارات",
   "notifications": "الإشعارات",
   "mark_all_tapped": "تحديد الكل كمقروء",

@@ -23,7 +23,22 @@ Widget commonDropdownButtonWidget<T>({
     final borderColor = isDark ? const Color(0xFF2E4266) : AppColor.cBorder;
     final textColor = isDark ? Colors.white : AppColor.themeNavyBlueColor;
     final labelColor = isDark ? Colors.grey.shade400 : AppColor.cDarkGreyFont;
-    final hintColor = isDark ? Colors.grey.shade500 : AppColor.cHintFont;
+    /* P2.5-A-06. THE LIGHT BRANCH WAS `AppColor.cHintFont`, WHICH IS #FFFFFF -- white hint text
+       on the white field set one line above. 1.00:1. A merchant filling in the product, shipping
+       or tax form could not read what the control was asking for.
+
+       cHintFont is the mutable-global trap in miniature: colors.dart:33 assigns it white once and
+       NEITHER AppLightTheme.lightThemeColor() NOR AppDarkTheme.darkColor() reassigns it, so it
+       stays white in both themes while every field around it swaps. A grep across lib/ returns
+       exactly two lines -- the declaration and this one use.
+
+       LightThemeColor.cFont (#66728C, 4.83:1 on white) is this app's own secondary-text colour,
+       so the hint now matches every other muted line instead of being its own value.
+
+       THE DARK BRANCH IS DELIBERATELY UNTOUCHED. Colors.grey.shade500 on #18263F measures
+       5.65:1 and already passes; changing it would be a restyle rather than a repair, and this
+       file's own idiom is `isDark ? <literal> : <token>` (see labelColor above). */
+    final hintColor = isDark ? Colors.grey.shade500 : LightThemeColor.cFont;
     final accentColor = isDark ? Colors.white : AppColor.themeNavyBlueColor;
 
     // إذا ما انبعت دالة عرض، استخدم toString() (نفس السلوك القديم لـ List<String>)

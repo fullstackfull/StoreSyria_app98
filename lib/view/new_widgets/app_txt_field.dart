@@ -10,6 +10,13 @@ class AppTextField extends StatelessWidget {
   // ── الأساسيات ──
   final String? title;
   final String? hint;
+
+  /// The accessible name, for the sites that render their visible label at the
+  /// call site instead of passing [title] -- `_requiredLabel` in
+  /// add_new_product_screen.dart is a RichText with a red asterisk that [title]
+  /// cannot express. Falls back to [title]; when both are absent no annotation
+  /// is added at all, so the sites that pass neither are untouched.
+  final String? semanticLabel;
   final TextEditingController? controller;
   final IconData? icon;
 
@@ -46,6 +53,7 @@ class AppTextField extends StatelessWidget {
     super.key,
     this.title,
     this.hint,
+    this.semanticLabel,
     this.controller,
     this.icon,
     this.validator,
@@ -70,7 +78,25 @@ class AppTextField extends StatelessWidget {
     this.htmlContent,
   });
 
+  /// P2.5-D-02. Kept, because it is still the correct LIGHT-mode value (13.94:1 on white) and
+  /// because removing a public static is a breaking change for anything referencing it.
+  /// What changed is that it is no longer used unconditionally -- see [_focusColor].
   static const Color navyBlue = Color(0xFF172C4E);
+
+  /// The caret and the focus ring, solved against the surface they are actually painted on.
+  ///
+  /// MEASURED: navy on the dark theme's own field surface (`DarkThemeColor.cSurface`, #213252)
+  /// is **1.09:1**. A caret and a focus indicator are non-text UI components, so WCAG 1.4.11
+  /// asks 3:1, and focus visibility is WCAG 2.4.7 -- a ring nobody can see is the same as no
+  /// ring. In dark mode a merchant could not tell which field had focus or where the cursor was.
+  ///
+  /// NO NEW COLOUR IS INTRODUCED. Both values already exist in this app's own themes:
+  /// `LightThemeColor.cPrimary` is the same navy (13.94:1 on white, unchanged) and
+  /// `DarkThemeColor.cPrimary` is #10AFC0 (4.82:1 on the dark field). The app's brand is an
+  /// open question reserved to the owner; this reads what the theme already says rather than
+  /// deciding it. Guarded by test/a11y/field_focus_contrast_test.dart.
+  static Color _focusColor(bool isDark) =>
+      isDark ? DarkThemeColor.cPrimary : LightThemeColor.cPrimary;
 
   bool _has(String? s) => s != null && s.isNotEmpty;
 
@@ -146,7 +172,20 @@ class AppTextField extends StatelessWidget {
             ),
           )
         else
-          TextFormField(
+          // Names the field with its own visible label. `Semantics` defaults to
+          // `container: false`, so this MERGES into the field's node rather
+          // than adding a sibling -- which is what keeps the TEXTFIELD role,
+          // the OBSCURED flag, the value and the validator's error intact.
+          //
+          // Deliberately no `textField: true`: RenderEditable already sets it,
+          // two nodes carrying the same flag conflict, and the conflict forces
+          // the field to form its own node -- measured, the label then never
+          // arrives and a phantom edit box appears beside it.
+          Semantics(
+            label: _has(semanticLabel)
+                ? semanticLabel
+                : (_has(title) ? title : null),
+            child: TextFormField(
             controller: controller,
             focusNode: focusNode,
             enabled: enabled,
@@ -164,7 +203,7 @@ class AppTextField extends StatelessWidget {
             maxLines: obscureText ? 1 : maxLines,
             maxLength: maxLength,
             inputFormatters: inputFormatters,
-            cursorColor: navyBlue,
+            cursorColor: _focusColor(isDark),
             style: TextStyle(fontSize: 16.sp, color: textColor),
             decoration: InputDecoration(
               hintText: hint,
@@ -206,10 +245,11 @@ class AppTextField extends StatelessWidget {
               border: border(borderColor),
               enabledBorder: border(borderColor),
               disabledBorder: border(borderColor),
-              focusedBorder: border(navyBlue, 1.5),
+              focusedBorder: border(_focusColor(isDark), 1.5),
               errorBorder: border(Colors.red),
               focusedErrorBorder: border(Colors.red, 1.5),
             ),
+          ),
           ),
       ],
     );

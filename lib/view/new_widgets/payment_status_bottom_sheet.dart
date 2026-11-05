@@ -465,6 +465,7 @@ class OrderStatusBottomSheet {
                               StatusBadgeHelper
                                   .getOrderConfig(
                                 statusId,
+                                isDark: isDark,
                               );
 
                               return GestureDetector(

@@ -42,7 +42,14 @@ class StatusBadgeHelper {
   /// unchanged, so the badges look like themselves, just legible. The new
   /// values are the darkest step that clears 4.5:1 with margin (5.75, 6.60 and
   /// 5.86 respectively) rather than the first one that scrapes past it.
-  static StatusBadgeConfig getOrderConfig(int status) {
+  /// P2.5-WAVE-5. `isDark` is OPTIONAL and defaults to the light set, so every existing
+  /// call site compiles unchanged -- the directive requires the shipped app's contracts
+  /// stay intact, and a required parameter here would have broken six of them.
+  static StatusBadgeConfig getOrderConfig(int status, {bool isDark = false}) {
+    if (isDark) {
+      return _darkOrderConfig(status);
+    }
+
     switch (status) {
       case 0:
         return const StatusBadgeConfig(
@@ -261,27 +268,145 @@ class StatusBadgeHelper {
   // PAYMENT CONFIG
   // =========================================================
 
+  /// THE DARK SET.  P2.5-WAVE-5
+  ///
+  /// MEASURED before writing a line of it: every light badge background sits between
+  /// **12.49:1 and 14.24:1 against the dark card** `#18263F`. They are near-white tiles on a
+  /// dark page -- the same defect the web side found in its `#E9D5E7` toolbar chips, here on
+  /// every order list, order detail, notification, top-orders and payment surface in the
+  /// shipped app. `order_status_badge.dart` contained no `Theme.of(context)`, no `isDark` and
+  /// no `Brightness` reference at all, so the light pairs rendered unchanged in dark mode.
+  ///
+  /// THE HUE IS KEPT AND THE SURFACE INVERTS. The light set's own note says the tinted
+  /// backgrounds "are what make a status column scannable", so this does not flatten them to
+  /// grey: each status keeps its hue and gets a dark tinted surface with light text.
+  ///
+  /// THREE CONSTRAINTS, ALL CHECKED BY `order_status_label_test.dart`:
+  ///   * text on its own background >= 4.5:1  (WCAG AA, small text)
+  ///   * BORDER against the dark card >= 3:1  (SC 1.4.11 -- the border is what identifies the
+  ///     chip, because a fill that reads as a chip on a dark page glares)
+  ///   * fill against the card >= 1.35:1      (visible as a surface, not a glowing tile)
+  ///
+  /// TWO OF THESE WERE DERIVED WRONG FIRST. Statuses 8 and the default come from near-grey
+  /// sources (`#EFEBE9`, `#F5F5F5`); their hue is meaningless, and a naive derivation gave
+  /// them a saturation floor and turned them BROWN and RED. The default is neutral here
+  /// because its source is neutral.
+  static StatusBadgeConfig _darkOrderConfig(int status) {
+    switch (status) {
+      case 0:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF4F3917),
+          textColor: Color(0xFFFFA61A),
+          borderColor: Color(0xFF926A2A),
+          icon: Icons.access_time_rounded,
+        );
+
+      case 1:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF1D4420),
+          textColor: Color(0xFF59C061),
+          borderColor: Color(0xFF38803D),
+          icon: Icons.check_circle_outline,
+        );
+
+      case 2:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF6F202C),
+          textColor: Color(0xFFFF8093),
+          borderColor: Color(0xFFC73D52),
+          icon: Icons.cancel_outlined,
+        );
+
+      case 3:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF5C2663),
+          textColor: Color(0xFFCE94D6),
+          borderColor: Color(0xFFAA47B8),
+          icon: Icons.undo,
+        );
+
+      case 4:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF1A405B),
+          textColor: Color(0xFF54AFF3),
+          borderColor: Color(0xFF3074A6),
+          icon: Icons.verified_outlined,
+        );
+
+      case 5:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF154147),
+          textColor: Color(0xFF39CCDF),
+          borderColor: Color(0xFF277B86),
+          icon: Icons.inventory_2_outlined,
+        );
+
+      case 6:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF473B15),
+          textColor: Color(0xFFFFC91A),
+          borderColor: Color(0xFF826D26),
+          icon: Icons.local_shipping_outlined,
+        );
+
+      // 7 and 8 are real `delivered_status` values and not fulfilment states; they keep the
+      // same identity in dark as the light set gives them.
+      case 7:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF2C3672),
+          textColor: Color(0xFF9BA4D9),
+          borderColor: Color(0xFF5E6CC0),
+          icon: Icons.payments_outlined,
+        );
+
+      case 8:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF50372B),
+          textColor: Color(0xFFCF9B81),
+          borderColor: Color(0xFF92654F),
+          icon: Icons.event_available_outlined,
+        );
+
+      default:
+        return const StatusBadgeConfig(
+          backgroundColor: Color(0xFF3B3B3B),
+          textColor: Color(0xFFA6A6A6),
+          borderColor: Color(0xFF707070),
+          icon: Icons.info_outline,
+        );
+    }
+  }
+
+  /// `isDark` is optional for the same reason as `getOrderConfig`: the existing call sites
+  /// must keep compiling. Paid reuses status 1's pair and unpaid reuses status 2's, in both
+  /// themes -- they are the same two states wearing different names, and giving them separate
+  /// values would be two more pairs nobody re-measures.
   static StatusBadgeConfig getPaymentConfig(
-      String? paymentStatus,
-      ) {
+      String? paymentStatus, {
+        bool isDark = false,
+      }) {
     final isPaid =
         (paymentStatus ?? 'Unpaid').toLowerCase().trim() == 'paid';
 
     if (isPaid) {
-      return const StatusBadgeConfig(
-        backgroundColor: Color(0xFFE8F5E9),
-        textColor: Color(0xFF2E7D32),
-        borderColor: Color(0xFFC8E6C9),
-        icon: Icons.check_circle_outline,
-      );
+      return isDark
+          ? _darkOrderConfig(1)
+          : const StatusBadgeConfig(
+              backgroundColor: Color(0xFFE8F5E9),
+              textColor: Color(0xFF2E7D32),
+              borderColor: Color(0xFFC8E6C9),
+              icon: Icons.check_circle_outline,
+            );
     }
 
-    return const StatusBadgeConfig(
-      backgroundColor: Color(0xFFFFEBEE),
-      textColor: Color(0xFFC62828),
-      borderColor: Color(0xFFFFCDD2),
-      icon: Icons.cancel_outlined,
-    );
+    return isDark
+        ? _darkOrderConfig(2)
+        : const StatusBadgeConfig(
+            backgroundColor: Color(0xFFFFEBEE),
+            textColor: Color(0xFFC62828),
+            borderColor: Color(0xFFFFCDD2),
+            icon: Icons.cancel_outlined,
+          );
   }
 
   // =========================================================
@@ -327,15 +452,17 @@ class CommonStatusBadge extends StatelessWidget {
     this.isCard = false,
   });
 
-  StatusBadgeConfig _getConfig() {
+  StatusBadgeConfig _getConfig(bool isDark) {
     if (type == StatusBadgeType.payment) {
       return StatusBadgeHelper.getPaymentConfig(
         paymentStatus,
+        isDark: isDark,
       );
     }
 
     return StatusBadgeHelper.getOrderConfig(
       orderStatus ?? 0,
+      isDark: isDark,
     );
   }
 
@@ -370,7 +497,9 @@ class CommonStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = _getConfig();
+    final config = _getConfig(
+      Theme.of(context).brightness == Brightness.dark,
+    );
     final label = _getLabel();
 
     // =========================

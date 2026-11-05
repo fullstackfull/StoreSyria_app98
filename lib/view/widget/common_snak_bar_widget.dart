@@ -226,22 +226,128 @@ class _AppSnackBarController {
  static OverlayEntry? _entry;
  static Timer? _timer;
 
+ /// D-42.6 -- WHERE THE TOAST IS INSERTED, AND WHY IT IS NO LONGER ASKED FOR WITH `Overlay.of`.
+ ///
+ /// ════════════════════════════════════════════════════════════════════════════════════════════
+ /// THE DEFECT THIS REPLACES
+ /// ════════════════════════════════════════════════════════════════════════════════════════════
+ ///
+ /// This method used to do:
+ ///
+ ///     final context = Get.overlayContext;
+ ///     if (context == null) return;
+ ///     final overlay = Overlay.of(context, rootOverlay: true);
+ ///
+ /// which cannot resolve on Flutter 3.47.7, in the shipped app, ever:
+ ///
+ ///   * `Get.overlayContext` (GetX 4.7.3, `extension_navigation.dart:1150`) is
+ ///     `key.currentState?.overlay?.context.visitChildElements(...)` -- the single CHILD element
+ ///     of the root navigator's `OverlayState` context. `OverlayState.build` returns a
+ ///     `_Theater`, so `Get.overlayContext` IS the `_Theater`, which sits ABOVE every entry.
+ ///   * `Overlay.of` -> `Overlay.maybeOf` -> `_RenderTheaterMarker.maybeOf`
+ ///     (`widgets/overlay.dart:634`). That marker is provided INSIDE
+ ///     `_OverlayEntryWidgetState.build()` (`overlay.dart:422`), so the lookup needs an enclosing
+ ///     overlay ENTRY, not an enclosing `Overlay`. From the `_Theater` there is none above, and
+ ///     `maybeOf` returns null.
+ ///
+ /// `Overlay.of` then throws `No Overlay widget found` through its assert in debug
+ /// (`overlay.dart:612`) and dereferences `result!` in release (`overlay.dart:615`). Measured in
+ /// the real app shape -- `GetMaterialApp` with `builder: ThemeSwitchOverlay`, which is a `Stack`
+ /// and not an `Overlay`, so nothing in the shipped tree supplies an entry above the root theater:
+ ///
+ ///     PROBE overlayContext widget:       _Theater
+ ///     PROBE maybeOf(rootOverlay:true):   null
+ ///     PROBE Get.key.currentState.overlay:OverlayState#00ea5(entries: [..., ...])
+ ///
+ /// So on every one of the 271 call sites -- 269 `commonToast` plus
+ /// `lib/view/new_widgets/customer_contact.dart:34,40` -- a save confirmation, a refusal, a 403
+ /// and a demo-mode block raised instead of appearing.
+ ///
+ /// ════════════════════════════════════════════════════════════════════════════════════════════
+ /// THE REPAIR: ASK THE NAVIGATOR, DO NOT SEARCH UPWARDS FROM ABOVE THE ENTRIES
+ /// ════════════════════════════════════════════════════════════════════════════════════════════
+ ///
+ /// The third probe line is the whole fix. The `OverlayState` wanted here is the one whose
+ /// `_Theater` `Get.overlayContext` already returns -- `Get.key.currentState.overlay`. Reaching it
+ /// downwards from the navigator instead of upwards from the theater removes the impossible
+ /// lookup without changing where the toast lands: it is the SAME overlay the old code was aiming
+ /// at, and it is the root navigator's, which is what `rootOverlay: true` asked for.
+ ///
+ /// THAT PLACEMENT ALSO KEEPS THREE THINGS THE TOAST DEPENDS ON, each pinned by a case in
+ /// `test/ui/toast_overlay_test.dart` rather than asserted here:
+ ///
+ ///   * AMBIENT DIRECTION. `WidgetsApp` builds its `Navigator` inside `Localizations`, which
+ ///     wraps its child in `Directionality` (`widgets/localizations.dart:744`). The toast is
+ ///     positioned with `PositionedDirectional`, and Arabic is this app's default AND fallback
+ ///     locale, so an overlay chosen ABOVE `Localizations` would mirror every Arabic toast the
+ ///     wrong way.
+ ///   * THE APP THEME. `Theme.of(context).brightness` picks the surface and the per-theme type
+ ///     colour (F277). An overlay above the `MaterialApp` would resolve the fallback theme and
+ ///     paint a light toast in a dark app.
+ ///   * Z-ORDER ABOVE DIALOGS AND SHEETS. Routes are entries in this same overlay and
+ ///     `OverlayState.insert` with no `below:`/`above:` appends at the top, so the toast is above
+ ///     an open dialog and its modal barrier -- which is where refusals come from.
+ ///
+ /// NOTHING ELSE ABOUT THE TOAST MOVES: the four variants, the 3-second default, the slide/fade
+ /// timing, the styling, the `Semantics(liveRegion: true, container: true)` live region from
+ /// commit 83dcf49, and every public signature are untouched.
+ ///
+ /// ════════════════════════════════════════════════════════════════════════════════════════════
+ /// WHY THERE ARE THREE STEPS AND NOT ONE
+ /// ════════════════════════════════════════════════════════════════════════════════════════════
+ ///
+ /// Step 1 is the shipped app's path and the only one it uses. Steps 2 and 3 exist so this helper
+ /// never becomes the reason a toast is lost in a tree that is shaped differently -- a nested
+ /// navigator, or a harness that pumps the app under its own `Overlay`
+ /// (`test/a11y/toast_announcement_test.dart` does exactly that). Step 3 is the ORIGINAL lookup,
+ /// kept because it is correct for a context that genuinely is inside an entry, but through
+ /// `maybeOf` -- never `of`, which is `maybeOf(...)!` with an assert in front of it and is the
+ /// line this whole comment is about.
+ ///
+ /// `mounted` is checked on each candidate: a `GlobalKey`'s `currentState` can outlive its
+ /// element, and `OverlayState.insert` on an unmounted state would assert.
+ static OverlayState? _resolveOverlay() {
+  // 1. The root navigator GetX itself owns -- the shipped path.
+  final navigatorOverlay = Get.key.currentState?.overlay;
+
+  if (navigatorOverlay != null && navigatorOverlay.mounted) {
+   return navigatorOverlay;
+  }
+
+  final context = Get.overlayContext ?? Get.context;
+
+  if (context == null) return null;
+
+  // 2. The root navigator reachable from that context, for a nested or re-parented tree.
+  final rootNavigatorOverlay = Navigator.maybeOf(
+   context,
+   rootNavigator: true,
+  )?.overlay;
+
+  if (rootNavigatorOverlay != null && rootNavigatorOverlay.mounted) {
+   return rootNavigatorOverlay;
+  }
+
+  // 3. The original lookup, null-safe. Correct when the context really is inside an entry.
+  return Overlay.maybeOf(
+   context,
+   rootOverlay: true,
+  );
+ }
+
  static void show({
   required _SnackType type,
   required String title,
   required String message,
   required Duration duration,
  }) {
-  final context = Get.overlayContext;
+  final overlay = _resolveOverlay();
 
-  if (context == null) return;
+  // Unchanged contract: with nowhere to put the toast, show nothing. It must not raise -- this is
+  // the only feedback path for 271 call sites and a throw here is a crash on a save button.
+  if (overlay == null) return;
 
   _remove();
-
-  final overlay = Overlay.of(
-   context,
-   rootOverlay: true,
-  );
 
   _entry = OverlayEntry(
    builder: (_) {
@@ -364,118 +470,150 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
    top: MediaQuery.of(context).padding.top + 12,
    start: 16,
    end: 16,
-   child: SafeArea(
-    bottom: false,
-    child: SlideTransition(
-     position: _slideAnimation,
-     child: FadeTransition(
-      opacity: _fadeAnimation,
-      child: Material(
-       color: Colors.transparent,
-       child: Container(
-        padding: const EdgeInsets.symmetric(
-         horizontal: 12,
-         vertical: 10,
-        ),
-        decoration: BoxDecoration(
-         color: backgroundColor,
-         borderRadius: BorderRadius.circular(14),
-         // ==================================================
-         // تعديل الحواف لتكون بلون النوع (Type Color)
-         // ==================================================
-         border: Border.all(
-          color: style.on(isDark).withValues(alpha: isDark ? 0.6 : 0.3),
-          width: 1.2,
+   /* P2.5 a11y -- ANNOUNCED, because until this node existed the toast was not announced at all.
+      This widget is inserted as a raw `OverlayEntry` (`_AppSnackBarController.show`), and a raw
+      overlay subtree with no live region is silent to TalkBack and VoiceOver. It is the ONLY
+      feedback path for roughly 270 `commonToast` call sites -- every save, every refusal, every
+      403, every "action not permitted" and every demo-mode block -- so a merchant using a screen
+      reader pressed Save and was told nothing, with success and failure indistinguishable.
+
+      Measured before writing it: a case-insensitive sweep of this file for
+      semantic|liveRegion|announce|accessib|a11y|screen.reader|talkback|voiceover matched nothing,
+      and `_SimpleSnackBar`'s subtree carried no `Semantics` node at any level.
+
+      SAME SHAPE AS THE REST OF THE APP AND AS THE FRAMEWORK. `EmptyState`, `ErrorState` and
+      `StaleDataNotice` (`error_empty_state.dart`) each carry `liveRegion: true, container: true`,
+      and so does Flutter's own `SnackBar` (`material/snack_bar.dart:830`). NO `label:` HERE,
+      deliberately and for the reason `error_empty_state.dart` records: a label on this node would
+      duplicate the sentence the visible `Text` already carries, so a reader would meet it twice.
+      `container: true` gives the flag a node of its own and lets the visible text be what is read.
+
+      IT GOES INSIDE `PositionedDirectional`, NOT AROUND IT, and that is a layout requirement
+      rather than a preference. `PositionedDirectional` builds a `Positioned`, a `ParentDataWidget`
+      that applies `StackParentData` to the render object directly beneath it, and that render
+      object has to be a child of the overlay's own Stack-like `_RenderTheatre`. Wrapping the root
+      instead puts `RenderSemanticsAnnotations` in between and throws "Incorrect use of
+      ParentDataWidget ... incompatible type ParentData" on every toast -- measured, not assumed.
+      Placed here it still covers the entire visible toast, which is what a live region needs.
+
+      Guarded by `test/a11y/toast_announcement_test.dart`, which drives `commonToast` for all four
+      types and reads the live-region flag off the real semantics tree rather than off this source. */
+   child: Semantics(
+    liveRegion: true,
+    container: true,
+    child: SafeArea(
+     bottom: false,
+     child: SlideTransition(
+      position: _slideAnimation,
+      child: FadeTransition(
+       opacity: _fadeAnimation,
+       child: Material(
+        color: Colors.transparent,
+        child: Container(
+         padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
          ),
-         boxShadow: [
-          BoxShadow(
-           color: style.on(isDark).withValues(alpha: isDark ? 0.18 : 0.10),
-           blurRadius: 18,
-           offset: const Offset(0, 6),
+         decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(14),
+          // ==================================================
+          // تعديل الحواف لتكون بلون النوع (Type Color)
+          // ==================================================
+          border: Border.all(
+           color: style.on(isDark).withValues(alpha: isDark ? 0.6 : 0.3),
+           width: 1.2,
           ),
-         ],
-        ),
-        child: Row(
-         children: [
-          // ==================================================
-          // ICON
-          // ==================================================
-
-          Container(
-           width: 34,
-           height: 34,
-           decoration: BoxDecoration(
-            color: style.on(isDark).withValues(alpha: .10),
-            shape: BoxShape.circle,
+          boxShadow: [
+           BoxShadow(
+            color: style.on(isDark).withValues(alpha: isDark ? 0.18 : 0.10),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
            ),
-           child: Icon(
-            style.icon,
-            color: style.on(isDark),
-            size: 20,
+          ],
+         ),
+         child: Row(
+          children: [
+           // ==================================================
+           // ICON
+           // ==================================================
+
+           Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+             color: style.on(isDark).withValues(alpha: .10),
+             shape: BoxShape.circle,
+            ),
+            child: Icon(
+             style.icon,
+             color: style.on(isDark),
+             size: 20,
+            ),
            ),
-          ),
 
-          const SizedBox(width: 10),
+           const SizedBox(width: 10),
 
-          // ==================================================
-          // TEXT
-          // ==================================================
+           // ==================================================
+           // TEXT
+           // ==================================================
 
-          Expanded(
-           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-             Text(
-              widget.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-               fontSize: 13.5,
-               fontWeight: FontWeight.w700,
-               color: titleColor,
-               height: 1.2,
-              ),
-             ),
-
-             if (widget.message.trim().isNotEmpty) ...[
-              const SizedBox(height: 2),
+           Expanded(
+            child: Column(
+             mainAxisSize: MainAxisSize.min,
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
               Text(
-               widget.message,
+               widget.title,
                maxLines: 2,
                overflow: TextOverflow.ellipsis,
                style: TextStyle(
-                fontSize: 11.5,
-                color: messageColor,
-                height: 1.3,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+                color: titleColor,
+                height: 1.2,
                ),
               ),
+
+              if (widget.message.trim().isNotEmpty) ...[
+               const SizedBox(height: 2),
+               Text(
+                widget.message,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                 fontSize: 11.5,
+                 color: messageColor,
+                 height: 1.3,
+                ),
+               ),
+              ],
              ],
-            ],
-           ),
-          ),
-
-          const SizedBox(width: 6),
-
-          // ==================================================
-          // CLOSE
-          // ==================================================
-
-          InkWell(
-           onTap: widget.onClose,
-           borderRadius: BorderRadius.circular(20),
-           child: Padding(
-            padding: const EdgeInsets.all(5),
-            child: Icon(
-             Icons.close_rounded,
-             size: 18,
-             color: isDark
-                 ? const Color(0xFFA9B8D0)
-                 : const Color(0xFF9CA3AF),
             ),
            ),
-          ),
-         ],
+
+           const SizedBox(width: 6),
+
+           // ==================================================
+           // CLOSE
+           // ==================================================
+
+           InkWell(
+            onTap: widget.onClose,
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+             padding: const EdgeInsets.all(5),
+             child: Icon(
+              Icons.close_rounded,
+              size: 18,
+              color: isDark
+                  ? const Color(0xFFA9B8D0)
+                  : const Color(0xFF9CA3AF),
+             ),
+            ),
+           ),
+          ],
+         ),
         ),
        ),
       ),

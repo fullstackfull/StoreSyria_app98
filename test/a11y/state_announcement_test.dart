@@ -111,6 +111,15 @@ void main() {
   test('PREMISE: a bare Icon is silent by construction, so none needs wrapping', () {
     // Pinned so that "hide decorative icons" is not later implemented by hand-wrapping every
     // icon in the app. Flutter excludes the glyph and labels the node only when asked.
+    //
+    // ONE ICON IN lib/ IS DELIBERATELY LABELLED, and it does not contradict this premise:
+    // the back arrow in common_appbar_widget.dart carries semanticLabel: 'back'.tr because it
+    // is the ONLY content of an interactive control, so without it the button has no name at
+    // all on Android -- the engine's AccessibilityBridge composes its content description from
+    // value+label+hint and never reads the IconButton's tooltip. Measured in
+    // test/a11y/appbar_back_control_test.dart, whose bite test shows the label going empty in
+    // both languages the moment it is removed. That is a NAMED CONTROL, not a decorative
+    // glyph; the rule above still holds for every icon that merely sits beside text.
     const icon = Icon(Icons.inbox_outlined);
     expect(icon.semanticLabel, isNull,
         reason: 'if this app starts labelling decorative icons, they WILL be announced and the '

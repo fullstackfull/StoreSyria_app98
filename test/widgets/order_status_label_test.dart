@@ -268,4 +268,124 @@ void main() {
     expect(failures, isEmpty,
         reason: 'badge colour pairs below AA:\n${failures.join('\n')}');
   });
+
+  // ===========================================================================
+  // P2.5-WAVE-5 -- THE DARK SET.
+  //
+  // MEASURED before any of it was written: every LIGHT badge background sits
+  // between 12.49:1 and 14.24:1 against the dark card `#18263F`. They were
+  // near-white tiles on a dark page, on every order list, order detail,
+  // notification, top-orders and payment surface in the shipped app, because
+  // `order_status_badge.dart` contained no `Theme.of(context)`, no `isDark`
+  // and no `Brightness` reference at all.
+  //
+  // Three constraints, each asserted separately below so a failure names which
+  // one broke rather than just "the badge is wrong".
+  // ===========================================================================
+
+  double channel(double srgb) =>
+      srgb <= 0.03928 ? srgb / 12.92 : math.pow((srgb + 0.055) / 1.055, 2.4) as double;
+
+  double luminance(Color c) =>
+      0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
+
+  double ratio(Color a, Color b) {
+    final l1 = luminance(a);
+    final l2 = luminance(b);
+    return (math.max(l1, l2) + 0.05) / (math.min(l1, l2) + 0.05);
+  }
+
+  /// `DarkThemeColor.cCardBackground`, which is what a badge actually sits on.
+  const darkCard = Color(0xFF18263F);
+
+  test('PREMISE: the light set really is unusable on the dark card', () {
+    // Without this the dark set below could be identical to the light one and
+    // every assertion after it would still pass.
+    final glaring = <String>[];
+    for (final status in _allStatuses) {
+      final light = StatusBadgeHelper.getOrderConfig(status);
+      if (ratio(light.backgroundColor, darkCard) < 7.0) {
+        glaring.add('status $status: only '
+            '${ratio(light.backgroundColor, darkCard).toStringAsFixed(2)}:1');
+      }
+    }
+    expect(glaring, isEmpty,
+        reason: 'the light badges no longer glare on the dark card, so the dark '
+            'set below may be solving a problem that is gone:\n${glaring.join('\n')}');
+  });
+
+  test('the dark set is actually different from the light set', () {
+    for (final status in _allStatuses) {
+      final light = StatusBadgeHelper.getOrderConfig(status);
+      final dark = StatusBadgeHelper.getOrderConfig(status, isDark: true);
+      expect(dark.backgroundColor, isNot(equals(light.backgroundColor)),
+          reason: 'status $status returns the light background in dark mode');
+    }
+  });
+
+  test('every dark status badge clears WCAG AA for small text', () {
+    final failures = <String>[];
+    for (final status in _allStatuses) {
+      final c = StatusBadgeHelper.getOrderConfig(status, isDark: true);
+      final r = ratio(c.textColor, c.backgroundColor);
+      if (r < 4.5) {
+        failures.add('status $status: ${r.toStringAsFixed(2)}:1 '
+            '(text ${c.textColor} on ${c.backgroundColor})');
+      }
+    }
+    expect(failures, isEmpty, reason: 'dark pairs below AA:\n${failures.join('\n')}');
+  });
+
+  test('every dark badge border reaches 3:1 against the dark card', () {
+    // SC 1.4.11. The BORDER identifies the chip in dark mode, because a fill
+    // strong enough to read as a chip on a near-black page is the glare this
+    // whole package removes.
+    final failures = <String>[];
+    for (final status in _allStatuses) {
+      final c = StatusBadgeHelper.getOrderConfig(status, isDark: true);
+      final r = ratio(c.borderColor, darkCard);
+      if (r < 3.0) {
+        failures.add('status $status: border ${r.toStringAsFixed(2)}:1');
+      }
+    }
+    expect(failures, isEmpty,
+        reason: 'dark badge boundaries below SC 1.4.11:\n${failures.join('\n')}');
+  });
+
+  test('every dark badge fill is visible as a surface without glaring', () {
+    final failures = <String>[];
+    for (final status in _allStatuses) {
+      final c = StatusBadgeHelper.getOrderConfig(status, isDark: true);
+      final r = ratio(c.backgroundColor, darkCard);
+      if (r < 1.25) {
+        failures.add('status $status: fill only ${r.toStringAsFixed(2)}:1 - invisible');
+      }
+      if (r > 4.0) {
+        failures.add('status $status: fill ${r.toStringAsFixed(2)}:1 - glaring');
+      }
+    }
+    expect(failures, isEmpty, reason: 'dark fills:\n${failures.join('\n')}');
+  });
+
+  test('the payment badge follows the theme too', () {
+    for (final paid in ['paid', 'unpaid']) {
+      final light = StatusBadgeHelper.getPaymentConfig(paid);
+      final dark = StatusBadgeHelper.getPaymentConfig(paid, isDark: true);
+      expect(dark.backgroundColor, isNot(equals(light.backgroundColor)),
+          reason: 'payment badge "$paid" keeps its light background in dark mode');
+      expect(ratio(dark.textColor, dark.backgroundColor), greaterThanOrEqualTo(4.5),
+          reason: 'payment badge "$paid" is below AA in dark mode');
+    }
+  });
+
+  test('a grey status stays grey in dark mode', () {
+    // Statuses whose LIGHT source is near-neutral have no meaningful hue. A
+    // naive derivation gave the default badge a saturation floor and turned it
+    // RED; this is the assertion that caught it.
+    final c = StatusBadgeHelper.getOrderConfig(99, isDark: true); // the default arm
+    expect(c.backgroundColor.r, closeTo(c.backgroundColor.g, 0.02),
+        reason: 'the default (grey) badge has gained a hue in dark mode');
+    expect(c.backgroundColor.g, closeTo(c.backgroundColor.b, 0.02),
+        reason: 'the default (grey) badge has gained a hue in dark mode');
+  });
 }
