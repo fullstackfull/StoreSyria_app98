@@ -59,6 +59,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/config/theme_light/light_theme.dart';
 import 'package:store_go_app/core/controller/setting_controller/theme_controller.dart';
+import 'package:store_go_app/translations/translation_service.dart';
 
 import 'source_tree.dart';
 
@@ -161,6 +162,27 @@ void pinGoldenSurface(WidgetTester tester) {
 ///
 /// `GetMaterialApp` rather than `MaterialApp`, because the screens use `.tr` and GetX navigation and
 /// a bare MaterialApp throws on the first of them.
+///
+/// **AND IT MUST BE GIVEN THE APP'S OWN `translations`, `fallbackLocale` AND LOCALISATION
+/// DELEGATES — the first version of this harness gave it none, and that was a blocker.**
+///
+/// `store_go.dart:44-46` wires `translations: TranslationService()`,
+/// `locale: TranslationService.currentLocale` and
+/// `fallbackLocale: TranslationService.fallbackLocale`. Without them GetX's `.tr` returns **the key
+/// unchanged**, so `'active'.tr` renders the literal string `active`. The first capture shows
+/// exactly that on the customer card's status pill.
+///
+/// The consequence is worst in the half that matters most here: **every Arabic baseline would have
+/// frozen an English key in place of the Arabic label**, and checking Arabic text rendering is
+/// most of what an RTL baseline is for. A reviewer looking at those images would have been
+/// approving the wrong picture.
+///
+/// `localizationsDelegates` and `supportedLocales` come with them for the reason
+/// `TranslationService` records at `:16-27`: without `GlobalWidgetsLocalizations`, MaterialApp
+/// falls back to `DefaultWidgetsLocalizations`, whose `textDirection` is **always LTR** — so
+/// Material's own built-ins would render unmirrored inside a baseline the test calls RTL.
+///
+/// Found by an adversarial review of the change that added this file.
 Widget goldenHost({
   required Widget child,
   required bool dark,
@@ -173,7 +195,15 @@ Widget goldenHost({
     builder: (_, __) => GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: appTheme(dark: dark),
-      locale: direction == TextDirection.rtl ? const Locale('ar') : const Locale('en'),
+      translations: TranslationService(),
+      fallbackLocale: TranslationService.fallbackLocale,
+      localizationsDelegates: TranslationService.localizationsDelegates,
+      supportedLocales: TranslationService.supportedLocales,
+      // The app's own locale objects, not bare language codes: TranslationService.locales are
+      // `ar_AE` and `en_US`, and GetX matches its translation map on the full locale.
+      locale: direction == TextDirection.rtl
+          ? const Locale('ar', 'AE')
+          : const Locale('en', 'US'),
       home: Directionality(
         textDirection: direction,
         child: Scaffold(body: child),

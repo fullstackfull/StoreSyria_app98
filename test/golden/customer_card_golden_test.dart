@@ -54,11 +54,17 @@ void main() {
         'status': 1,
       });
 
+  // `contact`, NOT `mobile`. DeliveryBoyData.fromJson reads `json['contact']`
+  // (delivery_boy_model.dart:70) and delivery_boy_widget.dart:34 reads `.contact`, falling back to
+  // '--' when it is empty. The first version of this fixture passed `mobile`, copied from the
+  // CUSTOMER model beside it, so the phone row in all four delivery-boy baselines rendered a blank
+  // dash — a baseline that freezes an empty cell where real data belongs, and that a reviewer
+  // might well have approved without noticing. Found by an adversarial review of this change.
   DeliveryBoyData deliveryBoy() => DeliveryBoyData.fromJson(<String, dynamic>{
         'id': 2,
         'name': 'سامر خليل',
         'email': 'samer@example.test',
-        'mobile': '0933444555',
+        'contact': '0933444555',
         'status': 1,
       });
 
