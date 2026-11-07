@@ -33,6 +33,19 @@ Widget customerWidget({
 
   final city = customer?.city?.replaceAll('"', '').trim() ?? '';
 
+  // THE CUSTOMER'S E-MAIL WAS NEVER ON THIS CARD. The row below carried
+  // `Icons.email_outlined` and rendered `city` beside it -- an e-mail icon
+  // labelling a place name -- while `CustomerData.email` (customer_model.dart:70,
+  // read from the response root at :102) went unread. The merchant web card shows
+  // identity first, name then e-mail (customer/grid.blade.php:159), and the
+  // delivery-man card in this same folder already pairs the e-mail icon with the
+  // e-mail (delivery_boy_widget.dart:92-93). This card was the odd one out.
+  //
+  // `customer_info` carries ONLY name and mobile (customer_model.dart:130-142); the
+  // API puts `email` beside that object, not inside it
+  // (Api/DashboardController.php:6128-6132).
+  final email = customer?.email?.replaceAll('"', '').trim() ?? '';
+
   final bool isActive = customer?.status == 1;
 
   final statusLabel = customer?.statusText?.isNotEmpty == true
@@ -94,15 +107,39 @@ Widget customerWidget({
               ),
             ],
           ),
-          _customerInfoRow(
-            context: context,
-            icon: Icons.email_outlined,
-            text: city.isNotEmpty ? city : '--',
-            textColor: subTextColor,
-            iconColor: AppColor.themeNavyBlueColor,
-          ),
+          // NO ROW IS DRAWN FOR A VALUE THE CUSTOMER DOES NOT HAVE. Both of the rows
+          // above used to render a literal '--' when their field was empty, which is a
+          // row that costs a line of the card and tells the merchant nothing. The
+          // orders count is the one row that is always meaningful, because zero orders
+          // is a real and useful answer.
+          if (email.isNotEmpty) ...[
+            _customerInfoRow(
+              context: context,
+              icon: Icons.email_outlined,
+              // LTR EVEN IN ARABIC. An address is a Latin run with '@' and '.' in it;
+              // laid out RTL the parts reorder and it reads as a different address.
+              // The web card answers this with `dir="ltr"` on the same field
+              // (customer/grid.blade.php:159); this is that, in Flutter.
+              text: email,
+              textColor: subTextColor,
+              iconColor: AppColor.themeNavyBlueColor,
+            ),
+            SizedBox(height: 5.h),
+          ],
 
-          SizedBox(height: 5.h),
+          if (city.isNotEmpty) ...[
+            _customerInfoRow(
+              context: context,
+              // A PLACE ICON FOR A PLACE. `CustomerData.city` is read from
+              // `json['state_name']` (customer_model.dart:111), so this row has always
+              // been a location -- it was simply wearing the e-mail icon.
+              icon: Icons.location_on_outlined,
+              text: city,
+              textColor: subTextColor,
+              iconColor: AppColor.themeNavyBlueColor,
+            ),
+            SizedBox(height: 5.h),
+          ],
 
           _customerInfoRow(
             context: context,
@@ -117,6 +154,7 @@ Widget customerWidget({
             _customerInfoRow(
               context: context,
               icon: Icons.phone_outlined,
+              // A phone number is a Latin digit run for the same reason as the e-mail.
               text: mobile,
               textColor: subTextColor,
               iconColor: AppColor.themeNavyBlueColor,
@@ -134,6 +172,7 @@ Widget _customerInfoRow({
   required String text,
   required Color textColor,
   required Color iconColor,
+  TextDirection? textDirection,
 }) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.start,
@@ -153,7 +192,11 @@ Widget _customerInfoRow({
           text,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.end,
+          textDirection: textDirection,
+          // `start`, NOT `end`. The row puts its icon first and the text beside it, so
+          // the text belongs against the icon in BOTH directions; `TextAlign.end` sent
+          // it to the far edge of whatever width the Flexible happened to take.
+          textAlign: TextAlign.start,
           style: TextStyle(
             fontSize: 13.5.sp,
             fontWeight: FontWeight.w500,

@@ -72,3 +72,7 @@ android/key.properties
 
 # Coverage
 coverage/
+
+# Flutter writes golden comparison output here on a failed run. Never committed: it is a
+# diff of a candidate against a baseline, not a baseline, and it is regenerated every run.
+test/golden/failures/

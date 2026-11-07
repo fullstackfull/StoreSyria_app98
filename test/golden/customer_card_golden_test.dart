@@ -44,13 +44,21 @@ void main() {
 
   // Arabic names and a Syrian mobile number, because half of these baselines are the Arabic half
   // and Latin placeholder text would not exercise the Tajawal faces or the RTL run at all.
+  //
+  // `email` AND `state_name` SIT AT THE ROOT, NOT INSIDE `customer_info`. `CustomerInfo`
+  // carries only name and mobile (customer_model.dart:130-142) and the API puts both of
+  // these beside that object (Api/DashboardController.php:6128-6132). The first version
+  // of this fixture nested `email`, so it was never read -- and because the card ALSO
+  // bound its e-mail row to `city`, all four customer baselines rendered a literal '--'
+  // where the address belongs. Two defects stacked, and only the picture showed them.
   CustomerData customer() => CustomerData.fromJson(<String, dynamic>{
         'id': 1,
         'customer_info': <String, dynamic>{
           'name': 'أمينة حداد',
-          'email': 'amina@example.test',
           'mobile': '0911222333',
         },
+        'email': 'amina@example.test',
+        'state_name': 'دمشق',
         'status': 1,
       });
 
