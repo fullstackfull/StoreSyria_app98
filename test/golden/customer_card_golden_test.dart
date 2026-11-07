@@ -62,10 +62,27 @@ void main() {
         'status': 1,
       });
 
+
+  // THE SKIP IS AT RUNTIME, NOT `skip:`, and the first version of this file got that wrong in a way
+  // worth keeping. `testWidgets`'s `skip` is typed `bool?` — NOT `dynamic` like `test()`'s — so a
+  // String reason cannot be passed to it and does not compile. The consequence was that
+  // `goldenSkipReason()`, written and documented as "the reason attached to a skipped golden case,
+  // so the skip explains itself", was NEVER CALLED: eight cases skipped in SILENCE inside a gate
+  // this repository declares blocking and 100 per cent. `markTestSkipped` carries the reason into
+  // the run output, which is what was intended all along. Caught by the adversarial review of this
+  // change, which found the function was dead code.
+  bool skipUnlessCaptured(String surface, GoldenCombination combination) {
+    if (goldenReady(surface, combination)) return false;
+    markTestSkipped(goldenSkipReason(surface, combination));
+    return true;
+  }
+
   for (final combination in kFourCombinations) {
     testWidgets(
       'the customer card renders as its baseline — ${combination.name}',
       (tester) async {
+        if (skipUnlessCaptured('customer-card', combination)) return;
+
         pinGoldenSurface(tester);
 
         await tester.pumpWidget(goldenHost(
@@ -87,12 +104,13 @@ void main() {
         );
       },
       tags: const <String>['golden'],
-      skip: !goldenReady('customer-card', combination),
     );
 
     testWidgets(
       'the delivery-man card renders as its baseline — ${combination.name}',
       (tester) async {
+        if (skipUnlessCaptured('delivery-boy-card', combination)) return;
+
         pinGoldenSurface(tester);
 
         await tester.pumpWidget(goldenHost(
@@ -111,7 +129,6 @@ void main() {
         );
       },
       tags: const <String>['golden'],
-      skip: !goldenReady('delivery-boy-card', combination),
     );
   }
 }

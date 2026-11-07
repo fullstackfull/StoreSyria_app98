@@ -9,7 +9,10 @@ name: CI
 #
 #   pubspec.lock is installable    -- blocking. NEW, and the one that makes
 #                                     every number below mean something.
-#   flutter test                   -- blocking, must be 100%. MEASURED 1165/1165.
+#   flutter test                   -- blocking, must be 100%. THE FIGURE LIVES BESIDE THE
+#                                     STEP, NOT HERE: this line carried 1165 while the step's
+#                                     own comment declared 1165 stale, so the file disagreed
+#                                     with itself in two places. See "flutter test" below.
 #   flutter analyze errors         -- blocking, must be 0. MEASURED 0.
 #   flutter analyze warnings       -- blocking, must be 0. MEASURED 0.
 #   flutter analyze infos          -- RATCHET at 248: may fall, never rise.
@@ -131,7 +134,7 @@ name: CI
 #     flutter pub get --enforce-lockfile  -> "Got dependencies!", exit 0
 #     flutter pub get, run twice          -> pubspec.lock byte-identical
 #     flutter analyze                     -> 248 issues, 0 errors, 0 warnings
-#     flutter test                        -> 1165/1165
+#     flutter test                        -> 1165/1165  (at the time; see the step's own note)
 #   and the lock is still byte-identical after analyze and test, which is why
 #   the containment step below can now allow exactly ONE file to change.
 #
@@ -314,7 +317,7 @@ jobs:
 
       - name: flutter test
         # Must be 100%. There is no allowance here and no continue-on-error:
-        # the suite measures 1165/1165 on this SDK. It was 217 when this job
+        # the suite measured 1165/1165 on this SDK WHEN THIS WAS WRITTEN. It was 217 when this job
         # was written; the response-shape and release-posture work took it to
         # 1104, the temp-directory race test to 1105, and this closure cycle
         # added 60 on top of that:
@@ -471,7 +474,7 @@ jobs:
 
       - name: Capture the baselines
         # --tags golden selects exactly the pixel cases, so nothing else in the
-        # 1165-test suite is touched. --update-goldens makes
+        # rest of the suite is touched. --update-goldens makes
         # `goldenReady()` return true regardless of whether a file exists, which
         # is what lets an uncaptured case run here and skip everywhere else.
         run: flutter test --tags golden --update-goldens --reporter expanded
