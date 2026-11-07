@@ -194,9 +194,18 @@ void main() {
           reason: 'the captured PNGs must leave CI as an artifact a human downloads and reviews. A '
               'job that committed them would be the agent approving its own baselines');
 
-      expect(workflowCode.contains('git commit') && workflowCode.contains('--update-goldens'), isFalse,
-          reason: 'the workflow both captures baselines and commits — route 1 step 2 is a human '
-              'review, and this would bypass it');
+      // SCOPED TO THE CAPTURE JOB, not the whole file. The previous form asked whether
+      // `git commit` and `--update-goldens` both appear ANYWHERE in ci.yml, so an unrelated
+      // `git commit` added to any other job would have failed it, and — worse — the real question
+      // (does the job that captures also commit?) was never asked. Found by an adversarial review.
+      final captureJobBody = workflowCode.contains('  goldens:')
+          ? workflowCode.substring(workflowCode.indexOf('  goldens:'))
+          : '';
+      expect(captureJobBody, isNot(isEmpty),
+          reason: 'the `goldens:` capture job is gone from ci.yml');
+      expect(captureJobBody.contains('git commit') || captureJobBody.contains('git push'), isFalse,
+          reason: 'the CAPTURE JOB commits or pushes. Route 1 step 2 is a human review of the '
+              'images, and a job that commits them is the automation approving its own baselines');
     });
 
     test('THE EXISTING BLOCKING GATE IS NOT NARROWED', () {
@@ -223,7 +232,13 @@ void main() {
           .where((f) => f.path.endsWith('_golden_test.dart'));
 
       for (final file in files) {
-        final source = file.readAsStringSync();
+        // COMMENTS STRIPPED HERE TOO. Counting `matchesGoldenFile` in RAW source means a mention
+        // in a docstring inflates the expectation and the test fails for a reason that has nothing
+        // to do with tagging — the mirror image of the dart_test.yaml trap above.
+        final source = file
+            .readAsLinesSync()
+            .where((l) => !l.trimLeft().startsWith('//'))
+            .join('\n');
         final goldenCalls = RegExp('matchesGoldenFile').allMatches(source).length;
         final tags = RegExp(r"tags:\s*const\s*<String>\[\s*'golden'\s*\]")
             .allMatches(source)
@@ -241,7 +256,26 @@ void main() {
       expect(config.existsSync(), isTrue,
           reason: 'dart_test.yaml must declare the `golden` tag. An undeclared tag makes '
               '`--tags golden` print a warning and, with the runner configured strictly, fail');
-      expect(config.readAsStringSync(), contains('golden'));
+
+      // COMMENTS STRIPPED, AND THE DECLARATION MATCHED STRUCTURALLY. The first version asserted
+      // `contains('golden')` over the whole file — and dart_test.yaml's own comments say the word
+      // "golden" five times explaining what the tag is for, so the assertion passed whether or not
+      // the declaration existed. Delete the `tags:` block and it still went green. That is the
+      // same prose trap this file already fixed for its ci.yml assertions, repeated six tests
+      // later. Found by an adversarial review of this change.
+      final declarations = config
+          .readAsLinesSync()
+          .where((l) => !l.trimLeft().startsWith('#'))
+          .join('\n');
+
+      expect(
+        RegExp(r'^\s*tags\s*:\s*$', multiLine: true).hasMatch(declarations)
+            && RegExp(r'^\s+golden\s*:', multiLine: true).hasMatch(declarations),
+        isTrue,
+        reason: 'dart_test.yaml no longer DECLARES a `golden:` entry under `tags:` — the word may '
+            'still appear in its comments, which is what the previous version of this assertion '
+            'was matching. Live YAML:\n$declarations',
+      );
     });
   });
 }

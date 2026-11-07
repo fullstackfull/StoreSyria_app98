@@ -190,7 +190,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # THE EVENT IS PART OF THE GROUP, and leaving it out was a real hazard introduced by adding
+  # `workflow_dispatch` above. With a group of `ci-<ref>` alone, triggering a baseline CAPTURE on a
+  # branch would join the same group as that branch's running pull-request CI and, with
+  # `cancel-in-progress: true`, KILL IT -- so asking for pictures would silently destroy a test
+  # verdict somebody was waiting on. Including `github.event_name` keeps the behaviour that matters
+  # (two pull_request runs on one ref still cancel each other) and stops a manual capture from
+  # cancelling anything. Found by an adversarial review of the change that added the capture job.
+  group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -491,7 +498,13 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: golden-baselines-${{ github.sha }}
-          path: test/golden/goldens/
+          # *.png, NOT THE DIRECTORY -- and this is a guard that had already stopped working.
+          # `if-no-files-found: error` is here so a capture that produced nothing fails loudly
+          # instead of uploading an empty artifact somebody then "reviews". But the directory also
+          # holds a committed README.md explaining why it has no images, so pointing the upload at
+          # the directory meant it ALWAYS found a file and the guard could never fire again.
+          # Found by an adversarial review of the change that added that README.
+          path: test/golden/goldens/*.png
           if-no-files-found: error
           retention-days: 30
 
