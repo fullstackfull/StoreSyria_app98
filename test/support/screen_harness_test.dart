@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/customers/customer_controller.dart';
 import 'package:store_go_app/view/new_widgets/shimmer.dart';
@@ -373,4 +374,67 @@ void main() {
       );
     });
   }
+
+  // ===============================================================================================
+  //  THE ZONE, AND WHAT ESCAPES IT
+  // ===============================================================================================
+
+  testWidgets('a fetch started AFTER pumpScreen returns escapes the stub unless wrapped',
+      (tester) async {
+    /// `http.runWithClient` is `runZoned` with a zone value, so the stub lives exactly as long as
+    /// the call that installed it. [pumpScreen] returns, the zone unwinds, and anything the test
+    /// drives afterwards — a filter tap, a second page, a pull-to-refresh — reaches the REAL
+    /// client.
+    ///
+    /// It fails silently in the worst way: the request never lands in `api.calls`, so an assertion
+    /// waiting for it reports that the SCREEN never made the call. That cost a wrong diagnosis
+    /// once; this is the measurement, so the next person reads it instead of repeating it.
+    final api = ApiStub()..on('customerlist', customerPage());
+
+    await pumpScreen(tester, const CustomerScreen(), api: api, register: () {
+      Get.put(CustomerController());
+    });
+
+    final duringMount = api.calls.length;
+    expect(duringMount, greaterThan(0), reason: 'premise: the mount itself was not intercepted');
+
+    /// Outside the zone. `NetworkHttps` reaches `package:http`'s own client, which in a widget
+    /// test answers 400 without touching the network — the point is only that the STUB did not
+    /// see it.
+    await http.get(Uri.parse('https://storesyria.com/api/admin/customerlist'));
+    expect(api.calls.length, duringMount,
+        reason: 'the stub recorded a request made outside its zone, so this trap no longer '
+            'exists and `runWithApi` may be unnecessary');
+
+    /// Inside, via the helper.
+    await runWithApi(api, () async {
+      await http.get(Uri.parse('https://storesyria.com/api/admin/customerlist'));
+    });
+    expect(api.calls.length, duringMount + 1,
+        reason: 'runWithApi did not reinstall the stub, so no post-mount interaction can be '
+            'driven against it');
+  });
+
+  testWidgets('recorded calls keep the query string, so one endpoint can be told from another',
+      (tester) async {
+    /// `calls` used to record `url.path` alone. `on()` matched against the FULL url even then, so
+    /// a rule keyed on `page=2` answered correctly while `sawRequestFor('page=2')` was false —
+    /// the stub working and the assertion claiming the request never happened. Everything that
+    /// distinguishes one call to an endpoint from another lives in the query: the page, the
+    /// status filter, the date range.
+    final api = ApiStub()..on('customerlist', customerPage());
+
+    await pumpScreen(tester, const CustomerScreen(), api: api, register: () {
+      Get.put(CustomerController());
+    });
+
+    await runWithApi(api, () async {
+      await http.get(Uri.parse('https://storesyria.com/api/admin/orderlist?store_id=1&page=2'));
+    });
+
+    expect(api.sawRequestFor('page=2'), isTrue,
+        reason: 'the query string is being dropped from `calls` again. Recorded: ${api.calls}');
+    expect(api.calls.last, contains('?'),
+        reason: 'the recorded call carries no query at all: ${api.calls.last}');
+  });
 }

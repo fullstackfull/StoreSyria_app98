@@ -164,11 +164,18 @@ class ApiStub {
 
   final List<_StubRule> _rules = <_StubRule>[];
 
-  /// Every request the screen made, as `METHOD /path`, in order.
+  /// Every request the screen made, as `METHOD /path?query`, in order.
   ///
   /// Recording them is not decoration: a screen that fetches nothing and a screen whose fetch was
   /// never intercepted look identical on screen. This is how a test tells them apart, and every
   /// test below asserts on it before asserting on pixels.
+  ///
+  /// **THE QUERY STRING IS PART OF IT.** This used to record `request.url.path` alone, which drops
+  /// everything that distinguishes one call to an endpoint from another — the page, the status
+  /// filter, the date range. `on()` matched against the full URL even then, so a rule keyed on
+  /// `page=2` answered correctly while `sawRequestFor('page=2')` was false: the stub was working
+  /// and the assertion said the request had never happened. Measured while driving the orders list
+  /// to a second page.
   final List<String> calls = <String>[];
 
   /// Answer any request whose path contains [pathFragment] with [body].
@@ -184,7 +191,11 @@ class ApiStub {
   bool sawRequestFor(String pathFragment) => calls.any((call) => call.contains(pathFragment));
 
   http.Client client() => MockClient((request) async {
-        calls.add('${request.method} ${request.url.path}');
+        calls.add(
+          request.url.query.isEmpty
+              ? '${request.method} ${request.url.path}'
+              : '${request.method} ${request.url.path}?${request.url.query}',
+        );
 
         for (final rule in _rules) {
           if (request.url.path.contains(rule.pathFragment) ||
@@ -271,6 +282,30 @@ Future<void> drainToasts(WidgetTester tester) =>
 // =================================================================================================
 //  THE PUMP ITSELF
 // =================================================================================================
+
+/// Runs [body] with [api] answering the network, for work done AFTER [pumpScreen] has returned.
+///
+/// **THIS IS NOT OPTIONAL FOR POST-MOUNT INTERACTIONS, AND LEAVING IT OUT FAILS QUIETLY.**
+/// [pumpScreen] installs the stub by calling `http.runWithClient`, which is `runZoned` with a zone
+/// value — so the stub is in force only for the duration of that call. A fetch triggered after it
+/// returns (tapping a filter, scrolling to page 2, pulling to refresh, calling a controller method
+/// directly) runs in the ORIGINAL zone and goes to the real `http` client.
+///
+/// What that looks like when it happens: the request never appears in `api.calls`, so a `pumpUntil`
+/// waiting on it times out saying the screen never made the call — which reads as "the screen
+/// stopped fetching" rather than "the test lost the stub". Measured while driving the orders list
+/// to a second page; `flutter_test` also prints its "At least one test in this suite creates an
+/// HttpClient" warning, which is the real tell.
+///
+/// ```dart
+/// await pumpScreen(tester, const OrderScreen(), api: api, register: ...);
+/// await runWithApi(api, () async {
+///   await controller.getOrderData(2);
+///   await pumpFrames(tester);
+/// });
+/// ```
+Future<T> runWithApi<T>(ApiStub api, Future<T> Function() body) =>
+    http.runWithClient(body, api.client);
 
 /// Mount [screen] in the app's real shell, in [combination], with [api] answering the network.
 ///
