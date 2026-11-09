@@ -7,7 +7,10 @@ import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
 import 'package:store_go_app/view/new_widgets/search_widget.dart';
 import 'package:store_go_app/view/new_widgets/shimmer.dart';
 import 'package:store_go_app/view/new_widgets/status_pill.dart';
+import 'package:store_go_app/view/widget/app_dialog.dart';
+import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_button.dart';
+import 'package:store_go_app/view/widget/common_drop_down_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 
 import '../support/golden_harness.dart';
@@ -122,6 +125,59 @@ void main() {
         children: <Widget>[
           specimen('active', statusPill(label: 'active'.tr, isActive: true)),
           specimen('inactive', statusPill(label: 'inactive'.tr, isActive: false)),
+        ],
+      ),
+    ),
+    _Gallery(
+      surface: 'flutter-component-appbar',
+      label: 'app bar',
+      build: () => Column(
+        children: <Widget>[
+          // `simpleAppBar` reads `Theme.of(Get.context!)`, so it needs the harness's shell to be
+          // mounted -- which it is, since the gallery runs inside `pumpScreen`.
+          // KEYS COPIED FROM REAL CALL SITES. Every `simpleAppBar` in the app passes snake_case
+          // keys -- `all_categories`, `add_category`, `product_details` -- and the first version
+          // of this specimen invented `'New Order'` and `'Analytics'`, which are not keys at all.
+          // They rendered as English in the Arabic capture and looked like a missing translation
+          // in the component. The specimen was wrong, which is the same mistake the
+          // StaleDataNotice specimen made.
+          specimen('with a back control and an action',
+              simpleAppBar(isBack: true, title: 'all_categories'.tr, label: 'add_category'.tr,
+                  onNewLabelTap: () {})),
+          specimen('title only',
+              simpleAppBar(title: 'product_details'.tr, label: null, onNewLabelTap: () {})),
+        ],
+      ),
+    ),
+    _Gallery(
+      surface: 'flutter-component-dropdown',
+      label: 'dropdown',
+      build: () => Column(
+        children: <Widget>[
+          specimen('with a selection', commonDropdownButtonWidget<String>(
+            value: 'Percentage',
+            labelText: 'charges_type'.tr,
+            list: const <String>['Percentage', 'Flat'],
+            itemLabel: (v) => v,
+            onChanged: (_) {},
+          )),
+          specimen('empty', commonDropdownButtonWidget<String>(
+            labelText: 'charges_type'.tr,
+            list: const <String>['Percentage', 'Flat'],
+            itemLabel: (v) => v,
+            onChanged: (_) {},
+          )),
+        ],
+      ),
+    ),
+    _Gallery(
+      surface: 'flutter-component-dialog-button',
+      label: 'dialog button',
+      build: () => Column(
+        children: <Widget>[
+          // `AppDialog` opens an overlay, which a static gallery cannot hold; its BUTTON is the
+          // part that ships inside the dialog and is a row of its own in the inventory.
+          specimen('AppButton', AppButton(text: 'delete'.tr, onPressed: () {})),
         ],
       ),
     ),
