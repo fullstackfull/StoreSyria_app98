@@ -373,6 +373,8 @@ const Map<String, String> en = {
   "Tax": "Tax",
   // Paired with the new "Name" entry in ar.dart — `translation_keys_test.dart` requires both, and
   // caught this one missing on the first full run after the Arabic side was added.
+  // Paired with the new "Overview" entry in ar.dart.
+  "Overview": "Overview",
   "Name": "Name",
   "Amount": "Amount",
   "Action": "Action",

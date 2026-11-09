@@ -60,6 +60,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:store_go_app/core/controller/setting_controller/theme_controller.dart';
 import 'package:store_go_app/core/controller/home_controller/store_change_service.dart';
 import 'package:store_go_app/core/permissions/merchant_permissions.dart';
 import 'package:store_go_app/main.dart' as app;
@@ -357,6 +358,27 @@ Future<void> pumpScreen(
         'will throw `"Foo" not found`. Use a block body instead: '
         '`register: () { Get.put(Foo()); }`.',
       );
+    }
+
+    /// ALIGN THE APP'S OWN THEME STATE WITH THE COMBINATION.
+    ///
+    /// **Without this, a "dark" mount renders HALF dark and the capture is a lie.** Many screens
+    /// do not ask `Theme.of(context).brightness`; they build through
+    /// `GetBuilder<ThemeController>` and branch on `themeController.isDark.value`
+    /// (`home_screen.dart:81`). That controller is whatever the test registered, and
+    /// `ThemeController.onInit` seeds `isDark` from `Prefs.getBool(...)` — **false** in a fresh
+    /// harness — so it stayed light while `theme:` below was dark.
+    ///
+    /// Measured on the dashboard: `themeController.isDark=false` with
+    /// `Theme.brightness=Brightness.dark`, and the store-selector row rendered its LIGHT fill
+    /// (`#FFFFFF`) inside the dark page. That was nearly written up as a white-surface-in-dark
+    /// defect; it was this.
+    ///
+    /// The `AppColor` statics need no help here: `appTheme()` below reads `ThemeController.theme`,
+    /// whose getter applies `AppDarkTheme.darkColor()` / `AppLightTheme.lightThemeColor()` as a
+    /// side effect, and it runs after this.
+    if (Get.isRegistered<ThemeController>()) {
+      Get.find<ThemeController>().isDark.value = combination.dark;
     }
 
     await tester.pumpWidget(

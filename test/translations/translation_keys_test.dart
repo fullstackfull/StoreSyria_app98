@@ -106,7 +106,6 @@ const Set<String> knownUntranslatedKeys = <String>{
     'No data',
     'No_payment_methods_available',
     'Other',
-    'Overview',
     'Please fill all field',
     'Return Order Duration',
     'Top links',

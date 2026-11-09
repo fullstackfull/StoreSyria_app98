@@ -368,6 +368,10 @@ const Map<String, String> ar = {
   // GetX fell back to the key and the Arabic build printed the English word between two translated
   // headers. The Laravel side has used this exact wording for the same column since Phase 01
   // (`resources/lang/ar.json`), so the two surfaces now agree rather than nearly agree.
+  // P2.5-FLUTTER-HOME-TILES. `'Overview'.tr` is the section heading on the merchant's
+  // home screen and on the statistics screen, and it had no entry in either file, so the
+  // Arabic build printed the English key above three Arabic tile labels.
+  "Overview": "نظرة عامة",
   "Name": "الاسم",
   "Amount": "القيمة",
   "Action": "الإجراء",
