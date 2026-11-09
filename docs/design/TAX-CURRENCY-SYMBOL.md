@@ -1,6 +1,33 @@
 # A fixed-amount tax has no currency, because the server never sends one
 
-**Status: a MEASURED gap with a server-side fix, deliberately NOT applied.** Adding a field to a
+> ## FIXED — 2026-11-09, owner-approved (Decision 2)
+>
+> `taxlist` now sends **`currency_symbol`** beside the pagination keys, under the same name
+> `ProductList` already uses. Every key it sent before is still sent, so the addition is
+> backward-compatible for any existing consumer.
+>
+> The symbol is resolved from the store's active `currency_rates` row through a named helper,
+> `DashboardController::storeCurrencySymbol()`, rather than a fourth copy of a block that already
+> appears three times. There is no hard-coded `$`: a store configured for USD gets `$`, and an
+> unconfigured non-USD store gets its currency CODE — a poor symbol, but an honest one.
+>
+> A **percentage** tax gets no symbol, because a rate has no currency. A server that predates the
+> field makes the row print the bare amount rather than guess, because a wrong symbol on a money
+> figure is worse than none — which was the whole lesson of the `$`.
+>
+> Pinned: `tests/Feature/ApiContract/TaxListCurrencyContractTest.php` (5 tests, including that the
+> symbol comes from the CALLER'S store — `currency_rates` is not in `scoped_models`, so the store
+> predicate is the only thing preventing a cross-tenant read) and the three new cases in
+> `test/screens/tax_label_correctness_test.dart`.
+>
+> Evidence: `flutter-tax-list_en_ltr_light.png` under
+> `syriastore98/docs/development/phase-2.5/evidence/flutter-ops-2026-11-09/after/` shows
+> `25 ل.س` on the fixed tax and `11%` on the percentage one.
+>
+> **`shippinglist` still has the sibling gap** this file recorded: its rows carry an `amount` the
+> screen never displays. That was not in the approved decision and is not claimed here.
+
+**Status (historical): a MEASURED gap with a server-side fix, deliberately NOT applied.** Adding a field to a
 public API response is a compatibility change, and the owner's standing constraints reserve those.
 Found 2026-11-09 by the Phase 2.5 screen harness, on the first populated capture of the tax screen.
 

@@ -1,6 +1,27 @@
 # The admin app shows no price for any product that has no discount
 
-**Status: a MEASURED finding with a one-line fix, deliberately NOT applied.** It changes which
+> ## FIXED — 2026-11-09, owner-approved (Decision 1)
+>
+> The card reads **`final_price`**, and **no API change was needed**: the field was already in the
+> response and already resolved server-side. `ProductList` strips the expensive `final_price`
+> append and sets the field from `getRawOriginal('final_price') ?? getRawOriginal('price')` — the
+> first term is always null, because `final_price` is an accessor on `Product` and a column only
+> on `orders` — so it resolves to the product's own `price`, exactly what the merchant web prints.
+>
+> The two surfaces now agree **by reading the same field**. No pricing calculation changed, no
+> public contract changed, and `sale_price` is never substituted.
+>
+> Pinned on both sides: `tests/Feature/ApiContract/ProductListPriceContractTest.php` (Laravel, 4
+> tests, including a premise that `products.final_price` must not become a real column) and
+> `test/screens/product_price_parity_test.dart` (Flutter, 3 tests, including that a DISCOUNTED
+> product still shows the regular price — because the web does, and resolving to the discount
+> would put the two surfaces back into disagreement).
+>
+> Evidence: `flutter-products-list_*` under
+> `syriastore98/docs/development/phase-2.5/evidence/flutter-harness-2026-11-09/after/` now shows
+> `150 $` and `85 $` where it showed em dashes.
+
+**Status (historical): a MEASURED finding with a one-line fix, deliberately NOT applied.** It changes which
 number a merchant sees on the product list, and the owner's standing constraints reserve "material
 changes to prices" for an owner decision. Found 2026-11-09 by the Phase 2.5 screen harness, on the
 first populated capture of the products screen.

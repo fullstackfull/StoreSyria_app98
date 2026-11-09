@@ -54,6 +54,10 @@ void main() {
   Map<String, Object?> paginated(List<Object?> rows) => <String, Object?>{
         'status': 1,
         'data': <String, Object?>{
+          // P2.5-TAX-CURRENCY: `taxlist` sends the store's symbol beside the pagination keys, so
+          // a fixed-amount tax can print its real unit. Harmless on the shipping page, which
+          // ignores it.
+          'currency_symbol': 'ل.س',
           'current_page': 1,
           'last_page': 1,
           'per_page': 10,

@@ -1,6 +1,30 @@
 # Copy deck — the untranslated merchant screens (Phase 2.5, P2.5-B-12 slice two)
 
-**This is a request for Arabic copy, not an engineering task.** Slice one is shipped: the
+> ## RESOLVED — 2026-11-09
+>
+> The owner authorised the copy in the Phase 2.5 final directive and it is written. **All 68
+> unique strings across the five screens below are translated**, at 76 call sites, and the keys
+> are in `lib/translations/ar.dart` and `en.dart`.
+>
+> Terminology follows the Laravel side's `resources/lang/ar.json` wherever that file already had
+> the term — Email, Mobile, City, Country, Zipcode, Full Name, Save Changes, Password — so the two
+> surfaces say the same word for the same thing.
+>
+> **`State` is the one entry where both surfaces had to move.** `ar.json` carried `الدولة`, which
+> means *country* and collides with `البلد`, so an Arabic merchant saw two differently-labelled
+> address fields meaning the same thing. Both now use **`المحافظة`**, the Syrian administrative
+> term, guarded by `tests/Unit/Localisation/AddressTerminologyTest.php` in the Laravel repository.
+>
+> Three rows below were already translated by the time the copy was written — this deck was
+> slightly stale on `Store Email Setting`, `Send Test Mail` and `Store Loyalty Program` — and their
+> established values were kept rather than replaced.
+>
+> Verified in the rendered UI, not only in the files: see §"What the merchant currently sees".
+> `Store information` is now **REDESIGNED AND VERIFIED** in the coverage matrix.
+>
+> The table below is kept as the record of what was asked for and what it was asked against.
+
+**This was a request for Arabic copy, not an engineering task.** Slice one is shipped: the
 nine labels whose Arabic already existed now render in Arabic. The strings below have **no
 Arabic copy anywhere in `lib/translations/ar.dart`**, and they cannot be converted without it.
 
