@@ -44,7 +44,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
     return Scaffold(
       backgroundColor: AppColor.cBackGround,
       appBar: simpleAppBar(
-          title: "Store Email Setting",
+          title: "Store Email Setting".tr,
           isBack: true,
           label: null,
           onNewLabelTap: () {  }),
@@ -59,8 +59,8 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                 children: [
                   AddProductTextField(
                     controller: emailSettingController.mailDriver,
-                    labelText: 'Mail Driver:',
-                    hintText: 'Enter Mail Driver',
+                    labelText: 'Mail Driver:'.tr,
+                    hintText: 'Enter Mail Driver'.tr,
                     validator: (value) {
                       return Validator.validateRequired(value!);
                     },
@@ -69,8 +69,8 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                   ),
                   AddProductTextField(
                     controller: emailSettingController.mailHost,
-                    labelText: 'Mail Host:',
-                    hintText: 'Mail Driver',
+                    labelText: 'Mail Host:'.tr,
+                    hintText: 'Mail Driver'.tr,
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       return Validator.validateRequired(value!);
@@ -80,8 +80,8 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                   ),
                   AddProductTextField(
                     controller: emailSettingController.mailPort,
-                    labelText: 'Mail Port:',
-                    hintText: 'Enter Mail Driver',
+                    labelText: 'Mail Port:'.tr,
+                    hintText: 'Enter Mail Driver'.tr,
                     validator: (value) {
                       return Validator.validateRequired(value!);
                     },
@@ -90,8 +90,8 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                   ),
                   AddProductTextField(
                     controller: emailSettingController.mailUserName,
-                    labelText: 'Mail Username:',
-                    hintText: 'Enter Mail Driver',
+                    labelText: 'Mail Username:'.tr,
+                    hintText: 'Enter Mail Driver'.tr,
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       return Validator.validateRequired(value!);
@@ -101,8 +101,8 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                   ),
                   AddProductTextField(
                     controller: emailSettingController.mailPassword,
-                    labelText: 'Mail Password:',
-                    hintText: 'Enter Password',
+                    labelText: 'Mail Password:'.tr,
+                    hintText: 'Enter Password'.tr,
                     validator: (value) {
                       return Validator.validateRequired(value!);
                     },
@@ -111,8 +111,8 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                   ),
                   AddProductTextField(
                     controller: emailSettingController.mailEncryption,
-                    labelText: 'Mail Encryption:',
-                    hintText: 'Enter Encryption',
+                    labelText: 'Mail Encryption:'.tr,
+                    hintText: 'Enter Encryption'.tr,
                     validator: (value) {
                       return Validator.validateRequired(value!);
                     },
@@ -121,8 +121,8 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                   ),
                   AddProductTextField(
                     controller: emailSettingController.mailFromAddress,
-                    labelText: 'Mail From Address:',
-                    hintText: 'Enter From Address',
+                    labelText: 'Mail From Address:'.tr,
+                    hintText: 'Enter From Address'.tr,
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       return Validator.validateRequired(value!);
@@ -132,8 +132,8 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                   ),
                   AddProductTextField(
                     controller: emailSettingController.mailFromName,
-                    labelText: 'Mail From Name:',
-                    hintText: 'Enter Mail Driver',
+                    labelText: 'Mail From Name:'.tr,
+                    hintText: 'Enter Mail Driver'.tr,
                     validator: (value) {
                       return Validator.validateRequired(value!);
                     },
@@ -145,7 +145,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                     children: [
                       Expanded(
                         child: CommonButton(
-                          title: 'Send Test Mail',
+                          title: 'Send Test Mail'.tr,
                           btnColor: AppColor.themeNavyBlueColor,
                           fontSize: 12,
                           textColor: AppColor.cWhite,
@@ -182,7 +182,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                              "Send Test Mail",
+                                              "Send Test Mail".tr,
                                               style: pRegular20.copyWith(
                                                 color: AppColor.cGreenFont,
                                               ),
@@ -192,8 +192,8 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                                             verticalSpace(10),
                                             AddProductTextField(
                                               controller: emailSettingController.emailController,
-                                              labelText: 'Email:',
-                                              hintText: 'Enter Email',
+                                              labelText: 'Email:'.tr,
+                                              hintText: 'Enter Email'.tr,
                                               keyboardType: TextInputType.emailAddress,
                                             ),
                                             verticalSpace(25),
@@ -220,7 +220,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                                                   Expanded(
                                                     flex: 2,
                                                     child: CommonIconButton(
-                                                      title: 'Send',
+                                                      title: 'Send'.tr,
                                                       iconData: DefaultImages.whiteDoneIcn,
                                                       onPressed: () {
                                                         if (emailSettingController.emailController.text.isNotEmpty) {
@@ -249,7 +249,7 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                       Expanded(
                         child: CommonIconButton(
                           iconData: DefaultImages.whiteDoneIcn,
-                          title: 'Save changes',
+                          title: 'Save changes'.tr,
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
                               if (Prefs.getBool(AppConstant.isDemoMode) == true) {

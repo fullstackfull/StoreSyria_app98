@@ -720,4 +720,93 @@ const Map<String, String> ar = {
   'page_views_between': 'مشاهدات الصفحات، من @from إلى @to',
   'plan_limit_unlimited': 'غير محدود',
   'page_views_no_period': 'مشاهدات الصفحات',
+
+  // ===============================================================================================
+  //  P2.5-COPY-DECK (2026-11-09) -- the 68 merchant strings that had no Arabic anywhere.
+  //
+  //  Owner-approved in the Phase 2.5 final directive. Recorded in
+  //  docs/development/phase-2.5/COPY-DECK-UNTRANSLATED-SCREENS.md, which existed because
+  //  a `.tr` lookup renders the RAW IDENTIFIER when its key is absent -- so converting a label whose
+  //  Arabic did not exist would have replaced a readable English word with `store_loyalty_program`.
+  //  The deck held the strings until the copy existed. It now does.
+  //
+  //  Terminology follows the Laravel side's resources/lang/ar.json wherever that file already had
+  //  the term, so the two surfaces say the same word for the same thing: Email, Mobile, City,
+  //  Country, Zipcode, Full Name, Save Changes, Password.
+  //
+  //  `State` is the ONE place they deliberately diverged and then converged: ar.json carried
+  //  "الدولة", which means country and collides with البلد, so a store-address form would have
+  //  shown two differently-labelled fields meaning the same thing. Both files now use المحافظة,
+  //  the Syrian administrative term.
+  //
+  //  Proper nouns stay in Latin script -- Facebook, Twitter / X, Instagram, WhatsApp, Telegram --
+  //  which is how Syrian merchants write them, and the mail-configuration VALUES are never
+  //  touched: only their labels are translated.
+  // ===============================================================================================
+
+  'No store information available': 'لا تتوفر معلومات عن المتجر',
+  'Store Name': 'اسم المتجر',
+  'Enter store name': 'أدخل اسم المتجر',
+  'Email': 'البريد الإلكتروني',
+  'Enter store email': 'أدخل البريد الإلكتروني للمتجر',
+  'Store URL': 'رابط المتجر',
+  'Enter store URL': 'أدخل رابط المتجر',
+  'Created At': 'تاريخ الإنشاء',
+  'Created at': 'تاريخ الإنشاء',
+  'Owner Information': 'معلومات المالك',
+  'Owner Name': 'اسم المالك',
+  'Enter owner name': 'أدخل اسم المالك',
+  'Owner Email': 'البريد الإلكتروني للمالك',
+  'Enter owner email': 'أدخل البريد الإلكتروني للمالك',
+  'Mobile': 'رقم الهاتف',
+  'Enter mobile number': 'أدخل رقم الهاتف',
+  'Enter city': 'أدخل المدينة',
+  'Country': 'البلد',
+  'Enter country': 'أدخل البلد',
+  'State': 'المحافظة',
+  'Enter state': 'أدخل المحافظة',
+  'Enter store address': 'أدخل عنوان المتجر',
+  'Zipcode': 'الرمز البريدي',
+  'Enter zipcode': 'أدخل الرمز البريدي',
+  'Full Address': 'العنوان الكامل',
+  'Full address': 'العنوان الكامل',
+  'Media': 'الوسائط',
+  'Invoice Logo': 'شعار الفاتورة',
+  'Store Image': 'صورة المتجر',
+  'Mail Driver:': 'مزود البريد:',
+  'Enter Mail Driver': 'أدخل مزود البريد',
+  'Mail Host:': 'خادم البريد:',
+  'Mail Driver': 'مزود البريد',
+  'Mail Port:': 'منفذ البريد:',
+  'Mail Username:': 'اسم مستخدم البريد:',
+  'Mail Password:': 'كلمة مرور البريد:',
+  'Enter Password': 'أدخل كلمة المرور',
+  'Mail Encryption:': 'تشفير البريد:',
+  'Enter Encryption': 'أدخل نوع التشفير',
+  'Mail From Address:': 'البريد المُرسِل:',
+  'Enter From Address': 'أدخل البريد المُرسِل',
+  'Mail From Name:': 'اسم المُرسِل:',
+  'Email:': 'البريد الإلكتروني:',
+  'Enter Email': 'أدخل البريد الإلكتروني',
+  'Send': 'إرسال',
+  'Save changes': 'احفظ التغييرات',
+  'My Account': 'حسابي',
+  'Account Information': 'معلومات الحساب',
+  'Update your personal information': 'حدّث معلوماتك الشخصية',
+  'Full Name': 'الاسم الكامل',
+  'Enter name': 'أدخل الاسم',
+  'Enter email': 'أدخل البريد الإلكتروني',
+  'Save Changes': 'احفظ التغييرات',
+  'Security': 'الأمان',
+  'Keep your account password secure': 'حافظ على أمان كلمة مرور حسابك',
+  'Current Password': 'كلمة المرور الحالية',
+  'New Password': 'كلمة المرور الجديدة',
+  'Update Password': 'تحديث كلمة المرور',
+  'Reward points on orders of \$1000': 'نقاط المكافأة على الطلبات بقيمة \$1000',
+  'Enter reward': 'أدخل عدد النقاط',
+  'Facebook link': 'رابط Facebook',
+  'Twitter / X link': 'رابط Twitter / X',
+  'Instagram link': 'رابط Instagram',
+  'WhatsApp link': 'رابط WhatsApp',
+  'Telegram link': 'رابط Telegram',
 };

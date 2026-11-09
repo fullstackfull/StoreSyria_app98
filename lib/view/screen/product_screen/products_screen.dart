@@ -694,7 +694,25 @@ class _ProductsScreenState extends State<ProductsScreen> with AutomaticKeepAlive
                                   imageUrl: product.coverImageUrl ?? '',
                                   categoryName: product.categoryName ?? '',
                                   productName: product.name ?? '',
-                                  price: "${product.salePrice?.toString() ?? ""}  ${productController.currencySymbol.value}",
+                                  // P2.5-FLUTTER-PRICE. READS `final_price`, THE SERVER'S OWN
+                                  // RESOLVED DISPLAY PRICE -- not `sale_price`.
+                                  //
+                                  // `sale_price` is the optional DISCOUNT: `->default(0)` in the
+                                  // products migration and validated `nullable|numeric|min:0|
+                                  // lte:price`. It is 0 for every product nobody has discounted,
+                                  // which is the DEFAULT state of every product, so this card
+                                  // rendered an em dash where the merchant web printed the price.
+                                  //
+                                  // `final_price` is already in the response and is already
+                                  // resolved server-side: `Api/DashboardController::ProductList`
+                                  // strips the expensive `final_price` append and sets the field
+                                  // from the product's own `price`, which is exactly what the web
+                                  // list and grid print (`ProductDataTable.php:68`,
+                                  // `product/list.blade.php:138`). So the two surfaces now show
+                                  // the same number by reading the same field, and no pricing
+                                  // calculation and no API contract changed.
+                                  price:
+                                      "${product.finalPrice?.toString() ?? ""}  ${productController.currencySymbol.value}",
                                   stock: product.productStock?.toString() ?? '-',
                                   stockStatus: product.stockStatus,
                                   // P2-07-10: the per-store threshold the web compares against,

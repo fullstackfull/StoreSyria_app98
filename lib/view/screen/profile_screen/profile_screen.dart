@@ -54,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Scaffold(
         backgroundColor: isDark ? DarkThemeColor.cBackGround : AppColor.cLight,
         appBar: simpleAppBar(
-          title: "My Account",
+          title: "My Account".tr,
           label: null,
           isBack: true,
           isBold: true,
@@ -418,16 +418,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return _sectionCard(
       isDark: isDark,
       icon: Icons.manage_accounts_outlined,
-      title: "Account Information",
-      subtitle: "Update your personal information",
+      title: "Account Information".tr,
+      subtitle: "Update your personal information".tr,
       child: Form(
         key: profileFormKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppTextField(
-              title: 'Full Name',
-              hint: 'Enter name',
+              title: 'Full Name'.tr,
+              hint: 'Enter name'.tr,
               icon: Icons.person_outline,
               controller: profileController.nameController,
               validator: (value) => Validator.validateName(value!, "Name"),
@@ -435,7 +435,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 16),
             AppTextField(
               title: 'email'.tr,
-              hint: 'Enter email',
+              hint: 'Enter email'.tr,
               icon: Icons.email_outlined,
               controller: profileController.emailController,
               keyboardType: TextInputType.emailAddress,
@@ -443,7 +443,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 22),
             AppButton(
-              text: "Save Changes",
+              text: "Save Changes".tr,
               isLoading: profileController.isLoading2.value,
               onPressed: () {
                 if (profileFormKey.currentState!.validate()) {
@@ -472,15 +472,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return _sectionCard(
       isDark: isDark,
       icon: Icons.shield_outlined,
-      title: "Security",
-      subtitle: "Keep your account password secure",
+      title: "Security".tr,
+      subtitle: "Keep your account password secure".tr,
       child: Form(
         key: formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppTextField(
-              title: 'Current Password',
+              title: 'Current Password'.tr,
               hint: '*************',
               icon: Icons.lock_outline,
               controller: profileController.oldPasswordController,
@@ -497,7 +497,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 16),
             AppTextField(
-              title: 'New Password',
+              title: 'New Password'.tr,
               hint: '*************',
               icon: Icons.lock_reset_outlined,
               controller: profileController.passwordController,
@@ -535,7 +535,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 22),
             AppButton(
-              text: "Update Password",
+              text: "Update Password".tr,
               isLoading: profileController.isLoading.value,
               onPressed: () {
                 if (formKey.currentState!.validate()) {

@@ -7,47 +7,45 @@ import 'package:store_go_app/view/screen/product_screen/products_screen.dart';
 import '../support/golden_harness.dart';
 import '../support/screen_harness.dart';
 
-/// P2.5-FLUTTER-PRICE — a product with no discount shows NO PRICE in the admin app.
+/// P2.5-FLUTTER-PRICE — FIXED. The product list shows the same price the merchant web shows.
 /// =================================================================================================
 ///
-/// **THIS FILE RECORDS CURRENT BEHAVIOUR. IT DOES NOT ENDORSE IT.** The repair changes which number
-/// a merchant sees on the product list, and the owner's standing constraints reserve "material
-/// changes to prices" for an owner decision. The finding is written up in
-/// `docs/design/PRODUCT-PRICE-PARITY.md`; this is the executable half, so that whoever takes the
-/// decision can see it happen rather than take it on trust, and so the day it is fixed this test
-/// fails and names itself.
+/// **THIS FILE USED TO RECORD THE DEFECT. IT NOW GUARDS THE FIX**, which is what its earlier header
+/// asked for: "the day it is fixed this test fails and names itself. Do not simply delete it."
 ///
-/// WHAT WAS MEASURED.
+/// THE DEFECT, for the record. The screen built the card's price from `salePrice` alone, and
+/// `sale_price` is the optional DISCOUNT — `->default(0)` in the products migration, validated
+/// `nullable|numeric|min:0|lte:price` (`Api/DashboardController.php:2869`). It is `0` for every
+/// product nobody has discounted, which is the default state of every product, and the card renders
+/// `displayPrice > 0 ? price : '—'`. So an ordinary catalogue showed **no prices at all** in the
+/// app while the web printed them correctly.
 ///
-/// The product card is handed its price by the screen, and the screen builds that string from
-/// `salePrice` alone (`products_screen.dart:697`):
+/// THE FIX IS TO READ THE FIELD THE SERVER ALREADY RESOLVES. `ProductList` sends `final_price`
+/// beside `price` and `sale_price`, and sets it from the product's own `price`: it strips the
+/// expensive `final_price` append and falls back through
+/// `getRawOriginal('final_price') ?? getRawOriginal('price')`, where the first is null because
+/// `final_price` is an accessor on `Product` and a column only on `orders`. That is the same number
+/// the merchant web prints (`ProductDataTable.php:68`, `product/list.blade.php:138`).
 ///
-///     price: "${product.salePrice?.toString() ?? ""}  ${productController.currencySymbol.value}"
+/// So the two surfaces now agree **by reading the same field**, no pricing calculation changed, and
+/// no API contract changed — the field was already there.
 ///
-/// The card then renders `displayPrice > 0 ? price : '—'` (`product_widget.dart:330`), where
-/// `displayPrice = parsePriceSafe(price)`.
-///
-/// `sale_price` IS THE OPTIONAL DISCOUNT, NOT THE SELLING PRICE. On the Laravel side it
-/// `->default(0)` (`2023_12_26_092822_create_products_table.php:32`) and is validated
-/// `nullable|numeric|min:0|lte:price` (`Api/DashboardController.php:2869`), and the host resolves
-/// the effective price as "sale_price when set, otherwise price"
-/// (`app/Models/Product.php:323-324`).
-///
-/// SO THE TWO SURFACES DISAGREE. The merchant WEB product list and grid print `$product->price`
-/// (`ProductDataTable.php:68`, `product/list.blade.php:138`). The Flutter list prints `sale_price`.
-/// For every product without a discount — which is the default state of every product — the web
-/// shows the price and the app shows an em dash.
-///
-/// A dash is not a rounding difference or a formatting quibble: it is the absence of the single
-/// most important number on a product card, on the screen a merchant uses to check their catalogue.
+/// `tests/Feature/Api/ProductListPriceContractTest.php` in the Laravel repository pins the server
+/// half, so the field cannot quietly stop being sent or stop equalling `price`.
 void main() {
   setUpAll(initScreenHarness);
   tearDownAll(disposeScreenHarness);
   tearDown(resetScreenHarness);
 
-  /// One product priced 150 with NO discount — `sale_price: 0`, which is the column's default and
-  /// therefore the state of every product nobody has discounted.
-  Map<String, Object?> undiscountedProduct() => <String, Object?>{
+  /// One product priced 150 with NO discount — `sale_price: 0`, the column's default and therefore
+  /// the state of every product nobody has discounted. `final_price` carries the resolved display
+  /// price, exactly as the server sends it.
+  Map<String, Object?> product({
+    required Object price,
+    required Object salePrice,
+    required Object finalPrice,
+  }) =>
+      <String, Object?>{
         'status': 1,
         'data': <String, Object?>{
           'currency_symbol': r'$',
@@ -60,9 +58,9 @@ void main() {
               'id': 1,
               'name': 'قميص قطن دمشقي',
               'product_code': 'SS-1001',
-              'price': 150,
-              'sale_price': 0,
-              'final_price': 150,
+              'price': price,
+              'sale_price': salePrice,
+              'final_price': finalPrice,
               'product_stock': 12,
               'track_stock': 1,
               'status': 1,
@@ -73,9 +71,8 @@ void main() {
         },
       };
 
-  testWidgets('RECORDED DEFECT: an undiscounted product renders an em dash instead of its price',
-      (tester) async {
-    final api = ApiStub()..on('productlist', undiscountedProduct());
+  Future<ProductController> pumpProducts(WidgetTester tester, Map<String, Object?> body) async {
+    final api = ApiStub()..on('productlist', body);
     final controller = ProductController();
 
     await pumpScreen(
@@ -92,64 +89,65 @@ void main() {
       () => controller.productList.isNotEmpty,
       reason: 'the product never loaded, so nothing about its price was measured',
     );
-
     await drainToasts(tester);
 
     expect(tester.takeException(), isNull);
+    return controller;
+  }
 
-    // The premise: the product really does carry a price, and really has no discount.
+  testWidgets('an UNDISCOUNTED product shows its price, not an em dash', (tester) async {
+    /// The case the defect was about: the default state of every product.
+    final controller = await pumpProducts(
+      tester,
+      product(price: 150, salePrice: 0, finalPrice: 150),
+    );
+
+    // The premise: the fixture really does carry a price and really has no discount.
     expect(controller.productList.first.price, '150',
-        reason: 'premise: the fixture\'s regular price parsed');
-    expect(
-      controller.productList.first.salePrice,
-      anyOf('0', '', isNull),
-      reason: 'premise: the fixture carries no discount',
-    );
+        reason: 'premise: the regular price did not parse');
+    expect(controller.productList.first.salePrice, anyOf('0', '0.00', '', isNull),
+        reason: 'premise: the fixture carries no discount');
 
-    // And the card shows neither.
-    expect(
-      find.text('—'),
-      findsWidgets,
-      reason: 'the em dash is gone — if the card now shows the price, this recorded defect is '
-          'FIXED and this test should be replaced with one asserting the correct number. Do not '
-          'simply delete it: the point is that the fix is deliberate and noticed.',
-    );
+    expect(find.textContaining('150'), findsWidgets,
+        reason: 'an undiscounted product shows no price. The card reads `final_price`, which the '
+            'server resolves from the product\'s own price — the same number the merchant web '
+            'prints. If this fails, the screen has gone back to reading `sale_price`, or the '
+            'server stopped sending `final_price`.');
 
-    expect(
-      find.textContaining('150'),
-      findsNothing,
-      reason: 'the price 150 is now rendered somewhere on the card. See above — this test exists '
-          'to notice exactly that change.',
-    );
+    expect(find.text('—'), findsNothing,
+        reason: 'the em dash is back on a product that has a price');
   });
 
-  testWidgets('and a DISCOUNTED product does show its discounted price', (tester) async {
-    /// The control. Without it, "the card shows a dash" could be read as "the card never shows a
-    /// price at all", which would be a different and larger defect. The card works; what it is
-    /// given is wrong.
-    final discounted = undiscountedProduct();
-    final rows = ((discounted['data']! as Map<String, Object?>)['data']! as List).cast<Map<String, Object?>>();
-    rows.first['sale_price'] = 120;
-
-    final api = ApiStub()..on('productlist', discounted);
-    final controller = ProductController();
-
-    await pumpScreen(
+  testWidgets('a DISCOUNTED product shows the resolved price the web shows', (tester) async {
+    /// Parity, not cleverness. The merchant web prints `$product->price` on both its list and its
+    /// grid even when a discount exists, and `ProductList` resolves `final_price` from that same
+    /// `price`. So a discounted product shows **150** on both surfaces, and the app must not
+    /// invent a struck-through treatment that would make the two disagree again — differently.
+    final controller = await pumpProducts(
       tester,
-      const ProductsScreen(isBack: false),
-      api: api,
-      register: () {
-        Get.put(controller);
-      },
+      product(price: 150, salePrice: 120, finalPrice: 150),
     );
 
-    await pumpUntil(tester, () => controller.productList.isNotEmpty,
-        reason: 'the discounted product never loaded');
+    expect(controller.productList.first.salePrice, '120',
+        reason: 'premise: the discount did not parse');
 
-    await drainToasts(tester);
+    expect(find.textContaining('150'), findsWidgets,
+        reason: 'the card no longer shows the resolved display price for a discounted product');
+    expect(find.textContaining('120'), findsNothing,
+        reason: 'the card is showing the DISCOUNT as the price. `sale_price` is the discount, and '
+            'the merchant web shows the regular price; showing 120 here puts the two surfaces back '
+            'into disagreement.');
+  });
 
-    expect(find.textContaining('120'), findsWidgets,
-        reason: 'the card does render a price when sale_price carries one, so the defect is in '
-            'WHICH field the screen reads, not in the card');
+  testWidgets('the card still falls back to an em dash when there really is no price',
+      (tester) async {
+    /// The control, and the reason the em dash exists at all. `displayPrice > 0 ? price : '—'`
+    /// is correct behaviour for a product with no price; the defect was never the card, it was
+    /// which field the card was handed.
+    await pumpProducts(tester, product(price: 0, salePrice: 0, finalPrice: 0));
+
+    expect(find.text('—'), findsWidgets,
+        reason: 'a product with no price at all should still render the em dash rather than a '
+            'bare currency symbol');
   });
 }

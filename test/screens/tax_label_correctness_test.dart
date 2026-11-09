@@ -50,6 +50,8 @@ void main() {
   Map<String, Object?> taxes() => <String, Object?>{
         'status': 1,
         'data': <String, Object?>{
+          // P2.5-TAX-CURRENCY: sent beside the pagination keys by TaxList.
+          'currency_symbol': 'ل.س',
           'current_page': 1,
           'last_page': 1,
           'per_page': 10,
@@ -107,15 +109,55 @@ void main() {
             'merchant their tax class is a discount is the kind of wrong that gets acted on.');
   });
 
-  testWidgets('a fixed tax does not invent a dollar sign', (tester) async {
+  testWidgets('a fixed tax shows the STORE\'s currency, not an invented dollar sign',
+      (tester) async {
+    /// P2.5-TAX-CURRENCY, owner-approved. `taxlist` now sends `currency_symbol`, resolved from
+    /// the store's active currency rate, so the row can print the real unit. The `$` this test
+    /// originally forbade is still forbidden — it was never a default, it was invented.
     await pumpTax(tester, combination: englishLight);
 
     expect(find.textContaining('25'), findsOneWidget,
         reason: 'the amount itself must still be shown');
+    expect(find.textContaining('25 ل.س'), findsOneWidget,
+        reason: 'the fixed-amount row is not showing the store currency the response carries. '
+            'The symbol is read from `currency_symbol`; nothing in this app caches a store '
+            'currency, so if this fails the field is not reaching the screen.');
     expect(find.textContaining(r'$'), findsNothing,
-        reason: 'the fixed-amount row still prints a US dollar sign. The taxlist endpoint sends no '
-            'currency at all, so this symbol was invented and is wrong for every store that does '
-            'not price in dollars — which is every store this product is for.');
+        reason: 'the hard-coded US dollar sign is back');
+  });
+
+  testWidgets('a PERCENTAGE tax shows no currency, because a rate has no currency',
+      (tester) async {
+    /// The control that keeps the fix honest. A percentage is dimensionless; appending a currency
+    /// to it would be a new wrong unit in place of the old one.
+    await pumpTax(tester, combination: englishLight);
+
+    expect(find.textContaining('11%'), findsOneWidget);
+    expect(find.textContaining('11% ل.س'), findsNothing,
+        reason: 'a percentage rate is being given a currency symbol');
+  });
+
+  testWidgets('an older server that sends no currency shows the number alone', (tester) async {
+    /// BACKWARD COMPATIBILITY, and the reason there is no fallback. The field is additive, so a
+    /// server that predates it sends no key. The row then prints the bare amount rather than
+    /// guessing — a wrong symbol on a money figure is worse than no symbol, which is the whole
+    /// lesson of the `$`.
+    final withoutSymbol = taxes();
+    (withoutSymbol['data']! as Map<String, Object?>).remove('currency_symbol');
+
+    final api = ApiStub()..on('taxlist', withoutSymbol);
+    await pumpScreen(tester, const TaxScreen(), api: api, combination: englishLight);
+    await pumpUntil(
+      tester,
+      () => find.textContaining('Municipality fee').evaluate().isNotEmpty,
+      reason: 'the tax rows never rendered',
+    );
+    await drainToasts(tester);
+
+    expect(find.text('25'), findsOneWidget,
+        reason: 'with no currency in the response the row should print the bare amount');
+    expect(find.textContaining(r'$'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('the Arabic build is free of both English labels', (tester) async {

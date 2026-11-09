@@ -46,7 +46,7 @@ class _LoyaltyProgramScreenState extends State<LoyaltyProgramScreen> {
       },
       child: Scaffold(
         appBar: simpleAppBar(
-            title: "Store Loyalty Program",
+            title: "Store Loyalty Program".tr,
             label: null,
             isBack: true,
             onNewLabelTap: (){}),
@@ -84,8 +84,8 @@ class _LoyaltyProgramScreenState extends State<LoyaltyProgramScreen> {
                   verticalSpace(20),
                   AddProductTextField(
                     controller: loyaltyController.rewardPointController,
-                    labelText: 'Reward points on orders of \$1000',
-                    hintText: 'Enter reward',
+                    labelText: 'Reward points on orders of \$1000'.tr,
+                    hintText: 'Enter reward'.tr,
                     keyboardType: TextInputType.number,
                     onChanged: (value) {},
                   ),
@@ -93,7 +93,7 @@ class _LoyaltyProgramScreenState extends State<LoyaltyProgramScreen> {
                   Center(
                     child: CommonIconButton(
                       iconData: DefaultImages.whiteDoneIcn,
-                      title: 'Save changes',
+                      title: 'Save changes'.tr,
                       onPressed: () {
                         if (loyaltyController.rewardPointController.text.isNotEmpty) {
                           if (Prefs.getBool(AppConstant.isDemoMode) == true) {

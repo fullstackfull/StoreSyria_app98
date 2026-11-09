@@ -12,6 +12,10 @@ class TaxController extends GetxController {
 
   RxList<Tax> taxList = <Tax>[].obs;
 
+  /// P2.5-TAX-CURRENCY. Assigned from the response of this screen's own endpoint, which is how
+  /// every other currency symbol in this app is sourced -- nothing here caches a store currency.
+  RxString currencySymbol = ''.obs;
+
   TextEditingController nameController = TextEditingController();
   TextEditingController amountController = TextEditingController();
 
@@ -48,6 +52,10 @@ class TaxController extends GetxController {
       onSuccess: (data) {
         if (data['status'] == 1) {
           taxModel = TaxModel.fromJson(data);
+
+          // P2.5-TAX-CURRENCY. Read from the response, never guessed. An older server sends no
+          // such key and this stays empty, which the row renders as the number alone.
+          currencySymbol.value = taxModel?.data.currencySymbol ?? '';
 
           final newData = taxModel?.data.data ?? [];
 
