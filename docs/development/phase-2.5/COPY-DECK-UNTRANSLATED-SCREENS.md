@@ -17,6 +17,27 @@ Arabic can be written against what the merchant actually sees.
 
 One Arabic string per row. Keep the English column as-is — it is the current UI text.
 
+## What the merchant currently sees (added 2026-11-09)
+
+Until now this deck listed strings. There are now **captures of the screens they are on**, taken
+through the Phase 2.5 screen harness, so the Arabic can be written against the real layout rather
+than against a table of line numbers:
+
+`syriastore98/docs/development/phase-2.5/evidence/flutter-store-settings-2026-11-09/after/`
+
+* `flutter-store-info_ar_rtl_light.png` / `_ar_rtl_dark.png` — the Arabic build of Store
+  Information. The section heading reads **معلومات المتجر** and every field label under it reads
+  **Store Name**, **Email**, **Store URL**, **Created At**, **Owner Information**, **Owner Name**,
+  **Owner Email**. That mix is what the deck is asking to fix.
+* `flutter-language-currency_ar_rtl_*.png` — for contrast, the sibling screen with its Arabic
+  complete: **لغة المتجر والعملات**, **اللغات**, **العملات**, **أسعار الصرف**. Nothing on it is in
+  this deck.
+
+**Consequence for the coverage matrix:** `Store information` is held at **PENDING** for this
+reason, with its four captures already taken and sitting beside the language screen's. It is not
+waiting on engineering or on evidence — only on the Arabic in the empty column above. The moment
+that column is filled it can be converted and promoted in one small change.
+
 
 ### Store Information
 
