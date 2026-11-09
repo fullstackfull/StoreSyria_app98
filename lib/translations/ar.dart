@@ -809,4 +809,9 @@ const Map<String, String> ar = {
   'Instagram link': 'رابط Instagram',
   'WhatsApp link': 'رابط WhatsApp',
   'Telegram link': 'رابط Telegram',
+  // P2.5-COPY-DECK follow-up: three strings on the profile HEADER that the deck did not
+  // list. Found by the Arabic capture, not by reading the file -- which is the argument
+  // for capturing a screen rather than trusting a string inventory.
+  'Hello': 'مرحباً',
+  'Manage your account and profile': 'إدارة حسابك وملفك الشخصي',
 };

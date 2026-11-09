@@ -793,4 +793,7 @@ const Map<String, String> en = {
   'Instagram link': 'Instagram link',
   'WhatsApp link': 'WhatsApp link',
   'Telegram link': 'Telegram link',
+  // Paired with the three profile-header entries in ar.dart.
+  'Hello': 'Hello',
+  'Manage your account and profile': 'Manage your account and profile',
 };

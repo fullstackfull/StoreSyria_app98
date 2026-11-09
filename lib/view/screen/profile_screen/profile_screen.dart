@@ -132,7 +132,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _avatar(),
                 const SizedBox(height: 14),
                 Text(
-                  "Hello, ${widget.name}",
+                  // P2.5-COPY-DECK follow-up. An interpolated greeting cannot be a `.tr` key --
+                  // the key would differ per merchant -- so the translated word is looked up and
+                  // the name interpolated around it. In Arabic the greeting precedes the name the
+                  // same way, so no reordering is needed.
+                  "${'Hello'.tr}، ${widget.name}",
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -143,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "Manage your account and profile",
+                  "Manage your account and profile".tr,
                   textAlign: TextAlign.center,
                   style: pMedium12.copyWith(
                     color: Colors.white.withValues(alpha: 0.72),
@@ -176,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          "Change Profile Photo",
+                          "Change Profile Photo".tr,
                           style: pMedium12.copyWith(
                             color: Colors.white,
                           ),
