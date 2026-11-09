@@ -102,20 +102,27 @@ void main() {
           api: api,
           combination: combination,
         );
-        await pumpFrames(tester, frames: 12);
+        /// WAIT FOR THE LABEL, DO NOT ASSUME A FRAME COUNT REACHED IT.
+        ///
+        /// This was `pumpFrames(12)` followed immediately by the assertion, and it FLAKED: one
+        /// full-suite run failed on `loyalty programme renders in light-ltr` while the same file
+        /// passed 13/13 in isolation and the next full run passed. A fixed frame count is a
+        /// guess about how long a screen takes; under the parallel load of a whole suite the
+        /// guess is sometimes wrong, and the failure then looks like a missing translation.
+        /// `pumpUntil` is bounded the same way but waits for the actual condition.
+        await pumpUntil(
+          tester,
+          () => accountCase.deckLabel
+              .any((label) => find.textContaining(label).evaluate().isNotEmpty),
+          reason: 'neither "${accountCase.deckLabel.first}" nor '
+              '"${accountCase.deckLabel.last}" reached ${accountCase.label} in '
+              '${combination.name}. This label came out of the copy deck, so if it is missing '
+              'either the screen stopped rendering it or its translation was lost.',
+        );
         await drainToasts(tester);
 
         expect(tester.takeException(), isNull,
             reason: '${accountCase.label} threw while rendering in ${combination.name}');
-
-        final found = accountCase.deckLabel
-            .any((label) => find.textContaining(label).evaluate().isNotEmpty);
-
-        expect(found, isTrue,
-            reason: 'neither "${accountCase.deckLabel.first}" nor '
-                '"${accountCase.deckLabel.last}" is on ${accountCase.label} in '
-                '${combination.name}. This label came out of the copy deck, so if it is missing '
-                'either the screen stopped rendering it or its translation was lost.');
 
         final context = tester.element(
           find.byWidgetPredicate((w) => w.runtimeType.toString() == accountCase.typeName),
