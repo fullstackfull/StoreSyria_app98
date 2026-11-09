@@ -46,7 +46,12 @@ Widget topOrderCardWidget({
           ),
         ],
       ),
+        // P2.5-FLUTTER-FRAMING. `MainAxisSize.min`: a `Column` defaults to `MainAxisSize.max`,
+        // so this card filled any BOUNDED height it was given. MEASURED 800.0px in an 800px box
+        // against 168.0px in a scrolling list, which is the context the app really renders it in.
+        // The card was content-height only by accident of its surroundings.
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// ================= ORDER ID =================
