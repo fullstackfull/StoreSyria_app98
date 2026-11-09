@@ -364,6 +364,11 @@ const Map<String, String> ar = {
   "Copy Me Quickly": "نسخ سريع",
   "Shipping": "الشحن",
   "Tax": "الضريبة",
+  // "Name" is the tax list's first column header (`tax_screen.dart:116`). It had no entry here, so
+  // GetX fell back to the key and the Arabic build printed the English word between two translated
+  // headers. The Laravel side has used this exact wording for the same column since Phase 01
+  // (`resources/lang/ar.json`), so the two surfaces now agree rather than nearly agree.
+  "Name": "الاسم",
   "Amount": "القيمة",
   "Action": "الإجراء",
   "Store Syria": "ستور سوريا",

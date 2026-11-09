@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../core/model/wallet_model.dart';
 import '../../utils/colors.dart';
 import '../../utils/helper.dart';
+import '../../utils/text_style.dart';
 
 const Color success = Color(0xFF16A34A);
 const Color danger = Color(0xFFEF4444);
@@ -140,6 +141,11 @@ Widget transactionCard({
             SizedBox(height: 8.h),
             RichText(
               text: TextSpan(
+                // THE ROOT SPAN MUST CARRY THE FAMILY. `RichText` does not inherit
+                // `DefaultTextStyle`, so without this both child spans below resolved
+                // `fontFamily: null` — measured as `[null, null]` — and the transaction amount,
+                // the largest number on the row, rendered in the platform font beside Tajawal.
+                style: const TextStyle(fontFamily: appFontFamily),
                 children: [
                   TextSpan(
                     text: '${tx.isCredit ? '+' : '-'} ${tx.amount}',

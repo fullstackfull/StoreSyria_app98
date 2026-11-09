@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/wallet/wallet_controller.dart';
 import '../../utils/colors.dart';
+import '../../utils/store_syria_brand.dart';
 import '../../utils/images.dart';
 import '../widget/icon_and_image.dart';
 import 'balance_bottomsheet.dart';
@@ -28,11 +29,19 @@ Widget balanceCard({
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColor.themeNavyBlueColor,
-            AppColor.themeNavyBlueColor,
-            AppColor.themeGreenColor,
-          ],
+          // P2.5-FLUTTER-WALLET-CARD. These used to be
+          // `[themeNavyBlueColor, themeNavyBlueColor, themeGreenColor]`, which READS as
+          // "navy, navy, cyan" and is not what it evaluates to. `AppColor.themeNavyBlueColor` is
+          // a mutable static the active theme reassigns, and in DARK mode it becomes
+          // `DarkThemeColor.cPrimary` — `StoreSyriaBrand.cyanOnDark`. So the dark card collapsed
+          // to a flat cyan slab, the white balance on it measured **2.09:1**, and the filled
+          // button drew cyan on cyan at **1.03:1**: the merchant's primary wallet action was
+          // invisible. See `test/a11y/balance_card_contrast_test.dart`.
+          //
+          // Named explicitly now, so the gradient cannot be re-pointed by a theme switch. Light
+          // is unchanged — `themeNavyBlueColor`/`themeGreenColor` already resolved to exactly
+          // these two there. Dark starts from the SURFACE navy, which carries white at 16.05:1.
+          colors: balanceCardGradient(isDark: isDark),
         ),
         borderRadius: BorderRadius.circular(22.r),
         boxShadow: [
@@ -140,6 +149,28 @@ Widget balanceCard({
   });
 }
 
+/// The balance card's background, pinned per theme rather than read from the mutable
+/// `AppColor` statics. See the note at the gradient for why that distinction mattered.
+List<Color> balanceCardGradient({required bool isDark}) => isDark
+    ? <Color>[
+        DarkThemeColor.cBottomNavyBlueColor,
+        DarkThemeColor.cBottomNavyBlueColor,
+        DarkThemeColor.cAccent,
+      ]
+    : <Color>[
+        LightThemeColor.cPrimary,
+        LightThemeColor.cPrimary,
+        LightThemeColor.cAccent,
+      ];
+
+/// The two action colours. Deliberately NOT theme-dependent: both buttons are solid surfaces, so
+/// each label is measured against its OWN fill — 13.94:1, the same number in both themes and
+/// wherever along the gradient the button lands. A label measured against the card instead drifts
+/// with the gradient, which is how the white "Withdraw" label ended up at 2.05:1 in dark mode and
+/// 4.05:1 in light.
+const Color kBalanceActionDark = StoreSyriaBrand.navy;
+const Color kBalanceActionLight = Color(0xFFFFFFFF);
+
 Widget cardButton({
   required String label,
   required bool filled,
@@ -154,11 +185,21 @@ Widget cardButton({
         height: 46.h,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: filled
-              ? AppColor.themeGreenColor.withValues(alpha: 0.7)
-              : Colors.transparent,
+          // SOLID, AND OPAQUE. The filled variant used to be `themeGreenColor` at **alpha 0.7**
+          // over the card, so its label's contrast was a function of the gradient underneath —
+          // cyan over cyan, 1.03:1, in dark mode. The outlined variant was fully transparent, so
+          // its white label sat straight on the gradient and read 2.05:1 there.
+          //
+          // Each button now carries its own opaque fill and a border in the OPPOSITE tone. That
+          // second part is what keeps the control perceivable (WCAG 2.1 SC 1.4.11) at every point
+          // of a gradient no single colour can clear 3:1 against: where the fill disappears into
+          // the card, the border does not, and vice versa.
+          color: filled ? kBalanceActionDark : kBalanceActionLight,
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: filled ? AppColor.themeNavyBlueColor : AppColor.cBorder),
+          border: Border.all(
+            color: filled ? kBalanceActionLight : kBalanceActionDark,
+            width: 1.5,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -168,9 +209,9 @@ Widget cardButton({
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
-                color: filled
-                    ? AppColor.themeNavyBlueColor
-                    : Colors.white,
+                // The label always contrasts with its OWN fill, not with the card: 13.94:1 either
+                // way, in both themes.
+                color: filled ? kBalanceActionLight : kBalanceActionDark,
               ),
             ),
           ],

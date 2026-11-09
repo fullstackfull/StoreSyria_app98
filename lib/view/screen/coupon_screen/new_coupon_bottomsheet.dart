@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/home_controller/new_coupon_controller.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
@@ -222,6 +223,10 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
       }) {
     return RichText(
       text: TextSpan(
+        // THE ROOT SPAN MUST CARRY THE FAMILY. `RichText` does not inherit `DefaultTextStyle`, so
+        // without this every label in the coupon form resolved `fontFamily: null` and rendered in
+        // the platform font instead of Tajawal — beside Tajawal field text in the same sheet.
+        style: const TextStyle(fontFamily: appFontFamily),
         children: [
           TextSpan(
             text: title,
