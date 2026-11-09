@@ -332,6 +332,9 @@ Future<T> runWithApi<T>(ApiStub api, Future<T> Function() body) =>
 /// [register] runs INSIDE the client zone and before the first pump: put the controllers the screen
 /// does `Get.find` for there. `StoreChangeService` is registered already.
 ///
+/// [pages] supplies a route table for screens that navigate by NAME. Without it,
+/// `Get.offAllNamed('/x')` throws `Could not find a generator for route` at teardown.
+///
 /// **WRITE [register] WITH A BLOCK BODY, NEVER AN ARROW.** `register: () => Get.put(Foo())` is a
 /// silent trap: the parameter's type is `void Function()`, so Dart infers the generic of
 /// `S Get.put<S>(S)` from that `void` CONTEXT and registers the instance under `void`. The screen's
@@ -352,6 +355,7 @@ Future<void> pumpScreen(
     direction: TextDirection.ltr,
   ),
   void Function()? register,
+  List<GetPage<dynamic>>? pages,
   int frames = 12,
   Duration step = const Duration(milliseconds: 50),
 }) async {
@@ -419,6 +423,15 @@ Future<void> pumpScreen(
           // `golden_harness.dart` records the same trap.
           localizationsDelegates: TranslationService.localizationsDelegates,
           supportedLocales: TranslationService.supportedLocales,
+          // ROUTES, FOR SCREENS THAT NAVIGATE AWAY FROM THEMSELVES.
+          //
+          // A screen that calls `Get.offAllNamed('/somewhere')` on a timer -- the welcome screen
+          // does, 1500 ms after mount -- throws
+          // `Could not find a generator for route RouteSettings("/onboarding")` in a shell with no
+          // route table, and the throw happens during TEARDOWN, so it reads as an unrelated
+          // failure. Supplying stub pages lets the navigation resolve, which also makes "did it
+          // really redirect?" an assertion a test can make.
+          getPages: pages,
           home: Directionality(textDirection: combination.direction, child: screen),
         ),
       ),
