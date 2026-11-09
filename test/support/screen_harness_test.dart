@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/customers/customer_controller.dart';
 import 'package:store_go_app/view/new_widgets/shimmer.dart';
 import 'package:store_go_app/view/screen/customers/customer_screen.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import 'golden_harness.dart';
 import 'screen_harness.dart';
@@ -436,5 +437,19 @@ void main() {
         reason: 'the query string is being dropped from `calls` again. Recorded: ${api.calls}');
     expect(api.calls.last, contains('?'),
         reason: 'the recorded call carries no query at all: ${api.calls.last}');
+  });
+
+  test('the visibility-detector interval is pinned to zero, so no screen leaks its timer', () {
+    /// `visibility_detector` batches callbacks behind an internal `Timer` that it RESCHEDULES, so
+    /// no amount of pumping drains it and the binding fails the test with
+    /// `A Timer is still pending even after the widget tree was disposed`. The failure names no
+    /// widget and points at teardown, so it reads as a harness fault rather than as a dependency's
+    /// documented default — it took a section-by-section bisect of the analytics screen to find
+    /// that `PlatformBarChart` was the only `VisibilityDetector` in `lib/`.
+    ///
+    /// `initScreenHarness` sets the package's own test setting. This asserts it stayed set.
+    expect(VisibilityDetectorController.instance.updateInterval, Duration.zero,
+        reason: 'the visibility-detector interval is no longer zero, so every screen holding one '
+            'will fail with a pending timer at teardown');
   });
 }

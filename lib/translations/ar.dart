@@ -401,6 +401,14 @@ const Map<String, String> ar = {
   'Unique Page View': 'المشاهدات الفريدة للصفحة',
   'Total Page View': 'إجمالي مشاهدات الصفحة',
   'Page View': 'مشاهدات الصفحة',
+  // P2.5-FLUTTER-STATS. Four labels on the analytics screen's summary card and its
+  // top-links section had no entry in either file, so the Arabic build printed the
+  // English keys beside 'التحليلات' and 'أعلى الروابط'. Seen in the first populated
+  // capture of that screen.
+  'Total page views': 'إجمالي مشاهدات الصفحات',
+  'Unique visitors': 'الزوار الفريدون',
+  'Top links': 'أهم الروابط',
+  'Most visited links': 'الروابط الأكثر زيارة',
   'Visitors by operating system': 'الزوار حسب نظام التشغيل',
   'Devices': 'الأجهزة',
   'Visitors by device': 'الزوار حسب الجهاز',

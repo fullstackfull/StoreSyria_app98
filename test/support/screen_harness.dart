@@ -67,6 +67,7 @@ import 'package:store_go_app/main.dart' as app;
 import 'package:store_go_app/translations/ar.dart';
 import 'package:store_go_app/translations/en.dart';
 import 'package:store_go_app/translations/translation_service.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import 'golden_harness.dart';
 
@@ -95,6 +96,24 @@ Future<void> initScreenHarness() async {
   app.getStorage = GetStorage();
 
   Get.addTranslations({'en': en, 'ar': ar});
+
+  /// VISIBILITY DETECTOR SCHEDULES A TIMER, AND THE TEST BINDING FAILS ON PENDING TIMERS.
+  ///
+  /// `visibility_detector` batches its callbacks behind an internal `Timer` whose period is
+  /// `VisibilityDetectorController.updateInterval` (500 ms by default). Any screen holding one
+  /// therefore ends its test with a timer outstanding and fails with
+  /// `A Timer is still pending even after the widget tree was disposed` — regardless of how much
+  /// the test pumps, because the timer is rescheduled rather than drained.
+  ///
+  /// `Duration.zero` is the package's own documented setting for tests: callbacks fire
+  /// synchronously and no timer is scheduled. It is set HERE and not worked around in production
+  /// code, because the production behaviour is correct.
+  ///
+  /// Measured by bisecting the analytics screen section by section: `platform only` failed and
+  /// every other section passed. `PlatformBarChart` is the single `VisibilityDetector` in `lib/`
+  /// (`statistics_screen_widget.dart:1077`), where it starts the bar animation once the chart
+  /// scrolls into view.
+  VisibilityDetectorController.instance.updateInterval = Duration.zero;
 
   await loadAppFonts();
 }

@@ -98,7 +98,6 @@ const Set<String> knownUntranslatedKeys = <String>{
     'Enter Description',
     'Enter Return Order Duration',
     'Last 7 days',
-    'Most visited links',
     // 'Name' was translated in P2.5-FLUTTER-TAX-LABEL (2026-11-09). It was the tax list's first
     // column header and rendered as the English key between two translated headers in the Arabic
     // build; the Laravel side had translated the same column since Phase 01. Removed from this
@@ -108,9 +107,6 @@ const Set<String> knownUntranslatedKeys = <String>{
     'Other',
     'Please fill all field',
     'Return Order Duration',
-    'Top links',
-    'Total page views',
-    'Unique visitors',
     'change2',
     'confirm',
     'enter_name',

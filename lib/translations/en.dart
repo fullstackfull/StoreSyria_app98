@@ -404,6 +404,11 @@ const Map<String, String> en = {
   'Unique Page View': 'Unique Page View',
   'Total Page View': 'Total Page View',
   'Page View': 'Page View',
+  // Paired with the four new analytics entries in ar.dart.
+  'Total page views': 'Total page views',
+  'Unique visitors': 'Unique visitors',
+  'Top links': 'Top links',
+  'Most visited links': 'Most visited links',
   'Visitors by operating system': 'Visitors by operating system',
   'Devices': 'Devices',
   'Visitors by device': 'Visitors by device',
