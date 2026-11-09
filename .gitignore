@@ -72,3 +72,26 @@ android/key.properties
 
 # Coverage
 coverage/
+
+# Flutter writes golden comparison output here on a failed run. Never committed: it is a
+# diff of a candidate against a baseline, not a baseline, and it is regenerated every run.
+test/golden/failures/
+
+# Captured golden candidates. IGNORED ON PURPOSE, and the purpose is an owner instruction:
+# "The eight captured golden images are candidates, not approved baselines... Do not
+# automatically commit screenshots as approved baselines."
+#
+# A capture run writes eight PNGs here. Untracked-but-not-ignored, one `git add -A` would have
+# committed them, and a committed file in this directory IS the baseline every later run asserts
+# against -- so the approval would have happened by accident, in a commit about something else.
+# Ignoring them makes approval a deliberate act instead.
+#
+# The candidates for review are committed under docs/evidence/route-1-candidates/ -- a contact
+# sheet plus the eight originals -- which is what a human reviews. When a baseline is APPROVED,
+# it is added explicitly:
+#
+#     git add -f test/golden/goldens/<surface>.<theme>-<dir>.png
+#
+# Until then each golden case SKIPS and says how to capture it (customer_card_golden_test.dart),
+# so an absent baseline asserts nothing rather than passing vacuously.
+test/golden/goldens/*.png

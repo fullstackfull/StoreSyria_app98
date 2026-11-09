@@ -1,0 +1,14 @@
+# Declares the test tags this package uses.
+#
+# Without this file the test runner prints "Unknown tag" warnings for `--tags golden`, and a runner
+# configured strictly rejects the selector outright — so the capture job route 1 step 1 describes
+# could not select the golden cases at all.
+#
+# The `golden` tag exists so ONE job can run exactly the pixel-comparison cases with
+# `--update-goldens`, without regenerating anything else and without the normal `flutter test` run
+# having to exclude anything. The normal run still executes these cases; they skip themselves while
+# their reviewed baseline is absent. See test/support/golden_harness.dart.
+tags:
+  golden:
+    # Pixel comparison against a committed baseline. Slower than a widget test — each case paints a
+    # full surface and compares it byte for byte — but not slow enough to need its own timeout.

@@ -87,23 +87,30 @@ Widget deliveryBoyWidget({
               ),
             ],
           ),
-          _deliveryBoyInfoRow(
-            context: context,
-            icon: Icons.email_outlined,
-            text: email.isNotEmpty ? email : '--',
-            textColor: subTextColor,
-            iconColor: AppColor.themeNavyBlueColor,
-          ),
+          // SAME TREATMENT AS THE CUSTOMER CARD BESIDE THIS ONE: no row is drawn for a
+          // value the delivery man does not have, and the Latin runs are laid out LTR
+          // so an Arabic page does not reorder an address or a phone number.
+          if (email.isNotEmpty) ...[
+            _deliveryBoyInfoRow(
+              context: context,
+              icon: Icons.email_outlined,
+              text: email,
+              textColor: subTextColor,
+              iconColor: AppColor.themeNavyBlueColor,
+            ),
+            SizedBox(height: 5.h),
+          ],
 
-          SizedBox(height: 5.h),
-
-          _deliveryBoyInfoRow(
-            context: context,
-            icon: Icons.phone_outlined,
-            text: contact.isNotEmpty ? contact : '--',
-            textColor: subTextColor,
-            iconColor: AppColor.themeNavyBlueColor,
-          ),
+          if (contact.isNotEmpty) ...[
+            _deliveryBoyInfoRow(
+              context: context,
+              icon: Icons.phone_outlined,
+              text: contact,
+              textColor: subTextColor,
+              iconColor: AppColor.themeNavyBlueColor,
+            ),
+            SizedBox(height: 5.h),
+          ],
 
           if (commissionPercentage.isNotEmpty) ...[
             SizedBox(height: 5.h),
@@ -169,6 +176,7 @@ Widget _deliveryBoyInfoRow({
   required String text,
   required Color textColor,
   required Color iconColor,
+  TextDirection? textDirection,
 }) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.start,
@@ -188,7 +196,10 @@ Widget _deliveryBoyInfoRow({
           text,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.end,
+          textDirection: textDirection,
+          // `start`, not `end` -- the icon leads the row, so the text belongs beside it
+          // in both directions.
+          textAlign: TextAlign.start,
           style: TextStyle(
             fontSize: 13.5.sp,
             fontWeight: FontWeight.w500,
