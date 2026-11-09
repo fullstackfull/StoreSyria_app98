@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/new_widgets/customer_widget.dart';
 import 'package:store_go_app/view/new_widgets/delivery_boy_widget.dart';
+import 'package:store_go_app/view/new_widgets/transactions_widget.dart';
 
 import '../support/golden_harness.dart';
 import '../support/sample_cards.dart';
@@ -48,11 +49,11 @@ void main() {
     await tester.pumpWidget(goldenHost(
       dark: false,
       direction: TextDirection.ltr,
-      child: Builder(builder: build),
+      child: KeyedSubtree(key: const Key('ss-measured'), child: Builder(builder: build)),
     ));
     await tester.pumpAndSettle();
 
-    return tester.getSize(find.byType(Container).first).height;
+    return tester.getSize(find.byKey(const Key('ss-measured'))).height;
   }
 
   /// The height it takes in the context the app really uses: a scrolling list, main axis unbounded.
@@ -63,11 +64,13 @@ void main() {
     await tester.pumpWidget(goldenHost(
       dark: false,
       direction: TextDirection.ltr,
-      child: ListView(children: [Builder(builder: build)]),
+      child: ListView(children: [
+        KeyedSubtree(key: const Key('ss-measured'), child: Builder(builder: build)),
+      ]),
     ));
     await tester.pumpAndSettle();
 
-    return tester.getSize(find.byType(Container).first).height;
+    return tester.getSize(find.byKey(const Key('ss-measured'))).height;
   }
 
   group('the list cards are content-height in any box', () {
@@ -142,6 +145,47 @@ void main() {
       final bounded = await heightInBoundedBox(
         tester,
         (context) => deliveryBoyWidget(context: context, deliveryBoy: sampleDeliveryBoy()),
+      );
+
+      expect(bounded, closeTo(list, 0.5));
+    });
+
+    testWidgets('the transaction card does not fill a bounded 800px surface', (tester) async {
+      /// THE THIRD CARD, AND THE ONE THAT TAUGHT THE MOST. It is a `Row`, not a `Column`, so the
+      /// pattern looked different -- and a static census for "a Column with no mainAxisSize inside
+      /// a decorated Container" flagged only ONE of its two Columns, because the second is further
+      /// from the decoration than the window the census looked at.
+      ///
+      /// Fixing the one the census found changed nothing: the card was still 800.0px and the Row
+      /// itself 770.0px, because a Row sizes its cross axis to its TALLEST CHILD and the trailing
+      /// amount column was still `MainAxisSize.max`. A card can have more than one Column and the
+      /// stretch only needs one of them. Measurement found it; the pattern search did not.
+      pinGoldenSurface(tester);
+
+      final bounded = await heightInBoundedBox(
+        tester,
+        (context) => transactionCard(tx: sampleTransaction(), currency: 'SYP', isDark: false),
+      );
+
+      expect(
+        bounded,
+        lessThan(400),
+        reason: 'the transaction card took ${bounded.toStringAsFixed(1)} of the 800px surface',
+      );
+    });
+
+    testWidgets('the transaction card measures the same in a list and in a bounded box',
+        (tester) async {
+      pinGoldenSurface(tester);
+
+      final list = await heightInScrollingList(
+        tester,
+        (context) => transactionCard(tx: sampleTransaction(), currency: 'SYP', isDark: false),
+      );
+
+      final bounded = await heightInBoundedBox(
+        tester,
+        (context) => transactionCard(tx: sampleTransaction(), currency: 'SYP', isDark: false),
       );
 
       expect(bounded, closeTo(list, 0.5));

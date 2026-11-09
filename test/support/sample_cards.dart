@@ -1,7 +1,8 @@
 import 'package:store_go_app/core/model/customer_model.dart';
 import 'package:store_go_app/core/model/delivery_boy_model.dart';
+import 'package:store_go_app/core/model/wallet_model.dart';
 
-/// The two list-card fixtures, in ONE place.
+/// The list-card fixtures, in ONE place.
 /// =================================================================================================
 ///
 /// These lived as private closures inside `test/golden/customer_card_golden_test.dart`. They are
@@ -47,4 +48,21 @@ DeliveryBoyData sampleDeliveryBoy() => DeliveryBoyData.fromJson(<String, dynamic
       'email': 'samer@example.test',
       'contact': '0933444555',
       'status': 1,
+    });
+
+/// A wallet transaction for the third card this project measures.
+///
+/// `description` is Arabic with a Latin order reference inside it, which is the real shape on
+/// /finance and the one that exercises the bidi run.
+WalletTransaction sampleTransaction() => WalletTransaction.fromJson(<String, dynamic>{
+      'id': 1,
+      'type': 'order',
+      'direction': 'credit',
+      'amount': '150.00',
+      'currency_code': 'SYP',
+      'balance_before': '0.00',
+      'balance_after': '150.00',
+      'description': 'طلب #ORD-2043',
+      'status': 'completed',
+      'created_at': '2026-11-06 10:00:00',
     });
