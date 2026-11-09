@@ -262,6 +262,55 @@ void main() {
     }
   }
 
+  // ===============================================================================================
+  //  THE SAME GALLERIES ON A TABLET SURFACE
+  // ===============================================================================================
+  //
+  // Phase 2.5 asks for responsive coverage, and a component that reflows is only proven to reflow
+  // by being rendered at a second width. It also gives the inventory's DUPLICATE rows evidence of
+  // their own: `Shared app bar` and `Shared app bar (simpleAppBar)` are the same widget named
+  // twice, as are the text field, the skeletons, the status indicators and the button family.
+  // Claiming both from one picture is what the owner's constraints forbid, so the duplicates are
+  // claimed on this set instead -- different surface, different render, different file.
+  for (final combination in kFourCombinations) {
+    for (final gallery in galleries) {
+      testWidgets('${gallery.label} render on a tablet in ${combination.name}', (tester) async {
+        await pumpScreen(
+          tester,
+          Builder(
+            builder: (_) => Scaffold(
+              body: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: gallery.build(),
+              ),
+            ),
+          ),
+          api: ApiStub(),
+          combination: combination,
+          surface: kGoldenTabletSize,
+        );
+        await pumpFrames(tester, frames: 10);
+        await drainToasts(tester);
+
+        expect(tester.takeException(), isNull,
+            reason: '${gallery.label} threw on a tablet in ${combination.name}');
+
+        final context = tester.element(find.byType(Scaffold).first);
+        expect(MediaQuery.of(context).size.width, kGoldenTabletSize.width,
+            reason: 'the tablet pass rendered at the phone width, so this set is not the second '
+                'width it claims to be');
+
+        final captured =
+            await captureScreen(tester, captureName('${gallery.surface}-tablet', combination));
+        if (captureDir != null) {
+          expect(captured, isNotNull);
+          expect(captured!.lengthSync(), greaterThan(1000),
+              reason: 'the tablet ${gallery.label} capture is suspiciously small');
+        }
+      });
+    }
+  }
+
   testWidgets('premise: the two pill states are visually different', (tester) async {
     /// A status pill that looks the same active and inactive carries no information, and a
     /// gallery capture would not notice — both specimens would simply be present. This measures

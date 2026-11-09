@@ -151,8 +151,14 @@ ThemeData appTheme({required bool dark}) {
 
 /// Pins the test surface to the design size, so ScreenUtil's `.sp` scale factor is 1:1 with the
 /// layout the screens were designed against. See trap 3.
-void pinGoldenSurface(WidgetTester tester) {
-  tester.view.physicalSize = kGoldenDesignSize;
+/// A TABLET SURFACE, for the responsive half of Phase 2.5.
+///
+/// A component that reflows is only proven to reflow by being rendered wide as well as narrow:
+/// the 360pt set alone cannot show whether a form goes two-up or a bar stops wrapping.
+const Size kGoldenTabletSize = Size(768, 1024);
+
+void pinGoldenSurface(WidgetTester tester, {Size size = kGoldenDesignSize}) {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
   tester.view.padding = FakeViewPadding.zero;
   addTearDown(tester.view.reset);

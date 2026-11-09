@@ -356,10 +356,13 @@ Future<void> pumpScreen(
   ),
   void Function()? register,
   List<GetPage<dynamic>>? pages,
+  /// The surface to render on. Defaults to the 360x800 design size; pass `kGoldenTabletSize` for
+  /// the responsive set.
+  Size surface = kGoldenDesignSize,
   int frames = 12,
   Duration step = const Duration(milliseconds: 50),
 }) async {
-  pinGoldenSurface(tester);
+  pinGoldenSurface(tester, size: surface);
 
   await http.runWithClient(() async {
     // `permanent: true` matches main.dart:55. Six controllers call
@@ -406,6 +409,9 @@ Future<void> pumpScreen(
 
     await tester.pumpWidget(
       ScreenUtilInit(
+        // ScreenUtil's design size stays the DESIGN size even on a wider surface: that is what
+        // the app does on a tablet, and scaling the design size with the window would hide
+        // exactly the reflow this set exists to show.
         designSize: kGoldenDesignSize,
         minTextAdapt: true,
         splitScreenMode: true,
