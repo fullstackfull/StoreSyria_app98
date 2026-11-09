@@ -49,8 +49,10 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show ImageByteFormat;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -348,6 +350,89 @@ Future<void> pumpScreen(
 
     await pumpFrames(tester, frames: frames, step: step);
   }, api.client);
+}
+
+// =================================================================================================
+//  CAPTURE — evidence, deliberately not a baseline
+// =================================================================================================
+
+/// Where captures are written, when capturing is switched on.
+///
+/// `SS_CAPTURE_DIR=<dir> flutter test test/screens/...` writes PNGs; with the variable unset
+/// nothing is written and the tests are ordinary mount tests.
+///
+/// WHY THIS IS NOT `matchesGoldenFile`. A golden is an ASSERTION — it fails a run when the pixels
+/// move, which is why `test/golden/goldens/*.png` is gitignored by owner instruction and why a
+/// human has to approve each baseline before it becomes one. These images are EVIDENCE for the
+/// Phase 2.5 coverage matrix: they record what a screen drew so a person can look at it. Writing
+/// them through the golden comparator would quietly turn every captured screen into a pixel
+/// assertion that any font or anti-aliasing difference could break in CI.
+String? get captureDir {
+  const dir = String.fromEnvironment('SS_CAPTURE_DIR');
+
+  if (dir.isNotEmpty) return dir;
+
+  return Platform.environment['SS_CAPTURE_DIR'];
+}
+
+/// Write what the tester is currently showing to `<captureDir>/<name>.png`, if capturing is on.
+///
+/// Returns the file written, or null when capturing is off — so a caller can assert on the file
+/// in a capture run without the test failing in an ordinary one.
+Future<File?> captureScreen(WidgetTester tester, String name) async {
+  final dir = captureDir;
+
+  if (dir == null) return null;
+
+  final repaint = _findRepaintBoundary(tester.binding.rootElement!.renderObject!);
+
+  if (repaint == null) {
+    fail('no RenderRepaintBoundary was found to capture "$name" from');
+  }
+
+  late final File file;
+
+  // `runAsync`, because toImage/toByteData need real async and a widget test's fake clock
+  // otherwise never completes them.
+  await tester.runAsync(() async {
+    final image = await repaint.toImage(pixelRatio: 1);
+    final bytes = await image.toByteData(format: ImageByteFormat.png);
+
+    image.dispose();
+
+    if (bytes == null) fail('encoding "$name" to PNG produced no bytes');
+
+    final target = Directory(dir);
+
+    if (!target.existsSync()) target.createSync(recursive: true);
+
+    file = File('$dir/$name.png')..writeAsBytesSync(bytes.buffer.asUint8List());
+  });
+
+  return file;
+}
+
+RenderRepaintBoundary? _findRepaintBoundary(RenderObject node) {
+  if (node is RenderRepaintBoundary) return node;
+
+  RenderRepaintBoundary? found;
+
+  node.visitChildren((child) {
+    found ??= _findRepaintBoundary(child);
+  });
+
+  return found;
+}
+
+/// The capture file name this project uses, matching the Laravel side's convention so the two
+/// evidence sets read the same: `<surface>_<lang>_<dir>_<theme>`.
+String captureName(String surface, GoldenCombination combination) {
+  final parts = combination.name.split('-');
+  final theme = parts.first;
+  final direction = parts.last;
+  final lang = direction == 'rtl' ? 'ar' : 'en';
+
+  return '${surface}_${lang}_${direction}_$theme';
 }
 
 /// The app's own two translation maps, as a `Translations`.

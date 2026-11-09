@@ -142,7 +142,9 @@ void main() {
               'the real network.',
         );
 
-        final context = tester.element(find.byWidgetPredicate((w) => w.runtimeType.toString() == screenCase.widgetTypeName));
+        final context = tester.element(
+          find.byWidgetPredicate((w) => w.runtimeType.toString() == screenCase.widgetTypeName),
+        );
 
         expect(Directionality.of(context), combination.direction,
             reason: '${screenCase.name} rendered the wrong direction in ${combination.name}');
@@ -151,6 +153,20 @@ void main() {
           combination.dark ? Brightness.dark : Brightness.light,
           reason: '${screenCase.name} rendered the wrong brightness in ${combination.name}',
         );
+
+        /// EVIDENCE, AND ONLY WHEN ASKED FOR. With `SS_CAPTURE_DIR` unset this returns null and
+        /// the test is an ordinary mount test; with it set, the PNG the Phase 2.5 coverage matrix
+        /// wants is written. It is deliberately NOT a `matchesGoldenFile`, which would turn every
+        /// captured screen into a pixel assertion that a font difference could break in CI — see
+        /// the note on `captureDir`.
+        final captured = await captureScreen(tester, captureName(screenCase.surface, combination));
+
+        if (captureDir != null) {
+          expect(captured, isNotNull);
+          expect(captured!.existsSync(), isTrue, reason: 'the capture file was not written');
+          expect(captured.lengthSync(), greaterThan(1000),
+              reason: 'the capture is suspiciously small: a blank or failed render');
+        }
       });
     }
   }
@@ -188,4 +204,7 @@ class _ScreenCase {
 
   /// The runtime type name of the screen widget, for locating its element.
   String get widgetTypeName => build().runtimeType.toString();
+
+  /// The capture slug: the surface name with spaces replaced, so a file name carries no spaces.
+  String get surface => 'flutter-${name.replaceAll(' ', '-')}';
 }
