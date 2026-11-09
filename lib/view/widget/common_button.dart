@@ -34,13 +34,39 @@ class CommonButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return AnimatedOpacity(
-      opacity: isLoading ? 0.7 : 1.0, // تخفيف الشفافية قليلاً أثناء التحميل
-      duration: const Duration(milliseconds: 200),
-      child: GestureDetector(
-        // تعطيل الضغط تماماً إذا كان يحمل
-        onTap: isLoading ? null : onPressed,
-        child: Container(
+    // P2.5-FLUTTER-BTN-DISABLED. TWO THINGS THIS BUTTON DID NOT SAY.
+    //
+    // 1. A `CommonButton` with `onPressed: null` painted the full brand blue, showed its white
+    //    label, and silently did nothing when tapped -- indistinguishable from one that works.
+    //    `onPressed` is nullable BY DESIGN, so that state is reachable the moment any call site
+    //    disables a button during validation or a permission check. Found by rendering the
+    //    component gallery: the "disabled (no handler)" specimen matched the "idle" one exactly.
+    //    LATENT, not live -- all six call sites in lib/ pass a handler today.
+    //
+    // 2. It was a `GestureDetector` wrapping a `Container`, which carries NO button semantics at
+    //    all. A screen reader announced the label as plain text, in BOTH states, so "this is a
+    //    button" and "this button is unavailable" were equally unsaid. Dimming alone would have
+    //    fixed only the half a sighted merchant can see.
+    //
+    // `isLoading` is deliberately not folded into `isInert` for the OPACITY: it already has its
+    // own clear state, a spinner in place of the label, and its own 0.7 fade below. It does
+    // suppress the tap, so it counts as not-enabled for semantics.
+    final bool isInert = onPressed == null;
+    final bool isTappable = !isLoading && !isInert;
+
+    return Semantics(
+      button: true,
+      enabled: isTappable,
+      label: title,
+      child: AnimatedOpacity(
+        // 0.5 is the upper end of the 0.38-0.5 disabled range: dim enough to read as unavailable,
+        // light enough that the label stays legible, which a disabled control still needs.
+        opacity: isInert ? 0.5 : (isLoading ? 0.7 : 1.0),
+        duration: const Duration(milliseconds: 200),
+        child: GestureDetector(
+          // تعطيل الضغط تماماً إذا كان يحمل
+          onTap: isTappable ? onPressed : null,
+          child: Container(
           width: width ?? Get.width,
           // P2.5-D-01. 48 is Material's kMinInteractiveDimension. MEASURED by rendering
           // this widget: it was 42.0dp -- below Material's 48, and below Apple HIG's 44.
@@ -72,6 +98,7 @@ class CommonButton extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
+          ),
           ),
         ),
       ),
