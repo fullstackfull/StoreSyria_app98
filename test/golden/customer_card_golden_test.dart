@@ -33,6 +33,7 @@ import 'package:store_go_app/view/new_widgets/customer_widget.dart';
 import 'package:store_go_app/view/new_widgets/delivery_boy_widget.dart';
 
 import '../support/golden_harness.dart';
+import '../support/sample_cards.dart';
 
 void main() {
   setUpAll(loadAppFonts);
@@ -42,40 +43,13 @@ void main() {
   setUp(resetThemeColours);
   tearDown(resetThemeColours);
 
-  // Arabic names and a Syrian mobile number, because half of these baselines are the Arabic half
-  // and Latin placeholder text would not exercise the Tajawal faces or the RTL run at all.
+  // THE TWO FIXTURES MOVED TO ../support/sample_cards.dart, and the move is the point.
   //
-  // `email` AND `state_name` SIT AT THE ROOT, NOT INSIDE `customer_info`. `CustomerInfo`
-  // carries only name and mobile (customer_model.dart:130-142) and the API puts both of
-  // these beside that object (Api/DashboardController.php:6128-6132). The first version
-  // of this fixture nested `email`, so it was never read -- and because the card ALSO
-  // bound its e-mail row to `city`, all four customer baselines rendered a literal '--'
-  // where the address belongs. Two defects stacked, and only the picture showed them.
-  CustomerData customer() => CustomerData.fromJson(<String, dynamic>{
-        'id': 1,
-        'customer_info': <String, dynamic>{
-          'name': 'أمينة حداد',
-          'mobile': '0911222333',
-        },
-        'email': 'amina@example.test',
-        'state_name': 'دمشق',
-        'status': 1,
-      });
-
-  // `contact`, NOT `mobile`. DeliveryBoyData.fromJson reads `json['contact']`
-  // (delivery_boy_model.dart:70) and delivery_boy_widget.dart:34 reads `.contact`, falling back to
-  // '--' when it is empty. The first version of this fixture passed `mobile`, copied from the
-  // CUSTOMER model beside it, so the phone row in all four delivery-boy baselines rendered a blank
-  // dash — a baseline that freezes an empty cell where real data belongs, and that a reviewer
-  // might well have approved without noticing. Found by an adversarial review of this change.
-  DeliveryBoyData deliveryBoy() => DeliveryBoyData.fromJson(<String, dynamic>{
-        'id': 2,
-        'name': 'سامر خليل',
-        'email': 'samer@example.test',
-        'contact': '0933444555',
-        'status': 1,
-      });
-
+  // `test/ui/card_intrinsic_height_test.dart` measures the same two cards, and two copies of a
+  // fixture that has ALREADY BEEN WRONG TWICE -- `email` nested inside `customer_info` where the
+  // API puts it at the root, and `mobile` instead of `contact` on the delivery man -- is how two
+  // files come to measure different widgets while reporting the same name. Both mistakes produced
+  // a green run and a wrong picture; the reasons are kept verbatim beside the data.
 
   // THE SKIP IS AT RUNTIME, NOT `skip:`, and the first version of this file got that wrong in a way
   // worth keeping. `testWidgets`'s `skip` is typed `bool?` — NOT `dynamic` like `test()`'s — so a
@@ -107,7 +81,7 @@ void main() {
           // LateInitializationError before an expectation can run — recorded in
           // customer_card_direction_test.dart:66-69.
           child: Builder(
-            builder: (context) => customerWidget(context: context, customer: customer()),
+            builder: (context) => customerWidget(context: context, customer: sampleCustomer()),
           ),
         ));
         await tester.pumpAndSettle();
@@ -132,7 +106,7 @@ void main() {
           direction: combination.direction,
           child: Builder(
             builder: (context) =>
-                deliveryBoyWidget(context: context, deliveryBoy: deliveryBoy()),
+                deliveryBoyWidget(context: context, deliveryBoy: sampleDeliveryBoy()),
           ),
         ));
         await tester.pumpAndSettle();

@@ -204,9 +204,33 @@ Widget goldenHost({
       locale: direction == TextDirection.rtl
           ? const Locale('ar', 'AE')
           : const Locale('en', 'US'),
+      // P2.5-FLUTTER-FRAMING. THE BODY MUST NOT BE TOLD TO FILL THE SCAFFOLD.
+      //
+      // `Scaffold(body: child)` gives its body TIGHT constraints, so a card with no height of
+      // its own expands to the whole 360x800 surface. MEASURED on the first capture and written
+      // up in docs/design/GOLDEN-BASELINE-FRAMING.md: `customer-card.dark-ltr.png` was 98.2%
+      // `cCardBackground` and `customer-card.light-ltr.png` 98.3% `Colors.white` -- the CARD's
+      // own fill -- while `LightThemeColor.cBackGround` did not appear in the light image at all.
+      // A row-by-row scan found exactly one non-background row in the whole image, at y=799: the
+      // rounded corner at the very bottom.
+      //
+      // THREE CONSEQUENCES, and the second is the one that matters. A human reviewing those
+      // baselines approves a picture the app never draws -- the real screen wraps this card in
+      // `Padding(bottom: 12.h)` inside a list, so it is content-height with siblings above and
+      // below. A HEIGHT REGRESSION IS INVISIBLE, because the comparison cannot see a difference
+      // in a dimension the harness has pinned to the viewport. And 98% of every diff is one flat
+      // colour that carries no information.
+      //
+      // Capturing the Scaffold stays: it is what puts the real theme background in the picture.
+      // `AlignmentDirectional`, not `Alignment`, so the RTL baselines keep their own leading edge.
       home: Directionality(
         textDirection: direction,
-        child: Scaffold(body: child),
+        child: Scaffold(
+          body: Align(
+            alignment: AlignmentDirectional.topStart,
+            child: child,
+          ),
+        ),
       ),
     ),
   );
