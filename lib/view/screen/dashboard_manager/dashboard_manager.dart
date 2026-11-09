@@ -55,7 +55,16 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
       final bool isDark = themeController.isDark.value;
       final Color bgColor = isDark ? DarkThemeColor.cBackGround : AppColor.cLight;
       final Color navBgColor = isDark ? DarkThemeColor.cBottomNavyBlueColor : LightThemeColor.cBottomNavyBlueColor;
-      final Color navInactiveColor = isDark ? Colors.white54 : AppColor.cDarkGreyFont;
+      // P2.5-FLUTTER-SHELL. THE BAR IS DARK NAVY IN BOTH THEMES -- `cBottomNavyBlueColor` is
+      // #14213A in dark and #172C4E in light -- so its inactive label has to be a LIGHT tint in
+      // both. In light mode it was `AppColor.cDarkGreyFont`, a grey meant for light backgrounds,
+      // which measured **3.14:1** on that navy. Four of the five labels are unselected at any
+      // moment, on the one surface that stays on screen for the whole session.
+      //
+      // `Colors.white54` is what the dark theme already used (5.60:1 there) and gives 5.15:1
+      // here, so the two themes now agree instead of one of them being wrong. Measured off the
+      // rendered bar: `test/screens/dashboard_shell_capture_test.dart`.
+      final Color navInactiveColor = Colors.white54;
       final Color navActiveColor = isDark ? DarkThemeColor.cPrimary : AppColor.cWhite;
 
       return PopScope(
