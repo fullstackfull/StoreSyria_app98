@@ -7,6 +7,7 @@ import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
 import '../../../core/controller/customers/customer_controller.dart';
 import 'package:store_go_app/utils/app_log.dart';
+import 'package:store_go_app/utils/colors.dart';
 
 class AddNewCustomerWidget extends StatefulWidget {
   final bool isUpdate;
@@ -302,7 +303,21 @@ class _AddNewCustomerWidgetState extends State<AddNewCustomerWidget>
           ),
           Switch.adaptive(
             value: isActive,
-            activeColor: navyBlue,
+            // DARK MODE GETS THE CYAN, NOT THE NAVY.
+            //
+            // `navyBlue` #172C4E measures 13.94:1 on white and 1.09:1 on the dark card #18263F
+            // -- MEASURED from the painted pixels of
+            // evidence/flutter-sheets-2026-11-10/after/flutter-sheet-category-edit_*_dark.png,
+            // sampled at the switch's own rect. At 1.09:1 the ON state is invisible, and it sits
+            // only 2.00:1 from the OFF track, so a merchant could not tell the states apart.
+            //
+            // `DarkThemeColor.cPrimary` is StoreSyriaBrand.cyanOnDark #2AC3E5: 7.23:1 on the card
+            // and 3.33:1 against the OFF track. It is the design system's own dark primary, so
+            // this derives the dark value rather than inventing one -- the rule CLAUDE.md states
+            // and that this site had broken by carrying a light-mode colour across.
+            //
+            // Pinned by test/a11y/switch_active_track_contrast_test.dart.
+            activeColor: isDark ? DarkThemeColor.cPrimary : navyBlue,
             onChanged: _isLoading
                 ? null
                 : (value) {
