@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
 import 'package:store_go_app/view/new_widgets/filter_tabs.dart';
 import 'package:store_go_app/view/new_widgets/pop_up_menu.dart';
@@ -11,6 +14,8 @@ import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/common_drop_down_widget.dart';
+import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
+import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 
 import '../support/golden_harness.dart';
@@ -36,6 +41,9 @@ import '../support/screen_harness.dart';
 /// What was missing was the *evidence a reviewer can look at*, in both languages and both themes.
 /// This supplies that and asserts only what a capture can honestly carry: that the component
 /// rendered, in the direction and brightness asked for, without throwing.
+/// The exact box the products grid gives each card: products_screen.dart:782-786.
+Widget _tile(Widget card) => SizedBox(width: 220.w, height: 290.h, child: card);
+
 void main() {
   setUpAll(initScreenHarness);
   tearDownAll(disposeScreenHarness);
@@ -206,6 +214,155 @@ void main() {
         ],
       ),
     ),
+    // ---- P2.5-P1-FLUTTER (2026-11-10) -------------------------------------------------------
+
+    // THE HOME WIDGETS. `totalProductWidget` is captured twice because `permitted: false` is not
+    // a styling variant -- it swaps the figure for an em dash, and the author's own comment says
+    // why ("an empty tile reads as a rendering failure"). A tile that shows a number and a tile
+    // that shows a dash are two different pictures and only one of them has ever been reviewed.
+    _Gallery(
+      surface: 'flutter-component-home-widgets',
+      label: 'home stat tiles, profile row, QR',
+      build: () => Builder(
+        builder: (context) => Column(
+          children: <Widget>[
+            specimen('stat tile, permitted', totalProductWidget(
+              context,
+              image: DefaultImages.gridIcn,
+              title: 'Total'.tr,
+              subTitle: 'Products'.tr,
+              total: '17',
+              accentColor: AppColor.themeGreenColor,
+              period: 'stat_period_in_this_store'.tr,
+            )),
+            specimen('stat tile, NOT permitted (shows an em dash, not 0)', totalProductWidget(
+              context,
+              image: DefaultImages.gridIcn,
+              title: 'Total'.tr,
+              subTitle: 'Orders'.tr,
+              total: '42',
+              accentColor: AppColor.themeNavyBlueColor,
+              permitted: false,
+              period: 'stat_period_all_time'.tr,
+            )),
+            specimen('profile row', buildProfileTitle(
+              context,
+              name: 'Amina Haddad',
+              task: 'Damascus Textiles',
+            )),
+            specimen('QR', qrCodeWidget(
+              context,
+              qrString: 'https://storesyria.com/damascus-textiles',
+              // The real screen takes this from dashboardData.qrcode.name -- server data, not
+              // a translation key (home_screen.dart:354).
+              title: 'Damascus Textiles',
+            )),
+          ],
+        ),
+      ),
+    ),
+
+    // THE PRODUCT CARD, in the four states that take different code paths. One state proves only
+    // that state: the hidden chip, the out-of-stock colour and the backorder colour are three
+    // different branches, and a card captured only in its happy state says nothing about them.
+    // `imageUrl: ''` on purpose, so the validity check fails and no network fetch is attempted.
+    _Gallery(
+      surface: 'flutter-component-product-card',
+      label: 'product list card',
+      // THE CARD NEEDS THE CONSTRAINTS ITS REAL GRID GIVES IT, copied rather than guessed:
+      // products_screen.dart:782-786 uses SliverGridDelegateWithMaxCrossAxisExtent with
+      // `maxCrossAxisExtent: 220.w` and `mainAxisExtent: 290.h`. Dropped into the gallery's
+      // scroll view with no bound, the card's inner `Expanded` threw "RenderFlex children have
+      // non-zero flex but incoming height constraints are unbounded" -- a harness mismatch, not
+      // a defect in the card. Sizing it to anything else would photograph a layout no merchant
+      // ever sees.
+      build: () => Builder(
+        builder: (context) => Column(
+          children: <Widget>[
+            specimen('in stock, visible', _tile(allProductsListItemWidget(
+              context: context,
+              imageUrl: '',
+              categoryName: 'Textiles',
+              productId: '41',
+              productName: 'Damask Cotton Scarf',
+              price: '24.00',
+              status: 1,
+              trackStock: true,
+              stock: '12',
+              rating: 4.0,
+              showChangeAction: true,
+            ))),
+            specimen('hidden (status 0)', _tile(allProductsListItemWidget(
+              context: context,
+              imageUrl: '',
+              categoryName: 'Homeware',
+              productId: '42',
+              productName: 'Brocade Cushion Cover',
+              price: '38.00',
+              status: 0,
+              trackStock: true,
+              stock: '6',
+              showChangeAction: true,
+            ))),
+            specimen('out of stock', _tile(allProductsListItemWidget(
+              context: context,
+              imageUrl: '',
+              categoryName: 'Soaps',
+              productId: '43',
+              productName: 'Aleppo Laurel Soap',
+              price: '9.00',
+              status: 1,
+              trackStock: true,
+              stock: '0',
+              showChangeAction: true,
+            ))),
+            specimen('on sale', _tile(allProductsListItemWidget(
+              context: context,
+              imageUrl: '',
+              categoryName: 'Textiles',
+              productId: '44',
+              productName: 'Linen Tea Towel Set',
+              price: '18.00',
+              salePrice: '12.00',
+              status: 1,
+              trackStock: false,
+              stock: '30',
+              showChangeAction: true,
+            ))),
+          ],
+        ),
+      ),
+    ),
+
+    // THE OTHER TEXT FIELD. `AddProductTextField` is a separate ~200-line class from
+    // `AppTextField` above, rendered on eight screens, and it is the one whose focus colours were
+    // left on the light-mode navy when its twin's were derived per theme -- 1.09:1 for the caret
+    // and the ring on its own dark fill, repaired in P2.5-FLUTTER-FOCUS. Captured beside its twin
+    // so the two can be compared at a glance, which is what would have caught the divergence.
+    _Gallery(
+      surface: 'flutter-component-add-product-field',
+      label: 'add-product text field',
+      build: () => Column(
+        children: <Widget>[
+          specimen('idle', AddProductTextField(
+            labelText: 'product_name'.tr,
+            hintText: 'enter_product_name'.tr,
+          )),
+          specimen('with a value', AddProductTextField(
+            labelText: 'price'.tr,
+            hintText: '0.00',
+            controller: TextEditingController(text: '24.00'),
+          )),
+          specimen('read only', AddProductTextField(
+            labelText: 'sku'.tr,
+            hintText: 'SKU-0041',
+            readOnly: true,
+            controller: TextEditingController(text: 'SKU-0041'),
+          )),
+        ],
+      ),
+    ),
+
     _Gallery(
       surface: 'flutter-component-buttons',
       label: 'buttons and loader',
