@@ -123,7 +123,6 @@ const Set<String> knownUntranslatedKeys = <String>{
     'not trending',
     'order_created_successfully',
     'order_id_copied',
-    'payment',
     'please_enter_amount',
     'pricing',
     'product_settings',

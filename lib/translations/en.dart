@@ -335,6 +335,9 @@ const Map<String, String> en = {
   "add_note": "Add Note",
   "no_notes_yet": "No Notes Yet",
   "unpaid": "Unpaid",
+  // Pair for the Arabic key added in the same change; without it the
+  // translation ratchet rejects a one-sided key.
+  "payment": "Payment",
   "private_note": "Private Note",
   "public_note": "Public Note",
   "add_new_note": "Add New Note",

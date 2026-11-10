@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/store_go.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:store_go_app/utils/app_log.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
@@ -28,6 +29,15 @@ Future<void> main() async {
   await Firebase.initializeApp();
 
   await GetStorage.init();
+
+  // DATE SYMBOL DATA, before anything formats a date.
+  //
+  // `DateFormat('dd MMM yyyy')` with no locale falls back to en_US, so `MMM` rendered `Nov` on
+  // an otherwise Arabic screen -- and worse, a Latin date string inside an RTL line reorders:
+  // the coupon history showed `Nov 2026 01`. Passing a locale to DateFormat is the fix, but
+  // `intl` THROWS LocaleDataException for any non-en locale whose symbols were never loaded,
+  // so this call has to come first. It is cheap and it is once.
+  await initializeDateFormatting();
   getStorage = GetStorage();
 
   final language = Prefs.getLanguage();

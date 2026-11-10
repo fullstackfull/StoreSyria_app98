@@ -511,7 +511,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        detail.orderStatusText ?? "-",
+                        // TRANSLATED CLIENT-SIDE, from the integer, not printed from the
+                        // server's string. `order_status_text` arrives already rendered in
+                        // whatever locale the API resolved -- and the admin API does NOT run
+                        // `SetLocate` (bootstrap/app.php:36 appends it to the `web` group only),
+                        // so it is the application default rather than this merchant's language.
+                        // An Arabic merchant therefore read `Pending` on an otherwise Arabic
+                        // screen. `getOrderLabel` maps the integer the same response already
+                        // carries, which is locale-independent by construction.
+                        StatusBadgeHelper.getOrderLabel(detail.orderStatus ?? 0),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -527,7 +535,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 CommonStatusBadge(
                   type: StatusBadgeType.order,
                   orderStatus: detail.orderStatus,
-                  customLabel: detail.orderStatusText,
+                  // `customLabel` SHORT-CIRCUITS the badge's own translation
+                  // (order_status_badge.dart:470), so passing the server's string here defeated
+                  // `getOrderLabel` entirely. Omitted so the badge translates the integer.
                   showArrow: true,
                   onTap: () {
                     OrderStatusBottomSheet.show<OrderDetailData>(
@@ -712,7 +722,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 child: _headerInfoItem(
                   icon: Icons.payment_outlined,
                   label: "payment".tr,
-                  value: detail.paymentStatus ?? "-",
+                  // TRANSLATED, not printed raw. `payment_status` is a bare English literal
+                  // from the server (`DashboardController:8470` defaults it to `'Unpaid'`), so
+                  // an Arabic merchant read `Pending` here. `getPaymentLabel` is the existing
+                  // first-party mapper and resolves to `paid`/`unpaid`.
+                  value: StatusBadgeHelper.getPaymentLabel(detail.paymentStatus),
                   color: accentColor,
                   secondaryText: secondaryText,
                   primaryText: primaryText,

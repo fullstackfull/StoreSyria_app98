@@ -58,6 +58,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:store_go_app/core/controller/setting_controller/theme_controller.dart';
@@ -94,6 +95,12 @@ Future<void> initScreenHarness() async {
 
   await GetStorage.init();
   app.getStorage = GetStorage();
+
+  // DATE SYMBOLS, the same call `main()` makes. Without it `DateFormat(fmt, 'ar')` throws
+  // LocaleDataException, so every Arabic capture of a screen that prints a date would fail --
+  // and a harness that only ever runs en_US cannot show that `MMM` rendered `Nov` in Arabic,
+  // which is the defect this initialisation exists to let us fix.
+  await initializeDateFormatting();
 
   Get.addTranslations({'en': en, 'ar': ar});
 

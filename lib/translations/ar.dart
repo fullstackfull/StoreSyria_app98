@@ -328,6 +328,10 @@ const Map<String, String> ar = {
   "add_note": "إضافة ملاحظة",
   "no_notes_yet": "لا توجد ملاحظات بعد",
   "unpaid": "غير مدفوع",
+  // P2.5-FLUTTER-ORDERDETAIL: `"payment".tr` had no key in either
+  // file, so the order-detail header printed the literal lowercase word `payment`
+  // in BOTH languages. GetX returns the key when a lookup misses.
+  "payment": "الدفع",
   "private_note": "ملاحظة خاصة",
   "public_note": "ملاحظة عامة",
   "add_new_note": "إضافة ملاحظة جديدة",
