@@ -341,3 +341,37 @@ Map<String, dynamic> currentPlanResponse({
 /// An expired plan -- the state whose whole purpose is to say so loudly.
 Map<String, dynamic> expiredPlanResponse() =>
     currentPlanResponse(expired: true, daysRemaining: 0, expiry: '2026-10-01');
+
+/// ---------------------------------------------------------------------------------------------
+/// STORE PAYMENT METHODS -- `GET /getActivePaymentMethods?store_id=`
+///
+/// The list lives under `data.active_methods`, NOT under `data` itself, and each entry is just
+/// `{key, name}`. The controller reads it with `jsonList(responseData['active_methods'])` --
+/// a tolerant helper that returns an empty list for a Map or a null -- so a payload that puts the
+/// array one level too high parses to zero methods and renders "no payment methods configured".
+/// That is a sentence a merchant would believe.
+/// ---------------------------------------------------------------------------------------------
+
+Map<String, dynamic> activePaymentMethodsResponse({
+  List<List<String>>? methods,
+}) =>
+    {
+      'status': 1,
+      'message': 'Active payment methods',
+      'data': {
+        'active_methods': (methods ??
+                const [
+                  ['cod', 'Cash On Delivery'],
+                  ['bank_transfer', 'Bank Transfer'],
+                  ['stripe', 'Stripe'],
+                  ['paypal', 'Paypal'],
+                ])
+            .map((m) => {'key': m[0], 'name': m[1]})
+            .toList(),
+      },
+    };
+
+/// A store that has switched every gateway off. Distinct from a failed load only if the screen
+/// says so, which is what the premise test asserts.
+Map<String, dynamic> noActivePaymentMethodsResponse() =>
+    activePaymentMethodsResponse(methods: const []);
