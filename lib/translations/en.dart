@@ -799,4 +799,31 @@ const Map<String, String> en = {
   // Paired with the three profile-header entries in ar.dart.
   'Hello': 'Hello',
   'Manage your account and profile': 'Manage your account and profile',
+
+  // P2.5-FLUTTER-I18N. Twenty-two keys that sat in `knownUntranslatedKeys`: the
+  // ratchet passed because they were DECLARED, not because they were translated, and
+  // GetX returns the key when a lookup misses -- so the product detail screen showed
+  // the literal `final_price` as a field label, in both languages.
+  "change2": "Change",
+  "confirm": "Confirm",
+  "enter_name": "Enter a name",
+  "enter_product_weight": "Enter the product weight",
+  "enter_shipping_id": "Enter the shipping ID",
+  "enter_tax_id": "Enter the tax ID",
+  "final_price": "Final price",
+  "invalid_price": "Enter a valid price",
+  "invalid_product_weight": "Enter a valid weight",
+  "invalid_url": "Enter a valid link",
+  "leave_empty_to_keep_current_password": "Leave empty to keep the current password",
+  "no_currencies_found": "No currencies found",
+  "no_delivery_boy_name": "No delivery staff name",
+  "order_created_successfully": "Order created successfully",
+  "order_id_copied": "Order number copied",
+  "please_enter_amount": "Enter an amount",
+  "search_failed": "Search failed",
+  "shipping_id": "Shipping ID",
+  "stock_status": "Stock status",
+  "tax_id": "Tax ID",
+  "tax_status": "Tax status",
+  "track_stock": "Track stock",
 };

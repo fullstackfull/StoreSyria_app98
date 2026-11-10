@@ -818,4 +818,31 @@ const Map<String, String> ar = {
   // for capturing a screen rather than trusting a string inventory.
   'Hello': 'مرحباً',
   'Manage your account and profile': 'إدارة حسابك وملفك الشخصي',
+
+  // P2.5-FLUTTER-I18N. Twenty-two keys that sat in `knownUntranslatedKeys`: the
+  // ratchet passed because they were DECLARED, not because they were translated, and
+  // GetX returns the key when a lookup misses -- so the product detail screen showed
+  // the literal `final_price` as a field label, in both languages.
+  "change2": "تغيير",
+  "confirm": "تأكيد",
+  "enter_name": "أدخل الاسم",
+  "enter_product_weight": "أدخل وزن المنتج",
+  "enter_shipping_id": "أدخل معرّف الشحن",
+  "enter_tax_id": "أدخل معرّف الضريبة",
+  "final_price": "السعر النهائي",
+  "invalid_price": "أدخل سعراً صالحاً",
+  "invalid_product_weight": "أدخل وزناً صالحاً",
+  "invalid_url": "أدخل رابطاً صالحاً",
+  "leave_empty_to_keep_current_password": "اتركه فارغاً للإبقاء على كلمة المرور الحالية",
+  "no_currencies_found": "لا توجد عملات",
+  "no_delivery_boy_name": "لا يوجد اسم لمندوب التوصيل",
+  "order_created_successfully": "تم إنشاء الطلب بنجاح",
+  "order_id_copied": "تم نسخ رقم الطلب",
+  "please_enter_amount": "أدخل المبلغ",
+  "search_failed": "فشل البحث",
+  "shipping_id": "معرّف الشحن",
+  "stock_status": "حالة المخزون",
+  "tax_id": "معرّف الضريبة",
+  "tax_status": "حالة الضريبة",
+  "track_stock": "تتبّع المخزون",
 };

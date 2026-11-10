@@ -109,7 +109,23 @@ class ProductModelData {
 
 class ProductData {
   int? id, categoryId, subcategoryId, brandId, labelId, taxId, shippingId;
-  int? productStock, variantProduct, trending, averageRating, status;
+  int? productStock, variantProduct, trending, status;
+
+  /// `num?`, NOT `int?`, because `products.average_rating` is a **double(8,2)**.
+  ///
+  /// The cast below used to be `as int?`, and in Dart `4.5 as int?` THROWS. Any product with a
+  /// fractional average rating -- which is most rated products -- took
+  /// `ProductData.fromJson` down with it, and that constructor parses the product LIST as well
+  /// as the detail screen, so one 4.5-star product could empty a merchant's catalogue.
+  ///
+  /// It survived because a whole rating decodes as `int` and casts fine: a store with no reviews,
+  /// or only whole-number averages, never sees it. Found by driving the detail screen with a
+  /// realistic fixture (P2.5-FLUTTER-PRODUCTDETAIL).
+  ///
+  /// `num?` is source-compatible with the one consumer
+  /// (`products_screen.dart:722` does `averageRating?.toDouble() ?? 0.0`) and now keeps the
+  /// fraction instead of discarding it.
+  num? averageRating;
   int? storeId, createdBy, isActive, maincategoryId, isReview;
   int? trackStock, minimumQuantity, maximumQuantity, lowStockThreshold;
   int? customFieldStatus;
@@ -232,7 +248,7 @@ class ProductData {
     productStock = json['product_stock'] as int?;
     variantProduct = json['variant_product'] as int?;
     trending = json['trending'] as int?;
-    averageRating = json['average_rating'] as int?;
+    averageRating = json['average_rating'] as num?;
     status = json['status'] as int?;
     isActive = json['is_active'] as int?;
     isReview = json['is_review'] as int?;

@@ -111,6 +111,23 @@ Map<String, dynamic> orderDetailResponse({
         'delivery_date': '2026-11-05',
         'order_status': orderStatus,
         'order_status_text': orderStatusText,
+        /*
+         * F154. THE TWO ADDITIVE FIELDS THE API NOW SENDS, present here so the fixture is the
+         * shape the server really produces.
+         *
+         * The admin API never runs `SetLocate`, so `order_status_text` arrives in the
+         * APPLICATION DEFAULT language rather than the merchant's. Rather than localise an
+         * existing field -- which would have broken the five places this client compares
+         * `payment_status` to the literal `'paid'` -- the server adds a stable key and a
+         * localised label beside it.
+         *
+         * This app does not READ them: it translates the integer `order_status` client-side
+         * through `StatusBadgeHelper.getOrderLabel`, which is locale-independent and works
+         * offline. They are in the fixture to prove the client tolerates them, which is what
+         * "additive" has to mean in practice.
+         */
+        'order_status_key': 'confirmed',
+        'order_status_label': 'مؤكد',
         'order_status_message': 'Your order is being prepared.',
         'order_reward_point': 24.0,
         'is_review': isReview,
@@ -171,46 +188,93 @@ Map<String, dynamic> orderDetailEmptyResponse() {
 
 /// ---------------------------------------------------------------------------------------------
 /// PRODUCT DETAIL
+///
+/// TWO PIECES, and the first version of this file got the split wrong.
+///
+/// `ProductDetailScreen` takes the PRODUCT as a constructor argument -- a `ProductData` the
+/// caller already has from the list -- and fetches only its IMAGES from `/viewproduct`.
+/// `ProductDetailModel` reads `image_path`, `image_path_full_url` and `product_id`, and nothing
+/// about name or price. A fixture built as "the product detail response" parses to an empty
+/// image list and a screen that renders the product fine, which is why the mistake is invisible.
 /// ---------------------------------------------------------------------------------------------
 
-Map<String, dynamic> productDetailResponse({
+/// The map `ProductData.fromJson` reads. Every field is optional on that model, so a missing key
+/// renders as null rather than throwing -- which is exactly why the ones that matter are all set
+/// here: a blank price is indistinguishable from a free product.
+Map<String, dynamic> productDataJson({
+  int id = 41,
   String name = 'Aleppo Laurel Soap, 6 bars',
-  String price = '30,000',
-  String? salePrice = '24,000',
+  String price = '30000',
+  String? finalPrice = '24000',
   String currencySymbol = 'ل.س',
-  int stock = 42,
-  bool enableStock = true,
+  int quantity = 42,
+  String categoryName = 'Bath & Body',
+  double rating = 4.5,
 }) =>
     {
-      'status': 1,
-      'message': 'Product detail',
-      'data': {
-        'id': 41,
-        'name': name,
-        'sku': 'SOAP-LAUREL-6',
-        'description':
-            'Traditional Aleppo soap, cured for nine months. Olive oil and laurel berry oil.',
-        'price': _money(price),
-        'sale_price': salePrice == null ? null : _money(salePrice),
-        'final_price': _money(salePrice ?? price),
-        'currency_symbol': currencySymbol,
-        'quantity': stock,
-        'enable_stock_management': enableStock ? 1 : 0,
-        'stock_status': stock > 0 ? 'in_stock' : 'out_of_stock',
-        'cover_image': 'https://example.test/uploads/products/laurel-soap.png',
-        'product_image': const [
-          {'image': 'https://example.test/uploads/products/laurel-soap.png'},
-        ],
-        'category': {'id': 3, 'name': 'Bath & Body'},
-        'brand': {'id': 2, 'name': 'Homs Cotton'},
-        'tax': const [
-          {'id': 1, 'name': 'VAT', 'tax_value': '10', 'type': 'percentage'},
-        ],
-        'variants': const <Map<String, dynamic>>[],
-        'rating': 4.5,
-        'review_count': 12,
-      },
+      'id': id,
+      'name': name,
+      'slug': 'aleppo-laurel-soap',
+      'sku': 'SOAP-LAUREL-6',
+      'description': 'Traditional Aleppo soap, cured for nine months.',
+      'detail': 'Olive oil and laurel berry oil. Handmade in Aleppo.',
+      'price': price,
+      // `final_price` is the field the card prints (P2.5-FLUTTER-PRICE): the server resolves it
+      // from the product's own price, and it is NOT the same thing as a discount price.
+      'final_price': finalPrice ?? price,
+      'discount_amount': finalPrice == null ? '0' : '6000',
+      'currency_symbol': currencySymbol,
+      // `product_stock`, not `quantity`: the model reads the former and ignores the latter, so a
+      // fixture using `quantity` renders a product with no stock and says nothing about it.
+      'product_stock': quantity,
+      'category_id': 3,
+      'category_name': categoryName,
+      'brand_id': 2,
+      'label_id': null,
+      'tax_id': null,
+      'cover_image_url': 'https://example.test/uploads/products/laurel-soap.png',
+      'cover_image_path': 'uploads/products/laurel-soap.png',
+      'average_rating': rating,
+      'is_review': 1,
+      'is_active': 1,
+      // BOOLEANS, not 0/1: `active`, `in_cart` and `in_whishlist` are cast `as bool?` while
+      // `is_active` beside them is `as int?`. The model mixes both conventions for what the host
+      // stores as tinyint, so a fixture has to match each field rather than the column family.
+      'active': true,
+      'in_cart': false,
+      'in_whishlist': false,
+      'variant_product': 0,
+      // STRING, not int: `downloadable_product` is cast `as String?` (the host column is a
+      // varchar). Sent as `0` it threw `type 'int' is not a subtype of type 'String?'` and took
+      // the whole screen down -- the third fixture type mismatch in this file, and the reason
+      // each one is recorded where it happened.
+      'downloadable_product': '0',
+      'product_weight': '0.9',
+      'custom_field_status': 0,
+      'created_at': '2026-09-14 10:00:00',
+      'updated_at': '2026-11-01 12:30:00',
     };
+
+/// `GET /viewproduct?store_id=&product_id=` -- the image list, and only that.
+Map<String, dynamic> productImagesResponse({int images = 3}) => {
+      'status': 1,
+      'message': 'Product images',
+      'data': List<Map<String, dynamic>>.generate(
+        images,
+        (i) => {
+          'id': 200 + i,
+          'product_id': 41,
+          'image_path': 'uploads/products/laurel-soap-$i.png',
+          'image_path_full_url': 'https://example.test/uploads/products/laurel-soap-$i.png',
+          'store_id': 1,
+          'created_at': '2026-09-14 10:00:00',
+          'updated_at': '2026-09-14 10:00:00',
+        },
+      ),
+    };
+
+/// A product whose gallery is empty -- the state a screen must render rather than crash on.
+Map<String, dynamic> productNoImagesResponse() => productImagesResponse(images: 0);
 
 /// ---------------------------------------------------------------------------------------------
 /// COUPON DETAIL -- `GET /view-used-coupon`
