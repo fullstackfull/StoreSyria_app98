@@ -213,37 +213,6 @@ Map<String, dynamic> productDetailResponse({
     };
 
 /// ---------------------------------------------------------------------------------------------
-/// CURRENT PLAN -- the My Plan screen
-/// ---------------------------------------------------------------------------------------------
-
-Map<String, dynamic> currentPlanResponse({
-  String planName = 'Growth',
-  String price = '120,000',
-  String currencySymbol = 'ل.س',
-  String expiry = '2027-03-01',
-  bool unlimitedProducts = false,
-}) =>
-    {
-      'status': 1,
-      'message': 'Current plan',
-      'data': {
-        'id': 2,
-        'name': planName,
-        'price': _money(price),
-        'currency_symbol': currencySymbol,
-        'duration': 'Yearly',
-        'expiry_date': expiry,
-        'max_products': unlimitedProducts ? -1 : 500,
-        'max_orders': unlimitedProducts ? -1 : 5000,
-        'used_products': 128,
-        'used_orders': 1042,
-        'description': 'For stores that are growing quickly.',
-        'enable_custom_domain': 1,
-        'enable_chatgpt': 0,
-      },
-    };
-
-/// ---------------------------------------------------------------------------------------------
 /// COUPON DETAIL -- `GET /view-used-coupon`
 ///
 /// NOT the coupon's definition. `CouponDetailScreen` renders its REDEMPTION HISTORY: each row is
@@ -285,3 +254,90 @@ Map<String, dynamic> usedCouponResponse({
 
 /// A coupon nobody has redeemed -- the empty state, which must be distinguishable from a failure.
 Map<String, dynamic> usedCouponEmptyResponse() => usedCouponResponse(redemptions: 0);
+
+/// ---------------------------------------------------------------------------------------------
+/// MY PLAN -- `GET /indexAllPlan?store_id=`
+///
+/// Deep but FORGIVING: every field in `my_plan_model.dart` is read as `json['x'] ?? default` and
+/// every nested object through `jsonMap(...)`, so a partial payload parses rather than throwing.
+/// That tolerance is exactly why the fixture is written out in full here: a missing key does not
+/// fail, it renders a zero -- a plan page showing `0 / 0 products` looks like a real answer.
+/// ---------------------------------------------------------------------------------------------
+
+Map<String, dynamic> _planLimit(int max, int used) => {
+      'max': max,
+      'used': used,
+      'remaining': max < 0 ? -1 : max - used,
+      'percentage': max <= 0 ? 0.0 : (used / max * 100),
+    };
+
+Map<String, dynamic> currentPlanResponse({
+  String planName = 'Growth',
+  num price = 120000,
+  String currency = 'ل.س',
+  String currencyName = 'Syrian Pound',
+  String expiry = '2027-03-01',
+  int daysRemaining = 112,
+  int maxProducts = 500,
+  int usedProducts = 128,
+  bool expired = false,
+  bool trial = false,
+}) =>
+    {
+      'status': 1,
+      'message': 'Current plan',
+      'data': {
+        'current_plan': {
+          'id': 2,
+          'name': planName,
+          'price': price,
+          'currency': currency,
+          'currency_name': currencyName,
+          'duration': 'year',
+          'duration_text': 'Yearly',
+          'price_display': '$currency $price',
+          'description': 'For stores that are growing quickly.',
+          'has_trial': trial,
+          'trial_days': trial ? 14 : 0,
+          'limits': {
+            'products': _planLimit(maxProducts, usedProducts),
+            'stores': _planLimit(3, 1),
+            'users': _planLimit(10, 4),
+          },
+          'features': {
+            'custom_domain': true,
+            'sub_domain': true,
+            'chatgpt': false,
+            'pwa': true,
+            'shipping_method': true,
+            'enable_tax': true,
+            'storage_limit': '5 GB',
+          },
+          'plan_status': {
+            'is_current_plan': true,
+            'is_expired': expired,
+            'is_trial_plan': trial,
+            'plan_expire_date': expiry,
+            'days_remaining': daysRemaining,
+            'expire_message': expired ? 'Your plan has expired.' : '',
+          },
+          'user_subscription': {
+            'plan_id': 2,
+            'plan_status': expired ? 'expired' : 'active',
+            'plan_expire_date': expiry,
+          },
+        },
+        'current_user_plan': {
+          'plan_id': 2,
+          'plan_expire_date': expiry,
+          'is_expired': expired,
+          'days_remaining': daysRemaining,
+        },
+        'has_requested_plan': false,
+        'requested_plan': null,
+      },
+    };
+
+/// An expired plan -- the state whose whole purpose is to say so loudly.
+Map<String, dynamic> expiredPlanResponse() =>
+    currentPlanResponse(expired: true, daysRemaining: 0, expiry: '2026-10-01');
