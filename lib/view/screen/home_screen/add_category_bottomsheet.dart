@@ -687,7 +687,12 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
   // SUBMIT
   // ============================================================
 
-  void _submit() {
+  /// `Future<void>`, because the sheet now waits for the save and closes ITSELF.
+  ///
+  /// It used to be dismissed as a side effect of the controller's `Loader.hideLoader()`, which
+  /// was `Get.back(closeOverlays: true)` with no loader open -- so it popped whatever was on top,
+  /// on every outcome including 403 and 429. A failed save took the form with it.
+  Future<void> _submit() async {
     FocusScope.of(context).unfocus();
 
     final String name =
@@ -752,7 +757,7 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
     // Submit
     // ----------------------------------------------------------
 
-    categoryController.addCategoriesData(
+    final bool saved = await categoryController.addCategoriesData(
       isUpdate: widget.isUpdate,
       categoryId: widget.categoryId ?? 0,
       name: name,
@@ -773,6 +778,11 @@ class _AddNewCategoriesWidgetState extends State<AddNewCategoriesWidget>
       // Category Icon
       iconImagePath: icon,
     );
+
+    // ONLY on success, and only if this sheet is still on screen.
+    if (saved && mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   // ============================================================

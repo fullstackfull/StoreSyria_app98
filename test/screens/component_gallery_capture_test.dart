@@ -14,6 +14,7 @@ import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/common_button.dart';
 import 'package:store_go_app/view/widget/common_drop_down_widget.dart';
+import 'package:store_go_app/view/widget/loading_widget.dart';
 import 'package:store_go_app/view/screen/home_screen/home_screen_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
@@ -214,6 +215,18 @@ void main() {
         ],
       ),
     ),
+    // ---- P2.5-P2 (2026-11-10) ---------------------------------------------------------------
+    // THE LOADER, which until this wave was never on screen at all: `Loader.showLoader()`
+    // constructed `const LoadingWidget()` as an expression and discarded it. Four live call
+    // sites showed nothing, while its sibling `hideLoader()` popped whatever happened to be on
+    // top -- the merchant's half-filled category sheet, on every outcome including a rejected
+    // save. Now that it renders, it can be reviewed.
+    _Gallery(
+      surface: 'flutter-component-loader',
+      label: 'blocking loader',
+      build: () => const SizedBox(height: 120, child: LoadingWidget()),
+    ),
+
     // ---- P2.5-P1-FLUTTER (2026-11-10) -------------------------------------------------------
 
     // THE HOME WIDGETS. `totalProductWidget` is captured twice because `permitted: false` is not
