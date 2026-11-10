@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/customers/customer_controller.dart';
 import 'package:store_go_app/view/new_widgets/shimmer.dart';
+import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
 import 'package:store_go_app/view/screen/customers/customer_screen.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -451,5 +453,62 @@ void main() {
     expect(VisibilityDetectorController.instance.updateInterval, Duration.zero,
         reason: 'the visibility-detector interval is no longer zero, so every screen holding one '
             'will fail with a pending timer at teardown');
+  });
+
+  testWidgets('a capture contains what an overlay drew ABOVE the screen', (tester) async {
+    /// THE REGRESSION TEST FOR 20 BLANK CAPTURES.
+    ///
+    /// `captureScreen` used to photograph the first `RenderRepaintBoundary` it found walking down
+    /// from the root. That is not the view: `_ModalScopeState.build` wraps the first route's page
+    /// in one, so the search stopped there and the image held that page and nothing above it. A
+    /// toast, a dialog, a modal bottom sheet and a popup menu are all `OverlayEntry`s inserted as
+    /// SIBLINGS of that page, so none of them was ever in a capture.
+    ///
+    /// MEASURED before the fix: the four toast types in four combinations produced 20 PNGs that
+    /// were each a single flat colour across all 288,000 pixels, while `find.text` in the same
+    /// test found the toast every time. Both halves matter -- the widget was there, the evidence
+    /// was not -- and no existing guard could see it, because a uniform 360x800 PNG still encodes
+    /// to about 2.9 KB and so cleared every `lengthSync() > 1000` check.
+    ///
+    /// This asserts the structural property that failed, rather than a pixel count: the thing an
+    /// overlay drew is a DESCENDANT of the boundary the capture is taken from. It needs no
+    /// `SS_CAPTURE_DIR`, so it runs in the ordinary blocking suite and not only in a capture run.
+    final api = ApiStub();
+
+    await pumpScreen(tester, const Scaffold(body: SizedBox.expand()), api: api);
+
+    const String message = 'an overlay drew this';
+
+    commonToast(message);
+
+    await pumpFrames(tester, frames: 8, step: const Duration(milliseconds: 50));
+
+    final Finder toast = find.text(message);
+
+    expect(toast, findsOneWidget,
+        reason: 'the toast resolved no overlay, so this test cannot measure what it is for');
+
+    final RenderObject? boundary = kCaptureBoundaryKey.currentContext?.findRenderObject();
+
+    expect(boundary, isA<RenderRepaintBoundary>(),
+        reason: 'pumpScreen no longer installs the capture boundary');
+
+    // Walk from the overlay's own render object up to the boundary, keeping the chain so a
+    // failure says where the walk ended rather than just "false".
+    final List<String> chain = <String>[];
+    RenderObject? node = tester.renderObject(toast);
+
+    while (node != null && node != boundary) {
+      chain.add(node.runtimeType.toString());
+      node = node.parent;
+    }
+
+    expect(node, same(boundary),
+        reason: 'what the overlay drew is NOT inside the capture boundary, so every capture of a '
+            'toast, dialog, bottom sheet or popup menu is blank. The walk from the overlay '
+            'reached the root through ${chain.length} render objects without finding it: '
+            '${chain.join(' -> ')}');
+
+    await drainToasts(tester);
   });
 }

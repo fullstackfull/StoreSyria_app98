@@ -228,6 +228,68 @@ void main() {
         }
       });
     }
+
+    /* ---- P2.5-FLUTTER-COMP: THE SHELL ITSELF, AT A SECOND WIDTH --------------------------------
+
+       The five cases above are claimed by the five `Nav destination` inventory rows, and the
+       `Bottom-nav shell (DashBoardManagerScreen)` row is a SIXTH surface: the chrome those five
+       share. It cannot honestly be claimed on one of their images -- the coverage-matrix
+       generator refuses one picture for two surfaces, and it is right to -- so the shell gets a
+       render of its own.
+
+       A TABLET IS THE HONEST SECOND RENDER, not a second phone frame, because it answers
+       something the 360pt set cannot: `StylishBottomBar` lays five destinations out for a phone,
+       and whether that still reads at 768pt is a question about the SHELL rather than about any
+       one destination. `golden_harness.dart` keeps `kGoldenTabletSize` for exactly this.
+
+       The surface really is the tablet one, asserted rather than assumed: `pinGoldenSurface` is
+       called inside `pumpScreen`, so passing the size and then photographing the wrong viewport
+       would be invisible in the image. */
+    testWidgets('the shell lays its five destinations out on a tablet in ${combination.name}',
+        (tester) async {
+      final api = shellStub();
+
+      await pumpScreen(
+        tester,
+        const DashBoardManagerScreen(),
+        api: api,
+        combination: combination,
+        register: registerShell,
+        surface: kGoldenTabletSize,
+      );
+
+      await pumpFrames(tester, frames: 16);
+      await drainToasts(tester);
+
+      expect(tester.takeException(), isNull,
+          reason: 'the shell threw on a tablet in ${combination.name}');
+
+      expect(find.byType(DashBoardManagerScreen), findsOneWidget);
+
+      final Size surface = tester.view.physicalSize / tester.view.devicePixelRatio;
+
+      expect(surface, kGoldenTabletSize,
+          reason: 'this case is meant to be the tablet render and the viewport is $surface');
+
+      final context = tester.element(find.byType(DashBoardManagerScreen));
+
+      expect(Directionality.of(context), combination.direction,
+          reason: 'the tablet shell rendered the wrong direction in ${combination.name}');
+      expect(
+        Theme.of(context).brightness,
+        combination.dark ? Brightness.dark : Brightness.light,
+        reason: 'the tablet shell rendered the wrong brightness in ${combination.name}',
+      );
+
+      final captured =
+          await captureScreen(tester, captureName('flutter-shell-tablet', combination));
+
+      if (captureDir != null) {
+        expect(captured, isNotNull);
+        expect(captured!.lengthSync(), greaterThan(1000),
+            reason: 'the tablet shell capture is suspiciously small: a blank render');
+      }
+    });
   }
 
   testWidgets('premise: every destination really is reachable and distinct', (tester) async {

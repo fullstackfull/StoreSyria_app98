@@ -78,6 +78,20 @@ import 'golden_harness.dart';
 
 Directory? _storageDir;
 
+/// Whether [initScreenHarness] has run. [pumpScreen] refuses to mount without it.
+///
+/// WHY THIS IS A HARD FAILURE AND NOT A DOCUMENTED CONVENTION. The last line of
+/// [initScreenHarness] is `loadAppFonts()`, and a capture taken without it is not an error --
+/// it is a perfectly valid PNG in which every glyph is the test font's filled box. Layout,
+/// direction and colour all still read correctly, so the image looks like evidence and gets
+/// filed as evidence; only a side-by-side with an older capture shows the text never rendered.
+///
+/// MEASURED: a new capture file was written without a `setUpAll`, and all twenty of its images
+/// came back in tofu while the gallery's captures from the day before, through this same
+/// function, rendered Tajawal. Every other capture file in `test/` calls this, so the guard
+/// costs nothing and closes the one way the set can go quietly wrong.
+bool _harnessReady = false;
+
 /// Call once from `setUpAll`. Idempotent.
 ///
 /// GetStorage writes through `path_provider`, which has no implementation in a test binding, so the
@@ -123,6 +137,8 @@ Future<void> initScreenHarness() async {
   VisibilityDetectorController.instance.updateInterval = Duration.zero;
 
   await loadAppFonts();
+
+  _harnessReady = true;
 }
 
 /// Call from `tearDownAll`.
@@ -352,6 +368,26 @@ Future<T> runWithApi<T>(ApiStub api, Future<T> Function() body) =>
 ///     block  isRegistered<Foo>=true   isRegistered<void>=false
 ///
 /// This cost an hour the first time. [pumpScreen] now detects it and fails by name instead.
+/// THE BOUNDARY EVERY CAPTURE IS TAKEN FROM, and the reason it is keyed rather than searched for.
+///
+/// [captureScreen] used to take the FIRST `RenderRepaintBoundary` it found walking down from the
+/// root. In a `MaterialApp` that is not the view -- it is the boundary `_ModalScopeState.build`
+/// wraps the first route's page in, so it holds that page and NOTHING ABOVE IT. Every
+/// `OverlayEntry` inserted later is a SIBLING of that page inside the navigator's `Overlay`, so a
+/// toast, a dialog, a `showModalBottomSheet`, a dropdown menu and a popup menu all fell outside
+/// the photograph.
+///
+/// MEASURED on the four toast types in four combinations: 20 captures, each one a single flat
+/// colour across all 288,000 pixels -- the scaffold background and nothing else -- while
+/// `find.text(message)` in the same test found the toast. The test passed; the evidence was blank.
+/// The `lengthSync() > 1000` guard every capture case carries did not catch it either, because a
+/// uniform 360x800 PNG still encodes to ~2.9 KB.
+///
+/// So the boundary is now pinned at the top of the pumped tree and looked up by key. A capture
+/// cannot silently photograph a sub-tree again: if this key resolves nothing, [captureScreen]
+/// fails by name instead of falling back to a search.
+final GlobalKey kCaptureBoundaryKey = GlobalKey(debugLabel: 'ss-capture-boundary');
+
 Future<void> pumpScreen(
   WidgetTester tester,
   Widget screen, {
@@ -369,6 +405,15 @@ Future<void> pumpScreen(
   int frames = 12,
   Duration step = const Duration(milliseconds: 50),
 }) async {
+  if (!_harnessReady) {
+    fail(
+      'pumpScreen was called before `initScreenHarness`, so the app fonts are not loaded and '
+      'every glyph will render as the test font\'s filled box. Add '
+      '`setUpAll(initScreenHarness);` and `tearDownAll(disposeScreenHarness);` to this file, as '
+      'every other capture file does.',
+    );
+  }
+
   pinGoldenSurface(tester, size: surface);
 
   await http.runWithClient(() async {
@@ -415,7 +460,11 @@ Future<void> pumpScreen(
     }
 
     await tester.pumpWidget(
-      ScreenUtilInit(
+      // The capture boundary, ABOVE everything including the navigator's overlay. See
+      // [kCaptureBoundaryKey].
+      RepaintBoundary(
+        key: kCaptureBoundaryKey,
+        child: ScreenUtilInit(
         // ScreenUtil's design size stays the DESIGN size even on a wider surface: that is what
         // the app does on a tablet, and scaling the design size with the window would hide
         // exactly the reflow this set exists to show.
@@ -445,7 +494,8 @@ Future<void> pumpScreen(
           // failure. Supplying stub pages lets the navigation resolve, which also makes "did it
           // really redirect?" an assertion a test can make.
           getPages: pages,
-          home: Directionality(textDirection: combination.direction, child: screen),
+            home: Directionality(textDirection: combination.direction, child: screen),
+          ),
         ),
       ),
     );
@@ -486,10 +536,22 @@ Future<File?> captureScreen(WidgetTester tester, String name) async {
 
   if (dir == null) return null;
 
-  final repaint = _findRepaintBoundary(tester.binding.rootElement!.renderObject!);
+  // THE PINNED BOUNDARY, NOT A SEARCH. See [kCaptureBoundaryKey] for what the search photographed
+  // instead -- and for the 20 blank captures that measured it.
+  final context = kCaptureBoundaryKey.currentContext;
 
-  if (repaint == null) {
-    fail('no RenderRepaintBoundary was found to capture "$name" from');
+  if (context == null) {
+    fail(
+      'no capture boundary is mounted, so "$name" cannot be photographed. Every capture has to be '
+      'pumped through `pumpScreen`, which installs the boundary; a test that calls '
+      '`tester.pumpWidget` itself and then `captureScreen` will land here.',
+    );
+  }
+
+  final repaint = context.findRenderObject();
+
+  if (repaint is! RenderRepaintBoundary) {
+    fail('the capture boundary for "$name" is a ${repaint.runtimeType}, not a RenderRepaintBoundary');
   }
 
   late final File file;
@@ -512,18 +574,6 @@ Future<File?> captureScreen(WidgetTester tester, String name) async {
   });
 
   return file;
-}
-
-RenderRepaintBoundary? _findRepaintBoundary(RenderObject node) {
-  if (node is RenderRepaintBoundary) return node;
-
-  RenderRepaintBoundary? found;
-
-  node.visitChildren((child) {
-    found ??= _findRepaintBoundary(child);
-  });
-
-  return found;
 }
 
 /// The capture file name this project uses, matching the Laravel side's convention so the two

@@ -606,9 +606,24 @@ class _SimpleSnackBarState extends State<_SimpleSnackBar>
              child: Icon(
               Icons.close_rounded,
               size: 18,
+              // P2.5 a11y -- 2.54:1 -> 4.83:1 on the light surface.
+              //
+              // `#9CA3AF` on white is 2.5388:1, under the 3:1 that SC 1.4.11 asks of a UI
+              // component, and this glyph is the ONLY way to dismiss a toast early: no second
+              // target, no label, no gesture. It was found by looking at the Phase 2.5 captures --
+              // in all four LIGHT frames the control was barely there while the dark frames showed
+              // it plainly -- and then measured.
+              //
+              // `#6B7280` is not a new colour. It is the shade this same widget already uses for
+              // its secondary text in light mode (`messageColor` above), which is exactly the
+              // relationship dark mode already had: there the close icon and the message text are
+              // both `#A9B8D0`. So this makes light match dark rather than inventing a value.
+              //
+              // Measured by `test/a11y/toast_type_contrast_test.dart`, which parses THIS ternary
+              // rather than holding a copy of it -- a copy passed against the broken widget.
               color: isDark
                   ? const Color(0xFFA9B8D0)
-                  : const Color(0xFF9CA3AF),
+                  : const Color(0xFF6B7280),
              ),
             ),
            ),

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -376,6 +378,72 @@ class AppButton extends StatelessWidget {
     this.borderSide,
   });
 
+  /// The ink a filled button's label is drawn in, chosen so that it can be READ on the fill.
+  ///
+  /// ────────────────────────────────────────────────────────────────────────────────────────────
+  /// WHY THIS IS NOT JUST `Colors.white`, WHICH IS WHAT IT WAS
+  /// ────────────────────────────────────────────────────────────────────────────────────────────
+  ///
+  /// A filled `AppButton` used to draw its label white whatever the fill. On the navy primary that
+  /// is 14.43:1 and right. On a RED it is not, and red is what every destructive confirmation in
+  /// this application uses: twelve `AppDialog.showCustomDialog` call sites pass one of four reds
+  /// as `confirmColor`, and white fails SC 1.4.3 on three of them —
+  ///
+  ///     AppColor.cRedText  #dc0303  light   5.18:1  ok
+  ///     AppColor.cRedText  #FF6B6B  dark    2.78:1  FAIL   <- 7 call sites, dark mode
+  ///     Colors.red         #F44336          3.68:1  FAIL   <- 4 call sites
+  ///     danger             #EF4444          3.76:1  FAIL   <- 1 call site
+  ///
+  /// — so the label on "delete this customer", "delete this order", "delete this product" was
+  /// under the minimum in at least one theme at every one of those sites. MEASURED FROM A
+  /// RENDERED CAPTURE, not from the token: the confirm button was photographed in all four
+  /// combinations and its pixels sampled, white `#FFFFFF` on `#EF4444`, 3.76:1.
+  ///
+  /// The label is 14.sp at `FontWeight.w600`, which is nowhere near WCAG's large-text threshold
+  /// (18.66px AND bold, or 24px), so 4.5:1 is the bar and not 3:1.
+  ///
+  /// ────────────────────────────────────────────────────────────────────────────────────────────
+  /// THE RULE, AND WHY IT CANNOT MAKE ANYTHING WORSE
+  /// ────────────────────────────────────────────────────────────────────────────────────────────
+  ///
+  /// Take whichever of white and the app's near-black ink contrasts BETTER with the fill. A
+  /// button whose white label already passes keeps it — white wins on every dark fill in this
+  /// app, the navy primary included — so the only labels that change are ones that were failing.
+  /// The design system reaches the same answer from the other side: `--ss-on-danger` is `#ffffff`
+  /// in a light scope and `#3b0d0a` in a dark one, because its danger fill inverts between them.
+  ///
+  /// `#14161B` is this file's own `titleColor` for light mode, not a new value.
+  ///
+  /// An explicit `textColor:` from the caller still wins: this only decides the DEFAULT.
+  ///
+  /// Pinned by `test/a11y/dialog_confirm_label_contrast_test.dart`, which measures every colour
+  /// the twelve call sites actually pass and fails if a thirteenth introduces an unmeasured one.
+  static Color labelFor(Color background) {
+    const Color ink = Color(0xFF14161B);
+
+    return _contrast(Colors.white, background) >= _contrast(ink, background)
+        ? Colors.white
+        : ink;
+  }
+
+  /// WCAG 2.1 relative luminance, and the ratio built from it. Written out rather than taken from
+  /// `ThemeData.estimateBrightnessForColor`, which switches on a 0.15 luminance threshold and so
+  /// answers "is this dark?" — a different question from "can the label be read?", and one that
+  /// gives the wrong answer for exactly the mid-tone reds above.
+  static double _luminance(Color c) {
+    double channel(double v) =>
+        v <= 0.03928 ? v / 12.92 : math.pow((v + 0.055) / 1.055, 2.4).toDouble();
+
+    return 0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
+  }
+
+  static double _contrast(Color a, Color b) {
+    final double la = _luminance(a) + 0.05;
+    final double lb = _luminance(b) + 0.05;
+
+    return la > lb ? la / lb : lb / la;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -387,7 +455,7 @@ class AppButton extends StatelessWidget {
     final Color btnTextColor = textColor ??
         (outlined
             ? (isDark ? Colors.white : AppColor.cText)
-            : Colors.white);
+            : labelFor(btnBackground));
 
     final BorderSide side = borderSide ??
         BorderSide(

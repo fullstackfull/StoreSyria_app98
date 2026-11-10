@@ -121,6 +121,49 @@ void main() {
             reason: 'the analytics capture is suspiciously small: a blank render');
       }
 
+      /* ---- P2.5-FLUTTER-COMP: A SECOND CAPTURE, BELOW THE FOLD -------------------------------
+         THE THREE `findsOneWidget` ASSERTIONS ABOVE ARE NOT EVIDENCE THAT ANYBODY HAS SEEN THESE
+         CHARTS. They prove `PlatformBarChart` and the two `BrowsersGraph`s are MOUNTED; the
+         capture is 360x800 and all three sit below it, so the image stops just under the
+         visitors chart. The `Statistics widgets` inventory row stayed PENDING for exactly that
+         reason while the `Analytics / statistics` SCREEN row was claimed on this file.
+
+         `PlatformBarChart` is also the one widget in `lib/` holding a `VisibilityDetector`
+         (`statistics_screen_widget.dart:1077`): it starts its bar animation when it scrolls INTO
+         view, so a capture taken without scrolling would have photographed bars at zero height
+         even if the viewport had reached them. `initScreenHarness` pins the detector's interval
+         to zero so the callback fires synchronously rather than behind a timer the binding then
+         fails on.
+
+         The scroll position is ASSERTED, not assumed: `scrollUntilVisible` returning does not
+         mean the widget is inside the 360x800 surface, and a capture of the wrong offset would
+         look like a perfectly good photograph of something else. */
+      await tester.scrollUntilVisible(
+        find.byType(PlatformBarChart),
+        240,
+        maxScrolls: 30,
+      );
+
+      await pumpFrames(tester, frames: 16);
+
+      final Rect barChart = tester.getRect(find.byType(PlatformBarChart));
+      final Size surface = tester.view.physicalSize / tester.view.devicePixelRatio;
+
+      expect(barChart.top, lessThan(surface.height),
+          reason: 'the platform breakdown is still below the viewport after scrolling, so the '
+              'second capture would photograph the same region as the first');
+      expect(barChart.bottom, greaterThan(0),
+          reason: 'the platform breakdown scrolled off the top');
+
+      final lower =
+          await captureScreen(tester, captureName('flutter-statistics-charts', combination));
+
+      if (captureDir != null) {
+        expect(lower, isNotNull);
+        expect(lower!.lengthSync(), greaterThan(1000),
+            reason: 'the lower analytics capture is suspiciously small');
+      }
+
       await drainToasts(tester);
     });
   }

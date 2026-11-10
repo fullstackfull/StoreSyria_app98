@@ -123,12 +123,36 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
                     opacity: 0.15,
                   ),
 
+                  /* P2.5 -- THE BAR'S CONTENT SCALES WITH THE BAR, NOT WITH THE SCREEN'S WIDTH.
+                     ================================================================================
+
+                     Every size in here used to be width-scaled: the icon `25.w` and the label
+                     `10.sp`, which ScreenUtil also derives from the width. The bar around them is
+                     height-scaled (`70.h` above), and `StylishBottomBar` lays each
+                     `BottomBarItem` out inside a slot it fixes at 50 logical pixels of its own.
+
+                     On a phone at the 360pt design width those three scales are all 1.0 and
+                     nothing disagrees. On a 768pt tablet the width scale is 2.13 while the height
+                     scale is 1.28, so a 25pt icon became 53pt and a 10pt label became 21pt, both
+                     inside a slot that is still 50. MEASURED: `A RenderFlex overflowed by 29
+                     pixels on the bottom` for the selected destination and 3.3 for each of the
+                     other four -- five overflows, every frame, in all four combinations.
+
+                     `.h` ties both to the dimension that actually constrains them. At the design
+                     size this changes NOTHING -- `25.w`, `25.h` and `10.sp` are all exactly their
+                     literal there, which is why the five committed phone captures are unchanged
+                     byte for byte -- and on a tablet the icon becomes 32 and the label 12.8,
+                     which fit the 50 with room for the 1.2 line height.
+
+                     Guarded by the tablet case in `dashboard_shell_capture_test.dart`, which
+                     fails on any exception, so a renewed overflow is a failure rather than a
+                     striped band in an image nobody re-reads. */
                   items: dashboardManagerController.naviBarItemList.map((element) {
                     return BottomBarItem(
                       icon: SvgPicture.asset(
                         element['icon'],
-                        width: 25.w,
-                        height: 25.w,
+                        width: 25.h,
+                        height: 25.h,
                         colorFilter: ColorFilter.mode(
                           navInactiveColor,
                           BlendMode.srcIn,
@@ -136,8 +160,8 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
                       ),
                       selectedIcon: SvgPicture.asset(
                         element['icon'],
-                        width: 25.w,
-                        height: 25.w,
+                        width: 25.h,
+                        height: 25.h,
                         colorFilter: ColorFilter.mode(
                           navActiveColor,
                           BlendMode.srcIn,
@@ -146,7 +170,7 @@ class _DashBoardManagerScreenState extends State<DashBoardManagerScreen> with Ti
                       title: Text(
                         element['title'],
                         style: TextStyle(
-                          fontSize: 10.sp,
+                          fontSize: 10.h,
                           fontWeight: FontWeight.w500,
                           height: 1.2,
                         ),
