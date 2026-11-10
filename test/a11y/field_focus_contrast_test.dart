@@ -39,6 +39,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/view/new_widgets/app_txt_field.dart';
+import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 
 /// WCAG 2.x relative luminance.
 double _luminance(Color c) {
@@ -74,6 +75,41 @@ Future<void> pumpField(WidgetTester tester, {required bool dark}) async {
   );
   await tester.pumpAndSettle();
 }
+
+/// THE OTHER TEXT FIELD, which this file did not know about.
+///
+/// `AddProductTextField` (product_widget.dart:446) is a separate ~200-line class with the same
+/// job as `AppTextField`, and it is rendered on eight screens -- the email, stripe, COD and
+/// bank-transfer settings panels, the loyalty panel, the shipping and tax bottom sheets, and the
+/// rating screen. When `AppTextField`'s focus colours were derived per theme (`_focusColor`,
+/// app_txt_field.dart:98), its twin was left hardcoding `navyBlue` #172C4E for both the caret
+/// (:568) and the focus ring (:609) -- against a field whose own dark fill is #18263F (:501).
+///
+/// The assertions below are the same ones already applied to `AppTextField`. Only the sample was
+/// missing, which is the same shape of gap as the required-marker tool on the Laravel side: the
+/// right property, measured on the one widget that could not fail it.
+Future<void> pumpProductField(WidgetTester tester, {required bool dark}) async {
+  await tester.pumpWidget(
+    ScreenUtilInit(
+      designSize: const Size(360, 800),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (_, __) => GetMaterialApp(
+        theme: ThemeData(brightness: dark ? Brightness.dark : Brightness.light),
+        home: const Scaffold(
+          body: AddProductTextField(labelText: 'Store name', hintText: 'Damascus Textiles'),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+/// The dark fill `AddProductTextField` paints itself with, declared at product_widget.dart:501.
+/// Hardcoded there rather than read from the theme, so it is hardcoded here too -- and if the
+/// widget stops using it, the first assertion below is measuring the wrong ground and should be
+/// updated deliberately.
+const Color kProductFieldDarkFill = Color(0xFF18263F);
 
 void main() {
   testWidgets('the caret clears 3:1 on the dark field surface', (tester) async {
@@ -147,5 +183,45 @@ void main() {
     final field = tester.widget<TextField>(find.byType(TextField));
     expect(field.cursorColor, isNot(LightThemeColor.cPrimary),
         reason: 'the dark caret is using the light theme\'s brand again');
+  });
+
+  testWidgets('the product field caret clears 3:1 on its own dark fill', (tester) async {
+    await pumpProductField(tester, dark: true);
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    final r = contrast(field.cursorColor!, kProductFieldDarkFill);
+
+    expect(r, greaterThanOrEqualTo(3.0),
+        reason: 'AddProductTextField paints its caret ${field.cursorColor} on its own dark fill '
+            '$kProductFieldDarkFill = ${r.toStringAsFixed(2)}:1. Its twin AppTextField derives '
+            'this per theme at app_txt_field.dart:98; this widget was left on the light-mode '
+            'navy when that repair was made.');
+  });
+
+  testWidgets('the product field focus ring clears 3:1 on its own dark fill', (tester) async {
+    await pumpProductField(tester, dark: true);
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    final focused = field.decoration!.focusedBorder! as OutlineInputBorder;
+    final r = contrast(focused.borderSide.color, kProductFieldDarkFill);
+
+    expect(r, greaterThanOrEqualTo(3.0),
+        reason: 'AddProductTextField paints its focus ring ${focused.borderSide.color} on its own '
+            'dark fill $kProductFieldDarkFill = ${r.toStringAsFixed(2)}:1. Focus visibility is '
+            'WCAG 2.4.7 and a ring nobody can see is the same as no ring. This field is on eight '
+            'merchant screens.');
+  });
+
+  testWidgets('the product field keeps the light brand in light mode', (tester) async {
+    await pumpProductField(tester, dark: false);
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    final focused = field.decoration!.focusedBorder! as OutlineInputBorder;
+
+    final ring = contrast(focused.borderSide.color, const Color(0xFFFFFFFF));
+
+    expect(ring, greaterThanOrEqualTo(3.0),
+        reason: 'the product field focus ring is ${focused.borderSide.color} on the light fill, '
+            '${ring.toStringAsFixed(2)}:1. Light mode was already correct and must stay so.');
   });
 }

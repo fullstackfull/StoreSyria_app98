@@ -494,6 +494,23 @@ class AddProductTextField extends StatelessWidget {
 
   static const Color navyBlue = Color(0xFF172C4E);
 
+  /// THE FOCUS COLOUR, DERIVED PER THEME -- the repair `AppTextField` already had and this twin
+  /// did not.
+  ///
+  /// `navyBlue` #172C4E is the light-mode brand. Against this field's OWN dark fill, #18263F
+  /// (the `backgroundColor` two methods below), it measures **1.09:1** -- so in dark mode the
+  /// caret and the focus ring were both invisible, on the eight screens that render this widget:
+  /// the email, Stripe, COD and bank-transfer settings panels, the loyalty panel, the shipping
+  /// and tax bottom sheets, and the rating screen. Focus visibility is WCAG 2.4.7, and a ring
+  /// nobody can see is the same as no ring.
+  ///
+  /// This reads what the theme already says rather than deciding the brand, exactly as
+  /// `AppTextField._focusColor` does (app_txt_field.dart:98). Guarded by
+  /// test/a11y/field_focus_contrast_test.dart, which previously pumped only the twin -- the
+  /// right assertion on the one widget that could not fail it.
+  static Color _focusColor(bool isDark) =>
+      isDark ? DarkThemeColor.cPrimary : LightThemeColor.cPrimary;
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -565,7 +582,7 @@ class AddProductTextField extends StatelessWidget {
               obscureText: obscureText ?? false,
               obscuringCharacter: obscuringCharacter ?? '•',
               maxLines: (obscureText ?? false) ? 1 : (maxLines ?? 1),
-              cursorColor: navyBlue,
+              cursorColor: _focusColor(isDark),
               style: TextStyle(fontSize: 16, color: textColor),
               decoration: InputDecoration(
                 hintText: hintText,
@@ -606,7 +623,7 @@ class AddProductTextField extends StatelessWidget {
                 border: border(borderColor),
                 enabledBorder: border(borderColor),
                 disabledBorder: border(borderColor),
-                focusedBorder: border(navyBlue, 1.5),
+                focusedBorder: border(_focusColor(isDark), 1.5),
                 errorBorder: border(Colors.red),
                 focusedErrorBorder: border(Colors.red, 1.5),
               ),
