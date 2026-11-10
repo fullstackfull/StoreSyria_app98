@@ -234,24 +234,26 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
                                     addReviewController.isStatus.value;
 
 
-                                return Container(
+                                // `Material`, NOT a `Container` with a decoration.
+                                //
+                                // A ListTile paints its background and its ink splash on the
+                                // nearest Material ancestor. Wrapped in a DecoratedBox that has
+                                // its own colour, the DecoratedBox paints OVER both -- so the
+                                // tile had no tap feedback at all, and Flutter said so:
+                                // "ListTile background color or ink splashes may be invisible".
+                                // Raised as a framework error by the capture harness, which is
+                                // the only reason it was seen; it is silent at runtime.
+                                return Material(
+                                  color: (isVisible
+                                      ? AppColor.themeGreenColor
+                                      : Colors.grey)
+                                      .withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: Padding(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 14.w,
                                     vertical: 4.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: (isVisible
-                                        ? AppColor.themeGreenColor
-                                        : Colors.grey)
-                                        .withValues(alpha: 0.08),
-                                    borderRadius:
-                                    BorderRadius.circular(12.r),
-                                    // border: Border.all(
-                                    //   color: (isVisible
-                                    //       ? AppColor.themeGreenColor
-                                    //       : Colors.grey)
-                                    //       .withValues(alpha: 0.3),
-                                    // ),
                                   ),
                                   child: SwitchListTile(
                                     contentPadding: EdgeInsets.zero,
@@ -289,6 +291,7 @@ class _AddRatingScreenState extends State<AddRatingScreen> {
                                     isDark
                                         ? Colors.grey.shade700
                                         : Colors.grey.shade300,
+                                  ),
                                   ),
                                 );
                               },
