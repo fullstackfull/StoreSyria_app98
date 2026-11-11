@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:store_go_app/view/widget/common_button.dart';
 
-import '../support/golden_harness.dart';
 import '../support/screen_harness.dart';
 
 /// P2.5-FLUTTER-BTN-DISABLED — a button with no handler looked exactly like one that works.

@@ -96,11 +96,11 @@ void main() {
     const flame = '\u{1F525}';
     const bell = '\u{1F514}';
 
-    expect(_isDeveloperOutput('AppLog.d(' + bell + ' notification);'), isTrue);
-    expect(_isDeveloperOutput('buffer.writeln(' + flame + ' REQUEST);'), isTrue);
+    expect(_isDeveloperOutput('AppLog.d($bell notification);'), isTrue);
+    expect(_isDeveloperOutput('buffer.writeln($flame REQUEST);'), isTrue);
 
     // ...but a widget string must NOT be exempted merely for mentioning a word.
-    expect(_isDeveloperOutput('Text(' + flame + ' orderId),'), isFalse,
+    expect(_isDeveloperOutput('Text($flame orderId),'), isFalse,
         reason: 'the logging exemption is wide enough to swallow a real widget string');
   });
 }

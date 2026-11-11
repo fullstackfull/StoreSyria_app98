@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/product_controller/product_controller.dart';
 import 'package:store_go_app/view/screen/product_screen/products_screen.dart';
 
-import '../support/golden_harness.dart';
 import '../support/screen_harness.dart';
 
 /// P2.5-FLUTTER-PRICE — FIXED. The product list shows the same price the merchant web shows.

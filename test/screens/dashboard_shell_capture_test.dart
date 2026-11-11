@@ -171,7 +171,7 @@ void main() {
   }
 
   for (final combination in kFourCombinations) {
-    for (final (index, slug, englishLabel) in destinations) {
+    for (final (index, slug, _) in destinations) {
       testWidgets('the shell shows destination $index ($slug) in ${combination.name}',
           (tester) async {
         final api = shellStub();
@@ -308,7 +308,7 @@ void main() {
         reason: 'the navigation bar no longer carries five items');
 
     final seen = <int>{};
-    for (final (index, _, __) in destinations) {
+    for (final (index, _, _) in destinations) {
       shell.updateIndex(index);
       await pumpFrames(tester, frames: 6);
       seen.add(shell.currantIndex.value);
@@ -344,10 +344,10 @@ void main() {
 
       final bar = tester.widget<StylishBottomBar>(find.byType(StylishBottomBar));
       final background = bar.backgroundColor!;
-      final item = bar.items!.first;
+      final item = bar.items.first;
 
-      final unselected = flatten(item.unSelectedColor!, background);
-      final selected = flatten(item.selectedColor!, background);
+      final unselected = flatten(item.unSelectedColor, background);
+      final selected = flatten(item.selectedColor, background);
 
       expect(contrast(selected, background), greaterThanOrEqualTo(4.5),
           reason: '$theme: the SELECTED navigation label is '

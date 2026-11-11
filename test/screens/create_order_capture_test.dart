@@ -30,7 +30,7 @@ void main() {
 
       await pumpScreen(
         tester,
-        Builder(builder: (_) => CreateOrderScreen()),
+        Builder(builder: (_) => const CreateOrderScreen()),
         api: api,
         combination: combination,
         register: () {

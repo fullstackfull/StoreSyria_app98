@@ -4,7 +4,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/images.dart';
 import 'package:store_go_app/view/new_widgets/settings_card.dart';
 

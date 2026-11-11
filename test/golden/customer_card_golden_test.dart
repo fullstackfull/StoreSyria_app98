@@ -27,8 +27,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:store_go_app/core/model/customer_model.dart';
-import 'package:store_go_app/core/model/delivery_boy_model.dart';
 import 'package:store_go_app/view/new_widgets/customer_widget.dart';
 import 'package:store_go_app/view/new_widgets/delivery_boy_widget.dart';
 
