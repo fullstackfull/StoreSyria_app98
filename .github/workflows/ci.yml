@@ -9,7 +9,10 @@ name: CI
 #
 #   pubspec.lock is installable    -- blocking. NEW, and the one that makes
 #                                     every number below mean something.
-#   flutter test                   -- blocking, must be 100%. MEASURED 1165/1165.
+#   flutter test                   -- blocking, must be 100%. THE FIGURE LIVES BESIDE THE
+#                                     STEP, NOT HERE: this line carried 1165 while the step's
+#                                     own comment declared 1165 stale, so the file disagreed
+#                                     with itself in two places. See "flutter test" below.
 #   flutter analyze errors         -- blocking, must be 0. MEASURED 0.
 #   flutter analyze warnings       -- blocking, must be 0. MEASURED 0.
 #   flutter analyze infos          -- RATCHET at 248: may fall, never rise.
@@ -131,7 +134,7 @@ name: CI
 #     flutter pub get --enforce-lockfile  -> "Got dependencies!", exit 0
 #     flutter pub get, run twice          -> pubspec.lock byte-identical
 #     flutter analyze                     -> 248 issues, 0 errors, 0 warnings
-#     flutter test                        -> 1165/1165
+#     flutter test                        -> 1165/1165  (at the time; see the step's own note)
 #   and the lock is still byte-identical after analyze and test, which is why
 #   the containment step below can now allow exactly ONE file to change.
 #
@@ -175,12 +178,26 @@ on:
   pull_request:
   push:
     branches: [main, master]
+  # BY HAND ONLY, and that is the whole point of it. The `goldens` job below
+  # regenerates the pixel baselines, and a job that did that automatically
+  # would overwrite them with whatever the code currently draws -- turning the
+  # comparison into a no-op and removing the human review step that is route 1
+  # step 2. So it is `workflow_dispatch` and it is guarded by an event check,
+  # asserted by test/golden/golden_infrastructure_test.dart.
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # THE EVENT IS PART OF THE GROUP, and leaving it out was a real hazard introduced by adding
+  # `workflow_dispatch` above. With a group of `ci-<ref>` alone, triggering a baseline CAPTURE on a
+  # branch would join the same group as that branch's running pull-request CI and, with
+  # `cancel-in-progress: true`, KILL IT -- so asking for pictures would silently destroy a test
+  # verdict somebody was waiting on. Including `github.event_name` keeps the behaviour that matters
+  # (two pull_request runs on one ref still cancel each other) and stops a manual capture from
+  # cancelling anything. Found by an adversarial review of the change that added the capture job.
+  group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -307,7 +324,7 @@ jobs:
 
       - name: flutter test
         # Must be 100%. There is no allowance here and no continue-on-error:
-        # the suite measures 1165/1165 on this SDK. It was 217 when this job
+        # the suite measured 1165/1165 on this SDK WHEN THIS WAS WRITTEN. It was 217 when this job
         # was written; the response-shape and release-posture work took it to
         # 1104, the temp-directory race test to 1105, and this closure cycle
         # added 60 on top of that:
@@ -331,6 +348,27 @@ jobs:
         # This file has twice shipped a stale count, which is why the number
         # is cited next to the step that enforces it rather than only in a
         # summary at the top.
+        #
+        # AND THE 1165 ABOVE IS NOW STALE AGAIN, so here is the measurement
+        # rather than a correction nobody checked. Flutter 3.47.7, this
+        # container, 2026-11-07:
+        #
+        #   flutter test                                   -> 1535 passed
+        #     ...WITH the golden baselines present locally.
+        #   flutter test, baselines absent (as on a runner) -> 1527 + 8 skipped
+        #
+        # The difference is the eight pixel cases added with the golden
+        # infrastructure: they skip themselves until a reviewed baseline is
+        # committed, which is what let this step stay unfiltered. The step
+        # asserts "exit 0", not a count, and a skip exits 0 -- so the number
+        # is recorded here as evidence, not as a gate.
+        #
+        # Measured at the same time, for the three analyzer gates above:
+        # 0 errors, 0 warnings, 243 informational issues against a ceiling of
+        # 248. The drop from 248 was NOT caused by this change -- none of the
+        # files it adds produces an analyzer issue of any kind -- so the
+        # ceiling is deliberately left where it is rather than ratcheted on
+        # somebody else's fix.
         run: flutter test --reporter expanded
 
       # ---------------------------------------------------------------------
@@ -386,3 +424,95 @@ jobs:
 
           echo "Restored. Working tree now:"
           git status --porcelain
+
+  # ---------------------------------------------------------------------------
+  # ROUTE 1 OF THE FLUTTER RENDERING-EVIDENCE BLOCKER -- capture the pixel
+  # baselines for human review. NEVER RUNS ON A PUSH OR A PULL REQUEST.
+  #
+  # `docs/PHASE-2.5-FLUTTER-RENDERING-EVIDENCE-BLOCKER-AR.md` measured what was
+  # actually missing from this repository's verification: `matchesGoldenFile`
+  # appeared in ZERO test files and there were ZERO baseline PNGs, so nothing
+  # compared a rendered image. The SDK was already here; the images were not.
+  #
+  # ROUTE 1 IS THREE STEPS AND THIS JOB IS ONLY THE FIRST:
+  #   1. this job runs `flutter test --update-goldens --tags golden` and uploads
+  #      the PNGs as an artifact;
+  #   2. a human downloads the artifact, LOOKS at the pictures once, and commits
+  #      the ones that are correct to test/golden/goldens/;
+  #   3. from then on the ordinary `flutter test` above compares pixels on every
+  #      push, because the golden cases stop skipping the moment their baseline
+  #      file exists.
+  #
+  # WHY IT DOES NOT COMMIT. A baseline generated and committed by the same
+  # automation that wrote the test records whatever the code did -- a defect
+  # included -- and then asserts it for ever. The review in step 2 is the only
+  # thing that makes a baseline mean anything, so this job hands the images to a
+  # person and stops.
+  #
+  # WHY THE BLOCKING `flutter test` STEP ABOVE IS UNCHANGED. The alternative was
+  # `flutter test --exclude-tags golden`, which would have narrowed the one gate
+  # this repository declares blocking and 100%. Instead each golden case skips
+  # itself while its own baseline is absent, so the gate keeps running
+  # everything. `golden_infrastructure_test.dart` asserts `--exclude-tags` never
+  # appears in this file.
+  # ---------------------------------------------------------------------------
+  goldens:
+    name: goldens (capture for human review)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: subosito/flutter-action@f2c4f6686ca8e8d6e6d0f28410eeef506ed66aff # v2.18.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Record the toolchain actually used
+        # A baseline is only comparable against the SDK that produced it, and
+        # FLUTTER_VERSION is pinned for exactly this reason. The version goes in
+        # the log so a future diff can be read against the capture.
+        run: flutter --version
+
+      - name: The committed pubspec.lock is installable, and is what is used
+        run: flutter pub get --enforce-lockfile
+
+      - name: Capture the baselines
+        # --tags golden selects exactly the pixel cases, so nothing else in the
+        # rest of the suite is touched. --update-goldens makes
+        # `goldenReady()` return true regardless of whether a file exists, which
+        # is what lets an uncaptured case run here and skip everywhere else.
+        run: flutter test --tags golden --update-goldens --reporter expanded
+
+      - name: Show what was produced
+        run: |
+          echo "PNGs under test/golden/goldens/:"
+          ls -la test/golden/goldens/ 2>/dev/null || echo "(none -- no golden case ran)"
+          echo
+          echo "Git sees:"
+          git status --porcelain -- test/golden/
+
+      - name: Upload the images for review
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: golden-baselines-${{ github.sha }}
+          # *.png, NOT THE DIRECTORY -- and this is a guard that had already stopped working.
+          # `if-no-files-found: error` is here so a capture that produced nothing fails loudly
+          # instead of uploading an empty artifact somebody then "reviews". But the directory also
+          # holds a committed README.md explaining why it has no images, so pointing the upload at
+          # the directory meant it ALWAYS found a file and the guard could never fire again.
+          # Found by an adversarial review of the change that added that README.
+          path: test/golden/goldens/*.png
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: What to do with the artifact
+        run: |
+          echo "::notice::Route 1 step 2. Download the 'golden-baselines' artifact, LOOK at each"
+          echo "::notice::image in both themes and both directions, and commit only the ones that"
+          echo "::notice::are correct to test/golden/goldens/. Each committed file switches its"
+          echo "::notice::test case from SKIP to a pixel comparison on every later push."
+          echo "::notice::Do NOT commit an image you have not looked at: a baseline records"
+          echo "::notice::whatever the code drew, defects included, and then defends it."

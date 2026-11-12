@@ -213,7 +213,15 @@ class CategoryController extends GetxController
     }
   }
 
-  Future<void> addCategoriesData({
+  /// Returns true when the save succeeded, so the CALLER can close itself.
+  ///
+  /// It used to return nothing, and the sheet was dismissed as a side effect of
+  /// `Loader.hideLoader()` below -- which was `Get.back(closeOverlays: true)` with no loader to
+  /// dismiss, so it popped whatever was on top. That ran BEFORE the status branches, so the
+  /// sheet was torn down on EVERY outcome: a 403 or a 429 took the merchant's half-filled form
+  /// with it and left a toast to explain. Now the loader closes the loader, and the sheet closes
+  /// itself on success only.
+  Future<bool> addCategoriesData({
     required bool isUpdate,
     required int categoryId,
     required String name,
@@ -283,6 +291,8 @@ class CategoryController extends GetxController
       getCategoryData(
         currantPage.value,
       );
+
+      return true;
     } else if (response.statusCode == 401) {
       // Was missing entirely: a 401 here showed the raw English reason phrase
       // and left the dead session in local storage. One shared forced-logout
@@ -307,6 +317,9 @@ class CategoryController extends GetxController
         response.reasonPhrase ?? 'error_occurred'.tr,
       );
     }
+
+    // Every non-200 path falls here. The sheet stays open with what the merchant typed.
+    return false;
   }
 
   Future<void> deleteCategoriesData({

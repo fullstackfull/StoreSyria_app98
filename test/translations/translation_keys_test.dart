@@ -98,45 +98,20 @@ const Set<String> knownUntranslatedKeys = <String>{
     'Enter Description',
     'Enter Return Order Duration',
     'Last 7 days',
-    'Most visited links',
-    'Name',
+    // 'Name' was translated in P2.5-FLUTTER-TAX-LABEL (2026-11-09). It was the tax list's first
+    // column header and rendered as the English key between two translated headers in the Arabic
+    // build; the Laravel side had translated the same column since Phase 01. Removed from this
+    // ratchet so it can never silently go back to untranslated.
     'No data',
     'No_payment_methods_available',
     'Other',
-    'Overview',
     'Please fill all field',
     'Return Order Duration',
-    'Top links',
-    'Total page views',
-    'Unique visitors',
-    'change2',
-    'confirm',
-    'enter_name',
-    'enter_product_weight',
-    'enter_shipping_id',
-    'enter_tax_id',
-    'final_price',
-    'invalid_price',
-    'invalid_product_weight',
-    'invalid_url',
-    'leave_empty_to_keep_current_password',
-    'no_currencies_found',
-    'no_delivery_boy_name',
-    'not trending',
-    'order_created_successfully',
-    'order_id_copied',
-    'payment',
-    'please_enter_amount',
-    'pricing',
+                              'not trending',
+          'pricing',
     'product_settings',
-    'search_failed',
-    'shipping_and_tax',
-    'shipping_id',
-    'stock_status',
-    'tax_id',
-    'tax_status',
-    'track_stock',
-};
+      'shipping_and_tax',
+          };
 
 /// Keys defined in one translation map but not the other.
 /// This list may only ever shrink.

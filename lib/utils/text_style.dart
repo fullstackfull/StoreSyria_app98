@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
 
-const String _fontFamily = 'Tajawal';
+/// The application font, public so that the few widgets which cannot inherit it can name it.
+///
+/// Nearly all text gets Tajawal through `DefaultTextStyle`, which `ThemeData` supplies via
+/// `base.textTheme.apply(fontFamily: 'Tajawal')` (`theme_controller.dart:81`) and which `Text`
+/// merges into its span. **`RichText` does not do that merge** — it is the low-level widget and
+/// takes its style only from the spans it is handed — so a `RichText` whose root `TextSpan` has no
+/// style renders in the platform font instead. That is what happened to the wallet amount and the
+/// coupon form labels; see `test/ui/rich_text_font_inheritance_test.dart`.
+const String appFontFamily = 'Tajawal';
+
+const String _fontFamily = appFontFamily;
 
 /// Regular
 TextStyle get pRegular8 => TextStyle(

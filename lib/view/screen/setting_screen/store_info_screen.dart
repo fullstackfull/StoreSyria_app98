@@ -13,6 +13,16 @@ import '../../widget/app_dialog.dart';
 import '../../widget/error_empty_state.dart';
 import '../../widget/icon_and_image.dart';
 
+/* P2.5-B-12 slice one. These labels were hard-coded English passed straight to a
+   widget that renders them verbatim, so an Arabic merchant read them in English and a
+   screen reader announced them in English. Converted here because each key ALREADY has
+   copy in both en.dart and ar.dart AND its existing English value is byte-identical to
+   the literal replaced -- `.tr` on a key with no copy renders the raw identifier, which
+   is worse than the English it replaces. The other 27 strings in this file need new
+   Arabic copy and are in docs/development/phase-2.5/COPY-DECK-UNTRANSLATED-SCREENS.md,
+   awaiting the owner. 'Created At'.tr is deliberately NOT converted: en.dart carries
+   "Created at".tr, so converting it would re-word the English screen. */
+
 class StoreInfoScreen extends StatefulWidget {
   const StoreInfoScreen({super.key});
 
@@ -46,7 +56,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
           ? DarkThemeColor.cBackGround
           : const Color(0xFFF6F7F9),
       appBar: simpleAppBar(
-        title: 'Store Information',
+        title: 'store_information'.tr,
         label: null,
         isBack: true,
         isBold: true,
@@ -69,12 +79,12 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
 
           if (controller.storeInfoData.value == null) {
             return EmptyState(
-              message: 'No store information available',
+              message: 'No store information available'.tr,
               icon: Icons.store_outlined,
               actionWidget: ElevatedButton.icon(
                 onPressed: controller.getStoreInfoData,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text('retry'.tr),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                   AppColor.themeNavyBlueColor,
@@ -113,12 +123,12 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                   children: [
                     _sectionCard(
                       context: context,
-                      title: 'Store Information',
+                      title: 'store_information'.tr,
                       icon: Icons.store_outlined,
                       children: [
                         _field(
-                          title: 'Store Name',
-                          hint: 'Enter store name',
+                          title: 'Store Name'.tr,
+                          hint: 'Enter store name'.tr,
                           controller:
                           controller.storeNameController,
                           icon: Icons.store_outlined,
@@ -129,8 +139,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Email',
-                          hint: 'Enter store email',
+                          title: 'Email'.tr,
+                          hint: 'Enter store email'.tr,
                           controller:
                           controller.storeEmailController,
                           icon: Icons.email_outlined,
@@ -143,8 +153,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Store URL',
-                          hint: 'Enter store URL',
+                          title: 'Store URL'.tr,
+                          hint: 'Enter store URL'.tr,
                           controller:
                           controller.storeUrlController,
                           icon: Icons.public_outlined,
@@ -157,8 +167,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Created At',
-                          hint: 'Created at',
+                          title: 'Created At'.tr,
+                          hint: 'Created at'.tr,
                           controller:
                           controller
                               .storeCreatedAtController,
@@ -173,12 +183,12 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
 
                     _sectionCard(
                       context: context,
-                      title: 'Owner Information',
+                      title: 'Owner Information'.tr,
                       icon: Icons.person_outline,
                       children: [
                         _field(
-                          title: 'Owner Name',
-                          hint: 'Enter owner name',
+                          title: 'Owner Name'.tr,
+                          hint: 'Enter owner name'.tr,
                           controller:
                           controller.ownerNameController,
                           icon: Icons.person_outline,
@@ -189,8 +199,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Owner Email',
-                          hint: 'Enter owner email',
+                          title: 'Owner Email'.tr,
+                          hint: 'Enter owner email'.tr,
                           controller:
                           controller.ownerEmailController,
                           icon: Icons.email_outlined,
@@ -203,8 +213,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Mobile',
-                          hint: 'Enter mobile number',
+                          title: 'Mobile'.tr,
+                          hint: 'Enter mobile number'.tr,
                           controller:
                           controller.mobileController,
                           icon: Icons.phone_outlined,
@@ -222,14 +232,14 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
 
                     _sectionCard(
                       context: context,
-                      title: 'Address',
+                      title: 'address'.tr,
                       icon:
                       Icons.location_on_outlined,
                       children: [
 
                         _field(
-                          title: 'City',
-                          hint: 'Enter city',
+                          title: 'city'.tr,
+                          hint: 'Enter city'.tr,
                           controller:
                           controller.cityController,
                           icon:
@@ -241,8 +251,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Country',
-                          hint: 'Enter country',
+                          title: 'Country'.tr,
+                          hint: 'Enter country'.tr,
                           controller:
                           controller.countryController,
                           icon: Icons.public_outlined,
@@ -253,8 +263,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'State',
-                          hint: 'Enter state',
+                          title: 'State'.tr,
+                          hint: 'Enter state'.tr,
                           controller:
                           controller.stateController,
                           icon: Icons.map_outlined,
@@ -265,8 +275,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Address',
-                          hint: 'Enter store address',
+                          title: 'address'.tr,
+                          hint: 'Enter store address'.tr,
                           controller:
                           controller.addressController,
                           icon: Icons.home_outlined,
@@ -277,8 +287,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Zipcode',
-                          hint: 'Enter zipcode',
+                          title: 'Zipcode'.tr,
+                          hint: 'Enter zipcode'.tr,
                           controller:
                           controller.zipcodeController,
                           icon: Icons.markunread_mailbox_outlined,
@@ -291,8 +301,8 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         ),
 
                         _field(
-                          title: 'Full Address',
-                          hint: 'Full address',
+                          title: 'Full Address'.tr,
+                          hint: 'Full address'.tr,
                           controller:
                           controller
                               .fullAddressController,
@@ -317,13 +327,13 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
 
                     _sectionCard(
                       context: context,
-                      title: 'Media',
+                      title: 'Media'.tr,
                       icon: Icons.image_outlined,
                       children: [
                         Obx(
                               () => _mediaPreview(
                             context: context,
-                            title: 'Invoice Logo',
+                            title: 'Invoice Logo'.tr,
                             serverUrl: controller.invoiceLogoController.text,
                             selectedPath: controller.selectedInvoiceLogo.value,
                             onPick:
@@ -336,7 +346,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                         Obx(
                               () => _mediaPreview(
                             context: context,
-                            title: 'Store Image',
+                            title: 'Store Image'.tr,
                             serverUrl: controller.storeImageController.text,
                             selectedPath: controller.selectedStoreImage.value,
                             onPick:
@@ -360,7 +370,7 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                           text:
                           controller.isUpLoading.value
                               ? 'Saving...'
-                              : 'Save Changes',
+                              : 'Save Changes'.tr,
                         ),
                       ),
                     ),

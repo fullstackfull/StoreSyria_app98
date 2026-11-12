@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../core/model/wallet_model.dart';
+import '../../utils/colors.dart';
 import '../../utils/helper.dart';
+import '../../utils/text_style.dart';
 
 const Color success = Color(0xFF16A34A);
 const Color danger = Color(0xFFEF4444);
@@ -17,6 +19,11 @@ Widget transactionCard({
 
   final Color amountColor = tx.isCredit ? success : danger;
   final IconData icon = _iconForType(tx.type, tx.isCredit);
+  // P2.5-FLUTTER-FRAMING. IN LIGHT MODE THIS CARD IS WHITE ON A WHITE PAGE.
+  // `LightThemeColor.cBackGround` is `0xffFFFFFF` (colors.dart:72) and this fill is
+  // `Colors.white`, so the only separation was a shadow at alpha .03. Same reading, same remedy
+  // and the same token as the customer and delivery-man cards: a hairline in light, nothing in
+  // dark, where `0xFF18263F` already differs from the page.
   final Color cardColor =
   isDark ? const Color(0xFF18263F) : Colors.white;
   final Color primaryText =
@@ -28,6 +35,7 @@ Widget transactionCard({
     padding: EdgeInsets.all(14.w),
     decoration: BoxDecoration(
       color: cardColor,
+      border: isDark ? null : Border.all(color: LightThemeColor.cBorder, width: 1),
       borderRadius: BorderRadius.circular(16.r),
       // border: Border.all(color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3)),
       boxShadow: isDark
@@ -54,7 +62,13 @@ Widget transactionCard({
         ),
         SizedBox(width: 12.w),
         Expanded(
+          // P2.5-FLUTTER-FRAMING. The same defect the two list cards had, in a different shape.
+          // The root here is a `Row`, so this `Column` is sized on the Row's cross axis and a
+          // `Column` with no `mainAxisSize` is `MainAxisSize.max` -- it fills whatever bounded
+          // height arrives. MEASURED: 800.0px in an 800px box against 128.0px in a scrolling
+          // list, which is the context /finance really renders it in.
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -85,7 +99,13 @@ Widget transactionCard({
           ),
         ),
         SizedBox(width: 10.w),
+        // P2.5-FLUTTER-FRAMING. THE SECOND ONE, and it is why fixing the first changed nothing.
+        // MEASURED after the first fix: the card was still 800px in a bounded box and the Row
+        // itself 770px, because THIS trailing amount column was still `MainAxisSize.max` and the
+        // Row sizes its cross axis to its tallest child. A card can have more than one Column
+        // and the stretch only needs one of them.
         Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Row(
@@ -121,6 +141,11 @@ Widget transactionCard({
             SizedBox(height: 8.h),
             RichText(
               text: TextSpan(
+                // THE ROOT SPAN MUST CARRY THE FAMILY. `RichText` does not inherit
+                // `DefaultTextStyle`, so without this both child spans below resolved
+                // `fontFamily: null` — measured as `[null, null]` — and the transaction amount,
+                // the largest number on the row, rendered in the platform font beside Tajawal.
+                style: const TextStyle(fontFamily: appFontFamily),
                 children: [
                   TextSpan(
                     text: '${tx.isCredit ? '+' : '-'} ${tx.amount}',

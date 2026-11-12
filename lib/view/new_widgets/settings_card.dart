@@ -58,8 +58,12 @@ Widget settingCard({
                       width: 27.w,
                       height: 27.h,
                       colorFilter: ColorFilter.mode(
+                        // The dark branch drew the icon at alpha 0.3 on its tinted circle --
+                        // 1.89:1 -- while the light branch already used full opacity at 5.72:1,
+                        // so the two themes disagreed about whether this was an illustration or
+                        // an indicator. At full opacity dark measures 5.94:1 and they agree.
                         isDark
-                            ? AppColor.themeGreenColor.withValues(alpha: 0.3)
+                            ? AppColor.themeGreenColor
                             : AppColor.themeNavyBlueColor,
                         BlendMode.srcIn,
                       ),
@@ -69,9 +73,11 @@ Widget settingCard({
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 14,
-                  color: AppColor.cFont.withValues(alpha:
-                    isDark ? 0.4 : 0.5,
-                  ),
+                  // The chevron is the signal that the card is a navigation target, so it is
+                  // held to the 3:1 non-text threshold. At 0.4/0.5 it measured 2.38:1 in dark and
+                  // 1.99:1 in light -- nothing on the card said it led anywhere. 0.8 gives
+                  // 5.37:1 and 3.28:1 while still reading lighter than the subtitle beside it.
+                  color: AppColor.cFont.withValues(alpha: 0.8),
                 ),
               ],
             ),
@@ -95,9 +101,19 @@ Widget settingCard({
               Text(
                 subtitle,
                 style: pMedium12.copyWith(
-                  color: isDark
-                      ? AppColor.cFont.withValues(alpha: 0.55)
-                      : AppColor.cFont.withValues(alpha: 0.55),
+                  // P2.5-FLUTTER-MORE-CARD. FULL OPACITY, AND NO BRANCH.
+                  //
+                  // This was `isDark ? ...alpha: 0.55 : ...alpha: 0.55` -- the same expression on
+                  // both sides, which is not a choice but a value tuned once and copied, and it
+                  // hid that one number was serving two very different backgrounds. Measured on
+                  // the rendered card: **3.30:1 in dark and 2.15:1 in light**, against a 4.5:1
+                  // threshold, for the only sentence that tells a merchant what each card does.
+                  //
+                  // `AppColor.cFont` is ALREADY the designed secondary tone -- `cSecondaryText`
+                  // (#A9B8D0) in dark, `LightThemeColor.cFont` (#66728C) in light -- and clears
+                  // the threshold on its own card at full opacity: 7.53:1 and 4.83:1. The alpha
+                  // on top of it was the whole defect.
+                  color: AppColor.cFont,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

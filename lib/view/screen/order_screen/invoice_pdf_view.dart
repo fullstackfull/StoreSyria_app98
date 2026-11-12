@@ -96,6 +96,14 @@ class InvoicePdfViewScreenState extends State<InvoicePdfViewScreen> {
       body: Padding(
         padding: EdgeInsets.only(top: 10.h),
         child: PdfPreview(
+          // A4, EXPLICITLY. Given no initialPageFormat, `PdfPreview` falls back to the printing
+          // package's own default, and the Arabic capture showed the format control reading
+          // "Letter" -- the US paper size -- to a Syrian merchant. The screen already assumed A4
+          // twelve lines below, where loadingWidget is built at `aspectRatio: 1 / 1.414 // A4`,
+          // so the placeholder and the document disagreed about the page they were drawing.
+          // An invoice that prints at Letter is cropped or wrongly margined on every A4 sheet.
+          // Pinned by test/screens/invoice_viewer_capture_test.dart.
+          initialPageFormat: PdfPageFormat.a4,
           maxPageWidth: 700,
           pdfPreviewPageDecoration: BoxDecoration(
             color: Colors.white,

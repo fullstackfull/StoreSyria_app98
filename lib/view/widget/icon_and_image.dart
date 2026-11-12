@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/helper.dart';
+import 'package:store_go_app/utils/colors.dart';
 
 Widget assetSvdImageWidget({
   String? image,
@@ -54,7 +55,15 @@ Widget assetImageWidget({
     height: height,
     width: width,
     errorBuilder: (context, error, stackTrace) {
-      return Icon(Icons.image_not_supported, size: width ?? 24.w, color: Colors.grey);
+      /* P2.5-WAVE-5. `Colors.grey` (#9E9E9E) measured 2.68:1 on the light background --
+         below SC 1.4.11's 3:1 for a non-text graphic, and this icon IS the information:
+         it is the only thing telling a merchant the image failed to load. It was also a
+         fixed literal, so it could not follow the theme either way.
+
+         `AppColor.cFont` is the existing secondary-text token and is ALREADY theme-aware:
+         #66728C light / #A9B8D0 dark. Measured 4.83:1 on the light background and
+         6.36-8.66:1 on all three dark surfaces. No new value is invented. */
+      return Icon(Icons.image_not_supported, size: width ?? 24.w, color: AppColor.cFont);
     },
   );
 }
@@ -91,7 +100,9 @@ Widget buildCachedNetworkImage({
       child: Center(
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.grey.shade400),
+          // #BDBDBD measured 1.88:1 on the light background -- a spinner that is
+          // nearly invisible is a loading state the merchant cannot see.
+          valueColor: AlwaysStoppedAnimation<Color>(AppColor.cFont),
         ),
       ),
     ),

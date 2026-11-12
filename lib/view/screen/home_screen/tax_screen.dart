@@ -270,9 +270,38 @@ class _TaxItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final itemTextColor = isDark ? Colors.white70 : AppColor.cDarkGreyFont;
+    /// The rate, and nothing that is not the rate.
+    ///
+    /// This used to append `'Discount'.tr` to both branches, so an 11% VAT class read
+    /// "11% Discount" — a tax described to the merchant as a discount, and in Arabic the word
+    /// stayed English because `Discount` has no entry in `ar.dart` either. The column is headed
+    /// `Amount`/`القيمة` on a screen headed `Tax`/`الضريبة`, so the word was carrying no
+    /// information even on the rows where it was not actively wrong.
+    ///
+    /// The fixed branch also prefixed a hard-coded `$`. The `taxlist` endpoint
+    /// (`Api/DashboardController::TaxList`) returns the paginator and no currency field, and this
+    /// app keeps no store currency locally — every `currencySymbol` in it comes from the response
+    /// of the screen's own endpoint — so that symbol was invented, and wrong for every store that
+    /// does not price in dollars. Showing the right one needs the server to send it, which is a
+    /// public API change: `docs/design/TAX-CURRENCY-SYMBOL.md`.
+    /// P2.5-TAX-CURRENCY. A fixed amount now carries the STORE'S symbol, which
+    /// `Api/DashboardController::TaxList` sends beside the pagination keys.
+    ///
+    /// This used to print a hard-coded `$`. That was not a default that happened to be wrong for
+    /// Syrian stores -- it was invented, because the endpoint sent no currency at all and nothing
+    /// in this app caches one. The `$` was removed when the defect was found, which left the
+    /// amount with no unit; the symbol below is what takes its place.
+    ///
+    /// An EMPTY symbol renders the number alone rather than falling back to anything. A server
+    /// that predates the field sends no key, and a wrong symbol on a money figure is worse than
+    /// no symbol -- that is the whole lesson of the `$`.
+    final String symbol = Get.isRegistered<TaxController>()
+        ? Get.find<TaxController>().currencySymbol.value.trim()
+        : '';
+
     final String amountText = tax.taxType == "percentage"
-        ? "${tax.taxAmount}% ${'Discount'.tr}"
-        : "\$${tax.taxAmount} ${'Discount'.tr}";
+        ? "${tax.taxAmount}%"
+        : (symbol.isEmpty ? "${tax.taxAmount}" : "${tax.taxAmount} $symbol");
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 10.h),

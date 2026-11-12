@@ -72,3 +72,51 @@ android/key.properties
 
 # Coverage
 coverage/
+
+# Flutter writes golden comparison output here on a failed run. Never committed: it is a
+# diff of a candidate against a baseline, not a baseline, and it is regenerated every run.
+test/golden/failures/
+
+# Captured golden candidates. IGNORED ON PURPOSE, and the purpose is an owner instruction:
+# "The eight captured golden images are candidates, not approved baselines... Do not
+# automatically commit screenshots as approved baselines."
+#
+# A capture run writes eight PNGs here. Untracked-but-not-ignored, one `git add -A` would have
+# committed them, and a committed file in this directory IS the baseline every later run asserts
+# against -- so the approval would have happened by accident, in a commit about something else.
+# Ignoring them makes approval a deliberate act instead.
+#
+# The candidates for review are committed under docs/evidence/route-1-candidates/ -- a contact
+# sheet plus the eight originals -- which is what a human reviews. When a baseline is APPROVED,
+# it is added explicitly:
+#
+#     git add -f test/golden/goldens/<surface>.<theme>-<dir>.png
+#
+# Until then each golden case SKIPS and says how to capture it (customer_card_golden_test.dart),
+# so an absent baseline asserts nothing rather than passing vacuously.
+test/golden/goldens/*.png
+
+# =================================================================================================
+# DATABASE DUMPS AND ARCHIVES -- recurrence containment for P1-SEC-40 (issue #120). 2026-11-11.
+# =================================================================================================
+#
+# This repository is clean: no dump-shaped file is tracked, and none appears anywhere in its
+# history (checked with `git rev-list --objects --all`). These patterns are prevention, not
+# remediation. The sibling repository, syriastore98, had a 20 MB production dump committed to its
+# default branch for 18 days; the full incident record is in that repository at
+# docs/security/P1-SEC-40-INCIDENT.md. This block exists so the same mistake cannot land here.
+#
+# On the Firebase config files that are committed here deliberately --
+# android/app/google-services.json and ios/Runner/GoogleService-Info.plist each carry one
+# AIza-prefixed Google API key. Those are client-side credentials by Google's own design: they
+# ship inside every released APK and IPA and are extractable from any published build, so
+# committing them discloses nothing a shipped app does not. They are NOT part of the incident and
+# they do not need rotating on its account. What they DO need is restriction in the Google Cloud
+# console -- by Android package name plus signing SHA-1, by iOS bundle id, and by the specific
+# APIs each key may call -- or an unrestricted key invites billing abuse. Verify that separately.
+*.sql
+*.sql.gz
+*.dump
+*.bak
+*.sqlite
+*.sqlite3

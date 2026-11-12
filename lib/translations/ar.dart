@@ -315,6 +315,7 @@ const Map<String, String> ar = {
   "Dashboard": "لوحة التحكم",
   "Welcome back": "مرحباً بعودتك",
   "no_taxs_found": "لم يتم العثور على ضرائب",
+  "no_shipping_methods_found": "لا توجد طرق شحن",
   "no_notifications": "لا توجد إشعارات",
   "notifications": "الإشعارات",
   "mark_all_tapped": "تحديد الكل كمقروء",
@@ -327,6 +328,10 @@ const Map<String, String> ar = {
   "add_note": "إضافة ملاحظة",
   "no_notes_yet": "لا توجد ملاحظات بعد",
   "unpaid": "غير مدفوع",
+  // P2.5-FLUTTER-ORDERDETAIL: `"payment".tr` had no key in either
+  // file, so the order-detail header printed the literal lowercase word `payment`
+  // in BOTH languages. GetX returns the key when a lookup misses.
+  "payment": "الدفع",
   "private_note": "ملاحظة خاصة",
   "public_note": "ملاحظة عامة",
   "add_new_note": "إضافة ملاحظة جديدة",
@@ -363,6 +368,15 @@ const Map<String, String> ar = {
   "Copy Me Quickly": "نسخ سريع",
   "Shipping": "الشحن",
   "Tax": "الضريبة",
+  // "Name" is the tax list's first column header (`tax_screen.dart:116`). It had no entry here, so
+  // GetX fell back to the key and the Arabic build printed the English word between two translated
+  // headers. The Laravel side has used this exact wording for the same column since Phase 01
+  // (`resources/lang/ar.json`), so the two surfaces now agree rather than nearly agree.
+  // P2.5-FLUTTER-HOME-TILES. `'Overview'.tr` is the section heading on the merchant's
+  // home screen and on the statistics screen, and it had no entry in either file, so the
+  // Arabic build printed the English key above three Arabic tile labels.
+  "Overview": "نظرة عامة",
+  "Name": "الاسم",
   "Amount": "القيمة",
   "Action": "الإجراء",
   "Store Syria": "ستور سوريا",
@@ -391,6 +405,14 @@ const Map<String, String> ar = {
   'Unique Page View': 'المشاهدات الفريدة للصفحة',
   'Total Page View': 'إجمالي مشاهدات الصفحة',
   'Page View': 'مشاهدات الصفحة',
+  // P2.5-FLUTTER-STATS. Four labels on the analytics screen's summary card and its
+  // top-links section had no entry in either file, so the Arabic build printed the
+  // English keys beside 'التحليلات' and 'أعلى الروابط'. Seen in the first populated
+  // capture of that screen.
+  'Total page views': 'إجمالي مشاهدات الصفحات',
+  'Unique visitors': 'الزوار الفريدون',
+  'Top links': 'أهم الروابط',
+  'Most visited links': 'الروابط الأكثر زيارة',
   'Visitors by operating system': 'الزوار حسب نظام التشغيل',
   'Devices': 'الأجهزة',
   'Visitors by device': 'الزوار حسب الجهاز',
@@ -702,4 +724,125 @@ const Map<String, String> ar = {
   'page_views_between': 'مشاهدات الصفحات، من @from إلى @to',
   'plan_limit_unlimited': 'غير محدود',
   'page_views_no_period': 'مشاهدات الصفحات',
+
+  // ===============================================================================================
+  //  P2.5-COPY-DECK (2026-11-09) -- the 68 merchant strings that had no Arabic anywhere.
+  //
+  //  Owner-approved in the Phase 2.5 final directive. Recorded in
+  //  docs/development/phase-2.5/COPY-DECK-UNTRANSLATED-SCREENS.md, which existed because
+  //  a `.tr` lookup renders the RAW IDENTIFIER when its key is absent -- so converting a label whose
+  //  Arabic did not exist would have replaced a readable English word with `store_loyalty_program`.
+  //  The deck held the strings until the copy existed. It now does.
+  //
+  //  Terminology follows the Laravel side's resources/lang/ar.json wherever that file already had
+  //  the term, so the two surfaces say the same word for the same thing: Email, Mobile, City,
+  //  Country, Zipcode, Full Name, Save Changes, Password.
+  //
+  //  `State` is the ONE place they deliberately diverged and then converged: ar.json carried
+  //  "الدولة", which means country and collides with البلد, so a store-address form would have
+  //  shown two differently-labelled fields meaning the same thing. Both files now use المحافظة,
+  //  the Syrian administrative term.
+  //
+  //  Proper nouns stay in Latin script -- Facebook, Twitter / X, Instagram, WhatsApp, Telegram --
+  //  which is how Syrian merchants write them, and the mail-configuration VALUES are never
+  //  touched: only their labels are translated.
+  // ===============================================================================================
+
+  'No store information available': 'لا تتوفر معلومات عن المتجر',
+  'Store Name': 'اسم المتجر',
+  'Enter store name': 'أدخل اسم المتجر',
+  'Email': 'البريد الإلكتروني',
+  'Enter store email': 'أدخل البريد الإلكتروني للمتجر',
+  'Store URL': 'رابط المتجر',
+  'Enter store URL': 'أدخل رابط المتجر',
+  'Created At': 'تاريخ الإنشاء',
+  'Created at': 'تاريخ الإنشاء',
+  'Owner Information': 'معلومات المالك',
+  'Owner Name': 'اسم المالك',
+  'Enter owner name': 'أدخل اسم المالك',
+  'Owner Email': 'البريد الإلكتروني للمالك',
+  'Enter owner email': 'أدخل البريد الإلكتروني للمالك',
+  'Mobile': 'رقم الهاتف',
+  'Enter mobile number': 'أدخل رقم الهاتف',
+  'Enter city': 'أدخل المدينة',
+  'Country': 'البلد',
+  'Enter country': 'أدخل البلد',
+  'State': 'المحافظة',
+  'Enter state': 'أدخل المحافظة',
+  'Enter store address': 'أدخل عنوان المتجر',
+  'Zipcode': 'الرمز البريدي',
+  'Enter zipcode': 'أدخل الرمز البريدي',
+  'Full Address': 'العنوان الكامل',
+  'Full address': 'العنوان الكامل',
+  'Media': 'الوسائط',
+  'Invoice Logo': 'شعار الفاتورة',
+  'Store Image': 'صورة المتجر',
+  'Mail Driver:': 'مزود البريد:',
+  'Enter Mail Driver': 'أدخل مزود البريد',
+  'Mail Host:': 'خادم البريد:',
+  'Mail Driver': 'مزود البريد',
+  'Mail Port:': 'منفذ البريد:',
+  'Mail Username:': 'اسم مستخدم البريد:',
+  'Mail Password:': 'كلمة مرور البريد:',
+  'Enter Password': 'أدخل كلمة المرور',
+  'Mail Encryption:': 'تشفير البريد:',
+  'Enter Encryption': 'أدخل نوع التشفير',
+  'Mail From Address:': 'البريد المُرسِل:',
+  'Enter From Address': 'أدخل البريد المُرسِل',
+  'Mail From Name:': 'اسم المُرسِل:',
+  'Email:': 'البريد الإلكتروني:',
+  'Enter Email': 'أدخل البريد الإلكتروني',
+  'Send': 'إرسال',
+  'Save changes': 'احفظ التغييرات',
+  'My Account': 'حسابي',
+  'Account Information': 'معلومات الحساب',
+  'Update your personal information': 'حدّث معلوماتك الشخصية',
+  'Full Name': 'الاسم الكامل',
+  'Enter name': 'أدخل الاسم',
+  'Enter email': 'أدخل البريد الإلكتروني',
+  'Save Changes': 'احفظ التغييرات',
+  'Security': 'الأمان',
+  'Keep your account password secure': 'حافظ على أمان كلمة مرور حسابك',
+  'Current Password': 'كلمة المرور الحالية',
+  'New Password': 'كلمة المرور الجديدة',
+  'Update Password': 'تحديث كلمة المرور',
+  'Reward points on orders of \$1000': 'نقاط المكافأة على الطلبات بقيمة \$1000',
+  'Enter reward': 'أدخل عدد النقاط',
+  'Facebook link': 'رابط Facebook',
+  'Twitter / X link': 'رابط Twitter / X',
+  'Instagram link': 'رابط Instagram',
+  'WhatsApp link': 'رابط WhatsApp',
+  'Telegram link': 'رابط Telegram',
+  // P2.5-COPY-DECK follow-up: three strings on the profile HEADER that the deck did not
+  // list. Found by the Arabic capture, not by reading the file -- which is the argument
+  // for capturing a screen rather than trusting a string inventory.
+  'Hello': 'مرحباً',
+  'Manage your account and profile': 'إدارة حسابك وملفك الشخصي',
+
+  // P2.5-FLUTTER-I18N. Twenty-two keys that sat in `knownUntranslatedKeys`: the
+  // ratchet passed because they were DECLARED, not because they were translated, and
+  // GetX returns the key when a lookup misses -- so the product detail screen showed
+  // the literal `final_price` as a field label, in both languages.
+  "change2": "تغيير",
+  "confirm": "تأكيد",
+  "enter_name": "أدخل الاسم",
+  "enter_product_weight": "أدخل وزن المنتج",
+  "enter_shipping_id": "أدخل معرّف الشحن",
+  "enter_tax_id": "أدخل معرّف الضريبة",
+  "final_price": "السعر النهائي",
+  "invalid_price": "أدخل سعراً صالحاً",
+  "invalid_product_weight": "أدخل وزناً صالحاً",
+  "invalid_url": "أدخل رابطاً صالحاً",
+  "leave_empty_to_keep_current_password": "اتركه فارغاً للإبقاء على كلمة المرور الحالية",
+  "no_currencies_found": "لا توجد عملات",
+  "no_delivery_boy_name": "لا يوجد اسم لمندوب التوصيل",
+  "order_created_successfully": "تم إنشاء الطلب بنجاح",
+  "order_id_copied": "تم نسخ رقم الطلب",
+  "please_enter_amount": "أدخل المبلغ",
+  "search_failed": "فشل البحث",
+  "shipping_id": "معرّف الشحن",
+  "stock_status": "حالة المخزون",
+  "tax_id": "معرّف الضريبة",
+  "tax_status": "حالة الضريبة",
+  "track_stock": "تتبّع المخزون",
 };

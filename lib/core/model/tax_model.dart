@@ -60,12 +60,20 @@ class TaxModelData {
     this.prevPageUrl = '',
     this.to = 0,
     this.total = 0,
+    this.currencySymbol = '',
   })  : data = data ?? [],
         links = links ?? [];
 
 
+  /// P2.5-TAX-CURRENCY. The store's currency symbol, sent beside the pagination keys by
+  /// `Api/DashboardController::TaxList`. Empty when the server predates the field, which is why
+  /// the screen treats an empty symbol as "show the number alone" rather than falling back to a
+  /// guess -- a wrong symbol on a money figure is worse than no symbol.
+  String currencySymbol;
+
   TaxModelData.fromJson(Map<String, dynamic> json)
-      : currentPage = json['current_page'] ?? 0,
+      : currencySymbol = json['currency_symbol']?.toString() ?? '',
+        currentPage = json['current_page'] ?? 0,
         firstPageUrl = json['first_page_url'] ?? '',
         from = json['from'] ?? 0,
         lastPage = json['last_page'] ?? 0,

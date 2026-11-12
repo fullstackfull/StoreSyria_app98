@@ -356,6 +356,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         AppTextField(
           controller: addProductController.productName.value,
           hint: 'enter_product_name'.tr,
+          semanticLabel: 'product_name_required'.tr,
           icon: Icons.inventory_2_outlined,
           textCapitalization: TextCapitalization.sentences,
           validator: (value) => Validator.validateRequired(value ?? ''),
@@ -395,6 +396,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         AppTextField(
           controller: addProductController.productDescriptionController.value,
           hint: 'enter_product_description'.tr,
+          semanticLabel: 'product_description'.tr,
           maxLines: 6,
           keyboardType: TextInputType.multiline,
           textInputAction: TextInputAction.newline,
@@ -423,6 +425,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                   AppTextField(
                     controller: c.priceController.value,
                     hint: 'enter_price'.tr,
+                    semanticLabel: 'price'.tr,
                     keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
@@ -447,6 +450,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                   AppTextField(
                     controller: c.salePriceController.value,
                     hint: 'enter_sale_price'.tr,
+                    semanticLabel: 'sale_price'.tr,
                     keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
@@ -474,6 +478,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         AppTextField(
           controller: c.costPriceController.value,
           hint: 'enter_cost_price'.tr,
+          semanticLabel: 'costPrice'.tr,
           icon: Icons.payments_outlined,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: (value) {
@@ -521,6 +526,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         AppTextField(
           controller: c.stockQtyController.value,
           hint: 'enter_stock'.tr,
+          semanticLabel: 'stock'.tr,
           icon: Icons.other_houses_outlined,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -567,6 +573,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                   AppTextField(
                     controller: c.productWeightController.value,
                     hint: 'enter_product_weight'.tr,
+                    semanticLabel: 'product_weight'.tr,
                     keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
@@ -590,6 +597,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
                   AppTextField(
                     controller: c.shippingIdController.value,
                     hint: 'enter_shipping_id'.tr,
+                    semanticLabel: 'shipping_id'.tr,
                     keyboardType: TextInputType.text,
                   ),
                 ],
@@ -621,6 +629,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           AppTextField(
             controller: c.taxIdController.value,
             hint: 'enter_tax_id'.tr,
+            semanticLabel: 'tax_id'.tr,
             icon: Icons.receipt_long_outlined,
             keyboardType: TextInputType.text,
           ),

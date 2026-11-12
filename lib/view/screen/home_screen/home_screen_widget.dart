@@ -482,7 +482,19 @@ Widget totalProductWidget(BuildContext context,{
                         // code the analyser reports as a warning.
                         "$title $subTitle",
                         style: pSemiBold12.copyWith(color: isDark ? Colors.white70 : AppColor.cDarkGreyFont),
-                        maxLines: 1,
+                        // TWO LINES, NOT ONE. Three tiles share a 360 pt row, so each label gets
+                        // about 105 pt — and at one line EVERY Arabic label and two of the three
+                        // English ones ran out of room and rendered an ellipsis. Measured with
+                        // `RenderParagraph.didExceedMaxLines`, not read off the source:
+                        // `test/ui/dashboard_tile_label_fit_test.dart`.
+                        //
+                        // "الإجمالي الطـ" is not a word, and the three numbers sit side by side
+                        // with nothing legible to tell them apart. The FIGURE above each tile is
+                        // already inside a `FittedBox(scaleDown)` and always fits; this is the
+                        // label's equivalent. The tile has no fixed height, so a second line
+                        // costs a few points and nothing else — and it keeps the font size,
+                        // which shrinking the text would not.
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (period != null && period.isNotEmpty)

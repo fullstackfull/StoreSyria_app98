@@ -100,6 +100,59 @@ const Map<String, double> historicalFailures = <String, double>{
   'info-dark': 2.1063,
 };
 
+/// THE CLOSE CONTROL, which is not a type colour and had never been measured.
+///
+/// `_SimpleSnackBar.build` ends in an `InkWell` holding `Icons.close_rounded`
+/// (`common_snak_bar_widget.dart`), and that icon is the ONLY affordance for
+/// dismissing a toast early — there is no other target, no text label and no
+/// gesture. WCAG 2.1 SC 1.4.11 therefore applies to it exactly as it does to
+/// the type icons above, and it needs the same 3:1.
+///
+/// It is NOT measured by [iconContrast]: the type icons sit on a 10% tint of
+/// their own colour, this one sits directly on the toast surface.
+///
+/// ITS TWO VALUES ARE PARSED OUT OF THE WIDGET, NOT COPIED HERE, and that is
+/// the whole point. The first draft of this group declared the colours as
+/// constants and pinned them with the same `source.contains('0xFF…')` check
+/// the palette drift test uses. It passed INSTANTLY — against the broken
+/// widget — because the value it pinned (`#6B7280`) was already in the file as
+/// the light-mode message colour. A `contains` on a shared palette proves the
+/// hex exists somewhere; it cannot prove it is the colour THIS control draws
+/// with, which is the only question that matters here.
+({int light, int dark}) closeControlColours() {
+  final String source = File(
+    'lib/view/widget/common_snak_bar_widget.dart',
+  ).readAsStringSync();
+
+  final int close = source.indexOf('Icons.close_rounded');
+
+  expect(
+    close,
+    greaterThan(-1),
+    reason: 'the toast no longer has a close control to measure',
+  );
+
+  // The `color:` of that icon and nothing else: the search starts AT the glyph
+  // and takes the first per-theme pair after it.
+  final RegExpMatch? m = RegExp(
+    r'isDark\s*\?\s*const Color\((0x[0-9A-Fa-f]{8})\)\s*:\s*const Color\((0x[0-9A-Fa-f]{8})\)',
+  ).firstMatch(source.substring(close));
+
+  expect(
+    m,
+    isNotNull,
+    reason:
+        'the close control no longer resolves its colour as a per-theme '
+        'ternary, so this test cannot read what it draws with. Re-point it at '
+        'whatever the widget does now rather than deleting the measurement.',
+  );
+
+  return (
+    light: int.parse(m!.group(2)!),
+    dark: int.parse(m.group(1)!),
+  );
+}
+
 const int lightSurface = 0xFFFFFFFF;
 const int darkSurface = 0xFF18263F;
 
@@ -425,6 +478,51 @@ void main() {
           reason: '$key did not improve on its recorded $was',
         );
       });
+    });
+  });
+
+  group('the close control meets non-text contrast', () {
+    /// FOUND BY LOOKING AT A CAPTURE, not by reading the source. The four toast
+    /// types were photographed in four combinations for the Phase 2.5 matrix,
+    /// and in all four LIGHT frames the close glyph was barely there while the
+    /// dark frames showed it plainly. Measured, the light value was
+    /// `#9CA3AF` on white = **2.54:1**, under the 3:1 this file already holds
+    /// every type icon to; dark was `#A9B8D0` on `#18263F` = 7.53:1 and fine.
+    ///
+    /// The repair takes the light icon to `#6B7280`, which is not a new colour:
+    /// it is the shade this same widget already uses for its secondary text in
+    /// light mode. Dark mode had the symmetry all along — there the close icon
+    /// and the message text are both `#A9B8D0` — so this makes light match,
+    /// rather than introducing a value nobody can source.
+    test('light', () {
+      final int colour = closeControlColours().light;
+
+      final double now = contrast(Color(colour), const Color(lightSurface));
+
+      expect(
+        now,
+        greaterThanOrEqualTo(nonTextMinimum),
+        reason:
+            'the toast close control draws '
+            '#${colour.toRadixString(16).substring(2).toUpperCase()} on the '
+            'light surface, which is $now:1. It is the only way to dismiss a '
+            'toast early, so SC 1.4.11 applies.',
+      );
+    });
+
+    test('dark', () {
+      final int colour = closeControlColours().dark;
+
+      final double now = contrast(Color(colour), const Color(darkSurface));
+
+      expect(
+        now,
+        greaterThanOrEqualTo(nonTextMinimum),
+        reason:
+            'the toast close control draws '
+            '#${colour.toRadixString(16).substring(2).toUpperCase()} on the '
+            'dark surface, which is $now:1',
+      );
     });
   });
 }

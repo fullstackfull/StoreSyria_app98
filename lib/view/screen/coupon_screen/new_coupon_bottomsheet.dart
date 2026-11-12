@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/home_controller/new_coupon_controller.dart';
 import 'package:store_go_app/utils/constant.dart';
 import 'package:store_go_app/utils/prefer.dart';
+import 'package:store_go_app/utils/text_style.dart';
 import 'package:store_go_app/utils/validator.dart';
 import 'package:store_go_app/view/widget/app_dialog.dart';
 import 'package:store_go_app/view/widget/common_snak_bar_widget.dart';
@@ -222,6 +223,10 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
       }) {
     return RichText(
       text: TextSpan(
+        // THE ROOT SPAN MUST CARRY THE FAMILY. `RichText` does not inherit `DefaultTextStyle`, so
+        // without this every label in the coupon form resolved `fontFamily: null` and rendered in
+        // the platform font instead of Tajawal — beside Tajawal field text in the same sheet.
+        style: const TextStyle(fontFamily: appFontFamily),
         children: [
           TextSpan(
             text: title,
@@ -264,7 +269,15 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
 
         const SizedBox(height: 8),
 
-        TextFormField(
+          // Names the field with the label rendered above it. The Column
+          // does no semantics merging, so without this the field is
+          // announced by its placeholder when empty and by nothing at all
+          // once something is typed. No `textField: true`: the field
+          // already carries that flag and a second one would conflict,
+          // forcing it onto its own node where this label never arrives.
+          Semantics(
+            label: title,
+            child: TextFormField(
           controller: controller,
           validator: validator,
           keyboardType: keyboardType,
@@ -318,6 +331,7 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
               ),
             ),
           ),
+        ),
         ),
       ],
     );
@@ -512,7 +526,9 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
         Row(
           children: [
             Expanded(
-              child: TextFormField(
+              child: Semantics(
+                label: 'coupon_code'.tr,
+                child: TextFormField(
                 controller:
                 couponController.couponController,
                 validator: (value) {
@@ -568,6 +584,7 @@ class _AddNewCouponWidgetState extends State<AddNewCouponWidget>
                     ),
                   ),
                 ),
+              ),
               ),
             ),
 

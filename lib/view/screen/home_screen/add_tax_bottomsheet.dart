@@ -16,6 +16,7 @@ import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
 import 'package:store_go_app/view/screen/product_screen/product_widget.dart';
 import 'package:store_go_app/core/controller/home_controller/tax_controller.dart';
 import 'package:store_go_app/utils/app_log.dart';
+import 'package:store_go_app/utils/validator.dart';
 
 class AddTaxWidget extends StatefulWidget {
   final bool isUpdate;
@@ -33,6 +34,8 @@ class AddTaxWidget extends StatefulWidget {
 
 class _AddTaxWidgetState extends State<AddTaxWidget> {
   TaxController taxController = Get.put(TaxController());
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -67,7 +70,9 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: SingleChildScrollView(
             child: Obx(() {
-              return Column(
+              return Form(
+                key: _formKey,
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GestureDetector(
@@ -109,6 +114,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                     controller: taxController.nameController,
                     labelText: 'name'.tr,
                     hintText: "enter_category_name".tr,
+                    validator: (value) => Validator.validateRequired(value ?? ''),
                   ),
                   verticalSpace(10),
                   commonDropdownButtonWidget(
@@ -175,7 +181,14 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                           title: widget.isUpdate == true ? "update".tr : 'Create'.tr,
                           iconData: DefaultImages.whiteDoneIcn,
                           onPressed: () {
-                            if (taxController.nameController.text.isNotEmpty || taxController.amountController.text.isNotEmpty || taxController.chargesType.isNotEmpty) {
+                            // WAS: name.isNotEmpty || amount.isNotEmpty ||
+                            // chargesType.isNotEmpty -- three conditions joined
+                            // by OR, where chargesType is 'Flat'.obs and so
+                            // constant-true on a fresh sheet. The whole gate was
+                            // therefore constant true and an untouched sheet
+                            // posted a blank name. The sibling shipping sheet
+                            // joins five conditions with AND.
+                            if (_formKey.currentState?.validate() ?? false) {
                               if (widget.isUpdate == true) {
                                 if (Prefs.getBool(AppConstant.isDemoMode) == true) {
                                   commonToast(type: AppSnackBarType.info, AppConstant.demoString.tr);
@@ -200,7 +213,15 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                                 );
                               }
                             } else {
-                              commonToast(type: AppSnackBarType.info, "Please fill all field".tr);
+                              // The sheet is a fixed `Get.height / 1.5` box whose
+                              // scroll area shrinks by the keyboard inset, so the
+                              // name field can be above the fold while this button
+                              // is still tappable -- inline-only feedback can be
+                              // invisible at the moment of the tap. 'field_required'
+                              // is in BOTH translation maps; "Please fill all field"
+                              // was in knownUntranslatedKeys and rendered raw
+                              // English to an Arabic merchant.
+                              commonToast(type: AppSnackBarType.error, 'field_required'.tr);
                             }
                           },
                           width: 240,
@@ -210,6 +231,7 @@ class _AddTaxWidgetState extends State<AddTaxWidget> {
                     ],
                   ),
                 ],
+                ),
               );
             }),
           ),

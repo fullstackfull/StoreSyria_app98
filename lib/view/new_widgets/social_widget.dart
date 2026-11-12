@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../core/controller/setting_controller/store_setting_controller.dart';
@@ -88,7 +89,7 @@ class SocialMediaSection extends StatelessWidget {
 
           SocialMediaField(
             title: 'Facebook',
-            hint: 'Facebook link',
+            hint: 'Facebook link'.tr,
             controller: controller.facebookController,
             iconWidget: assetImageWidget(
               image: 'assets/icon/facebook.png',
@@ -104,7 +105,7 @@ class SocialMediaSection extends StatelessWidget {
 
           SocialMediaField(
             title: 'Twitter / X',
-            hint: 'Twitter / X link',
+            hint: 'Twitter / X link'.tr,
             controller: controller.twitterController,
             iconWidget: assetImageWidget(
               image: 'assets/icon/twitter.png',
@@ -120,7 +121,7 @@ class SocialMediaSection extends StatelessWidget {
 
           SocialMediaField(
             title: 'Instagram',
-            hint: 'Instagram link',
+            hint: 'Instagram link'.tr,
             controller: controller.instagramController,
             iconWidget: assetImageWidget(
               image: 'assets/icon/instagram.png',
@@ -136,7 +137,7 @@ class SocialMediaSection extends StatelessWidget {
 
           SocialMediaField(
             title: 'WhatsApp',
-            hint: 'WhatsApp link',
+            hint: 'WhatsApp link'.tr,
             controller: controller.whatsappController,
             iconWidget: assetImageWidget(
               image: 'assets/icon/whatsapp.png',
@@ -152,7 +153,7 @@ class SocialMediaSection extends StatelessWidget {
 
           SocialMediaField(
             title: 'Telegram',
-            hint: 'Telegram link',
+            hint: 'Telegram link'.tr,
             controller: controller.telegramController,
             iconWidget: assetImageWidget(
               image: 'assets/icon/telegram.png',

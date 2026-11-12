@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 String parseHtmlString(String? htmlString) {
@@ -9,7 +10,21 @@ String parseHtmlString(String? htmlString) {
 
 DateTime parseDateTime(String strDate) => DateTime.parse(strDate);
 
-DateFormat formatDateTime(String format) => DateFormat(format);
+/// THE ACTIVE LOCALE, OR ENGLISH. `Get.locale` is null before the app's locale is applied --
+/// which is the case in a plain widget test -- so this falls back rather than throwing.
+String _activeDateLocale() {
+  final code = Get.locale?.languageCode;
+
+  return (code == null || code.isEmpty) ? 'en' : code;
+}
+
+/// FORMATS IN THE MERCHANT'S LANGUAGE, not in en_US.
+///
+/// `DateFormat(format)` with no locale always resolves `MMM` to an English abbreviation, so an
+/// Arabic screen printed `Nov` -- and a Latin date inside an RTL line reorders, which is how the
+/// coupon redemption history came to read `Nov 2026 01`. The symbols are loaded once in `main()`
+/// by `initializeDateFormatting()`; without that call this constructor throws for `ar`.
+DateFormat formatDateTime(String format) => DateFormat(format, _activeDateLocale());
 
 String dateFormatted({required String date, required String formatType}) =>
     formatDateTime(formatType).format(parseDateTime(date));
