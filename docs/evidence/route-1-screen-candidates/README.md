@@ -143,6 +143,25 @@ which is what proves the change is Arabic-only.
 
 ---
 
+## The order status chips were repaired after these images were first exported
+
+`orders-screen.light-ltr.png` and `.light-rtl.png` were re-exported when GAP-269 closed: the
+light badge borders measured **1.29–1.65:1** against the white list row, where SC 1.4.11 asks 3:1
+of a control's boundary — and the chip is a control, with an `onTap` and a chevron at
+`order_detail_screen.dart:535`/`:1172`. Each border is now that badge's own text colour blended
+75 % over its own fill, which introduces no hue: the outline is the colour the label already is,
+only lighter. The set reads 3.33–5.71:1.
+
+**The asymmetry that hid it was in the tests, not the palette.** `order_status_label_test.dart`
+held three dark assertions and one light one, and the light one measures text. Nothing had ever
+looked at the light boundary.
+
+**The dark images did not move.** Of the ten baselines that changed in that round, every badge
+image is LIGHT; the only dark ones are the transaction card's, which changed for a different
+reason (GAP-271/272).
+
+---
+
 ## Findings reported and NOT fixed
 
 Each is recorded with its measurement so it is a decision somebody takes rather than something
