@@ -66,3 +66,41 @@ WalletTransaction sampleTransaction() => WalletTransaction.fromJson(<String, dyn
       'status': 'completed',
       'created_at': '2026-11-06 10:00:00',
     });
+
+/// THE OTHER HALF OF THE TRANSACTION CARD, and every value in it drives a different branch.
+///
+/// `transactionCard` is not one picture: it is a switch with two sides, and [sampleTransaction]
+/// exercises only the green one. Four code paths are reachable solely through a DEBIT row with a
+/// status that is not `completed`, and none of them had ever been rendered:
+///
+///  * `tx.isCredit` is false, so `amountColor` becomes `danger` (#EF4444) and the arrow flips from
+///    `arrow_downward_rounded` to `arrow_upward_rounded` (`transactions_widget.dart:20`, `:115-117`).
+///  * `_iconForType` takes a NAMED case rather than its fallback. `'manual_withdrawal'` returns
+///    `Icons.indeterminate_check_box_outlined` (`:207`); `'order'` on the credit fixture falls
+///    through to the default and draws the same arrow twice.
+///  * `_formatType` is handed a SNAKE_CASE type, which is the real shape on the wire — every value
+///    its sibling `_iconForType` switches on has an underscore in it. `'order'` cannot show that
+///    the split-capitalise-rejoin produces "Manual Withdrawal".
+///  * `_statusBadge` takes its `else` branch, which prints **`status` raw and untranslated**
+///    (`:189`) rather than `'completed'.tr`, and paints `warning` instead of `success`.
+///
+/// `'pending'` IS A REAL HOST VALUE and is deliberately a word that also exists as a translation
+/// key: if a future repair routes this through `.tr` the picture changes from `pending` to
+/// `قيد الانتظار` in the Arabic baselines, and the diff says so.
+///
+/// The description is plain Arabic with no Latin run, as a CONTROL for the credit fixture's
+/// `طلب #ORD-2043`: the two rows in one image show the bidi reorder happening to one of them and
+/// not the other, which is what makes it legible as a defect rather than as a font oddity.
+/// Invented values throughout: no real merchant data goes in a fixture or a screenshot.
+WalletTransaction sampleWithdrawalTransaction() => WalletTransaction.fromJson(<String, dynamic>{
+      'id': 2,
+      'type': 'manual_withdrawal',
+      'direction': 'debit',
+      'amount': '75.50',
+      'currency_code': 'SYP',
+      'balance_before': '150.00',
+      'balance_after': '74.50',
+      'description': 'سحب يدوي من المحفظة',
+      'status': 'pending',
+      'created_at': '2026-11-07 16:45:00',
+    });

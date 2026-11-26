@@ -37,6 +37,16 @@ import '../support/source_tree.dart';
 const List<String> kGoldenSurfaces = <String>[
   'customer-card',
   'delivery-boy-card',
+  // THE CATALOGUE SURFACES. A "surface" here is one captured image, not one widget: these two show
+  // every status the badge can paint, in one column per type, because the badge carries nineteen
+  // hardcoded colour pairs and one baseline each would be forty files. See the header of
+  // status_badge_golden_test.dart for why a column catches more per picture than a chip does.
+  'order-status-badge-column',
+  'payment-status-badge-column',
+  // The third card. `sample_cards.dart` already called it "the third card this project measures"
+  // and two files measured it; none had rendered it. Two rows per image, credit and debit, because
+  // the card is a switch and one fixture only drives one side of it.
+  'transaction-card',
 ];
 
 void main() {
