@@ -502,7 +502,11 @@ void showEditExchangeRateSheet({
                   return CommonButton(
                     title: 'save'.tr,
                     isLoading: isUpdating,
-                    textColor: Colors.white,
+                    // P06-WS8-A11Y-02. `textColor: Colors.white` WAS HERE and it is removed, not
+                    // replaced. It overrode AppButton.labelFor() and pinned white on the dark
+                    // theme's bright cyan primary at 2.09:1. Letting the button choose keeps the
+                    // identical white in light mode (labelFor returns white whenever white wins)
+                    // and gives #14161B at 8.65:1 in dark.
                     onPressed: () async {
                       if (!formKey.currentState!.validate()) {
                         return;

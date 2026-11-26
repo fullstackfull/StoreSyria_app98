@@ -6,6 +6,7 @@ import '../../utils/text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:store_go_app/view/widget/icon_and_image.dart';
 import 'package:store_go_app/view/widget/common_space_divider_widget.dart';
+import 'package:store_go_app/view/widget/app_dialog.dart' show AppButton;
 
 class CommonButton extends StatelessWidget {
   final String? title;
@@ -54,6 +55,28 @@ class CommonButton extends StatelessWidget {
     final bool isInert = onPressed == null;
     final bool isTappable = !isLoading && !isInert;
 
+    // P06-WS8-A11Y-02. THE LABEL IS CHOSEN AGAINST THE FILL, AND THE REPAIR ALREADY EXISTED.
+    //
+    // This button defaulted its label to `AppColor.cWhite` and its fill to
+    // `AppColor.themeNavyBlueColor` -- and that fill is not a constant. `light_theme.dart:26`
+    // sets it to `LightThemeColor.cPrimary` (#335DA8) and `dark_theme.dart:28` to
+    // `DarkThemeColor.cPrimary` (#2AC3E5, the bright cyan). So the same white label measured:
+    //
+    //     white on #335DA8   6.42:1   light
+    //     white on #2AC3E5   2.09:1   dark   -- 14sp w700 is ~10.5pt, so SC 1.4.3 asks 4.5:1
+    //
+    // `AppButton.labelFor()` (app_dialog.dart:421) takes whichever of white and the near-black
+    // ink reads better on the fill, and its docstring explains why it cannot make anything worse:
+    // a label that already passes keeps what it had. Measured on these two fills exactly that
+    // happens -- light stays white (6.42:1, unchanged), dark becomes #14161B at 8.65:1.
+    //
+    // AN EXPLICIT `textColor:` FROM THE CALLER STILL WINS; this only decides the DEFAULT. Both
+    // live call sites used to pass white by hand, which is why repairing the default alone would
+    // have gone green while the merchant still saw 2.09:1 -- see
+    // test/a11y/common_button_label_contrast_test.dart, whose third case guards the call sites.
+    final Color btnFill = btnColor ?? AppColor.themeNavyBlueColor;
+    final Color labelColor = textColor ?? AppButton.labelFor(btnFill);
+
     return Semantics(
       button: true,
       enabled: isTappable,
@@ -61,7 +84,17 @@ class CommonButton extends StatelessWidget {
       child: AnimatedOpacity(
         // 0.5 is the upper end of the 0.38-0.5 disabled range: dim enough to read as unavailable,
         // light enough that the label stays legible, which a disabled control still needs.
-        opacity: isInert ? 0.5 : (isLoading ? 0.7 : 1.0),
+        //
+        // P06-WS8-A11Y-02. LOADING NO LONGER FADES, and the disabled fade is untouched.
+        // `AnimatedOpacity` wraps the WHOLE button, so a fade composites the fill AND the spinner
+        // toward the page behind them and the distance between the two shrinks with it. Measured
+        // in dark mode over `cBackGround` #0F1A2E: at full strength the spinner reads 2.09:1
+        // inside its own button, at the 0.7 this used to apply it reads **1.90:1**. A disabled
+        // control is MEANT to read as unavailable and keeps its 0.5 (pinned to the 0.38-0.5 band
+        // by test/a11y/disabled_button_affordance_test.dart, whose own header already says
+        // `isLoading` is not the same thing). Loading is not a disabled state -- it is the signal
+        // that a save is in flight, and the one moment the merchant is watching the button.
+        opacity: isInert ? 0.5 : 1.0,
         duration: const Duration(milliseconds: 200),
         child: GestureDetector(
           // تعطيل الضغط تماماً إذا كان يحمل
@@ -75,7 +108,7 @@ class CommonButton extends StatelessWidget {
           // as an accessibility gap. Guarded by test/a11y/tap_target_size_test.dart.
           height: height ?? 48,
           decoration: BoxDecoration(
-            color: btnColor ?? AppColor.themeNavyBlueColor,
+            color: btnFill,
             borderRadius: BorderRadius.circular(35),
             border: Border.all(color: bColor ?? AppColor.cTransparent),
           ),
@@ -87,13 +120,13 @@ class CommonButton extends StatelessWidget {
               width: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                valueColor: AlwaysStoppedAnimation<Color>(textColor ?? AppColor.cWhite),
+                valueColor: AlwaysStoppedAnimation<Color>(labelColor),
               ),
             )
                 : Text(
               title ?? '',
               style: pBold14.copyWith(
-                  color: textColor ?? AppColor.cWhite,
+                  color: labelColor,
                   fontSize: fontSize ?? 14
               ),
               textAlign: TextAlign.center,
