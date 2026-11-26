@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:store_go_app/utils/colors.dart';
@@ -291,6 +293,47 @@ void main() {
       expect((box.border! as Border).top.color, LightThemeColor.cBorder,
           reason: 'the edge must come from the app\'s own token, and from the SAME one its '
               'sibling cards use, not from the commented-out navy-at-30% nobody measured');
+    });
+
+    test('the coupon edge is measured against BOTH hosts it really sits on', () {
+      /// A CORRECTION TO THE COMMIT THAT ADDED THE TEST ABOVE, kept as an assertion so the two
+      /// figures cannot drift back into one. `1.00:1` is the ratio on a WHITE host -- which is
+      /// what the golden harness paints, and what `coupon_screen.dart:80` and `:104` paint -- but
+      /// the coupons LIST hard-codes `Color(0xFFF5F6F8)` at `:189`, where the same white card sat
+      /// at 1.08:1. Faint, and not literally invisible. Both hosts are real; the edge has to work
+      /// on both.
+      double lum(int r, int g, int b) {
+        double ch(int v) {
+          final s = v / 255.0;
+          return s <= 0.03928 ? s / 12.92 : math.pow((s + 0.055) / 1.055, 2.4).toDouble();
+        }
+
+        return 0.2126 * ch(r) + 0.7152 * ch(g) + 0.0722 * ch(b);
+      }
+
+      double ratio(List<int> a, List<int> b) {
+        final la = lum(a[0], a[1], a[2]) + 0.05, lb = lum(b[0], b[1], b[2]) + 0.05;
+
+        return la > lb ? la / lb : lb / la;
+      }
+
+      const white = <int>[0xFF, 0xFF, 0xFF];
+      const listPage = <int>[0xF5, 0xF6, 0xF8]; // coupon_screen.dart:189
+      final border = <int>[
+        (LightThemeColor.cBorder.r * 255).round(),
+        (LightThemeColor.cBorder.g * 255).round(),
+        (LightThemeColor.cBorder.b * 255).round(),
+      ];
+
+      expect(ratio(white, white), closeTo(1.00, 0.005),
+          reason: 'premise: on a white host the card fill and the page are the same colour');
+      expect(ratio(white, listPage), closeTo(1.08, 0.01),
+          reason: 'premise: on the coupons list the card was faint at 1.08:1, not invisible. If '
+              'this moves, coupon_screen.dart:189 changed its hard-coded page colour');
+      expect(ratio(border, white), greaterThan(1.4),
+          reason: 'the edge must be visible on the white host');
+      expect(ratio(border, listPage), greaterThan(1.3),
+          reason: 'the edge must also be visible on the list page the card really ships on');
     });
 
     testWidgets('the dark COUPON card keeps its surface difference and gets no outline',
