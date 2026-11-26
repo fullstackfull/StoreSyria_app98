@@ -367,6 +367,119 @@ void main() {
     expect(failures, isEmpty, reason: 'dark fills:\n${failures.join('\n')}');
   });
 
+  // ===========================================================================
+  // GAP-269 -- THE LIGHT HALF, AND THE ASYMMETRY WAS IN THIS FILE.
+  //
+  // Wave 2 measured the light badge borders at 1.29-1.65:1 against the white
+  // card while the dark set sits at 3.00-3.16:1, and asked why. The answer is
+  // three tests up: `every dark badge border reaches 3:1` and `every dark badge
+  // fill is visible` have NO light equivalent, and the only light assertion is
+  // `every status badge clears WCAG AA for small text`, which measures TEXT.
+  // So the light boundary was never checked by anything, and an asymmetry that
+  // looks like a palette decision was really a missing test.
+  //
+  // THE HOST IS THE WHITE CARD, for the same reason `darkCard` is the host
+  // above: a badge sits on a list row, and the rows are white in light mode
+  // (orders, notifications, top orders, order detail). The page behind the row
+  // is a light grey, but the page is not what the chip is adjacent to.
+  //
+  // SC 1.4.11 APPLIES BECAUSE THE CHIP IS A CONTROL, not decoration:
+  // `order_detail_screen.dart:535` and `:1172` give the detail-shape badge an
+  // `onTap` and a chevron that opens the status sheet.
+  // ===========================================================================
+
+  /// What a badge really sits on in light mode: the list row, which is white.
+  const lightCard = Color(0xFFFFFFFF);
+
+  test('every LIGHT badge border reaches 3:1 against the white card', () {
+    // The exact twin of the dark assertion above. Its absence is GAP-269.
+    final failures = <String>[];
+    for (final status in [..._allStatuses, 99]) {
+      final c = StatusBadgeHelper.getOrderConfig(status);
+      final r = ratio(c.borderColor, lightCard);
+      if (r < 3.0) {
+        failures.add('status $status: border ${r.toStringAsFixed(2)}:1');
+      }
+    }
+    expect(failures, isEmpty,
+        reason: 'light badge boundaries below SC 1.4.11:\n${failures.join('\n')}');
+  });
+
+  test('the PAYMENT badge has a light boundary too, by the same rule', () {
+    /// FOUND BY RECAPTURING EVERY BASELINE AND READING THE DIFF, which is the only reason it is
+    /// here. A `sed` used to bite-check the order table had no `g` flag but still matched every
+    /// LINE, so restoring one value also rewrote the paid payment badge's border -- an edit
+    /// nobody asked for, invisible in the test run, and visible the moment
+    /// `payment-status-badge-column.light-*.png` moved.
+    ///
+    /// It is kept rather than reverted, because the payment badge is the same component family on
+    /// the same white rows and had the SAME defect: paid 1.34:1, unpaid 1.41:1. The accident
+    /// half-fixed it; this finishes it and pins both, so the next change is deliberate.
+    final failures = <String>[];
+    for (final paid in <String>['paid', 'unpaid']) {
+      final c = StatusBadgeHelper.getPaymentConfig(paid);
+      final r = ratio(c.borderColor, lightCard);
+      if (r < 3.0) {
+        failures.add('payment "$paid": border ${r.toStringAsFixed(2)}:1');
+      }
+
+      final lf = luminance(c.backgroundColor);
+      final lt = luminance(c.textColor);
+      final lb = luminance(c.borderColor);
+      if (lb >= lf || lb <= lt) {
+        failures.add('payment "$paid": the border is not derived from its own badge');
+      }
+    }
+    expect(failures, isEmpty,
+        reason: 'light payment badge boundaries below SC 1.4.11:\n${failures.join('\n')}');
+  });
+
+  test('every LIGHT border is derived from that badge\'s own two colours', () {
+    /// WHY THIS EXISTS AND WHAT IT STOPS. Raising ten borders to 3:1 invites an
+    /// arbitrary palette. The rule used instead introduces no hue at all: each
+    /// border is the badge's OWN text colour blended 75% over its OWN fill, so
+    /// a chip's outline is the colour its label already is, only lighter. This
+    /// asserts the property that rule guarantees -- the border lies between the
+    /// fill and the text in luminance -- so a later hand-picked colour that
+    /// happens to clear 3:1 still fails here unless it belongs to the badge.
+    final failures = <String>[];
+    for (final status in [..._allStatuses, 99]) {
+      final c = StatusBadgeHelper.getOrderConfig(status);
+      final lf = luminance(c.backgroundColor);
+      final lt = luminance(c.textColor);
+      final lb = luminance(c.borderColor);
+
+      if (lb >= lf || lb <= lt) {
+        failures.add('status $status: border luminance ${lb.toStringAsFixed(3)} is not '
+            'between the text ${lt.toStringAsFixed(3)} and the fill ${lf.toStringAsFixed(3)}');
+      }
+    }
+    expect(failures, isEmpty,
+        reason: 'a light border no longer comes from its own badge:\n${failures.join('\n')}');
+  });
+
+  test('the light FILLS are deliberately left faint, and that is why the border carries it', () {
+    /// THE TEST THE DARK SET HAS AND THE LIGHT SET MUST NOT. `every dark badge
+    /// fill is visible as a surface without glaring` holds the dark fills to
+    /// >=1.25:1, because on a near-black page a tint IS the chip. In light the
+    /// fills are near-white tints by design -- status 6 measures 1.06:1 on the
+    /// white card -- and raising them would repaint every order list in the
+    /// shipped app for a requirement SC 1.4.11 does not make of a fill when the
+    /// BORDER carries the boundary. This records that as a decision rather than
+    /// an oversight, and fails if somebody "finishes the job" by darkening them.
+    final strong = <String>[];
+    for (final status in _allStatuses) {
+      final c = StatusBadgeHelper.getOrderConfig(status);
+      if (ratio(c.backgroundColor, lightCard) > 1.25) {
+        strong.add('status $status: fill ${ratio(c.backgroundColor, lightCard).toStringAsFixed(2)}:1');
+      }
+    }
+    expect(strong, isEmpty,
+        reason: 'a light badge fill has been darkened into a surface. That is a palette change '
+            'across every order list, and the border is what SC 1.4.11 asks for '
+            'here:\n${strong.join('\n')}');
+  });
+
   test('the payment badge follows the theme too', () {
     for (final paid in ['paid', 'unpaid']) {
       final light = StatusBadgeHelper.getPaymentConfig(paid);
