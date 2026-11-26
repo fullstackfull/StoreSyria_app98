@@ -45,6 +45,41 @@ class StatusBadgeHelper {
   /// P2.5-WAVE-5. `isDark` is OPTIONAL and defaults to the light set, so every existing
   /// call site compiles unchanged -- the directive requires the shipped app's contracts
   /// stay intact, and a required parameter here would have broken six of them.
+  /// GAP-269 -- THE LIGHT BORDERS, AND THE ASYMMETRY WAS IN THE TESTS.
+  ///
+  /// Wave 2 measured these ten at **1.29-1.65:1** against the white list row while the dark set
+  /// sits at 3.00-3.16:1. The reason the gap survived is three tests in
+  /// `order_status_label_test.dart`: the dark set has `every dark badge border reaches 3:1` and
+  /// `every dark badge fill is visible`, and the light set had only a TEXT assertion. Nothing ever
+  /// looked at the light boundary, so what read as a palette decision was a missing test. Both
+  /// light assertions now exist, and they failed on all ten before this change.
+  ///
+  /// SC 1.4.11 APPLIES BECAUSE THE CHIP IS A CONTROL: `order_detail_screen.dart:535` and `:1172`
+  /// give the detail-shape badge an `onTap` and a chevron that opens the status sheet.
+  ///
+  /// NO HUE IS INTRODUCED. Each border is that badge's OWN text colour blended **75% over its own
+  /// fill** -- the outline is the colour the label already is, only lighter. The fraction is
+  /// measured, not chosen: 0.687 is the smallest that clears 3:1 on the worst chip (status 1), and
+  /// 0.70 would leave it at 3.06:1, the kind of zero-margin pass this project has been bitten by.
+  /// 0.75 puts the set at 3.33-5.71:1.
+  ///
+  ///     status  before            after
+  ///       0     #FFCC80 1.48:1    #BC6C38 3.93:1
+  ///       1     #C8E6C9 1.34:1    #5C9B60 3.33:1   <- the worst, and the one that sets 0.75
+  ///       2     #FFCDD2 1.41:1    #D4595A 3.91:1
+  ///       3     #E1BEE7 1.65:1    #9950B7 5.02:1
+  ///       4     #BBDEFB 1.40:1    #4888CF 3.69:1
+  ///       5     #B2EBF2 1.31:1    #38868A 4.25:1
+  ///       6     #FFE082 1.29:1    #AB7C38 3.70:1
+  ///       7     #C5CAE9 1.62:1    #5862AC 5.59:1
+  ///       8     #D7CCC8 1.57:1    #76625D 5.71:1
+  ///    default  #E0E0E0 1.32:1    #868686 3.64:1
+  ///
+  /// THE FILLS ARE UNTOUCHED, deliberately. `every dark badge fill is visible as a surface` has no
+  /// light twin and must not get one: in light these are near-white tints by design -- status 6 is
+  /// 1.06:1 on the white row -- and darkening them repaints every order list for something 1.4.11
+  /// does not ask of a fill when the border carries the boundary. A test now records that too, and
+  /// fails if a later change darkens them.
   static StatusBadgeConfig getOrderConfig(int status, {bool isDark = false}) {
     if (isDark) {
       return _darkOrderConfig(status);
@@ -55,7 +90,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFFFF3E0),
           textColor: Color(0xFFA63F00),   // was #EF6C00 -- 2.81:1
-          borderColor: Color(0xFFFFCC80),
+          borderColor: Color(0xFFBC6C38),
           icon: Icons.access_time_rounded,
         );
 
@@ -63,7 +98,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFE8F5E9),
           textColor: Color(0xFF2E7D32),
-          borderColor: Color(0xFFC8E6C9),
+          borderColor: Color(0xFF5C9B60),
           icon: Icons.check_circle_outline,
         );
 
@@ -71,7 +106,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFFFEBEE),
           textColor: Color(0xFFC62828),
-          borderColor: Color(0xFFFFCDD2),
+          borderColor: Color(0xFFD4595A),
           icon: Icons.cancel_outlined,
         );
 
@@ -79,7 +114,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFF3E5F5),
           textColor: Color(0xFF7B1FA2),
-          borderColor: Color(0xFFE1BEE7),
+          borderColor: Color(0xFF9950B7),
           icon: Icons.undo,
         );
 
@@ -87,7 +122,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFE3F2FD),
           textColor: Color(0xFF1565C0),
-          borderColor: Color(0xFFBBDEFB),
+          borderColor: Color(0xFF4888CF),
           icon: Icons.verified_outlined,
         );
 
@@ -95,7 +130,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFE0F7FA),
           textColor: Color(0xFF006064),   // was #00838F -- 4.06:1
-          borderColor: Color(0xFFB2EBF2),
+          borderColor: Color(0xFF38868A),
           icon: Icons.inventory_2_outlined,
         );
 
@@ -103,7 +138,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFFFF8E1),
           textColor: Color(0xFF8F5200),   // was #F9A825 -- 1.85:1, unreadable
-          borderColor: Color(0xFFFFE082),
+          borderColor: Color(0xFFAB7C38),
           icon: Icons.local_shipping_outlined,
         );
 
@@ -122,7 +157,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFE8EAF6),
           textColor: Color(0xFF283593),   // 8.68:1
-          borderColor: Color(0xFFC5CAE9),
+          borderColor: Color(0xFF5862AC),
           icon: Icons.payments_outlined,
         );
 
@@ -130,7 +165,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFEFEBE9),
           textColor: Color(0xFF4E342E),   // 9.56:1
-          borderColor: Color(0xFFD7CCC8),
+          borderColor: Color(0xFF76625D),
           icon: Icons.event_available_outlined,
         );
 
@@ -138,7 +173,7 @@ class StatusBadgeHelper {
         return const StatusBadgeConfig(
           backgroundColor: Color(0xFFF5F5F5),
           textColor: Color(0xFF616161),
-          borderColor: Color(0xFFE0E0E0),
+          borderColor: Color(0xFF868686),
           icon: Icons.info_outline,
         );
     }
@@ -394,7 +429,7 @@ class StatusBadgeHelper {
           : const StatusBadgeConfig(
               backgroundColor: Color(0xFFE8F5E9),
               textColor: Color(0xFF2E7D32),
-              borderColor: Color(0xFFC8E6C9),
+              borderColor: Color(0xFF5C9B60),
               icon: Icons.check_circle_outline,
             );
     }
@@ -404,7 +439,10 @@ class StatusBadgeHelper {
         : const StatusBadgeConfig(
             backgroundColor: Color(0xFFFFEBEE),
             textColor: Color(0xFFC62828),
-            borderColor: Color(0xFFFFCDD2),
+            // GAP-269, the payment half: 1.41:1 before, 3.91:1 now, by the same rule as the order
+            // table above -- 75% of this badge's own text over its own fill. The paid branch's
+            // border moved with it (1.34:1 -> 3.33:1).
+            borderColor: Color(0xFFD4595A),
             icon: Icons.cancel_outlined,
           );
   }

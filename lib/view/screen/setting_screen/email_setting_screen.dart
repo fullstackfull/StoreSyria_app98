@@ -148,7 +148,10 @@ class _EmailSettingScreenState extends State<EmailSettingScreen> {
                           title: 'Send Test Mail'.tr,
                           btnColor: AppColor.themeNavyBlueColor,
                           fontSize: 12,
-                          textColor: AppColor.cWhite,
+                          // P06-WS8-A11Y-02. `textColor: AppColor.cWhite` WAS HERE and it is
+                          // removed, not replaced -- it overrode AppButton.labelFor() and pinned
+                          // white on this very fill, which dark_theme.dart:28 makes the bright
+                          // cyan #2AC3E5: 2.09:1. Light mode is unchanged.
                           // width: 180,
                           onPressed: () {
                             showModalBottomSheet(

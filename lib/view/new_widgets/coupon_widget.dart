@@ -56,8 +56,39 @@ Widget productCouponWidget({
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: cardColor,
-        // border: Border.all(
-        //     color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3)),
+        // P06-WS8. THE LIGHT CARD HAD NO BOUNDARY OF ANY KIND, and the two lines that would have
+        // given it one were commented out. `LightThemeColor.cBackGround` is 0xffFFFFFF
+        // (colors.dart:72) and `cardColor` is `AppColor.cWhite` -- the SAME white -- and this
+        // decoration declares no shadow either. Measured off `coupon-card-column.light-ltr.png`:
+        // 96.52% of the image is #FFFFFF and a row scan across the card's left edge finds no edge
+        // pixel at all. **1.00:1.** The card was invisible as an object; only its contents showed.
+        //
+        // CORRECTION TO THE COMMIT THAT ADDED THIS COMMENT (01a9a09). The 1.00:1 above is the
+        // figure on a WHITE host, which is what `coupon-card-column.light-ltr.png` photographs
+        // because the golden harness paints `LightThemeColor.cBackGround` (0xffFFFFFF). THE
+        // COUPON *SCREEN* DOES NOT: `coupon_screen.dart:189` hard-codes `Color(0xFFF5F6F8)`, so
+        // in the shipped list the white card sat at **1.08:1**, not 1.00:1 -- very faint, and not
+        // literally invisible. Both figures are real and they belong to different surfaces; the
+        // earlier wording implied the screen had the worse one. Measured off
+        // `coupons-screen.light-ltr.png`, whose page reads #F5F6F8 across 66% of the image.
+        //
+        // The repair holds either way and the white host is NOT hypothetical: two other Scaffolds
+        // in that same file (`coupon_screen.dart:80`, `:104`) use `AppColor.cBackGround`, which
+        // light mode sets to pure white.
+        //
+        //     host       card fill   before    with the edge
+        //     #FFFFFF    #FFFFFF     1.00:1    1.43:1
+        //     #F5F6F8    #FFFFFF     1.08:1    1.32:1
+        //
+        // This is the repair 3727efc already chose for the customer and delivery-man cards, and
+        // the transaction card carries the same hairline: one card family, one edge. It is NOT
+        // the commented-out line, which was `themeNavyBlueColor.withValues(alpha: 0.3)` -- a
+        // value nobody measured. `LightThemeColor.cBorder` is the app's own token.
+        //
+        // DARK GETS NO OUTLINE, deliberately: there `cCardBackground` #18263F already differs
+        // from `cBackGround` #0F1A2E (1.15:1), and an outline would fight a surface that is
+        // already reading. Both halves are pinned by test/ui/card_intrinsic_height_test.dart.
+        border: isDark ? null : Border.all(color: LightThemeColor.cBorder),
         borderRadius: BorderRadius.circular(18.r),
       ),
         // P2.5-FLUTTER-FRAMING. `MainAxisSize.min`: a `Column` defaults to `MainAxisSize.max`,

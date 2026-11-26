@@ -10,6 +10,45 @@ const Color success = Color(0xFF16A34A);
 const Color danger = Color(0xFFEF4444);
 const Color warning = Color(0xFFF59E0B);
 
+// GAP-271 / GAP-272. THE HUES ABOVE STAY; THEY ARE TINTS AND ICONS, NOT TEXT.
+//
+// Each of the three was spent twice -- as a tint and as its own opaque label -- which is the
+// defect this codebase has now repaired in `status_pill.dart`, in `order_status_badge.dart` and
+// in the product stock pill. Measured on this card's own hosts:
+//
+//     element                        light #FFFFFF    dark #18263F
+//     success  Credit / + amount          3.30:1          4.59:1
+//     danger   Debit  / - amount          3.76:1       ** 4.02:1 **   <- dark does NOT pass
+//     pill label on its own tint     2.96 / 1.99:1    3.62 / 5.10:1
+//
+// GAP-272's own row warns that "dark passes throughout" was a figure taken on one surface, and it
+// was right to: `danger` on the dark card is 4.02:1, and the amount is 15 sp w800 -- 11.25 pt,
+// below the large-text threshold -- so SC 1.4.3 asks 4.5:1 of it.
+//
+// The replacements are the design system's per-theme semantic foregrounds, already transcribed
+// into this app at `common_snak_bar_widget.dart:127-145` from `public/css/store-syria-ds.css`.
+// Nothing new is introduced.
+//
+//     light  success #165E34  danger #8C1D17  warning #5D3F04
+//     dark   success #7FD6A0  danger #F3A9A4  warning #F0C674
+//
+// BOTH SIDES OF EACH PAIR MOVE, including the two that already passed (`success` on the dark
+// card, `warning` on the dark pill). Credit and debit are ONE signal a merchant tells apart at a
+// glance, and so are completed and pending; leaving half of a pair on the saturated hue and half
+// on the design system would make the distinction carry two colour systems at once. Every figure
+// improves: 7.82 / 9.12 / 8.67 / 7.94 for the amounts, 7.02 / 8.92 / 6.83 / 6.80 for the pills.
+//
+// THE 42 dp TYPE TILE KEEPS `success`/`danger` for its fill AND its icon, at 2.96-3.75:1. SC
+// 1.4.11 asks 3:1 of a graphic that carries meaning, and light success is a 1 % miss -- but the
+// icon duplicates the type, which is printed as text immediately beside it, so it is not an
+// essential graphical object. Recorded rather than used to justify repainting the card's accent.
+const Color _successFgLight = Color(0xFF165E34); // --ss-green-800
+const Color _successFgDark = Color(0xFF7FD6A0);
+const Color _dangerFgLight = Color(0xFF8C1D17); // --ss-red-800
+const Color _dangerFgDark = Color(0xFFF3A9A4);
+const Color _warningFgLight = Color(0xFF5D3F04); // --ss-amber-900
+const Color _warningFgDark = Color(0xFFF0C674);
+
 
 Widget transactionCard({
   required WalletTransaction tx,
@@ -18,24 +57,57 @@ Widget transactionCard({
 }) {
 
   final Color amountColor = tx.isCredit ? success : danger;
+
+  // The LABEL and the AMOUNT, which are text; `amountColor` above stays the tint and the icons.
+  final Color amountTextColor = tx.isCredit
+      ? (isDark ? _successFgDark : _successFgLight)
+      : (isDark ? _dangerFgDark : _dangerFgLight);
+
   final IconData icon = _iconForType(tx.type, tx.isCredit);
-  // P2.5-FLUTTER-FRAMING. IN LIGHT MODE THIS CARD IS WHITE ON A WHITE PAGE.
-  // `LightThemeColor.cBackGround` is `0xffFFFFFF` (colors.dart:72) and this fill is
-  // `Colors.white`, so the only separation was a shadow at alpha .03. Same reading, same remedy
-  // and the same token as the customer and delivery-man cards: a hairline in light, nothing in
-  // dark, where `0xFF18263F` already differs from the page.
+  // P2.5-FLUTTER-FRAMING, AND ITS CORRECTION. The light reading stands: this fill is
+  // `Colors.white` and the golden harness's page is `LightThemeColor.cBackGround` `0xffFFFFFF`,
+  // separated only by a shadow at alpha .03.
+  //
+  // **THE DARK HALF OF THAT NOTE WAS WRONG, and it said the opposite of the truth.** It read
+  // "nothing in dark, where `0xFF18263F` already differs from the page" -- which is true of the
+  // HARNESS page (`DarkThemeColor.cBackGround` `#0F1A2E`, 1.15:1) and false of the page this card
+  // ships on. `transactionCard` has exactly one call site, `wallet_screen.dart:169`, and that
+  // screen's Scaffold is `backgroundColor: AppColor.cLight` (`:69`) -- a static the themes
+  // REASSIGN: light to `LightThemeColor.cLight` `#F2F6FA`, dark to
+  // **`DarkThemeColor.cCardBackground` `#18263F`**, which is this card's own fill.
+  //
+  //     host                     light            dark
+  //     golden harness page      #FFFFFF 1.00:1   #0F1A2E 1.15:1
+  //     wallet_screen.dart:69    #F2F6FA 1.09:1   #18263F ** 1.00:1 **
+  //
+  // So on /finance in dark the card had no fill difference, no border and no shadow: no boundary
+  // of any kind. The half that was given the hairline was the better one. Both halves have an
+  // edge now -- `LightThemeColor.cBorder` in light (1.32:1 on that page) and
+  // `DarkThemeColor.cBorder` in dark (1.50:1), each the app's own token.
+  //
+  // Found by asking which host, after the coupon card taught the same lesson one commit earlier:
+  // a component baseline cannot tell you what the component really sits on. NOT CHANGED here, and
+  // it is the underlying cause: a Scaffold painting `AppColor.cLight`, whose dark value is the
+  // CARD background, is a page wearing a card's colour -- and that static is used by other
+  // screens, so moving it is a design decision rather than this widget's repair.
   final Color cardColor =
   isDark ? const Color(0xFF18263F) : Colors.white;
   final Color primaryText =
   isDark ? Colors.white : const Color(0xFF0F1A2E);
+  // GAP-272. `#777D87` measured 4.14:1 on the white card at 12 sp, which SC 1.4.3 fails -- the
+  // type line, the description and the date all use it. `LightThemeColor.cFont` is the app's own
+  // token and reads 4.83:1: a modest darkening rather than the jump to the design system's
+  // `--ss-grey-700` (8.73:1), which would repaint the card's whole secondary layer. Dark is
+  // untouched at 7.53:1.
   final Color secondaryText =
-  isDark ? const Color(0xFFA9B8D0) : const Color(0xFF777D87);
+  isDark ? const Color(0xFFA9B8D0) : LightThemeColor.cFont;
 
   return Container(
     padding: EdgeInsets.all(14.w),
     decoration: BoxDecoration(
       color: cardColor,
-      border: isDark ? null : Border.all(color: LightThemeColor.cBorder, width: 1),
+      border: Border.all(
+          color: isDark ? DarkThemeColor.cBorder : LightThemeColor.cBorder, width: 1),
       borderRadius: BorderRadius.circular(16.r),
       // border: Border.all(color: AppColor.themeNavyBlueColor.withValues(alpha: 0.3)),
       boxShadow: isDark
@@ -116,7 +188,8 @@ Widget transactionCard({
                       ? Icons.arrow_downward_rounded
                       : Icons.arrow_upward_rounded,
                   size: 12.sp,
-                  color: amountColor,
+                  // Part of the label, so it takes the label's colour rather than the tile's.
+                  color: amountTextColor,
                 ),
                 SizedBox(width: 3.w),
                 Text(
@@ -124,7 +197,7 @@ Widget transactionCard({
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
-                    color: amountColor,
+                    color: amountTextColor,
                   ),
                 ),
               ],
@@ -152,7 +225,7 @@ Widget transactionCard({
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w800,
-                      color: amountColor,
+                      color: amountTextColor,
                     ),
                   ),
                   TextSpan(
@@ -160,7 +233,7 @@ Widget transactionCard({
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w400,
-                      color: amountColor,
+                      color: amountTextColor,
                     ),
                   ),
                 ],
@@ -177,12 +250,17 @@ Widget transactionCard({
 
 Widget _statusBadge({required String status, required bool isDark}) {
   final bool isCompleted = status == 'completed';
-  final Color color = isCompleted ? success : warning;
+
+  // The TINT keeps the saturated hue; only the LABEL moves. See the note beside the constants.
+  final Color tint = isCompleted ? success : warning;
+  final Color label = isCompleted
+      ? (isDark ? _successFgDark : _successFgLight)
+      : (isDark ? _warningFgDark : _warningFgLight);
 
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
     decoration: BoxDecoration(
-      color: color.withValues(alpha: isDark ? 0.18 : 0.10),
+      color: tint.withValues(alpha: isDark ? 0.18 : 0.10),
       borderRadius: BorderRadius.circular(20.r),
     ),
     child: Text(
@@ -195,7 +273,7 @@ Widget _statusBadge({required String status, required bool isDark}) {
       style: TextStyle(
         fontSize: 10.sp,
         fontWeight: FontWeight.w600,
-        color: color,
+        color: label,
       ),
     ),
   );

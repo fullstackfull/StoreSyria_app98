@@ -71,6 +71,27 @@ const List<String> kGoldenSurfaces = <String>[
   'coupon-card-column',
   'setting-card-grid',
   'home-stat-tiles-column',
+  // ---- WAVE 4 -------------------------------------------------------------------------------
+  //
+  // THE FIRST WHOLE SCREENS. Every surface above is a COMPONENT rendered in a bare Scaffold;
+  // these two are real merchant screens pumped through `screen_harness.dart` — real controller,
+  // stubbed network, app bar, search row, list and all. `GAP-062`'s next action asked for exactly
+  // this and named the only two ways to get it: route 2's emulator, or a screen-level widget
+  // harness. There is no emulator in these containers.
+  //
+  // Both carry the same cards the component surfaces above photograph, which is the point:
+  // `3727efc` found both list cards stretching to fill any bounded box while the app looked right,
+  // because the real screen's main axis is unbounded. A component baseline cannot see that; a
+  // screen baseline beside it can.
+  'customers-screen',
+  'products-screen',
+  // ---- WAVE 5 -------------------------------------------------------------------------------
+  //
+  // Two more whole screens. The orders list is the surface a merchant lives on and the one whose
+  // status chips this project has measured as a catalogue but never seen in a real row; the
+  // coupons list is the card repaired in 01a9a09, in the list it actually ships in.
+  'orders-screen',
+  'coupons-screen',
 ];
 
 void main() {

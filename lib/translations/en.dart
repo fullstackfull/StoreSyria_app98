@@ -836,4 +836,16 @@ const Map<String, String> en = {
   "tax_id": "Tax ID",
   "tax_status": "Tax status",
   "track_stock": "Track stock",
+  // ----------------------------------------------------------------------------------------------
+  // PLURAL FORMS for the list-count label. English has two grammatical forms, so only `_one` and
+  // `_other` are ever selected here -- `pluralCategory()` returns nothing else for English. The
+  // remaining four carry the correct English text because translation_keys_test.dart requires
+  // every key to exist in BOTH maps, and a key present on one side only fails it.
+  // ----------------------------------------------------------------------------------------------
+  "items_count_zero": "{0} Items",
+  "items_count_one": "{0} Item",
+  "items_count_two": "{0} Items",
+  "items_count_few": "{0} Items",
+  "items_count_many": "{0} Items",
+  "items_count_other": "{0} Items",
 };

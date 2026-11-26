@@ -159,7 +159,16 @@ void main() {
             builder: (context) => column(<Widget>[
               CommonButton(title: 'Save Changes'.tr, onPressed: () {}),
               SizedBox(height: 10.h),
-              CommonButton(title: 'Save Changes'.tr, isLoading: true),
+              // P06-WS8. `onPressed` IS REQUIRED HERE AND ITS ABSENCE MADE THIS SPECIMEN A LIE.
+              // This read `CommonButton(title: ..., isLoading: true)` with no handler, so
+              // `isInert` was ALSO true and the widget took the 0.5 DISABLED fade: the image
+              // labelled "loading" in the review package was photographing the inert state, and
+              // the loading branch had never been rendered at all. Same class of fault as the
+              // three evidence specimens 5b3c6bb reported (ErrorState in a 210pt box,
+              // SearchRowWidget with no hint). With a handler this is the real in-flight state --
+              // full strength, spinner in place of the label -- which is what
+              // test/a11y/common_button_label_contrast_test.dart measures.
+              CommonButton(title: 'Save Changes'.tr, isLoading: true, onPressed: () {}),
               SizedBox(height: 10.h),
               // NO HANDLER AT ALL, which is how this widget is really disabled: `onPressed: null`
               // drives `isInert` and the 0.5 opacity. There is no `enabled:` flag.

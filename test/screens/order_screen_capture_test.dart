@@ -5,6 +5,7 @@ import 'package:store_go_app/core/controller/order_controller/order_controller.d
 import 'package:store_go_app/view/screen/order_screen/order_screen.dart';
 
 import '../support/golden_harness.dart';
+import '../support/list_page_fixtures.dart';
 import '../support/screen_harness.dart';
 
 /// P2.5-FLUTTER-ORDERS — the orders list, driven with real orders in all four combinations.
@@ -48,77 +49,18 @@ void main() {
   tearDownAll(disposeScreenHarness);
   tearDown(resetScreenHarness);
 
-  Map<String, Object?> order({
-    required int id,
-    required String ref,
-    required String customer,
-    required String total,
-    required int status,
-    required String statusText,
-  }) =>
-      <String, Object?>{
-        'id': id,
-        'product_order_id': ref,
-        'order_id_string': ref,
-        'user_name': customer,
-        'order_date': '2026-11-08',
-        'created_at': '2026-11-08 09:12:00',
-        'final_price': total,
-        'product_price': total,
-        'delivery_price': '0',
-        'tax_price': '0',
-        'coupon_price': '0',
-        'return_price': '0',
-        'currency_symbol': 'ل.س',
-        'payment_type': 'COD',
-        'payment_status': 'pending',
-        'delivered_status': status,
-        'delivered_status_string': statusText,
-        'is_guest': 0,
-        'store_id': 1,
-        'user_id': 4,
-      };
-
-  Map<String, Object?> orderPage() => <String, Object?>{
-        'status': 1,
-        'data': <String, Object?>{
-          'current_page': 1,
-          'last_page': 1,
-          'per_page': 10,
-          'total': 2,
-          'data': <Object?>[
-            order(
-              id: 1041,
-              ref: 'SS-1041',
-              customer: 'ليلى حداد',
-              total: '85000',
-              // 6 IS "Shipped" -- the numbering is NOT free, and it agrees with the server's
-              // `Order::getDeliveredStatusStringAttribute()`: 0 Pending, 1 Delivered, 2 Cancel,
-              // 3 Return, 4 Confirmed, 5 Picked Up, 6 Shipped. The card reads this INT, not
-              // `delivered_status_string`, so the first version of this fixture -- 2 with the
-              // string 'Shipped' -- captured an order badged "Cancelled". The card was right and
-              // the fixture was wrong; `test/widgets/order_status_label_test.dart` pins the map.
-              status: 6,
-              statusText: 'Shipped',
-            ),
-            order(
-              id: 1042,
-              ref: 'SS-1042',
-              customer: 'Marwan Haddad',
-              total: '126500',
-              status: 0,
-              statusText: 'Pending',
-            ),
-          ],
-        },
-      };
+  // `order()` AND `orderPage()` MOVED TO ../support/list_page_fixtures.dart. A second file now
+  // renders this same list -- test/golden/screen_golden_test.dart captures it as a PIXEL
+  // BASELINE -- and a copied fixture is how two files come to photograph different screens while
+  // reporting the same name. The status-6 note that cost a wrongly-badged capture travelled with
+  // the data.
 
   /// `topOrders` answers EMPTY on purpose. The list header counts a top-orders slot into
   /// `itemCount` when one exists (`order_screen.dart:364`), and the point of this tranche is the
   /// ordinary list; a populated top-orders strip is a different surface with its own card.
   ApiStub stub() => ApiStub()
     ..on('toporder', <String, Object?>{'status': 1, 'data': <Object?>[]})
-    ..on('orderlist', orderPage());
+    ..on('orderlist', orderListPage());
 
   for (final combination in kFourCombinations) {
     testWidgets('the orders list renders its orders in ${combination.name}', (tester) async {
@@ -243,7 +185,7 @@ void main() {
         'page=2',
         page(lastPage: 2, rows: <Object?>[
           // THE REPEAT: id 1042 was already on page 1.
-          order(
+          orderRow(
             id: 1042,
             ref: 'SS-1042',
             customer: 'Marwan Haddad',
@@ -251,7 +193,7 @@ void main() {
             status: 1,
             statusText: 'Pending',
           ),
-          order(
+          orderRow(
             id: 1043,
             ref: 'SS-1043',
             customer: 'Nour Khalil',
@@ -264,7 +206,7 @@ void main() {
       ..on(
         'orderlist',
         page(lastPage: 2, rows: <Object?>[
-          order(
+          orderRow(
             id: 1041,
             ref: 'SS-1041',
             customer: 'Layla Haddad',
@@ -272,7 +214,7 @@ void main() {
             status: 2,
             statusText: 'Shipped',
           ),
-          order(
+          orderRow(
             id: 1042,
             ref: 'SS-1042',
             customer: 'Marwan Haddad',
