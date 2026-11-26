@@ -321,14 +321,24 @@ String _typeLabel(String type) {
 }
 
 /// GAP-271. The host enum is `['pending','completed','cancelled']`; all three have copy in both
-/// maps. Same fallback reasoning as [_typeLabel]: a status the enum does not name prints as it
-/// arrived rather than as a key.
+/// maps. Same fallback reasoning as [_typeLabel]: a status the enum does not name must not reach
+/// the merchant as a raw key.
+///
+/// THIS DOCBLOCK WAS FALSE ABOUT ITS OWN CODE UNTIL INTEGRATION, 2026-11-26. It claimed the same
+/// fallback as [_typeLabel] and the body was a bare `status.tr` with no fallback at all -- so an
+/// unmapped status printed the raw wire token, which both this comment and [_typeLabel]'s call
+/// "strictly worse than the humanised English it replaced". Two branches fixed GAP-271
+/// independently; the other one's test asserted the title-cased fallback and FAILED against this
+/// body, which is the only reason the discrepancy surfaced. A comment agreeing with its sibling's
+/// comment is not the same as code agreeing with its sibling's code.
 String _statusLabel(String status) {
   if (status.isEmpty) {
     return '';
   }
 
-  return status.tr;
+  final String translated = status.tr;
+
+  return translated == status ? _formatType(status) : translated;
 }
 
 String _formatType(String type) {
