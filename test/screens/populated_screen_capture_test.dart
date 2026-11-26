@@ -12,6 +12,7 @@ import 'package:store_go_app/view/screen/coupon_screen/coupon_screen.dart';
 import 'package:store_go_app/view/screen/product_screen/products_screen.dart';
 
 import '../support/golden_harness.dart';
+import '../support/list_page_fixtures.dart';
 import '../support/screen_harness.dart';
 
 /// P2.5-FLUTTER-COVERAGE — two Flutter surfaces rendered WITH DATA, in all four combinations.
@@ -38,41 +39,11 @@ void main() {
   tearDownAll(disposeScreenHarness);
   tearDown(resetScreenHarness);
 
-  /// Three customers, in the envelope `CustomerModel.fromJson` reads.
-  ///
-  /// `email` and `state_name` sit at the ROOT, not inside `customer_info` — `CustomerInfo` carries
-  /// only name and mobile, and the API puts both of these beside that object. The first version of
-  /// this project's golden fixture nested `email`, so it was never read and four baselines froze a
-  /// literal `--` where the address belongs.
-  Map<String, Object?> customerPage() => <String, Object?>{
-        'status': 1,
-        'data': <String, Object?>{
-          'customers': <Object?>[
-            <String, Object?>{
-              'id': 1,
-              'customer_info': <String, Object?>{'name': 'أمينة حداد', 'mobile': '0911222333'},
-              'email': 'amina@example.test',
-              'state_name': 'دمشق',
-              'status': 1,
-            },
-            <String, Object?>{
-              'id': 2,
-              'customer_info': <String, Object?>{'name': 'عمر خليل', 'mobile': '0922333444'},
-              'email': 'omar@example.test',
-              'state_name': 'حلب',
-              'status': 1,
-            },
-            <String, Object?>{
-              'id': 3,
-              'customer_info': <String, Object?>{'name': 'نور صالح', 'mobile': '0933444555'},
-              'email': 'nour@example.test',
-              'state_name': 'اللاذقية',
-              'status': 0,
-            },
-          ],
-          'pagination': <String, Object?>{'last_page': 1},
-        },
-      };
+  // `customerPage()` AND `productPage()` MOVED TO ../support/list_page_fixtures.dart, and the move
+  // is the point. `test/golden/screen_golden_test.dart` renders the same two screens as PIXEL
+  // BASELINES, so two files now depend on these shapes being right -- and a fixture whose key is
+  // wrong parses to an empty list and renders a convincing empty state in both of them. That has
+  // happened twice in this repository already; `sample_cards.dart` exists for the same reason.
 
   /// Three delivery men. `DeliveryBoyModel.fromJson` reads `data` as a LIST directly — not the
   /// paginator envelope the customer endpoint uses — and each row's phone is `contact`, NOT
@@ -103,49 +74,6 @@ void main() {
             'status': 1,
           },
         ],
-      };
-
-  /// Two products. `ProductModelData` is the Laravel paginator shape — `data.data` is the LIST —
-  /// and `ProductData` uses typed casts (`json['id'] as int?`, `json['status'] as int?`), so a
-  /// string where an int belongs throws rather than parsing to null. The controller gates on
-  /// `data['status'] == 1` (`product_controller.dart:117`), an INT, which is a different check
-  /// from the delivery-man endpoint's.
-  Map<String, Object?> productPage() => <String, Object?>{
-        'status': 1,
-        'data': <String, Object?>{
-          'currency_symbol': r'$',
-          'out_of_stock_threshold': 0,
-          'current_page': 1,
-          'last_page': 1,
-          'per_page': 10,
-          'total': 2,
-          'data': <Object?>[
-            <String, Object?>{
-              'id': 1,
-              'name': 'قميص قطن دمشقي',
-              'product_code': 'SS-1001',
-              'price': 150,
-              'final_price': 150,
-              'product_stock': 12,
-              'track_stock': 1,
-              'status': 1,
-              'is_active': 1,
-              'variant_product': 0,
-            },
-            <String, Object?>{
-              'id': 2,
-              'name': 'وشاح حريري',
-              'product_code': 'SS-1002',
-              'price': 85,
-              'final_price': 85,
-              'product_stock': 0,
-              'track_stock': 1,
-              'status': 1,
-              'is_active': 0,
-              'variant_product': 0,
-            },
-          ],
-        },
       };
 
   /// Two categories. Same paginator shape as products — the rows are at `data.data` — but
@@ -216,7 +144,7 @@ void main() {
 
   for (final combination in kFourCombinations) {
     testWidgets('the customers list renders its rows in ${combination.name}', (tester) async {
-      final api = ApiStub()..on('customerlist', customerPage());
+      final api = ApiStub()..on('customerlist', customerListPage());
       final controller = CustomerController();
 
       await pumpScreen(
@@ -255,7 +183,7 @@ void main() {
     });
 
     testWidgets('the products list renders its rows in ${combination.name}', (tester) async {
-      final api = ApiStub()..on('productlist', productPage());
+      final api = ApiStub()..on('productlist', productListPage());
       final controller = ProductController();
 
       await pumpScreen(
