@@ -845,4 +845,16 @@ const Map<String, String> ar = {
   "tax_id": "معرّف الضريبة",
   "tax_status": "حالة الضريبة",
   "track_stock": "تتبّع المخزون",
+  // ----------------------------------------------------------------------------------------------
+  // PLURAL FORMS for the list-count label. Six keys because Arabic has six CLDR categories and the
+  // DUAL is not optional: `items` above is the bare singular and printed `3 عنصر`. See
+  // lib/utils/plural.dart for the rule and test/localization/item_count_plural_test.dart for the
+  // measurements. `items` itself is left exactly as it was.
+  // ----------------------------------------------------------------------------------------------
+  "items_count_zero": "لا عناصر",
+  "items_count_one": "عنصر واحد",
+  "items_count_two": "عنصران",
+  "items_count_few": "{0} عناصر",
+  "items_count_many": "{0} عنصرًا",
+  "items_count_other": "{0} عنصر",
 };

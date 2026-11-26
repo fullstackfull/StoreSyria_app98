@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/utils/colors.dart';
 import 'package:store_go_app/utils/helper.dart';
+import 'package:store_go_app/utils/plural.dart';
 
 Future<DateTimeRange?> showDateRangeBottomSheet({
   required BuildContext context,
@@ -333,7 +334,10 @@ Widget sectionHeaderWithFilterWidget({
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      '$num ${'items'.tr}',
+                      // P06-WS8-I18N. Was `'$num ${'items'.tr}'`, which printed the bare
+                      // Arabic SINGULAR at every count: `3 عنصر`, `2 عنصر`. Arabic takes the
+                      // dual for 2 and the plural of paucity for 3-10. See utils/plural.dart.
+                      itemCountLabel(num),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

@@ -12,6 +12,7 @@ import '../../new_widgets/customer_widget.dart';
 import '../../widget/app_dialog.dart';
 import '../../widget/common_appbar_widget.dart';
 import 'customers_details.dart';
+import 'package:store_go_app/utils/plural.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({super.key});
@@ -250,7 +251,13 @@ class _CustomerScreenState extends State<CustomerScreen>
                             child: Row(
                               children: [
                                 Text(
-                                  "${isSearchMode ? customers.length : (customerController.customerModel?.data?.pagination?.total ?? customers.length)} ${'items'.tr}",
+                                  // P06-WS8-I18N -- see utils/plural.dart: Arabic needs six
+                                  // forms and this printed the singular at every count.
+                                  itemCountLabel(isSearchMode
+                                      ? customers.length
+                                      : (customerController.customerModel?.data?.pagination
+                                              ?.total ??
+                                          customers.length)),
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     color: isDark

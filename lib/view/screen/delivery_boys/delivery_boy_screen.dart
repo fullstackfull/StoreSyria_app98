@@ -9,6 +9,7 @@ import '../../new_widgets/shimmer.dart';
 import 'delivery_boy_bottom_sheet.dart';
 import '../../widget/app_dialog.dart';
 import '../../widget/common_appbar_widget.dart';
+import 'package:store_go_app/utils/plural.dart';
 
 class DeliveryBoyScreen extends StatefulWidget {
   const DeliveryBoyScreen({super.key});
@@ -196,7 +197,8 @@ class _DeliveryBoyScreenState extends State<DeliveryBoyScreen>
                               child: Row(
                                 children: [
                                   Text(
-                                    "${deliveryBoys.length} ${'items'.tr}",
+                                    // P06-WS8-I18N -- see utils/plural.dart.
+                                    itemCountLabel(deliveryBoys.length),
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       color: isDark

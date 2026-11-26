@@ -10,6 +10,7 @@ import 'package:store_go_app/view/screen/home_screen/add_category_bottomsheet.da
 import 'package:store_go_app/view/widget/common_appbar_widget.dart';
 import 'package:store_go_app/view/widget/error_empty_state.dart';
 import '../../new_widgets/shimmer.dart';
+import 'package:store_go_app/utils/plural.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final bool isBack;
@@ -172,7 +173,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> with AutomaticKeepA
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "${categoryController.categoriesModel?.data?.total ?? 0} ${'items'.tr}",
+                                  // P06-WS8-I18N -- see utils/plural.dart: Arabic needs six
+                                  // forms and this printed the singular at every count.
+                                  itemCountLabel(
+                                      categoryController.categoriesModel?.data?.total ?? 0),
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     height: 1.2,
