@@ -62,18 +62,20 @@ cannot hold an opinion about that. A screen baseline beside it can.
 
 ```
 flutter test --tags golden --update-goldens test/golden/screen_golden_test.dart
-cp test/golden/goldens/{customers-screen,products-screen}.*.png \
+cp test/golden/goldens/{customers-screen,products-screen,orders-screen,coupons-screen}.*.png \
    docs/evidence/route-1-screen-candidates/
 python3 tool/contact_sheet.py \
   --images-dir docs/evidence/route-1-screen-candidates \
   --out docs/evidence/route-1-screen-candidates/CONTACT-SHEET.png \
   --page-margin 10 \
   --surface "customers-screen|Customers screen|lib/view/screen/customers/customer_screen.dart" \
-  --surface "products-screen|Products screen|lib/view/screen/product_screen/products_screen.dart"
+  --surface "products-screen|Products screen|lib/view/screen/product_screen/products_screen.dart" \
+  --surface "orders-screen|Orders screen|lib/view/screen/order_screen/order_screen.dart" \
+  --surface "coupons-screen|Coupons screen|lib/view/screen/coupon_screen/coupon_screen.dart"
 ```
 
 Flutter 3.47.7, the version `.github/workflows/ci.yml` pins as `FLUTTER_VERSION`. The capture was
-run twice and the eight files compared byte for byte: identical.
+run twice and the sixteen files compared byte for byte: identical, and each one is byte-identical to what `test/golden/goldens/` holds at HEAD.
 
 **The harness is the existing one, extended rather than duplicated.**
 `test/support/screen_harness.dart` already pumped these screens for the `test/screens/*_capture_test.dart`
@@ -193,5 +195,5 @@ measuring a picture, after every assertion in the suite had gone green.
 ---
 
 **THESE SIXTEEN REMAIN UN-REVIEWED AND UN-APPROVED.** No human has looked at them, nothing has been
-copied into `test/golden/goldens/`, and all eight golden cases still skip with their own printed
+copied into `test/golden/goldens/`, and all sixteen golden cases still skip with their own printed
 reason. Route 1 step 2 is outstanding.
