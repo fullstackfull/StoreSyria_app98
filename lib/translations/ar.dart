@@ -666,6 +666,23 @@ const Map<String, String> ar = {
   'order_paid': 'دفع طلب',
   'order_payment_reversed': 'إلغاء دفع طلب',
   'manual_withdrawal': 'سحب يدوي',
+  // GAP-270. The five remaining `store_wallet_transactions.type` values, phrased to match the
+  // four already in this file rather than freshly translated: this map glosses `withdraw` as
+  // سحب, `credit` as إيداع and `refund` as استرجاع, and `order_paid` / `order_payment_reversed`
+  // as the verbal-noun forms دفع طلب / إلغاء دفع طلب. The five below keep that shape so the
+  // card's type column reads as one set.
+  //
+  // THE WEB MERCHANT'S ARABIC FOR THE SAME NINE TYPES IS PHRASED DIFFERENTLY and that divergence
+  // is reported rather than silently resolved here: resources/lang/ar.json in the Laravel
+  // repository spells them as completed actions (تم إلغاء الطلب, تم استرداد الطلب, تم دفع السحب,
+  // استرداد السحب) and uses استرداد where this map uses استرجاع. Only `withdrawal_request`
+  // agrees exactly (طلب سحب). Unifying the two is a copy decision for the owner; changing the
+  // four values already shipped here would be a silent re-wording of a screen under review.
+  'order_cancelled': 'إلغاء طلب',
+  'order_refunded': 'استرجاع طلب',
+  'withdrawal_request': 'طلب سحب',
+  'withdrawal_refund': 'استرجاع سحب',
+  'withdrawal_paid': 'دفع سحب',
   'sale': 'بيع',
   'refund': 'استرجاع',
   'adjustment': 'تسوية',

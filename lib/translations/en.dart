@@ -670,6 +670,16 @@ const Map<String, String> en = {
   'order_paid': 'Order Paid',
   'order_payment_reversed': 'Order Payment Reversed',
   'manual_withdrawal': 'Manual Withdrawal',
+  // GAP-270. The five remaining `store_wallet_transactions.type` values. The four above were
+  // written for the /finance type FILTER; these complete the set the server actually emits, so
+  // the transaction card can translate every type instead of four of nine. Each English value is
+  // byte-identical to what `transactions_widget._formatType` produced for it, so the English
+  // screen is unchanged — asserted by transaction_type_and_status_labels_test.dart.
+  'order_cancelled': 'Order Cancelled',
+  'order_refunded': 'Order Refunded',
+  'withdrawal_request': 'Withdrawal Request',
+  'withdrawal_refund': 'Withdrawal Refund',
+  'withdrawal_paid': 'Withdrawal Paid',
   'sale': 'Sale',
   'refund': 'Refund',
   'adjustment': 'Adjustment',
