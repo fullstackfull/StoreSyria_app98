@@ -84,6 +84,46 @@ Widget allProductsListItemWidget({
       ? 'on_backorder'.tr
       : 'out_of_stock'.tr;
 
+  // P06-WS8-A11Y-01. THE LABEL IS NOT THE TINT, and it used to be.
+  //
+  // `statusColor` above was spent twice below: once as the chip's fill at 10% alpha (:346) and
+  // once as the chip's LABEL, opaque (:358). A label painted in the same saturated hue as its own
+  // tint is the defect `status_pill.dart:14-21` was repaired for, and it was measured here OFF A
+  // RENDERED SCREEN rather than off these constants -- `products-screen.light-ltr.png`, the chip
+  // #E7F7FA with #0EAED1 ink: **2.39:1**, where 9.5sp w700 (7.1pt, small text) asks 4.5:1.
+  //
+  // AND THIS FILE WAS BREAKING A RULE THE REPOSITORY HAD ALREADY WRITTEN DOWN.
+  // `store_syria_brand.dart:34` declares the cyan "an accent and a dark-surface brand, **never
+  // light-mode text**" -- and `accentColor` is `AppColor.themeGreenColor`, which light mode sets
+  // to exactly that cyan.
+  //
+  // THE TINT HUE IS KEPT AND ONLY THE TEXT MOVES, the decision recorded at
+  // `order_status_badge.dart:40-44`: the tinted fills are what make a grid of products scannable,
+  // and replacing them with opaque pastels measures 1.03:1 against this app's navy dark card.
+  //
+  // The replacements are the design system's per-theme semantic foregrounds, already transcribed
+  // into this app at `common_snak_bar_widget.dart:127-145` from `public/css/store-syria-ds.css`.
+  // ONLY THE COMBINATIONS THAT FAIL MOVE; the two that already pass are left exactly as they were.
+  //
+  //   state         theme  before            after                      measured on the chip
+  //   in stock      light  #0EAED1 2.39:1    #15558F --ss-blue-800      7.00:1
+  //   in stock      dark   #22C7EA 6.19:1    unchanged                  6.19:1
+  //   on backorder  light  #F59E0B 1.99:1    #5D3F04 --ss-amber-900     8.92:1
+  //   on backorder  dark   #F59E0B 5.99:1    unchanged                  5.99:1
+  //   out of stock  light  #EF4444 3.29:1    #8C1D17 --ss-red-800       7.98:1
+  //   out of stock  dark   #EF4444 3.70:1    #F3A9A4 dark danger fg     7.31:1
+  //
+  // `--ss-blue-800` and not `--ss-green-800` for in-stock: green also passes (7.11:1) but the chip
+  // is the brand CYAN, and a dark green label inside a pale cyan chip reads as two meanings
+  // stacked. Blue-800 is the darkest shade of the cool family the chip's own hue belongs to.
+  //
+  // Pinned by test/a11y/product_stock_pill_contrast_test.dart, in both themes and all three states.
+  final Color statusLabelColor = (stockState == StockState.inVariant || isInStock)
+      ? (isDark ? statusColor : const Color(0xFF15558F))
+      : isBackorder
+      ? (isDark ? statusColor : const Color(0xFF5D3F04))
+      : (isDark ? const Color(0xFFF3A9A4) : const Color(0xFF8C1D17));
+
   final String stockText = (stockState == StockState.inVariant || !trackStock)
       ? '${'stock'.tr}: -'
       : '${'stock'.tr}: $stock';
@@ -355,7 +395,7 @@ Widget allProductsListItemWidget({
                               style: TextStyle(
                                 fontSize: 9.5.sp,
                                 fontWeight: FontWeight.w700,
-                                color: statusColor,
+                                color: statusLabelColor,
                               ),
                             ),
                           ),
