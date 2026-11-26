@@ -81,7 +81,7 @@ Widget transactionCard({
               ),
               SizedBox(height: 4.h),
               Text(
-                _formatType(tx.type),
+                _typeLabel(tx.type),
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
@@ -186,7 +186,12 @@ Widget _statusBadge({required String status, required bool isDark}) {
       borderRadius: BorderRadius.circular(20.r),
     ),
     child: Text(
-      isCompleted ? 'completed'.tr : status,
+      // GAP-271. This was `isCompleted ? 'completed'.tr : status`, so the host enum's other two
+      // values -- `pending` and `cancelled`, both of which already had copy in both maps --
+      // printed the raw lowercase server string beside a translated `مكتمل` on the same list.
+      // The colour still branches on `isCompleted` above: re-tinting the pill is GAP-271's other
+      // half and is carried with GAP-269 as one palette decision, deliberately not taken here.
+      _statusLabel(status),
       style: TextStyle(
         fontSize: 10.sp,
         fontWeight: FontWeight.w600,
@@ -211,6 +216,41 @@ IconData _iconForType(String type, bool isCredit) {
           ? Icons.arrow_downward_rounded
           : Icons.arrow_upward_rounded;
   }
+}
+
+/// GAP-270. THE TYPE NOW GOES THROUGH THE SAME `.tr` THE REST OF THIS CARD ALREADY USES.
+///
+/// `_formatType` alone had no `.tr` anywhere in its chain, so `manual_withdrawal` printed
+/// `Manual Withdrawal` in Latin script on an otherwise fully Arabic card. Found by looking at the
+/// rendered image; no assertion in the suite read that string.
+///
+/// WHY A BARE `type.tr` WOULD BE A REGRESSION RATHER THAN A FIX. GetX returns THE KEY when a
+/// translation is absent (get-4.7.3 `internacionalization.dart:96-111` falls through to
+/// `return this`), so an unmapped type would print the raw `some_new_type` to the merchant --
+/// strictly worse than the humanised English it replaced. The nine types the server really writes
+/// all have copy in both maps (censused from the eleven `StoreWalletTransaction::create` sites in
+/// the Laravel repository), and anything else degrades to `_formatType` as before. That fallback
+/// is load-bearing today: `sampleTransaction()` carries `type: 'order'`, which no write site
+/// produces.
+String _typeLabel(String type) {
+  if (type.isEmpty) {
+    return '';
+  }
+
+  final String translated = type.tr;
+
+  return translated == type ? _formatType(type) : translated;
+}
+
+/// GAP-271. The host enum is `['pending','completed','cancelled']`; all three have copy in both
+/// maps. Same fallback reasoning as [_typeLabel]: a status the enum does not name prints as it
+/// arrived rather than as a key.
+String _statusLabel(String status) {
+  if (status.isEmpty) {
+    return '';
+  }
+
+  return status.tr;
 }
 
 String _formatType(String type) {
