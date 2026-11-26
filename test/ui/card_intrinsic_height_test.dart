@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:store_go_app/utils/colors.dart';
+import 'package:store_go_app/view/new_widgets/coupon_widget.dart';
 import 'package:store_go_app/view/new_widgets/customer_widget.dart';
 import 'package:store_go_app/view/new_widgets/delivery_boy_widget.dart';
 import 'package:store_go_app/view/new_widgets/transactions_widget.dart';
@@ -235,6 +236,93 @@ void main() {
         LightThemeColor.cBorder,
         reason: 'the edge must come from the app\'s own token, not a new literal',
       );
+    });
+
+    testWidgets('the light COUPON card has an edge too, and its border was commented out',
+        (tester) async {
+      /// THE SAME DEFECT, IN A THIRD CARD, FOUND BY LOOKING AT THE PICTURE. `5b3c6bb` captured
+      /// `coupon-card-column` and reported "the coupon card has no boundary at all in light mode,
+      /// 1.00:1, white on white, because its border is two commented-out lines". Re-measured off
+      /// that PNG here: **96.52 % of the whole image is #FFFFFF**, and a row scan across the
+      /// card's left edge finds no edge pixel at all -- the first non-white run is the card's
+      /// CONTENT, not its boundary.
+      ///
+      /// It is worse than the customer card's was. That one at least had a shadow at alpha .035
+      /// (1.08:1); `coupon_widget.dart:57-61` declares `color` and `borderRadius` and nothing
+      /// else, so there is no shadow either. 1.00:1 exactly.
+      ///
+      /// THE REPAIR IS THE ONE `3727efc` ALREADY CHOSE for the two list cards, not the commented
+      /// line. That line was `themeNavyBlueColor.withValues(alpha: 0.3)`, a value nobody measured;
+      /// `LightThemeColor.cBorder` is the app's own hairline token, measured at 1.43:1 on white by
+      /// the test above, and it is what the customer card, the delivery-man card and the
+      /// transaction card all carry. One card family, one edge.
+      pinGoldenSurface(tester);
+
+      await tester.pumpWidget(goldenHost(
+        dark: false,
+        direction: TextDirection.ltr,
+        child: Builder(
+          builder: (context) => productCouponWidget(
+            context: context,
+            index: 0,
+            status: 1,
+            code: 'SPRING15',
+            name: 'Spring Textiles',
+            discount: '15',
+            couponType: 'percentage',
+            // A plain string is fine HERE and would not be in a golden: this case asserts a
+            // BoxDecoration, so no month name reaches a baseline. list_cards_golden_test.dart
+            // runs the same fixture through the screen's own `dateFormatted` for that reason.
+            date: '31 Dec 2026',
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      final box = tester.widget<Container>(find.byType(Container).first).decoration! as BoxDecoration;
+
+      expect(box.color, LightThemeColor.cBackGround,
+          reason: 'premise: the light coupon card fill really is the same colour as the page, '
+              'which is why it needs an edge of its own');
+      expect(box.border, isNotNull,
+          reason: 'the light coupon card has NO boundary of any kind: same fill as the page, no '
+              'border (two commented-out lines) and no shadow. 1.00:1 -- the card is invisible as '
+              'an object and only its contents show');
+      expect((box.border! as Border).top.color, LightThemeColor.cBorder,
+          reason: 'the edge must come from the app\'s own token, and from the SAME one its '
+              'sibling cards use, not from the commented-out navy-at-30% nobody measured');
+    });
+
+    testWidgets('the dark COUPON card keeps its surface difference and gets no outline',
+        (tester) async {
+      /// Mirrors the assertion below for the customer card, and for the same reason: in dark the
+      /// coupon card is `cCardBackground` on `cBackGround`, two fills that already differ, so an
+      /// outline there would fight a surface that is reading.
+      pinGoldenSurface(tester);
+
+      await tester.pumpWidget(goldenHost(
+        dark: true,
+        direction: TextDirection.ltr,
+        child: Builder(
+          builder: (context) => productCouponWidget(
+            context: context,
+            index: 0,
+            status: 1,
+            code: 'SPRING15',
+            name: 'Spring Textiles',
+            discount: '15',
+            couponType: 'percentage',
+            date: '31 Dec 2026',
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      final box = tester.widget<Container>(find.byType(Container).first).decoration! as BoxDecoration;
+
+      expect(box.border, isNull,
+          reason: 'the dark coupon card gained an outline. Its fill already differs from the page, '
+              'so the edge is the light-mode repair only');
     });
 
     testWidgets('the dark card keeps its surface difference and gets no outline', (tester) async {
