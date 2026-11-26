@@ -47,6 +47,30 @@ const List<String> kGoldenSurfaces = <String>[
   // and two files measured it; none had rendered it. Two rows per image, credit and debit, because
   // the card is a switch and one fixture only drives one side of it.
   'transaction-card',
+  // ---- WAVE 3 -------------------------------------------------------------------------------
+  //
+  // THE SHARED STATES AND CONTROLS. Each of these is its own row in the Phase 2.5 surface
+  // inventory, and each replaces or decorates a whole screen rather than one cell — so a defect
+  // in one is a defect everywhere at once, which is exactly the shape of thing a per-screen
+  // capture cannot localise. Every one of them already carries a repair that was driven by a
+  // MEASUREMENT and whose result nobody had seen: the empty state's 1.88:1 light text, the text
+  // field's 1.09:1 dark focus ring, the settings card's icon tint, the status pill's tint-on-tint
+  // label. See the headers of the three wave-3 files for the full list.
+  'empty-error-stale-column',
+  'blocking-loader',
+  'text-field-column',
+  'button-column',
+  'app-bar-column',
+  'search-filter-menu-column',
+  'status-pill-pair',
+  // THE CARD FAMILIES a merchant spends the day looking at, after wave 1's customer and
+  // delivery-man cards. Each is captured in every state that takes a different code path, not in
+  // its happy state alone: four product branches, two coupon branches, the permitted and refused
+  // stat tile.
+  'product-card-grid',
+  'coupon-card-column',
+  'setting-card-grid',
+  'home-stat-tiles-column',
 ];
 
 void main() {
