@@ -57,6 +57,13 @@ const converted = <String, String>{
   'email': 'Email Address',
   'confirm_password': 'Confirm Password',
   'close': 'Close',
+  // P06-WS8, found by LOOKING at a rendered screen rather than by reading source:
+  // `coupons-screen.dark-rtl.png` showed "Coupon" and "Add Coupon" in Latin script above an
+  // otherwise Arabic page. Both keys already carried copy on both sides, and both English values
+  // are byte-identical to the literals they replace, so this conversion passes the governing rule
+  // above without a word of new copy.
+  'coupon': 'Coupon',
+  'add_coupon': 'Add Coupon',
 };
 
 /// file -> (key, how many call sites in that file now use it)
@@ -73,6 +80,10 @@ const sites = <String, Map<String, int>>{
   },
   'lib/view/screen/setting_screen/email_setting_screen.dart': {
     'close': 1, // :209
+  },
+  'lib/view/screen/coupon_screen/coupon_screen.dart': {
+    'coupon': 1, // app bar title
+    'add_coupon': 1, // the add button's label
   },
 };
 
@@ -122,7 +133,12 @@ void main() {
     sites.forEach((path, keys) {
       final src = read(path);
       keys.forEach((key, count) {
-        expect(RegExp("'$key'\\.tr").allMatches(src).length, count,
+        // EITHER QUOTE STYLE. This used to match `'key'.tr` only, and that was a blind spot
+        // rather than a style preference: a site converted as `"key".tr` -- which is what the
+        // screens around it already do, `customer_screen.dart:95` is `"customers".tr` -- counted
+        // as ZERO, so the guard would report a correctly converted call site as unconverted.
+        // Found by converting one. Dart treats the two quote forms identically.
+        expect(RegExp("['\"]$key['\"]\\.tr").allMatches(src).length, count,
             reason: '$path should use \'$key\'.tr at $count site(s)');
 
         final literal = converted[key]!;

@@ -112,3 +112,103 @@ Map<String, Object?> productListPage() => <String, Object?>{
         ],
       },
     };
+
+Map<String, Object?> orderRow({
+  required int id,
+  required String ref,
+  required String customer,
+  required String total,
+  required int status,
+  required String statusText,
+}) =>
+    <String, Object?>{
+      'id': id,
+      'product_order_id': ref,
+      'order_id_string': ref,
+      'user_name': customer,
+      'order_date': '2026-11-08',
+      'created_at': '2026-11-08 09:12:00',
+      'final_price': total,
+      'product_price': total,
+      'delivery_price': '0',
+      'tax_price': '0',
+      'coupon_price': '0',
+      'return_price': '0',
+      'currency_symbol': 'ل.س',
+      'payment_type': 'COD',
+      'payment_status': 'pending',
+      'delivered_status': status,
+      'delivered_status_string': statusText,
+      'is_guest': 0,
+      'store_id': 1,
+      'user_id': 4,
+    };
+
+Map<String, Object?> orderListPage() => <String, Object?>{
+      'status': 1,
+      'data': <String, Object?>{
+        'current_page': 1,
+        'last_page': 1,
+        'per_page': 10,
+        'total': 2,
+        'data': <Object?>[
+          orderRow(
+            id: 1041,
+            ref: 'SS-1041',
+            customer: 'ليلى حداد',
+            total: '85000',
+            // 6 IS "Shipped" -- the numbering is NOT free, and it agrees with the server's
+            // `Order::getDeliveredStatusStringAttribute()`: 0 Pending, 1 Delivered, 2 Cancel,
+            // 3 Return, 4 Confirmed, 5 Picked Up, 6 Shipped. The card reads this INT, not
+            // `delivered_status_string`, so the first version of this fixture -- 2 with the
+            // string 'Shipped' -- captured an order badged "Cancelled". The card was right and
+            // the fixture was wrong; `test/widgets/order_status_label_test.dart` pins the map.
+            status: 6,
+            statusText: 'Shipped',
+          ),
+          orderRow(
+            id: 1042,
+            ref: 'SS-1042',
+            customer: 'Marwan Haddad',
+            total: '126500',
+            status: 0,
+            statusText: 'Pending',
+          ),
+        ],
+      },
+    };
+
+/// Two coupons, in the same paginator envelope. `CouponData` reads `coupon_name`, `coupon_code`,
+/// `coupon_type` and `discount_amount` — not `name`/`code`, which is the kind of near-miss that
+/// parses to an empty list and renders a convincing empty state.
+Map<String, Object?> couponListPage() => <String, Object?>{
+      'status': 1,
+      'data': <String, Object?>{
+        'current_page': 1,
+        'last_page': 1,
+        'per_page': 10,
+        'total': 2,
+        'data': <Object?>[
+          <String, Object?>{
+            'id': 1,
+            'coupon_name': 'خصم العيد',
+            'coupon_code': 'EID25',
+            'coupon_type': 'percentage',
+            'discount_amount': 25,
+            'coupon_limit': 100,
+            'coupon_expiry_date': '2026-12-31',
+            'status': 1,
+          },
+          <String, Object?>{
+            'id': 2,
+            'coupon_name': 'شحن مجاني',
+            'coupon_code': 'FREESHIP',
+            'coupon_type': 'flat',
+            'discount_amount': 10,
+            'coupon_limit': 50,
+            'coupon_expiry_date': '2026-11-30',
+            'status': 1,
+          },
+        ],
+      },
+    };

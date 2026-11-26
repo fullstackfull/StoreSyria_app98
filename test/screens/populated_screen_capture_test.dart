@@ -107,40 +107,8 @@ void main() {
         },
       };
 
-  /// Two coupons, in the same paginator envelope. `CouponData` reads `coupon_name`, `coupon_code`,
-  /// `coupon_type` and `discount_amount` — not `name`/`code`, which is the kind of near-miss that
-  /// parses to an empty list and renders a convincing empty state.
-  Map<String, Object?> couponPage() => <String, Object?>{
-        'status': 1,
-        'data': <String, Object?>{
-          'current_page': 1,
-          'last_page': 1,
-          'per_page': 10,
-          'total': 2,
-          'data': <Object?>[
-            <String, Object?>{
-              'id': 1,
-              'coupon_name': 'خصم العيد',
-              'coupon_code': 'EID25',
-              'coupon_type': 'percentage',
-              'discount_amount': 25,
-              'coupon_limit': 100,
-              'coupon_expiry_date': '2026-12-31',
-              'status': 1,
-            },
-            <String, Object?>{
-              'id': 2,
-              'coupon_name': 'شحن مجاني',
-              'coupon_code': 'FREESHIP',
-              'coupon_type': 'flat',
-              'discount_amount': 10,
-              'coupon_limit': 50,
-              'coupon_expiry_date': '2026-11-30',
-              'status': 1,
-            },
-          ],
-        },
-      };
+  // `couponPage()` MOVED TO ../support/list_page_fixtures.dart, for the same reason as the two
+  // above: test/golden/screen_golden_test.dart now renders the coupons screen as a baseline.
 
   for (final combination in kFourCombinations) {
     testWidgets('the customers list renders its rows in ${combination.name}', (tester) async {
@@ -253,7 +221,7 @@ void main() {
     });
 
     testWidgets('the coupons list renders its rows in ${combination.name}', (tester) async {
-      final api = ApiStub()..on('couponlist', couponPage());
+      final api = ApiStub()..on('couponlist', couponListPage());
       final controller = NewCouponController();
 
       await pumpScreen(

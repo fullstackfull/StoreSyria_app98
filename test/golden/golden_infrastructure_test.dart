@@ -85,6 +85,13 @@ const List<String> kGoldenSurfaces = <String>[
   // screen baseline beside it can.
   'customers-screen',
   'products-screen',
+  // ---- WAVE 5 -------------------------------------------------------------------------------
+  //
+  // Two more whole screens. The orders list is the surface a merchant lives on and the one whose
+  // status chips this project has measured as a catalogue but never seen in a real row; the
+  // coupons list is the card repaired in 01a9a09, in the list it actually ships in.
+  'orders-screen',
+  'coupons-screen',
 ];
 
 void main() {

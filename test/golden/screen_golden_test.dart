@@ -54,8 +54,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:store_go_app/core/controller/customers/customer_controller.dart';
+import 'package:store_go_app/core/controller/home_controller/new_coupon_controller.dart';
+import 'package:store_go_app/core/controller/order_controller/order_controller.dart';
 import 'package:store_go_app/core/controller/product_controller/product_controller.dart';
+import 'package:store_go_app/view/screen/coupon_screen/coupon_screen.dart';
 import 'package:store_go_app/view/screen/customers/customer_screen.dart';
+import 'package:store_go_app/view/screen/order_screen/order_screen.dart';
 import 'package:store_go_app/view/screen/product_screen/products_screen.dart';
 
 import '../support/golden_harness.dart';
@@ -167,6 +171,105 @@ void main() {
         await expectLater(
           find.byKey(kCaptureBoundaryKey),
           matchesGoldenFile(goldenPath('products-screen', combination)),
+        );
+      },
+      tags: const <String>['golden'],
+    );
+
+    // ---- WAVE 5 ---------------------------------------------------------------------------
+    //
+    // THE ORDERS LIST IS THE SCREEN A MERCHANT LIVES ON, and it is the one surface whose status
+    // vocabulary this project has already measured twice: `status_badge_golden_test.dart`
+    // photographs all ten `delivered_status` chips as a catalogue, and wave 2 found the light
+    // set has no boundary contrast. This puts two of those chips back where a merchant meets
+    // them -- inside the real row, at the real size, beside a price and a date.
+    testWidgets(
+      'the orders screen renders as its baseline — ${combination.name}',
+      (tester) async {
+        if (skipUnlessCaptured('orders-screen', combination)) return;
+
+        // `toporder` answers EMPTY deliberately: the header counts a top-orders slot into
+        // itemCount when one exists (`order_screen.dart:364`), and the ordinary list is the
+        // surface under test. A populated strip is a different picture with its own card.
+        final api = ApiStub()
+          ..on('toporder', <String, Object?>{'status': 1, 'data': <Object?>[]})
+          ..on('orderlist', orderListPage());
+        late final OrderController controller;
+
+        await pumpScreen(
+          tester,
+          const OrderScreen(),
+          api: api,
+          combination: combination,
+          register: () {
+            controller = Get.put(OrderController());
+          },
+        );
+
+        await pumpUntil(
+          tester,
+          () => controller.orderList.length >= 2,
+          reason: 'the orders never loaded. The controller de-duplicates by id, so a fixture '
+              'whose two rows shared an id would stop here too. Calls: ${api.calls}',
+        );
+
+        await drainToasts(tester);
+
+        expect(tester.takeException(), isNull);
+        expect(api.sawRequestFor('orderlist'), isTrue,
+            reason: 'premise: the screen really fetched through the stub');
+        expect(find.textContaining('SS-1042'), findsWidgets,
+            reason: 'the second order is not rendered, so the baseline would freeze a short list');
+
+        await expectLater(
+          find.byKey(kCaptureBoundaryKey),
+          matchesGoldenFile(goldenPath('orders-screen', combination)),
+        );
+      },
+      tags: const <String>['golden'],
+    );
+
+    // THE COUPONS LIST, because the card it is made of was repaired one commit ago and nobody
+    // has seen the result in situ. `coupon-card-column` photographs the card on a bare Scaffold;
+    // this is the same card in the list it really ships in, which is the distinction
+    // `3727efc` showed matters -- a component can be wrong in a box and right on its screen.
+    testWidgets(
+      'the coupons screen renders as its baseline — ${combination.name}',
+      (tester) async {
+        if (skipUnlessCaptured('coupons-screen', combination)) return;
+
+        final api = ApiStub()..on('couponlist', couponListPage());
+        final controller = NewCouponController();
+
+        await pumpScreen(
+          tester,
+          const CouponScreen(),
+          api: api,
+          combination: combination,
+          register: () {
+            Get.put(controller);
+          },
+        );
+
+        await pumpUntil(
+          tester,
+          () => controller.couponsList.isNotEmpty,
+          reason: 'the coupon list never filled — CouponData reads coupon_name/coupon_code, not '
+              'name/code, and a near-miss renders a convincing empty state',
+        );
+
+        await drainToasts(tester);
+
+        expect(tester.takeException(), isNull);
+        expect(api.sawRequestFor('couponlist'), isTrue,
+            reason: 'premise: the screen really fetched through the stub');
+        expect(controller.couponsList.length, 2);
+        expect(find.textContaining('EID25'), findsWidgets,
+            reason: 'the first coupon code is not rendered');
+
+        await expectLater(
+          find.byKey(kCaptureBoundaryKey),
+          matchesGoldenFile(goldenPath('coupons-screen', combination)),
         );
       },
       tags: const <String>['golden'],

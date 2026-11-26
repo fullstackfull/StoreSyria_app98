@@ -12,6 +12,7 @@ import '../../new_widgets/shimmer.dart';
 import '../../widget/common_appbar_widget.dart';
 import 'coupon_detail_screen.dart';
 import 'new_coupon_bottomsheet.dart';
+import 'package:store_go_app/utils/plural.dart';
 
 class CouponScreen extends StatefulWidget {
   const CouponScreen({super.key});
@@ -165,9 +166,22 @@ class _CouponScreenState extends State<CouponScreen>
       child: Scaffold(
         appBar: simpleAppBar(
           isBack: true,
-          title: "Coupon",
+          // P06-WS8-I18N. BOTH OF THESE WERE HARD-CODED ENGLISH LITERALS, found by rendering the
+          // screen: `coupons-screen.dark-rtl.png` showed "Coupon" and "Add Coupon" in Latin
+          // script above an otherwise Arabic page. `simpleAppBar` renders what it is given
+          // verbatim, so neither string ever reached GetX. Every sibling screen already passes a
+          // key -- `customer_screen.dart:95` is `"customers".tr`, `products_screen.dart:493` is
+          // `"products".tr` -- so this screen was the odd one out.
+          //
+          // The keys ALREADY EXISTED with copy in both maps, so no copy is written here. That is
+          // the governing rule `test/translations/converted_labels_render_arabic_test.dart`
+          // records: convert a call site only if its key already has copy on both sides AND the
+          // existing English value is BYTE-IDENTICAL to the literal being replaced. `coupon` is
+          // "Coupon" and `add_coupon` is "Add Coupon", so the English screen does not move by a
+          // single character.
+          title: "coupon".tr,
           isBold: true,
-          label: "Add Coupon",
+          label: "add_coupon".tr,
           onNewLabelTap: _addCoupon,
         ),
         backgroundColor: isDark
@@ -266,7 +280,9 @@ class _CouponScreenState extends State<CouponScreen>
                               children: [
 
                                 Text(
-                                  "${couponController.couponModel?.data?.total ?? 0} ${'items'.tr}",
+                                  // P06-WS8-I18N -- see utils/plural.dart.
+                                  itemCountLabel(
+                                      couponController.couponModel?.data?.total ?? 0),
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     color: isDark
