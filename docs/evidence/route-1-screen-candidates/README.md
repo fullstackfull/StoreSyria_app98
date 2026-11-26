@@ -1,11 +1,11 @@
-# Route 1, wave 4 — WHOLE SCREENS, as golden CANDIDATES awaiting human review
+# Route 1, waves 4–5 — WHOLE SCREENS, as golden CANDIDATES awaiting human review
 
-**These eight images are candidates, not approved baselines.** Nothing in this directory is
+**These sixteen images are candidates, not approved baselines.** Nothing in this directory is
 compared against on any push. A candidate becomes a baseline only when a person has looked at it
 and copied it into `test/golden/goldens/`; from that moment the ordinary blocking `flutter test`
 compares pixels against it on every push, for ever. `.gitignore:97` is untouched.
 
-`CONTACT-SHEET.png` is all eight at a glance. The individual originals are beside it at full size.
+`CONTACT-SHEET.png` is all sixteen at a glance. The individual originals are beside it at full size.
 
 | file | surface | language | direction | theme |
 |---|---|---|---|---|
@@ -17,9 +17,25 @@ compares pixels against it on every push, for ever. `.gitignore:97` is untouched
 | `products-screen.light-rtl.png` | Products screen | العربية | RTL | Light |
 | `products-screen.dark-ltr.png` | Products screen | English | LTR | Dark |
 | `products-screen.dark-rtl.png` | Products screen | العربية | RTL | Dark |
+| `orders-screen.light-ltr.png` | Orders screen | English | LTR | Light |
+| `orders-screen.light-rtl.png` | Orders screen | العربية | RTL | Light |
+| `orders-screen.dark-ltr.png` | Orders screen | English | LTR | Dark |
+| `orders-screen.dark-rtl.png` | Orders screen | العربية | RTL | Dark |
+| `coupons-screen.light-ltr.png` | Coupons screen | English | LTR | Light |
+| `coupons-screen.light-rtl.png` | Coupons screen | العربية | RTL | Light |
+| `coupons-screen.dark-ltr.png` | Coupons screen | English | LTR | Dark |
+| `coupons-screen.dark-rtl.png` | Coupons screen | العربية | RTL | Dark |
 
 Sources: `lib/view/screen/customers/customer_screen.dart`,
-`lib/view/screen/product_screen/products_screen.dart`.
+`lib/view/screen/product_screen/products_screen.dart`,
+`lib/view/screen/order_screen/order_screen.dart`,
+`lib/view/screen/coupon_screen/coupon_screen.dart`.
+
+**Wave 5 added the last two.** The orders list is the screen a merchant lives on, and the one
+whose status vocabulary this project has measured as a *catalogue* (`order-status-badge-column`,
+all ten chips in a column) but never seen in a real row beside a price and a date. The coupons
+list is the card repaired in `01a9a09` — which had no boundary at all in light mode — in the list
+it actually ships in.
 
 ---
 
@@ -102,7 +118,30 @@ figures above were re-measured off those PNGs.
 
 ---
 
-## Three findings reported and NOT fixed
+## Two more defects these pictures found, and both are fixed
+
+**The coupons screen's app bar was hard-coded English.** `coupons-screen.dark-rtl.png` showed
+`Coupon` and `Add Coupon` in Latin script above an otherwise Arabic page: `coupon_screen.dart:169`
+and `:171` passed literals that `simpleAppBar` renders verbatim, so neither string ever reached
+GetX. Every sibling screen already passes a key — `customer_screen.dart:95` is `"customers".tr`,
+`products_screen.dart:493` is `"products".tr` — so this screen was the odd one out. **No copy was
+written:** both keys already existed with text on both sides, and both English values are
+byte-identical to the literals they replaced, which is the governing rule
+`converted_labels_render_arabic_test.dart` records. Pinned by adding the two sites to that file's
+own table.
+
+**The Arabic item count printed the singular at every count.** `3 عنصر` and `2 عنصر` — Arabic
+takes the plural of paucity for 3–10 and an obligatory DUAL for 2. There was no pluralisation path
+in the app to reuse (`trPlural`, `Intl.plural` and the word `plural` appear in zero files), and
+GetX's own `.trPlural` takes two forms, so it cannot express a dual. `lib/utils/plural.dart` now
+selects a CLDR category and resolves one key family; the five call sites that built the label by
+hand go through it. The screens now read `3 عناصر` and `عنصران`, visible in the images here.
+**Exactly four of the sixteen images moved, all of them RTL** — every English image is byte-identical,
+which is what proves the change is Arabic-only.
+
+---
+
+## Findings reported and NOT fixed
 
 Each is recorded with its measurement so it is a decision somebody takes rather than something
 that quietly went unnoticed.
@@ -118,7 +157,17 @@ that quietly went unnoticed.
    `2 عنصر`, the SINGULAR, where Arabic takes the plural for 3–10 and the dual for 2. The app has
    one key and no plural rules, so this is a copy and i18n decision rather than a one-line fix.
 
-3. **The currency symbol follows the number in English.** The price reads `150  $`, built by
+3. **Every order in the list shows `12:00 AM`.** Visible in `orders-screen.light-ltr.png`: both
+   rows read `08 Nov 12:00 AM`. `order_screen.dart:412` formats `order.orderDate` with
+   `FormatType.dateTime2`, which is `"dd MMM hh:mm a"` (`helper.dart:51-54`) — a format that
+   includes a TIME — while the fixture's `order_date` is date-only (`2026-11-08`), so it parses to
+   midnight. `OrderModel` carries `createdAt` as well (`order_model.dart:140`), which does hold a
+   time. **Not fixed, and the reason is that it cannot be settled from here:** if the server sends
+   a time in `order_date` there is no defect at all and the fixture is what is wrong instead.
+   Changing which field a merchant's order time comes from is a data decision that needs the live
+   payload, not a UI tidy-up.
+
+4. **The currency symbol follows the number in English.** The price reads `150  $`, built by
    `products_screen.dart:714` as `"<final_price>  <currency_symbol>"`. The platform has a
    `site_currency_symbol_position` setting that `lang_widget.dart:334` names and this screen does
    not read. **Deliberately untouched:** anything that changes how a price is displayed is an
@@ -143,6 +192,6 @@ measuring a picture, after every assertion in the suite had gone green.
 
 ---
 
-**THESE EIGHT REMAIN UN-REVIEWED AND UN-APPROVED.** No human has looked at them, nothing has been
+**THESE SIXTEEN REMAIN UN-REVIEWED AND UN-APPROVED.** No human has looked at them, nothing has been
 copied into `test/golden/goldens/`, and all eight golden cases still skip with their own printed
 reason. Route 1 step 2 is outstanding.
