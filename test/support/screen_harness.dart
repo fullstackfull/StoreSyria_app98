@@ -78,6 +78,29 @@ import 'golden_harness.dart';
 
 Directory? _storageDir;
 
+/// The PATH the mocked `path_provider` channel answers with, kept for the life of the PROCESS.
+///
+/// P06-WS8-FLAKE-01. THIS USED TO BE READ OFF `_storageDir!`, AND THAT WAS AN INTERMITTENT
+/// FAILURE OF THE BLOCKING `flutter test` GATE — roughly one run of `test/screens/` in ten,
+/// measured over ten captured runs, on a DIFFERENT test name each time.
+///
+/// `get_storage` finishes every flush with `_madeBackup()`, which is `_getFile(true).then(...)`
+/// and is awaited by nothing (`storage/io.dart:44-54`). `_getFile` asks this channel for the
+/// documents directory. So a write that is still in flight when `disposeScreenHarness()` nulls
+/// `_storageDir` reaches a handler that throws on `!`, the throw comes back as
+/// `PlatformException(error, Null check operator used on a null value)`, and because nothing
+/// awaits `_madeBackup()` it is an UNHANDLED ASYNC ERROR — which `flutter_test` charges to
+/// whichever test in the file is still open. The captured failure shows it arriving after
+/// `(tearDownAll)`, which is why the name moved from run to run and why re-running was green.
+///
+/// Keeping the path is the whole repair: the DIRECTORY may still be deleted, because
+/// `_getFile` re-creates it with `createSync(recursive: true)`, so a late write lands in a
+/// throwaway directory under the OS temp root instead of raising. Every other `path_provider`
+/// mock in this repository already captures a non-nullable local and so was never exposed.
+///
+/// Pinned by test/support/screen_harness_teardown_race_test.dart.
+String? _storageDirPath;
+
 /// Whether [initScreenHarness] has run. [pumpScreen] refuses to mount without it.
 ///
 /// WHY THIS IS A HARD FAILURE AND NOT A DOCUMENTED CONVENTION. The last line of
@@ -100,11 +123,15 @@ bool _harnessReady = false;
 Future<void> initScreenHarness() async {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  _storageDir ??= Directory.systemTemp.createTempSync('ss_screen_harness');
+  _storageDirPath = (_storageDir ??= Directory.systemTemp.createTempSync('ss_screen_harness')).path;
 
   binding.defaultBinaryMessenger.setMockMethodCallHandler(
     const MethodChannel('plugins.flutter.io/path_provider'),
-    (call) async => _storageDir!.path,
+    // NOT `_storageDir!.path`. See [_storageDirPath]: a late, un-awaited get_storage backup write
+    // reaches this handler after teardown, and a throw here is an unhandled async error charged
+    // to an unrelated test. The fallback is belt and braces -- this is only ever installed after
+    // the assignment above, and systemTemp is always a real directory.
+    (call) async => _storageDirPath ?? Directory.systemTemp.path,
   );
 
   await GetStorage.init();
@@ -150,6 +177,10 @@ void disposeScreenHarness() {
   }
 
   _storageDir = null;
+
+  // `_storageDirPath` IS DELIBERATELY NOT CLEARED. Clearing it would restore exactly the flake
+  // this harness carried: a get_storage backup write still in flight would find the handler
+  // without an answer. See [_storageDirPath].
 }
 
 /// Call from `tearDown`.
