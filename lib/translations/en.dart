@@ -826,4 +826,29 @@ const Map<String, String> en = {
   "tax_id": "Tax ID",
   "tax_status": "Tax status",
   "track_stock": "Track stock",
+
+  // SUPPORT-002 -- contextual help and platform announcements.
+  //
+  // DELIBERATELY THE SAME WORDS AS THE WEB PANEL'S ARABIC for every one of these
+  // concepts. J12 records that the app's Arabic and the web's disagree on nine
+  // ALREADY-SHIPPED wallet transaction concepts and that engineering must not
+  // re-word those -- none of them is in this set, and these are all NEW, so
+  // aligning them now is the cheap direction of that same decision.
+  'announcements': 'Announcements',
+  'no_announcements': 'No announcements yet',
+  'announcements_failed': 'Announcements could not be loaded',
+  'notice': 'Notice',
+  'urgent': 'Urgent',
+  'happening_now': 'Happening now',
+  'ended': 'Ended',
+  'announcement_window': 'From @from until @until.',
+  'announcement_window_until': 'Until @until.',
+  'announcement_window_from': 'From @from.',
+  'help': 'Help',
+  'help_for_this_screen': 'Help for this screen',
+  'no_help_for_this_screen': 'There is no help for this screen yet.',
+  'help_surface_unknown':
+      'This version of the app asked for help the server does not recognise. Update the app, or open the documentation centre.',
+  'help_not_in_your_language': 'This guide is not available in your language yet.',
+  'help_failed': 'Help could not be loaded',
 };

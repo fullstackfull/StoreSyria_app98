@@ -180,6 +180,25 @@ class SettingScreen extends StatelessWidget {
                         }
                          ),
 
+                      // SUPPORT-002. The platform's announcements, and the only
+                      // way an app-only merchant can reach them: CTRL-003's
+                      // banner is in the web panel's Blade layout.
+                      //
+                      // NOT A NEW ICON ASSET. `envelope.svg` already ships, is
+                      // already the right fill (#172C4E, what `settingWidget`
+                      // paints uncoloured) and reads as a message from the
+                      // platform. A purpose-drawn megaphone is a cosmetic
+                      // follow-up, and inventing one here would be shipping
+                      // artwork nobody had rendered.
+                      settingWidget(
+                        icon: DefaultImages.envelopeIcn,
+                        title: 'announcements'.tr,
+                        isDark: isDark,
+                        function: () {
+                          Get.toNamed(AppRoutes.announcements);
+                        },
+                      ),
+
 
                       settingWidget(
                         icon: DefaultImages.settingIcn,

@@ -845,4 +845,24 @@ const Map<String, String> ar = {
   "tax_id": "معرّف الضريبة",
   "tax_status": "حالة الضريبة",
   "track_stock": "تتبّع المخزون",
+
+  // SUPPORT-002 -- مساعدة سياقية وإعلانات. انظر ملاحظة en.dart: هذه مفاهيم جديدة
+  // وصياغتها مطابقة عن قصد لصياغة لوحة الويب، ولم يُعَد صوغ أي نص مُسلَّم سابقاً.
+  'announcements': 'إعلانات',
+  'no_announcements': 'لا إعلانات بعد',
+  'announcements_failed': 'تعذَّر جلب الإعلانات',
+  'notice': 'إشعار',
+  'urgent': 'عاجل',
+  'happening_now': 'جارٍ الآن',
+  'ended': 'انتهى',
+  'announcement_window': 'من @from حتى @until.',
+  'announcement_window_until': 'حتى @until.',
+  'announcement_window_from': 'من @from.',
+  'help': 'مساعدة',
+  'help_for_this_screen': 'مساعدة هذه الشاشة',
+  'no_help_for_this_screen': 'لا توجد مساعدة لهذه الشاشة بعد.',
+  'help_surface_unknown':
+      'طلبت هذه النسخة من التطبيق مساعدةً لا يعرفها الخادم. حدِّث التطبيق أو افتح مركز التوثيق.',
+  'help_not_in_your_language': 'هذا الدليل غير متوفّر بلغتك بعد.',
+  'help_failed': 'تعذَّر جلب المساعدة',
 };

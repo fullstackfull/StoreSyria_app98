@@ -70,6 +70,12 @@ const Map<String, ScreenKind> kScreenKinds = {
   // in the controller, and `shipping_controller` has nine. Reclassifying it is what makes this
   // census name the gap instead of excusing it.
   'home_screen/shipping_screen.dart': ScreenKind.collection,
+  // SUPPORT-002. A collection, and it owes all three states for a reason worth
+  // stating: an empty announcement list is the NORMAL case on most days, and a
+  // failed fetch leaves it empty too -- so a screen whose whole job is to carry
+  // maintenance notices would otherwise tell a merchant whose network dropped
+  // that the platform has announced nothing.
+  'announcement_screen/announcement_screen.dart': ScreenKind.collection,
   'notification_screen/notification_screen.dart': ScreenKind.collection,
   'order_screen/order_screen.dart': ScreenKind.collection,
   'plans/my_plan_screen.dart': ScreenKind.collection,
