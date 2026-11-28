@@ -24,6 +24,7 @@ import '../view/screen/plans/my_plan_screen.dart';
 import '../view/screen/statistics_screen/statistics_screen.dart';
 import '../view/screen/onboarding_screen/onboarding_screen.dart';
 import '../view/screen/notification_screen/notification_screen.dart';
+import '../view/screen/announcement_screen/announcement_screen.dart';
 
 class AppRoutes {
   // =========================
@@ -54,6 +55,12 @@ class AppRoutes {
   static const wallet = '/wallet';
   static const coupon = '/coupon';
   static const notifications = '/notifications';
+
+  /// SUPPORT-002. Platform announcements, which are NOT the notifications above:
+  /// a notification is this store's own row about its own orders, an
+  /// announcement is the platform talking to every tenant on it. Two screens
+  /// because two isolation rules.
+  static const announcements = '/announcements';
   static const lang = '/lang';
   static const customers = '/customers';
   static const deliveryBoys = '/delivery_boys';
@@ -137,6 +144,19 @@ class AppRoutes {
     GetPage(
       name: AppRoutes.notifications,
       page: () => NotificationScreen(isBack: true),
+    ),
+
+    // SUPPORT-002. `helpSurface` is read from the navigation arguments so a
+    // screen can open this with its own surface key and the help sheet is
+    // already contextual; omitted, the sheet asks for an empty surface and the
+    // server answers "no help for that screen".
+    GetPage(
+      name: AppRoutes.announcements,
+      page: () => AnnouncementScreen(
+        helpSurface: Get.arguments is Map
+            ? (Get.arguments as Map)['helpSurface']?.toString()
+            : null,
+      ),
     ),
 
     GetPage(

@@ -144,4 +144,30 @@ class API {
   static String createOrderNoteUrl = '/orders/notes/create';
   static String deleteOrderNoteUrl = '/orders/notes/delete';
 
+  // SUPPORT-002 -- contextual help and platform announcements.
+  //
+  // Both are GETs under /api/admin, carrying `custom.auth` and `AdminApiLog`
+  // like every other route in that group. Neither takes a store id: an
+  // announcement is the PLATFORM talking to every tenant and the help corpus is
+  // repository files, so there is nothing per-store to send -- which is also why
+  // neither endpoint can leak another merchant's anything.
+  //
+  // The server previously had NO help or announcement endpoint at all (repo A's
+  // SUPPORT-002 traceability row records zero matches in routes/api.php for
+  // ticket|help|announce|faq), so a merchant who only uses this app was told
+  // nothing when the platform announced maintenance. The web panel has carried
+  // that banner since CTRL-003.
+  //
+  // DECLARED HERE AND NOT AS LITERALS IN THE REPOSITORY, which is the lesson the
+  // three order endpoints above record: a path written inline is outside repo A's
+  // generated manifest, so a server-side rename passes CI and 404s on every
+  // installed phone.
+  static String announcementsUrl = '/announcements';
+  static String helpTopicsUrl = '/help-topics';
+
+  // Query fragments for the two above. Appended, in the same style as the
+  // storeIdUrl / pageUrl fragments.
+  static String langUrl = '?lang=';
+  static String andSurfaceUrl = '&surface=';
+
 }

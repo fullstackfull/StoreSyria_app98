@@ -68,6 +68,7 @@ void main() {
     'addReviewUrl': '/addreview',
     'addShippingUrl': '/addshipping',
     'addTaxUrl': '/addtax',
+    'announcementsUrl': '/announcements',
     'assignOrderUrl': '/assignOrders',
     'categoryListUrl': '/categorylist',
     'changeCurrencyUrl': '/updateCurrencyApi',
@@ -105,6 +106,7 @@ void main() {
     'getStatesUrl': '/getStatesByCountry',
     'getStoreCurrencyLangUrl': '/getCurrentLanguageAndCurrency',
     'getStoreInfoUrl': '/getStoreInfo',
+    'helpTopicsUrl': '/help-topics',
     'imageBaseUrl': '/base_url',
     'languagesUrl': '/getAvailableLanguages',
     'loginUrl': '/adminlogin',
@@ -150,11 +152,13 @@ void main() {
     'andPageUrl': '&page=',
     'andStatusUrl': '&delivered_status=',
     'andStoreIdUrl': '&store_id=',
+    'andSurfaceUrl': '&surface=',
     'andToDateUrl': '&to_date=',
     'categoryIdUrl': '&category_id=',
     'couponIdUrl': '&coupon_id=',
     'customerIdUrl': '?customer_id=',
     'deliveryBoyIdUrl': '/',
+    'langUrl': '?lang=',
     'mainCategoryUrl': '&maincategory_id=',
     'orderIdUrl': '&order_id=',
     'pageUrl': '?page=',
@@ -178,6 +182,7 @@ void main() {
     'addReviewUrl': API.addReviewUrl,
     'addShippingUrl': API.addShippingUrl,
     'addTaxUrl': API.addTaxUrl,
+    'announcementsUrl': API.announcementsUrl,
     'assignOrderUrl': API.assignOrderUrl,
     'categoryListUrl': API.categoryListUrl,
     'changeCurrencyUrl': API.changeCurrencyUrl,
@@ -215,6 +220,7 @@ void main() {
     'getStatesUrl': API.getStatesUrl,
     'getStoreCurrencyLangUrl': API.getStoreCurrencyLangUrl,
     'getStoreInfoUrl': API.getStoreInfoUrl,
+    'helpTopicsUrl': API.helpTopicsUrl,
     'imageBaseUrl': API.imageBaseUrl,
     'languagesUrl': API.languagesUrl,
     'loginUrl': API.loginUrl,
@@ -260,11 +266,13 @@ void main() {
     'andPageUrl': API.andPageUrl,
     'andStatusUrl': API.andStatusUrl,
     'andStoreIdUrl': API.andStoreIdUrl,
+    'andSurfaceUrl': API.andSurfaceUrl,
     'andToDateUrl': API.andToDateUrl,
     'categoryIdUrl': API.categoryIdUrl,
     'couponIdUrl': API.couponIdUrl,
     'customerIdUrl': API.customerIdUrl,
     'deliveryBoyIdUrl': API.deliveryBoyIdUrl,
+    'langUrl': API.langUrl,
     'mainCategoryUrl': API.mainCategoryUrl,
     'orderIdUrl': API.orderIdUrl,
     'pageUrl': API.pageUrl,
@@ -632,15 +640,27 @@ void main() {
     });
 
     test('the counts are stated, so a silent addition cannot pass', () {
-      // Repo A's manifest declares 81 endpoints and 16 fragments. The client
-      // is at 84 because three endpoints that were inline literals are now
-      // declared; the manifest must be regenerated to match. When an 85th
-      // appears this fails, and the regeneration question gets asked again
-      // instead of being forgotten.
-      expect(expectedEndpoints.length, 84);
-      expect(expectedFragments.length, 16);
-      expect((published['endpoints'] as Map).length, 84);
-      expect((published['fragments'] as Map).length, 16);
+      // 84 -> 86 endpoints and 16 -> 18 fragments on 2026-11-27 [SUPPORT-002],
+      // and the regeneration question this counter exists to force WAS asked
+      // and answered: repo A's manifest was regenerated in the same change
+      // (flutter-endpoints.json 92 -> 94 entries, server-api-routes.json
+      // 208 -> 210) and its pinned field-to-path hash moved with it.
+      //
+      // THE DELTA:
+      //   announcementsUrl  /announcements     GET, api/admin
+      //   helpTopicsUrl     /help-topics       GET, api/admin
+      //   langUrl           ?lang=
+      //   andSurfaceUrl     &surface=
+      //
+      // SUPPORT-002 is contextual help and announcements on the web AND
+      // Flutter. The web panel has carried a platform announcement banner
+      // since CTRL-003 and api/admin was left untouched, so a merchant who
+      // only uses this app was told nothing at all when the platform
+      // announced maintenance. These are that surface.
+      expect(expectedEndpoints.length, 86);
+      expect(expectedFragments.length, 18);
+      expect((published['endpoints'] as Map).length, 86);
+      expect((published['fragments'] as Map).length, 18);
     });
   });
 
